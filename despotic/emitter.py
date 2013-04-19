@@ -113,7 +113,7 @@ class emitter:
 ########################################################################
     def __init__(self, emitName, emitAbundance, extrap=False, \
                      energySkip=False, emitterFile=None, \
-                     emitterURL=None, noRefresh=False):
+                     emitterURL=None):
 
         """
         Initialization routine
@@ -137,9 +137,6 @@ class emitter:
             if True, collision rate coefficients for this species will
             be extrapolated to temperatures outside the range given in
             the LAMDA tables
-        noRefresh : Boolean
-            if True, the routine will not attempt to automatically
-            fetch updated versions of files from the web
 
         Returns
         -------
@@ -160,7 +157,7 @@ class emitter:
             # pointer
             self.data = emitterData(emitName, emitterFile=emitterFile, \
                                         emitterURL=emitterURL, \
-                                        extrap=extrap, noRefresh=noRefresh)
+                                        extrap=extrap)
             knownEmitterData[emitName] = self.data
  
         # Initialize level populations and escape probabilities, and

@@ -98,7 +98,7 @@ fp.close()
 
 # Run radex, timing execution
 t1 = datetime.now()
-os.system('/Users/adam/repos/radex/bin/radex < despotic_comp.inp > /dev/null')
+os.system('./radex < despotic_comp.inp > /dev/null')
 t2 = datetime.now()
 timeRadex = t2-t1
 print "RADEX time = "+str(timeRadex)

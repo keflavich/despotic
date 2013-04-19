@@ -366,6 +366,9 @@ class cloud:
                 if verbose:
                     print "Setting H2 ortho-para ratio = "+str(opr)
 
+                self.comp.xpH2 = 1./(1.+opr)
+                self.comp.xoH2 = opr/(1.+opr)
+
             elif linesplit[0].upper().strip() == 'XH2':
 
                 try:
@@ -532,7 +535,7 @@ class cloud:
 ########################################################################
     def addEmitter(self, emitName, emitAbundance, emitterFile=None, \
                        emitterURL=None, energySkip=False, \
-                       extrap=False, noRefresh=False):
+                       extrap=False):
         """
         Add an emitting species
 
@@ -569,8 +572,7 @@ class cloud:
             emitter(emitName, emitAbundance, 
                         emitterFile=emitterFile, 
                         emitterURL=emitterURL, 
-                        extrap=extrap, energySkip=energySkip,
-                        noRefresh=noRefresh)
+                        extrap=extrap, energySkip=energySkip)
 
 
 ########################################################################
