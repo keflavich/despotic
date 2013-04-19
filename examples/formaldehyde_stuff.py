@@ -13,7 +13,7 @@ gmc.Tg = 20 # start at 20 instead of 15 K
 gmc.Td = 20
 
 # add ortho-h2co
-gmc.addEmitter('o-h2co_troscompt', 1e-9, noRefresh=True)
+gmc.addEmitter('o-h2co_troscompt', 1e-9)
 
 # first plot: versus density
 densities = np.logspace(1,6)
