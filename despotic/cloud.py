@@ -531,7 +531,7 @@ class cloud:
     @H2OPR.setter
     def H2OPR(self, opr):
         self._H2OPR = opr
-        XH2 = self.XH2 or 1.0
+        XH2 = self.XH2 or 0.5
         self.comp.xpH2 = 1.0/(1.0+opr)*XH2
         self.comp.xoH2 = opr/(1.0+opr)*XH2
 
