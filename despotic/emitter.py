@@ -402,7 +402,7 @@ class emitter:
 # probabilities as unity.
 ########################################################################
     def setLevPop(self, thisCloud, thin=False, noClump=False, \
-                      diagOnly=False, verbose=False):
+                      diagOnly=False):
         """
         Compute the level populations for this species using the
         stored escape probabilities
@@ -513,7 +513,7 @@ class emitter:
         # field. Then go through and recursively eliminate levels with
         # negligible transition rates into them.
         conditionFlag = False
-        if np.linalg.cond(m2) > 1.0e8:
+        if np.linalg.cond(m2) > 1.0/(1.0e5*machineeps):
 
             # Flag that we've eliminated some levels
             conditionFlag = True
@@ -560,15 +560,15 @@ class emitter:
             # transitions in to transitions out, and eliminate
             # them. Repeat this iteratively until the condition number
             # is acceptable.
-            if np.linalg.cond(m2) > 1.0/(1.0e5*machineeps):
+            if np.linalg.cond(m2) > 1.0/(1.0e8*machineeps):
 
                 # Get upper limits on level populations
                 sumRateOut = np.sum(msave1, axis=0)
                 sumRateIn = np.sum(msave1, axis=1)
-                levPopLim = np.sumRateIn / sumRateOut
+                levPopLim = sumRateIn / sumRateOut
 
-                while np.linalg.cond(m2) > 1.0/(1.0e5*machineeps) and \
-                        np.argmin(levPopLim) < 1.0e-6:
+                while np.linalg.cond(m2) > 1.0/(1.0e8*machineeps) and \
+                        np.amin(levPopLim) < 1.0e-6:
 
                     # Find smallest level population limit left; flag
                     # it to make sure we don't hit it again
@@ -577,12 +577,6 @@ class emitter:
 
                     # Delete the offending level
                     idxdel = idx - len(levDel[levDel < idx])
-                    if verbose:
-                        print idx
-                        print idxdel
-                        print levKeep
-                        print levDel
-
                     levKeep = np.delete(levKeep, idxdel)
                     levDel = np.setdiff1d(np.arange(self.data.nlev, \
                                                   dtype='int'), \
@@ -873,7 +867,7 @@ class emitter:
                 np.identity(self.data.nlev)
 
             # check condition number
-            if np.linalg.cond(m) <= 1.0/(1.0e5*machineeps):
+            if np.linalg.cond(m) <= 1.0/(1.0e8*machineeps):
 
                 # Condition number ok, so solve
                 self.levPop, res, rank, s = np.linalg.lstsq(m, b)
@@ -909,7 +903,7 @@ class emitter:
                 mred[-1,:] = 1.0
 
                 # Check condition number again
-                if np.linalg.cond(mred) > 1.0/(1.0e5*machineeps):
+                if np.linalg.cond(mred) > 1.0/(1.0e8*machineeps):
 
                     # Condition number still bad, so progressively
                     # eliminate levels based on population upper
@@ -921,7 +915,7 @@ class emitter:
                     levPopLim = sumRateIn / sumRateOut
 
                     # Loop until condition number is acceptable
-                    while np.linalg.cond(mred) > 1.0/(1.0e5*machineeps) \
+                    while np.linalg.cond(mred) > 1.0/(1.0e8*machineeps) \
                             and np.argmin(levPopLim) < 1.0e-6:
 
                         # Delete the level with the most stringent
