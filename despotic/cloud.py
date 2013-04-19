@@ -362,22 +362,16 @@ class cloud:
 
             elif linesplit[0].upper().strip() == 'H2OPR':
 
-                opr = float(linesplit2[0])
+                self.H2OPR = float(linesplit2[0])
                 if verbose:
                     print "Setting H2 ortho-para ratio = "+str(opr)
 
-                self.comp.xpH2 = 1./(1.+opr)
-                self.comp.xoH2 = opr/(1.+opr)
-
             elif linesplit[0].upper().strip() == 'XH2':
 
-                try:
-                    opr==None
-                except UnboundLocalError:
-                    opr = 0.25
+                self.XH2 = float(linesplit2[0])
+                if self.H2OPR is None:
+                    self.H2OPR = 0.25
                     print("Warning: H2 OPR unspecified, assuming 0.25")
-                self.comp.xpH2 = 1.0/(1.0+opr)*float(linesplit2[0])
-                self.comp.xoH2 = opr/(1.0+opr)*float(linesplit2[0])
                 if verbose:
                     print "Setting xpH2 = "+str(self.comp.xpH2)
                     print "Setting xoH2 = "+str(self.comp.xoH2)
@@ -528,6 +522,30 @@ class cloud:
             if self.Tg > 0.0:
                 print "   ===> c_v/(k_B n_H mu_H) = " + \
                     str(self.comp.cv)
+
+    @property
+    def H2OPR(self):
+        if hasattr(self,'_H2OPR'):
+            return self._H2OPR
+
+    @H2OPR.setter
+    def H2OPR(self, opr):
+        self._H2OPR = opr
+        XH2 = self.XH2 or 1.0
+        self.comp.xpH2 = 1.0/(1.0+opr)*XH2
+        self.comp.xoH2 = opr/(1.0+opr)*XH2
+
+    @property
+    def XH2(self):
+        if hasattr(self,'_XH2'):
+            return self._XH2
+
+    @XH2.setter
+    def XH2(self, xh2):
+        self._XH2 = xh2
+        opr = self.H2OPR or 0.25
+        self.comp.xpH2 = 1.0/(1.0+opr)*xh2
+        self.comp.xoH2 = opr/(1.0+opr)*xh2
 
 
 ########################################################################

@@ -4,8 +4,8 @@
 nH 	   = 100.0   	     # Volume density, H cm^-3
 colDen	   = 1.5e22	     # Column density, H cm^-2
 sigmaNT	   = 2.0e5	     # Non-thermal velocity dispersion, cm s^-1
-Tg	   = 15.0	     # Gas temperature, K
-Td	   = 15.0	     # Dust temperature, K
+Tg	   = 8.0	     # Gas temperature, K
+Td	   = 10.0	     # Dust temperature, K
 
 # Dust properties
 alphaGD	   = 3.2e-34	     # Dust-gas coupling coefficient, erg cm^3 K^-3/2
@@ -29,6 +29,5 @@ xHe	   = 0.1             # He abundance per H nucleus
 # Emitting species
 emitter	   = co   1.0e-4     # CO, abundance 1.0e-4
 emitter	   = 13co 5.0e-7     # ^13CO, abundance 5.0e-7
-emitter	   = o-h2co 1.0e-9     # formaldehyde, abund 1e-9
 
 
