@@ -17,7 +17,7 @@ temperatures, and calculating time-dependent thermal evolution of clouds.
 DESPOTIC is implemented as a Python package, and is released under the GPL. The
 physical model, equations, solved, and some tests and example applications are
 described in <a href="http://arxiv.org/abs/1304.2404">Krumholz (2013)</a>, and an
-extensive <a href="source/UsersGuide.pdf">User's Guide</a> is available, and is
+extensive <a href="doc/UsersGuide.pdf">User's Guide</a> is available, and is
 included with the download.
 
 
