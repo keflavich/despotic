@@ -46,7 +46,7 @@ G = physcons.G*1e3
 # Small numerical value
 small = 1e-50
 
-class cloud:
+class cloud(object):
     """
     A class describing the properties of an interstellar cloud, and
     providing methods to perform calculations using those properties.
