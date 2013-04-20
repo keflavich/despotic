@@ -174,8 +174,8 @@ fig3=plt.figure(3, figsize=(6,4))
 plt.subplots_adjust(bottom=0.15)
 ax3=fig3.add_subplot(111)
 plt.plot(coLines[:,0]/LambdaSpec['co'][0], linewidth=2, label='0 kyr')
-plt.plot(coLines[:,20]/LambdaSpec['co'][20], linewidth=2, label='20 kyr')
-plt.plot(coLines[:,40]/LambdaSpec['co'][40], linewidth=2, label='40 kyr')
+plt.plot(coLines[:,nOut/2]/LambdaSpec['co'][nOut/2], linewidth=2, label='%i kyr' % (nOut/2))
+plt.plot(coLines[:,nOut-1]/LambdaSpec['co'][nOut-1], linewidth=2, label='%i kyr' % (nOut-1))
 plt.legend()
 plt.ylim([2e-3,1])
 plt.yscale('log')
@@ -184,9 +184,9 @@ plt.xlabel('CO transition')
 
 # Label transitions
 skip=2
-ax3.set_xticks(arange(0,40,skip))
+ax3.set_xticks(arange(0,nOut-1,skip))
 ticklabels=["$J={{{0}}}-{{{1}}}$".format(skip*j+1,skip*j) \
-                for j in arange(40)]
+                for j in arange(nOut-1)]
 ax3.set_xticklabels(ticklabels)
 plt.xlim([0,12])
 
