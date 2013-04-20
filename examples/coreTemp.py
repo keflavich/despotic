@@ -39,7 +39,7 @@ verbose = True
 ########################################################################
 
 # Read the protostellar core file
-core = cloud(fileName='cloudFiles/protostellarCore.desp', verbose=True)
+core = cloud(fileName='cloudfiles/protostellarCore.desp', verbose=True)
 
 # Check if we have saved work
 try:

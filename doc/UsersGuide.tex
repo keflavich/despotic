@@ -91,7 +91,7 @@ This command puts the cloud class into the current namespace.
 
 The next step is generally to input data describing a cloud upon which computations are to be performed. The input data describe the cloud's physical properties (density, temperature, etc.), the bulk composition of the cloud, what emitting species it contains, and the radiation field around it. While it is possible to enter the data manually, it is usually easier to read the data from a \despotic\ cloud file. The format for these files is described in Section \ref{sec:cloudfiles}. For this Quickstart, we'll use one of the configuration files that ship with \despotic\, and that are included in the cloudfiles subdirectory of the \despotic\ distribution. To create a cloud whose properties are as given in a particular cloud file, we simply invoke the constructor with the fileName optional argument set equal to a string containing the name of the file to be read:
 \begin{verbatim}
-gmc = cloud(fileName='cloudFiles/MilkyWayGMC.desp', verbose=True)
+gmc = cloud(fileName='cloudfiles/MilkyWayGMC.desp', verbose=True)
 \end{verbatim}
 Note the optional argument verbose, which we have set to True. Most \despotic\ methods accept the verbose argument, which causes them to produce printed output containing a variety of information. In this case, the  By default \despotic\ operations are silent.
 
