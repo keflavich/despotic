@@ -5,6 +5,9 @@ from despotic import emitter
 # Read the Milky Way GMC cloud file
 gmc = cloud(fileName='cloudfiles/MilkyWayGMC.desp')
 
+# for performance reason, plot fewer points
+npts = 10
+
 import numpy as np
 import pylab as pl
 
@@ -16,7 +19,7 @@ gmc.Td = 20
 gmc.addEmitter('o-h2co', 1e-9)
 
 # first plot: versus density
-densities = np.logspace(1,6)
+densities = np.logspace(1,6,npts)
 gmc.colDen = 5e21 # use a moderately high column, but not as high as the default
 
 tau11 = np.empty(densities.shape)
@@ -49,7 +52,7 @@ pl.savefig('despotic_formaldehyde_22vs11_density.png',bbox_inches='tight')
 
 # second plot: versus column
 gmc.nH = 1e4 # use a high density, right in the interesting zone
-columns = np.logspace(20,23)
+columns = np.logspace(20,23,npts)
 
 tau11 = np.empty(columns.shape)
 tau22 = np.empty(columns.shape)
@@ -80,7 +83,7 @@ pl.savefig('despotic_formaldehyde_22vs11_column.png',bbox_inches='tight')
 # third plot: versus temperature
 gmc.nH = 1e4 # use a high density, right in the interesting zone
 gmc.colDen = 5e21 # use a moderately high column, but not as high as the default
-temperatures = np.linspace(10,50)
+temperatures = np.linspace(10,50,npts)
 
 tau11 = np.empty(temperatures.shape)
 tau22 = np.empty(temperatures.shape)
@@ -115,7 +118,7 @@ gmc.nH = 1e4 # use a high density, right in the interesting zone
 gmc.colDen = 5e21 # use a moderately high column, but not as high as the default
 gmc.Tg = 20
 gmc.Td = 20
-oprs = np.logspace(-3,np.log10(3))
+oprs = np.logspace(-3,np.log10(3),npts)
 
 tau11 = np.empty(oprs.shape)
 tau22 = np.empty(oprs.shape)
