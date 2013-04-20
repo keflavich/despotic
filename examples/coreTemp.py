@@ -29,6 +29,8 @@ from datetime import timedelta
 
 # Set up a range of densities
 lognHgrid = arange(2,8.01,0.2)
+# faster version (10 steps instead of 31)
+lognHgrid = linspace(2,8,10)
 
 # Specify whether verbose printing while running is desired
 verbose = True

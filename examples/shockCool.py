@@ -21,6 +21,8 @@ tEvol = 40*kyr
 
 # Set desired number of outputs
 nOut = 41    # output once per kyr
+# for tests, do it faster:
+nOut = 11
 
 # Specify whether verbose printing while running is desired
 verbose = True
@@ -49,13 +51,15 @@ from datetime import timedelta
 
 # Create array of times
 times = arange(0, tEvol*(1.0+1.0e-6), tEvol/(nOut-1))
+# can use linspace here:
+times = linspace(0, tEvol*(1.0+1.0e-6), nOut)
 
 # Create list of states
 stateList = []
 
 # Read any existing data
 restart=False
-for i in arange(0, nOut, 1):
+for i in xrange(nOut):
     try:
         fp = open('shockCool{0:03d}.pkl'.format(i), 'rb')
         stateList.append(pickle.load(fp))
