@@ -13,7 +13,7 @@
 
 \begin{document}
 
-\title{User's Guide for \despotic\ v.~1.0.3}
+\title{User's Guide for \despotic\ v.~1.0.4}
 \author{Mark Krumholz}
 
 \maketitle
@@ -304,7 +304,7 @@ Each line of a cloud file must be blank, contain a comment starting with the cha
 \begin{verbatim}
 key = value
 \end{verbatim}
-The line may also contain comments after \verb=value=, again beginning with \verb=#=. Any content after \verb=#= is treated as a comment and is ignored. \despotic\ keys are case-insensitive, and whitespace around keys and values are ignored. The full set of allowed keys and their functions is listed in Table \ref{tab:cloudfiles}. All quantities must be in CGS units. Key-value pairs may be placed in any order, with the exception of the key \verb=H2opr=, which provides a means of specify the ratio of ortho-to-para-H$_2$, instead of directly setting the ortho- and para-H$_2$ abundances. If this key is specified, it must precede the key \verb=xH2=, which gives the total H$_2$ abundance including both ortho- and para- species. Not all keys are required to be present. If left unspecified, most quantities default to a fiducial Milky Way value (if a reasonable one exists, e.g.~for the gas-dust coupling constant and ISRF strength) or to 0 (if it does not, e.g.~for densities and chemical abundances).
+The line may also contain comments after \verb=value=, again beginning with \verb=#=. Any content after \verb=#= is treated as a comment and is ignored. \despotic\ keys are case-insensitive, and whitespace around keys and values are ignored. The full set of allowed keys and their functions is listed in Table \ref{tab:cloudfiles}. All quantities must be in CGS units. Key-value pairs may be placed in any order, with the exception of the key \verb=H2opr=, which provides a means of specify the ratio of ortho-to-para-H$_2$, instead of directly setting the ortho- and para-H$_2$ abundances. If this key is specified, it must precede the key \verb=xH2=, which gives the total H$_2$ abundance including both ortho- and para- species\footnote{In v1.0.4, \texttt{H2OPR} and \texttt{XH2} are implemented as python properties, and will automatically update \texttt{comp.xpH2} and \texttt{comp.xoH2} when changed interactively}. Not all keys are required to be present. If left unspecified, most quantities default to a fiducial Milky Way value (if a reasonable one exists, e.g.~for the gas-dust coupling constant and ISRF strength) or to 0 (if it does not, e.g.~for densities and chemical abundances).
 
 
 \begin{table}
@@ -1099,6 +1099,7 @@ This procedure returns nothing.
 \section{Revision History}
 
 \begin{enumerate}
+\item Version 1.0.4, 4/2013 -- fixed a bug with reading LAMDA files, added \verb|XH2| and \verb|H2OPR| as \verb|cloud| properties
 \item Version 1.0.3, 4/2013 -- fixed a bug introduced in version 1.0.2; also added section on dependencies to the manual; no functional changes
 \item Version 1.0.2, 4/2013 -- revised the way residuals are calculated in \verb=cloud.setTempEq=, \verb=cloud.setDustTempEq=, and \verb=cloud.setGasTempEq= to provide a higher probability of convergence when the initial guess is very far from the correct answer.
 \item Version 1.0.1, 4/2013 -- added license statements to all source files.

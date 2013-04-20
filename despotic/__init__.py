@@ -1,3 +1,4 @@
+__version__ = '1.0.4'
 __all__ = ["cloud", "collPartner", "composition", "despoticError", \
            "dustProp", "emitter", "emitterData", "fetchLamda", \
            "lineProfLTE", "radiation", "refreshLamda"]

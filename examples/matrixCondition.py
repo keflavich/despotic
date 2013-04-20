@@ -30,27 +30,27 @@ cloud.Tg = 10.0
 # Add three exmaple emitters; abundance values don't matter for this
 # example, so just set them to 1
 cloud.addEmitter('co', 1.0)
-cloud.addEmitter('c+', 1.0, extrap=True, emitterFile='c+@uv.dat')
+cloud.addEmitter('c+', 1.0, extrap=True, emitterURL='c+@uv.dat')
 cloud.addEmitter('o-nh3', 1.0, extrap=True)
 
 # Compute level populations for optically thin cloud with no clumping;
 # get back the dict containing diagnostic information
-codict = cloud.emitters['co'].setLevPop(cloud, thin=True, noClump=True, verbose=True)
-cdict = cloud.emitters['c+'].setLevPop(cloud, thin=True, noClump=True, verbose=True)
-nh3dict = cloud.emitters['o-nh3'].setLevPop(cloud, thin=True, noClump=True, verbose=True)
+codict = cloud.emitters['co'].setLevPop(cloud, thin=True, noClump=True)
+cdict = cloud.emitters['c+'].setLevPop(cloud, thin=True, noClump=True)
+nh3dict = cloud.emitters['o-nh3'].setLevPop(cloud, thin=True, noClump=True)
 
 # Print condition numbers, before and after reduction
-print "CO condition number = "+str(linalg.cond(codict['m']))
-print "C condition number = "+str(linalg.cond(cdict['m']))
-print "NH3 condition number = "+str(linalg.cond(nh3dict['m']))
+print "CO condition number = "+str(np.linalg.cond(codict['m']))
+print "C condition number = "+str(np.linalg.cond(cdict['m']))
+print "NH3 condition number = "+str(np.linalg.cond(nh3dict['m']))
 
 # Plot matrices graphically
 mco=codict['m'][:-1,:]
-mco += identity(mco.shape[0])
+mco += np.identity(mco.shape[0])
 mc=cdict['m'][:-1,:]
-mc += identity(mc.shape[0])
+mc += np.identity(mc.shape[0])
 mnh3=nh3dict['m'][:-1,:]
-mnh3 += identity(mnh3.shape[0])
+mnh3 += np.identity(mnh3.shape[0])
 fig=plt.figure(1, figsize=(7,2.8))
 plt.subplot(131)
 plt.imshow(np.log10(mco/(np.amax(mco))+1e-20), \
@@ -76,15 +76,15 @@ plt.savefig('matrix1.eps')
 # Now repeat for reduced matrices
 
 # Print condition numbers, before and after reduction
-print "C condition number (reduced) = "+str(linalg.cond(cdict['mRed']))
-print "NH3 condition number (reduced) = "+str(linalg.cond(nh3dict['mRed']))
-print "NH3 condition number (re-reduced) = "+str(linalg.cond(nh3dict['mRed2']))
+print "C condition number (reduced) = "+str(np.linalg.cond(cdict['mRed']))
+print "NH3 condition number (reduced) = "+str(np.linalg.cond(nh3dict['mRed']))
+print "NH3 condition number (re-reduced) = "+str(np.linalg.cond(nh3dict['mRed2']))
 
 # Graphics
 mc=cdict['mRed'][:-1,:]
-mc += identity(mc.shape[0])
+mc += np.identity(mc.shape[0])
 mnh3=nh3dict['mRed2'][:-1,:]
-mnh3 += identity(mnh3.shape[0])
+mnh3 += np.identity(mnh3.shape[0])
 fig=plt.figure(2, figsize=(5.5,2.8))
 plt.subplot(121)
 plt.imshow(np.log10(mc/(np.amax(mc))+1e-20), \

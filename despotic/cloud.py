@@ -364,7 +364,7 @@ class cloud(object):
 
                 self.H2OPR = float(linesplit2[0])
                 if verbose:
-                    print "Setting H2 ortho-para ratio = "+str(opr)
+                    print "Setting H2 ortho-para ratio = "+str(self.H2OPR)
 
             elif linesplit[0].upper().strip() == 'XH2':
 
@@ -531,7 +531,7 @@ class cloud(object):
     @H2OPR.setter
     def H2OPR(self, opr):
         self._H2OPR = opr
-        XH2 = self.XH2 or 0.5 
+        XH2 = self.XH2 or 0.5
         self.comp.xpH2 = 1.0/(1.0+opr)*XH2
         self.comp.xoH2 = opr/(1.0+opr)*XH2
 
