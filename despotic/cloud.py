@@ -961,7 +961,6 @@ class cloud(object):
         if noLines == False:
             GammaSum += rates['GammaDustLine']
             GammaSumMax = max(GammaSumMax, rates['GammaDustLine'])
-        lumScale = rates['maxAbsdEdtDust']
 
         # Step 3: if we don't have an initial guess, make one by
         # assuming that dust-gas coupling is negligible, and that the
@@ -973,7 +972,7 @@ class cloud(object):
                      (1.0/(4.0+self.dust.beta))
 
         # Step 4: get initial scaling
-        rates = cloud.dEdt(dustOnly=True, sumOnly=True, \
+        rates = self.dEdt(dustOnly=True, sumOnly=True, \
                                PsiUser=PsiUser, \
                                fixedLevPop=True, \
                                verbose=verbose)
@@ -992,7 +991,7 @@ class cloud(object):
         # Check that we're really converged; if not, try again
         # starting from guessed starting position
         if abs(_dustTempResid(self.Td, self, PsiUser, GammaSum, \
-                                  GammaSumMax, False)) > 1.0e-3:
+                                  GammaSumMax, lumScale, False)) > 1.0e-3:
             self.Td = \
                 (GammaSum / \
                      (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
@@ -1009,7 +1008,7 @@ class cloud(object):
 
         # Test for success and return appropriate value
         if abs(_dustTempResid(self.Td, self, PsiUser, GammaSum, \
-                                  GammaSumMax, False)) > 1.0e-3:
+                                  GammaSumMax, lumScale, False)) > 1.0e-3:
             return False
         else:
             return True
