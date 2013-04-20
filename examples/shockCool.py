@@ -57,7 +57,7 @@ stateList = []
 restart=False
 for i in arange(0, nOut, 1):
     try:
-        fp = open('shockCool{:03d}.pkl'.format(i), 'rb')
+        fp = open('shockCool{0:03d}.pkl'.format(i), 'rb')
         stateList.append(pickle.load(fp))
         fp.close()
         restart=True
@@ -103,7 +103,7 @@ for i, t in enumerate(times[istart:-1]):
 
     # Save state, both locally and to disk
     stateList.append(deepcopy(slab))
-    fp = open('shockCool{:03d}.pkl'.format(i+istart+1), 'wb')
+    fp = open('shockCool{0:03d}.pkl'.format(i+istart+1), 'wb')
     pickle.dump(slab, fp)
     fp.close()
 
