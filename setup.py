@@ -43,6 +43,7 @@ class PyTest(Command):
         errno = subprocess.call([sys.executable, 'tests/run_tests.py'])
         raise SystemExit(errno)
 
+
 setup(name='despotic',
       version=version,
       description='a Python / numPy / sciPy package to perform calculations related to line emission and thermal behavior in cold interstellar clouds.',
@@ -53,7 +54,7 @@ setup(name='despotic',
       download_url=download_url,
       packages=['despotic'],
       package_dir={'despotic':'despotic'}, 
-      package_data={'despotic.cloudfiles':['cloudfiles/']},
+      package_data={'despotic':['cloudfiles/*.desp']},
       requires=requirements,
       cmdclass={'build_py': build_py, 'test': PyTest},
       classifiers=[
