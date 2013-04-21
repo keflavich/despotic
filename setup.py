@@ -43,6 +43,10 @@ class PyTest(Command):
         errno = subprocess.call([sys.executable, 'tests/run_tests.py'])
         raise SystemExit(errno)
 
+import os 
+# despotic/cloudfiles is a link back to ./cloudfiles
+if not os.path.exists('despotic/cloudfiles'):
+    os.symlink('../cloudfiles','despotic/cloudfiles')
 
 setup(name='despotic',
       version=version,
