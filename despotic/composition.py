@@ -27,7 +27,7 @@ from despoticError import despoticError
 thetaRot = 85.3    # Rotation constant in K
 thetaVib = 5984.   # Vibrational constant in K
 
-class composition:
+class composition(object):
     """
     A class describing the chemical composition of an interstellar
     cloud, and providing methods to perform calculations using those
@@ -238,3 +238,31 @@ class composition:
             else:
                 self.cv = (cvtrans + cvvib + cvpH2rot + cvoH2rot)[0]
             return self.cv
+
+########################################################################
+# Some properties (things that update other numbers when changed)
+########################################################################
+
+    @property
+    def H2OPR(self):
+        if hasattr(self,'_H2OPR'):
+            return self._H2OPR
+
+    @H2OPR.setter
+    def H2OPR(self, opr):
+        self._H2OPR = opr
+        xH2 = self.xH2 or 0.5
+        self.xpH2 = 1.0/(1.0+opr)*xH2
+        self.xoH2 = opr/(1.0+opr)*xH2
+
+    @property
+    def xH2(self):
+        if hasattr(self,'_xH2'):
+            return self._xH2
+
+    @xH2.setter
+    def xH2(self, xH2):
+        self._xH2 = xH2
+        opr = self.H2OPR or 0.25
+        self.xpH2 = 1.0/(1.0+opr)*xH2
+        self.xoH2 = opr/(1.0+opr)*xH2

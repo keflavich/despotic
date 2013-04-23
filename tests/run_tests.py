@@ -1,4 +1,5 @@
 import time
+import os
 
 # run all examples except RADEX
 # skip this one execfile('examples/radexComp.py')
