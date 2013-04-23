@@ -124,7 +124,7 @@ tau11 = np.empty(oprs.shape)
 tau22 = np.empty(oprs.shape)
 for ii in xrange(tau11.size):
     # assume gas/dust have same temperature
-    gmc.H2OPR = oprs[ii]
+    gmc.comp.H2OPR = oprs[ii]
     line = gmc.lineLum('o-h2co')
     tau11[ii] = line[0]['tau']
     tau22[ii] = line[2]['tau']

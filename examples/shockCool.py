@@ -21,8 +21,6 @@ tEvol = 40*kyr
 
 # Set desired number of outputs
 nOut = 41    # output once per kyr
-# for tests, do it faster:
-nOut = 11
 
 # Specify whether verbose printing while running is desired
 verbose = True
@@ -51,17 +49,15 @@ from datetime import timedelta
 
 # Create array of times
 times = arange(0, tEvol*(1.0+1.0e-6), tEvol/(nOut-1))
-# can use linspace here:
-times = linspace(0, tEvol*(1.0+1.0e-6), nOut)
 
 # Create list of states
 stateList = []
 
 # Read any existing data
 restart=False
-for i in xrange(nOut):
+for i in arange(0, nOut, 1):
     try:
-        fp = open('shockCool{0:03d}.pkl'.format(i), 'rb')
+        fp = open('shockCool{:03d}.pkl'.format(i), 'rb')
         stateList.append(pickle.load(fp))
         fp.close()
         restart=True
@@ -107,7 +103,7 @@ for i, t in enumerate(times[istart:-1]):
 
     # Save state, both locally and to disk
     stateList.append(deepcopy(slab))
-    fp = open('shockCool{0:03d}.pkl'.format(i+istart+1), 'wb')
+    fp = open('shockCool{:03d}.pkl'.format(i+istart+1), 'wb')
     pickle.dump(slab, fp)
     fp.close()
 
@@ -174,8 +170,8 @@ fig3=plt.figure(3, figsize=(6,4))
 plt.subplots_adjust(bottom=0.15)
 ax3=fig3.add_subplot(111)
 plt.plot(coLines[:,0]/LambdaSpec['co'][0], linewidth=2, label='0 kyr')
-plt.plot(coLines[:,nOut/2]/LambdaSpec['co'][nOut/2], linewidth=2, label='%i kyr' % (nOut/2))
-plt.plot(coLines[:,nOut-1]/LambdaSpec['co'][nOut-1], linewidth=2, label='%i kyr' % (nOut-1))
+plt.plot(coLines[:,20]/LambdaSpec['co'][20], linewidth=2, label='20 kyr')
+plt.plot(coLines[:,40]/LambdaSpec['co'][40], linewidth=2, label='40 kyr')
 plt.legend()
 plt.ylim([2e-3,1])
 plt.yscale('log')
@@ -184,9 +180,9 @@ plt.xlabel('CO transition')
 
 # Label transitions
 skip=2
-ax3.set_xticks(arange(0,nOut-1,skip))
+ax3.set_xticks(arange(0,40,skip))
 ticklabels=["$J={{{0}}}-{{{1}}}$".format(skip*j+1,skip*j) \
-                for j in arange(nOut-1)]
+                for j in arange(40)]
 ax3.set_xticklabels(ticklabels)
 plt.xlim([0,12])
 
