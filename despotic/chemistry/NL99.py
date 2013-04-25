@@ -7,6 +7,7 @@ import numpy as np
 import string
 from despotic.despoticError import despoticError
 from shielding import fShield_CO_vDB
+from despotic.chemistry import abundanceDict
 import scipy.constants as physcons
 
 ########################################################################
@@ -16,21 +17,10 @@ kB = physcons.k/physcons.erg
 mH = (physcons.m_p+physcons.m_e)/physcons.gram
 
 ########################################################################
-# Define a mapping from species name to numerical index.
+# List of species used in this chemistry network
 ########################################################################
-specDict = { 'He+' : 0, 
-              'H3+' : 1, 
-              'OHx' : 2, 
-              'CHx' : 3, 
-              'CO' : 4, 
-              'C' : 5, 
-              'C+' : 6, 
-              'HCO+' : 7, 
-              'O' : 8, 
-              'M+' : 9 }
 specList = ['He+', 'H3+', 'OHx', 'CHx', 'CO', 'C', 'C+', 'HCO+', 'O',
             'M+']
-
 
 ########################################################################
 # Data on photoreactions
@@ -143,6 +133,10 @@ class NL99:
         = 0.4 * cloud.dust.sigmaPE
         """
 
+        # List of species for this network; provide a pointer here so
+        # that it can be accessed through the class
+        self.specList = specList
+
         # Array to hold abundances
         self.x = np.zeros(10)
 
@@ -171,7 +165,6 @@ class NL99:
             self.AV = 0.0
 
             # Set initial abundances
-            self.emList = None
             if info is None:
                 self.x[6] = _xCdefault
                 self.x[8] = _xOdefault
@@ -192,7 +185,7 @@ class NL99:
             self.cloud = cloud
 
             # Sanity check: make sure cloud is pure H2
-            if gmc.XH2 != 0.5:
+            if cloud.comp.xH2 != 0.5:
                 raise despoticError, "NL99 network only valid " + \
                     "for pure H2 composition"
 
@@ -229,37 +222,37 @@ class NL99:
 
             # Make a case-insensitive version of the emitter list for
             # convenience
-            self.emList = dict(zip(map(string.lower, 
-                                       cloud.emitters.keys()), 
-                                   cloud.emitters.values()))
+            emList = dict(zip(map(string.lower, 
+                                  cloud.emitters.keys()), 
+                              cloud.emitters.values()))
 
             # OH and H2O
-            if 'oh' in self.emList:
-                self.x[2] += self.emList['oh'].abundance
-            if 'ph2o' in self.emList:
-                self.x[2] += self.emList['ph2o'].abundance
-            if 'oh2o' in self.emList:
-                self.x[2] += self.emList['oh2o'].abundance
-            if 'p-h2o' in self.emList:
-                self.x[2] += self.emList['p-h2o'].abundance
-            if 'o-h2o' in self.emList:
-                self.x[2] += self.emList['o-h2o'].abundance
+            if 'oh' in emList:
+                self.x[2] += emList['oh'].abundance
+            if 'ph2o' in emList:
+                self.x[2] += emList['ph2o'].abundance
+            if 'oh2o' in emList:
+                self.x[2] += emList['oh2o'].abundance
+            if 'p-h2o' in emList:
+                self.x[2] += emList['p-h2o'].abundance
+            if 'o-h2o' in emList:
+                self.x[2] += emList['o-h2o'].abundance
 
             # CO
-            if 'co' in self.emList:
-                self.x[4] = self.emList['co'].abundance
+            if 'co' in emList:
+                self.x[4] = emList['co'].abundance
 
             # Neutral carbon
-            if 'c' in self.emList:
-                self.x[5] = self.emList['c'].abundance
+            if 'c' in emList:
+                self.x[5] = emList['c'].abundance
 
             # Ionized carbon
-            if 'c+' in self.emList:
-                self.x[6] = self.emList['c+'].abundance
+            if 'c+' in emList:
+                self.x[6] = emList['c+'].abundance
 
             # HCO+
-            if 'hco+' in self.emList:
-                self.x[7] = self.emList['hco+'].abundance
+            if 'hco+' in emList:
+                self.x[7] = emList['hco+'].abundance
 
             # Sum input abundances of C, C+, CO, HCO+ to ensure that
             # all carbon is accounted for. If there is too little,
@@ -289,22 +282,14 @@ class NL99:
                     "HCO+ abundance is " + str(xCtot)
 
             # O
-            if 'o' in self.emList:
-                self.x[8] = self.emList['o'].abundance
+            if 'o' in emList:
+                self.x[8] = emList['o'].abundance
             elif info is None:
                 self.x[8] = _xOdefault
             elif 'xO' in info:
                 self.x[8] = info['xO']
             else:
                 self.x[8] = _xOdefault
-
-            # Ratios of ^12C to ^13C, and ^16O to ^18O
-            if '13co' in self.emList and 'co' in self.emList:
-                self.c13_12 = self.emList['13co'].abundance / \
-                    self.emList['co'].abundance
-            if 'c18o' in self.emList and 'co' in self.emList:
-                self.o18_16 = self.emList['c18o'].abundance / \
-                    self.emList['co'].abundance
 
         # Initial electrons = metals + C+ + HCO+
         xeinit = self.xM + self.x[6] + self.x[7]
@@ -319,6 +304,9 @@ class NL99:
 
         # Initial M+
         self.x[9] = self.xM
+
+        # Create abundances wrapper
+        self.abundances = abundanceDict(specList, self.x)
 
 
 ########################################################################
@@ -380,116 +368,123 @@ class NL99:
         return xdot[:10]
 
 
-########################################################################
-# Method to take an array of abundances and turn them into a dict of
-# abundances for easier human reading
-########################################################################
-    def xToDict(self, abundances=None):
-        """
-        This method turns a numerical array of abundances into a dict
-        of abundances, for easier human reading
-        
-        Parameters
-        ----------
-        abundances : array or None
-             abundances to be transformed
-
-        Returns
-        -------
-        xDict : dict
-             dict of abundances
-
-        Raises
-        ------
-        despoticError if abundances is not None or a 1D or 2D array
-        with final dimension of length 10
-
-        Remarks
-        -------
-        If abundances is None, then xDict is a dict where each entry
-        describes the abundance of the corresponding element in
-        self.x. If abundances is a 1D array, xDict is a dict where
-        each entry gives the abundance of the corresponding element in
-        the input abundances array. If abundances is a 2D array, xDict
-        is a dict where each entry is an array whose length is equal
-        to the length of the first dimension of the array.
-        """
-
-        # Prepare output dict
-        xDict = {}
-
-        # Proceed based on input abundances
-        if abundances==None:
-
-            # None, so return data from stored abundances
-            for i, s in enumerate(specList):
-                xDict[s] = x[i]
-
-        else:
-
-            # Abundances have been input
-            if rank(abundances) < 1 or rank(abundances) > 2:
-
-                # Throw error: input array must be 1d or 2d
-                raise despoticError, "abundances must be " + \
-                    "array of rank 1 or 2"
-
-            elif rank(abundances) == 1:
-
-                # 1D input; check length
-                if abundances.shape[-1] != 10:
-                    raise despoticError, "last dimension of " + \
-                        "abundances must be of size 10"
-
-                # Construct output
-                for i, s in enumerate(specList):
-                    xDict[s] = abundances[i]
-
-            else:
-
-                # 2D input; check length of last dimension
-                if abundances.shape[-1] != 10:
-                    raise despoticError, "last dimension of " + \
-                        "abundances must be of size 10"
-
-                # Construct output
-                for i, s in enumerate(specList):
-                    xDict[s] = abundances[:,i]
-
-        # Return output
-        return xDict
-
-
-########################################################################
-# Define abundances as a property, which just gets the current values
-# in the x array and returns them in a nicely-formatted dict
-########################################################################
-    @property
-    def abundances(self):
-        if hasattr(self, '_abundances'):
-            return self._abundances
-
-    @abundances.setter
-    def abundances(self, 
-
-########################################################################
-# Method to take an dict of abundances and turn them into an array in
-# the ordering used by this chemistry network
-########################################################################
-    def xFromDict(self, abundances=None):
-        """
-        This method takes 
-        """
-
 
 ########################################################################
 # Method to write the currently stored abundances to a cloud
 ########################################################################
-    def applyAbundances(abundances=None, cloud=None):
+    def applyAbundances(self, addEmitters=False):
         """
-        This method writes abundances to a cloud's emitter list
+        This method writes the abundances produced by the chemical
+        network to the cloud's emitter list.
 
         Parameters
         ----------
-        abundances : None or array(10)
-             array of abundances
+        addEmitters : Boolean
+             if True, emitters that are included in the chemical
+             network but not in the cloud's existing emitter list will
+             be added; if False, abundances of emitters already in the
+             emitter list will be updated, but new emiters will not be
+             added to the cloud
+        """
+
+        # Safety check: make sure we have an associated cloud to which
+        # we can write
+        if self.cloud == None:
+            return despoticError, "must have associated cloud " + \
+                "to use applyAbundances"
+
+        # Make a case-insensitive version of the emitter list for
+        # convenience
+        emList = dict(zip(map(string.lower, 
+                              self.cloud.emitters.keys()), 
+                          self.cloud.emitters.values()))
+
+        # Save rtios of ^12C to ^13C, and ^16O to ^18O
+        if '13co' in emList and 'co' in emList:
+            c13_12 = emList['13co'].abundance / \
+                emList['co'].abundance
+        if 'c18o' in emList and 'co' in emList:
+            o18_16 = emList['c18o'].abundance / \
+                emList['co'].abundance
+
+        # OH, assuming OHx is half OH
+        if 'oh' in emList:
+            emList['oh'].abundance = self.x[2]/2.0
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('oh', self.x[2]/2.0)
+            except despoticError:
+                print 'Warning: unable to add OH; cannot find LAMDA file'
+
+        # H2O, assuming OHx is half H2O, and that oH2O and pH2O are
+        # equally abundance
+        if 'ph2o' in emList:
+            emList['ph2o'].abundance = self.x[2]/4.0
+        elif 'p-h2o' in emList:
+            emList['p-h2o'].abundance = self.x[2]/4.0
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('ph2o', self.x[2]/4.0)
+            except despoticError:
+                print 'Warning: unable to add p-H2O; cannot find LAMDA file'
+        if 'oh2o' in emList:
+            emList['oh2o'].abundance = self.x[2]/4.0
+        elif 'o-h2o' in emList:
+            emList['o-h2o'].abundance = self.x[2]/4.0
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('oh2o', self.x[2]/4.0)
+            except despoticError:
+                print 'Warning: unable to add o-H2O; cannot find LAMDA file'
+
+        # CO
+        if 'co' in emList:
+            emList['co'].abundance = self.x[4]
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('co', self.x[4])
+            except despoticError:
+                print 'Warning: unable to add CO; cannot find LAMDA file'
+
+        # if we have 13CO or C18O, make their abundances match that of CO
+        # multiplied by the appropriate isotopic abundances
+        if '13co' in emList:
+            emList['13co'].abundance = self.x[4]*c13_12
+        if 'c18o' in emList:
+            emList['c18o'].abundance = self.x[4]*c18_16
+
+        # C
+        if 'c' in emList:
+            emList['c'].abundance = self.x[5]
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('c', self.x[5])
+            except despoticError:
+                print 'Warning: unable to add C; cannot find LAMDA file'
+
+        # C+
+        if 'c+' in emList:
+            emList['c+'].abundance = self.x[6]
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('c+', self.x[6])
+            except despoticError:
+                print 'Warning: unable to add C+; cannot find LAMDA file'
+
+        # HCO+
+        if 'hco+' in emList:
+            emList['hco+'].abundance = self.x[7]
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('hco+', self.x[7])
+            except despoticError:
+                print 'Warning: unable to add HCO+; cannot find LAMDA file'
+
+        # O
+        if 'o' in emList:
+            emList['o'].abundance = self.x[8]
+        elif addEmitters:
+            try:
+                self.cloud.addEmitter('o', self.x[8])
+            except despoticError:
+                print 'Warning: unable to add O; cannot find LAMDA file'
