@@ -117,6 +117,22 @@ class abundanceDict(collections.MutableMapping,dict):
             "abundanceDict"
 
 ########################################################################
+# define how to print abundanceDict objects
+########################################################################
+    def __repr__(self):
+        """
+        define how to print abundanceDict objects
+        """
+        stringRep = "{"
+        for i, k in enumerate(self.__specDict):
+            stringRep += "'" + k + "': " + \
+                str(self.x[self.__specDict[k]])
+            if i != len(self.__specDict)-1:
+                stringRep += ", "
+        stringRep += "}"
+        return stringRep
+
+########################################################################
 # the methods below act just like they do on an ordinary dict
 # whose keys are __specDict and whose values are the elements of x
 ########################################################################

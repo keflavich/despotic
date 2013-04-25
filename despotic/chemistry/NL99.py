@@ -11,10 +11,11 @@ from despotic.chemistry import abundanceDict
 import scipy.constants as physcons
 
 ########################################################################
-# Physical constants
+# Physical and numerical constants
 ########################################################################
 kB = physcons.k/physcons.erg
 mH = (physcons.m_p+physcons.m_e)/physcons.gram
+__small = 1e-100
 
 ########################################################################
 # List of species used in this chemistry network
@@ -89,7 +90,7 @@ _xH2 = 0.5
 ########################################################################
 # Define the NL99 class
 ########################################################################
-class NL99:
+class NL99(object):
     """
     This class the implements the chemistry network of Nelson & Langer
     (1999, ApJ, 524, 923).
@@ -118,19 +119,21 @@ class NL99:
 
         Remarks
         -------
-        The dict info may contain the following keys:
+        The dict info may contain the following key - value pairs:
 
-        'xC' : total C abundance per H nucleus
-        'xO' : total H abundance per H nucleus
-        'xM' : total refractory metal abundance per H nucleus
-        'sigmaDustV' : V band dust extinction cross section per H
-        nucleus
-        'AV' : total visual extinction; mutually exclusive with
-        sigmaDustV
-        'noClump' : a Boolean; if True, the clump factor is set to 1.0
-
-        Default values are xC = 2e-4, xO = 4e-4, xM = 2e-7, sigmaDustV
-        = 0.4 * cloud.dust.sigmaPE
+        'xC' : float giving the total C abundance per H nucleus;
+             defaults to 2.0e-4
+        'xO' : float giving the total H abundance per H nucleus;
+             defaults to 4.0e-4
+        'xM' : float giving the total refractory metal abundance per H
+             nucleus; defaults to 2.0e-7
+        'sigmaDustV' : float giving the V band dust extinction cross
+             section per H nucleus; if not set, the default behavior
+             is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE
+        'AV' : float giving the total visual extinction; ignored if
+             sigmaDustV is set
+        'noClump' : a Boolean; if True, the clump factor is set to
+             1.0; defaults to False
         """
 
         # List of species for this network; provide a pointer here so
@@ -158,10 +161,10 @@ class NL99:
             # Physical properties
             self.xHe = 0.1
             self.ionRate = 2.0e-17
-            self.NH = 0.0
-            self.temp = 0.0
+            self.NH = small
+            self.temp = small
             self.chi = 1.0
-            self.nH = 0.0
+            self.nH = small
             self.AV = 0.0
 
             # Set initial abundances
@@ -177,6 +180,8 @@ class NL99:
                     self.x[8] = info['xO']
                 else:
                     self.x[8] = _xOdefault
+                if 'AV' in info:
+                    self.AV = info['AV']
             self.x[9] = self.xM
 
         else:
@@ -215,6 +220,8 @@ class NL99:
                 # dimensionless units
                 self.AV = self.NH * info['sigmaDustV'] / \
                     np.log(100**0.2)
+            elif 'AV' in info:
+                self.AV = info['AV']
             else:
                 self.AV = 0.4 * cloud.dust.sigmaPE * self.NH
 
@@ -285,11 +292,14 @@ class NL99:
             if 'o' in emList:
                 self.x[8] = emList['o'].abundance
             elif info is None:
-                self.x[8] = _xOdefault
+                self.x[8] = _xOdefault - self.x[2] - self.x[4] - \
+                    self.x[6] - self.x[7]
             elif 'xO' in info:
-                self.x[8] = info['xO']
+                self.x[8] = info['xO'] - self.x[2] - self.x[4] - \
+                    self.x[6] - self.x[7]
             else:
-                self.x[8] = _xOdefault
+                self.x[8] = _xOdefault - self.x[2] - self.x[4] - \
+                    self.x[6] - self.x[7]
 
         # Initial electrons = metals + C+ + HCO+
         xeinit = self.xM + self.x[6] + self.x[7]
@@ -305,9 +315,22 @@ class NL99:
         # Initial M+
         self.x[9] = self.xM
 
-        # Create abundances wrapper
-        self.abundances = abundanceDict(specList, self.x)
+        self._abundances = abundanceDict(specList, self.x)
 
+
+########################################################################
+# Define abundances as a property
+########################################################################
+
+    @property
+    def abundances(self):
+        self._abundances = abundanceDict(specList, self.x)
+        return self._abundances
+
+    @abundances.setter
+    def abundances(self, value):
+        self.x = value.x
+        self._abundances = value
 
 ########################################################################
 # Method to return the time derivative of all chemical rates
