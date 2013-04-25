@@ -17,3 +17,4 @@ from fetchLamda import fetchLamda
 from lineProfLTE import lineProfLTE
 from radiation import radiation
 from refreshLamda import refreshLamda
+import chemistry
