@@ -331,20 +331,6 @@ class NL99(object):
         self._abundances = value
 
 ########################################################################
-# Define abundances as a property
-########################################################################
-
-    @property
-    def abundances(self):
-        self._abundances = abundanceDict(specList, self.x)
-        return self._abundances
-
-    @abundances.setter
-    def abundances(self, value):
-        self.x = value.x
-        self._abundances = value
-
-########################################################################
 # Method to return the time derivative of all chemical rates
 ########################################################################
     def dxdt(self, xin, time):
