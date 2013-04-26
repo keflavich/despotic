@@ -315,8 +315,20 @@ class NL99(object):
         # Initial M+
         self.x[9] = self.xM
 
-        self._abundances = abundanceDict(specList, self.x)
 
+########################################################################
+# Define abundances as a property
+########################################################################
+
+    @property
+    def abundances(self):
+        self._abundances = abundanceDict(specList, self.x)
+        return self._abundances
+
+    @abundances.setter
+    def abundances(self, value):
+        self.x = value.x
+        self._abundances = value
 
 ########################################################################
 # Define abundances as a property

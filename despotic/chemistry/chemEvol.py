@@ -13,9 +13,6 @@ from scipy.integrate import odeint
 from despotic.despoticError import despoticError
 from abundanceDict import abundanceDict
 
-# Small numerical value, to avoid divide by zero
-__small = 1e-100
-
 def chemEvol(cloud, tFin, tInit=0.0, nOut=100, dt=None,
                  tOut=None, network=None, info=None,
                  addEmitters=False):

@@ -31,7 +31,7 @@ from composition import composition
 from radiation import radiation
 from dustProp import dustProp
 from despotic.chemistry.chemEvol import chemEvol
-from despotic.chemistry.chemEvol import setChemEq
+from despotic.chemistry.setChemEq import setChemEq
 from despoticError import despoticError
 from copy import deepcopy
 
