@@ -105,9 +105,11 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
         x2 = cloud.chemnetwork.x + dt*xdot1
         xdot2 = cloud.chemnetwork.dxdt(x2, 0.0)
 
-        # Use larger of the two xdot's to define a timescale
+        # Use larger of the two xdot's to define a timescale, but
+        # divide by 10 for safety
         tEqGuess = max(np.amax(cloud.chemnetwork.x/(xdot1+__small)),
                        np.amax(x2/(xdot2+__small)))
+        tEqGuess /= 10.0
 
         # Make sure tEqGuess doesn't exceed maxTime
         if tEqGuess > maxTime:
@@ -170,9 +172,10 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
     # Print status
     if verbose:
         if np.amax(err) < tol:
+            ad = abundanceDict(cloud.chemnetwork.specList,
+                               cloud.chemnetwork.x)
             print "setChemEquil: abundances converged: " + \
-                str(abundanceDict(cloud.chemnetwork.specList,
-                                  cloud.chemnetwork.x))
+                str(ad)
         else:
             print "setChemEquil: reached maximum time of " + \
                 str(maxTime) + " sec without converging"

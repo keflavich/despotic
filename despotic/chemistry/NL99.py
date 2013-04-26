@@ -8,6 +8,7 @@ import string
 from despotic.despoticError import despoticError
 from shielding import fShield_CO_vDB
 from despotic.chemistry import abundanceDict
+from despotic.chemistry import chemNetwork
 import scipy.constants as physcons
 
 ########################################################################
@@ -90,7 +91,7 @@ _xH2 = 0.5
 ########################################################################
 # Define the NL99 class
 ########################################################################
-class NL99(object):
+class NL99(chemNetwork):
     """
     This class the implements the chemistry network of Nelson & Langer
     (1999, ApJ, 524, 923).
@@ -140,6 +141,9 @@ class NL99(object):
         # that it can be accessed through the class
         self.specList = specList
 
+        # Store the input info dict
+        self.info = info
+
         # Array to hold abundances
         self.x = np.zeros(10)
 
@@ -159,13 +163,16 @@ class NL99(object):
             self.cloud = None
 
             # Physical properties
-            self.xHe = 0.1
-            self.ionRate = 2.0e-17
-            self.NH = small
-            self.temp = small
-            self.chi = 1.0
-            self.nH = small
-            self.AV = 0.0
+            self._xHe = 0.1
+            self._ionRate = 2.0e-17
+            self._NH = small
+            self._temp = small
+            self._chi = 1.0
+            self._nH = small
+            self._AV = 0.0
+            if info is not None:
+                if 'AV' in info:
+                    self._AV = info['AV']
 
             # Set initial abundances
             if info is None:
@@ -180,8 +187,6 @@ class NL99(object):
                     self.x[8] = info['xO']
                 else:
                     self.x[8] = _xOdefault
-                if 'AV' in info:
-                    self.AV = info['AV']
             self.x[9] = self.xM
 
         else:
@@ -193,37 +198,6 @@ class NL99(object):
             if cloud.comp.xH2 != 0.5:
                 raise despoticError, "NL99 network only valid " + \
                     "for pure H2 composition"
-
-            # Physical properties
-            self.xHe = cloud.comp.xHe
-            self.ionRate = cloud.rad.ionRate
-            self.NH = cloud.colDen / 2.0
-            self.temp = cloud.Tg
-            self.chi = cloud.rad.chi
-            if info is None:
-                cs2 = kB * cloud.Tg / (cloud.comp.mu * mH)
-                cfac = np.sqrt(1.0 + 0.75*cloud.sigmaNT**2/cs2)
-            elif 'noClump' in info:
-                if info['noClump'] == True:
-                    cfac = 1.0
-                else:
-                    cs2 = kB * cloud.Tg / (cloud.comp.mu * mH)
-                    cfac = np.sqrt(1.0 + 0.75*cloud.sigmaNT**2/cs2)
-            else:
-                cs2 = kB * cloud.Tg / (cloud.comp.mu * mH)
-                cfac = np.sqrt(1.0 + 0.75*cloud.sigmaNT**2/cs2)
-            self.nH = cloud.nH * cfac
-            if info is None:
-                self.AV = 0.4 * cloud.dust.sigmaPE * self.NH
-            elif 'sigmaDustV' in info:
-                # Note factor to convert from mag to true
-                # dimensionless units
-                self.AV = self.NH * info['sigmaDustV'] / \
-                    np.log(100**0.2)
-            elif 'AV' in info:
-                self.AV = info['AV']
-            else:
-                self.AV = 0.4 * cloud.dust.sigmaPE * self.NH
 
             # Set abundances
 
@@ -317,18 +291,157 @@ class NL99(object):
 
 
 ########################################################################
-# Define abundances as a property
+# Define some properties so that, if we have a cloud, quantities that
+# are stored in the cloud point back to it
 ########################################################################
+    @property
+    def nH(self):
+        if self.cloud is None:
+            return self._nH
+        else:
+            return self.cloud.nH
+
+    @nH.setter
+    def nH(self, value):
+        if self.cloud is None:
+            self._nH = value
+        else:
+            self.cloud.nH = value
 
     @property
-    def abundances(self):
-        self._abundances = abundanceDict(specList, self.x)
-        return self._abundances
+    def temp(self):
+        if self.cloud is None:
+            return self._temp
+        else:
+            return self.cloud.Tg
 
-    @abundances.setter
-    def abundances(self, value):
-        self.x = value.x
-        self._abundances = value
+    @temp.setter
+    def temp(self, value):
+        if self.cloud is None:
+            self._temp = value
+        else:
+            self.cloud.Tg = value
+
+    @property
+    def cfac(self):
+        if self.cloud is None:
+            return 1.0
+        else:
+            if self.info is None:
+                cs2 = kB * self.cloud.Tg / (self.cloud.comp.mu * mH)
+                return np.sqrt(1.0 + 0.75*self.cloud.sigmaNT**2/cs2)
+            elif 'noClump' in self.info:
+                if self.info['noClump'] == True:
+                    return 1.0
+                else:
+                    cs2 = kB * self.cloud.Tg / (self.cloud.comp.mu * mH)
+                    return np.sqrt(1.0 + 0.75*self.cloud.sigmaNT**2/cs2)
+            else:
+                cs2 = kB * self.cloud.Tg / (self.cloud.comp.mu * mH)
+                return np.sqrt(1.0 + 0.75*self.cloud.sigmaNT**2/cs2)
+
+    @cfac.setter
+    def cfac(self, value):
+        raise despoticError, "cannot set cfac directly"
+
+    @property
+    def xHe(self):
+        if self.cloud is None:
+            return self._xHe
+        else:
+            return self.cloud.comp.xHe
+
+    @xHe.setter
+    def xHe(self, value):
+        if self.cloud is None:
+            self._xHe = value
+        else:
+            self.cloud.comp.xHe = value
+
+    @property
+    def ionRate(self):
+        if self.cloud is None:
+            return self._ionRate
+        else:
+            return self.cloud.rad.ionRate
+
+    @ionRate.setter
+    def ionRate(self, value):
+        if self.cloud is None:
+            self._ionRate = value
+        else:
+            self.cloud.rad.ionRate = value
+
+    @property
+    def chi(self):
+        if self.cloud is None:
+            return self._chi
+        else:
+            return self.cloud.rad.chi
+
+    @chi.setter
+    def chi(self, value):
+        if self.cloud is None:
+            self._chi = value
+        else:
+            self.cloud.rad.chi = value
+
+    @property
+    def NH(self):
+        if self.cloud is None:
+            return self._NH
+        else:
+            return self.cloud.colDen / 2.0
+
+    @NH.setter
+    def NH(self, value):
+        if self.cloud is None:
+            self._NH = value
+        else:
+            self.cloud.colDen = 2.0*value
+
+    @property
+    def AV(self):
+        if self.cloud is None:
+            if self.info is None:
+                return self._AV
+            elif 'AV' in self.info:
+                return self.info['AV']
+            else:
+                return self._AV
+        else:
+            if self.info is None:
+                return 0.4 * self.cloud.dust.sigmaPE * self.NH
+            elif 'sigmaDustV' in self.info:
+                # Note factor to convert from mag to true
+                # dimensionless units
+                return self.NH * self.info['sigmaDustV'] / \
+                    np.log(100**0.2)
+            elif 'AV' in self.info:
+                return self.info['AV']
+            else:
+                return 0.4 * self.cloud.dust.sigmaPE * self.NH
+
+    @AV.setter
+    def AV(self, value):
+        if self.cloud is None:
+            if self.info is None:
+                self._AV = value
+            elif 'AV' in self.info:
+                self.info['AV'] = value
+            else:
+                self._AV = value
+        else:
+            if self.info is None:
+                raise despoticError, "cannot set AV directly " + \
+                    "unless it is part of info"
+            elif 'AV' not in self.info:
+                raise despoticError, "cannot set AV directly " + \
+                    "unless it is part of info"
+            else:
+                self.info['AV'] = value
+                
+
 
 ########################################################################
 # Method to return the time derivative of all chemical rates
@@ -378,7 +491,8 @@ class NL99(object):
             xdot[_outph2[i]] += rate[i]
 
         # Two-body reactions
-        rate = _k2*self.temp**_k2Texp*self.nH*xgrow[_in2bdy1]*xgrow[_in2bdy2]
+        rate = _k2*self.temp**_k2Texp*self.cfac*self.nH * \
+            xgrow[_in2bdy1]*xgrow[_in2bdy2]
         for i, n in enumerate(_in2bdy1):
             xdot[_in2bdy1[i]] -= rate[i]
             xdot[_in2bdy2[i]] -= rate[i]
@@ -406,13 +520,21 @@ class NL99(object):
              be added; if False, abundances of emitters already in the
              emitter list will be updated, but new emiters will not be
              added to the cloud
+
+        Returns
+        -------
+        Nothing
+
+        Remarks
+        -------
+        If there is no cloud associated with this chemical network,
+        this routine does nothing and silently returns.
         """
 
-        # Safety check: make sure we have an associated cloud to which
+        # SAFETY check: make sure we have an associated cloud to which
         # we can write
         if self.cloud == None:
-            return despoticError, "must have associated cloud " + \
-                "to use applyAbundances"
+            return
 
         # Make a case-insensitive version of the emitter list for
         # convenience
