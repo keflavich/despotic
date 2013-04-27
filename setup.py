@@ -48,7 +48,7 @@ import os
 if not os.path.exists('despotic/cloudfiles'):
     os.symlink('../cloudfiles','despotic/cloudfiles')
 
-setup(name='despotic',
+setup(name='DESPOTIC',
       version=version,
       description='a Python / numPy / sciPy package to perform calculations related to line emission and thermal behavior in cold interstellar clouds.',
       long_description=long_description,
@@ -64,7 +64,7 @@ setup(name='despotic',
       classifiers=[
                    "Development Status :: 3 - Alpha",
                    "Programming Language :: Python",
-                   "License :: OSI Approved :: GPL",
+                   "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
                   ],
       
      )

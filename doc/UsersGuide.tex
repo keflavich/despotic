@@ -13,7 +13,7 @@
 
 \begin{document}
 
-\title{User's Guide for \despotic\ v.~1.0.4}
+\title{User's Guide for \despotic\ v.~1.1.0}
 \author{Mark Krumholz}
 
 \maketitle
@@ -26,7 +26,7 @@
 
 This is a guide for users of the \despotic\ software package. \despotic\ is distributed under the terms of the \href{http://http://www.gnu.org/licenses/gpl.html}{GNU General Public License v.~3}. A copy of the license notification is included in all the source files.
 
-If you use \despotic\ in any published work, please cite the paper Krumholz, M.~R., 2013, ``\despotic\ -- A New Software Library to Derive the Energetics and SPectra of Optically Thick Interstellar Clouds", submitted to \textit{Monthly Notices of the Royal Astronomical Society}, arXiv:XXXX.XXXX.
+If you use \despotic\ in any published work, please cite the paper Krumholz, M.~R., 2013, ``\despotic\ -- A New Software Library to Derive the Energetics and SPectra of Optically Thick Interstellar Clouds", submitted to \textit{Monthly Notices of the Royal Astronomical Society}, \href{http://arxiv.org/abs/1304.2404}{arXiv:1304.2404}.
 
 In addition, if you make use of any of \despotic's capabilities that take advantage of data from the \href{http://home.strw.leidenuniv.nl/~moldata/}{Leiden Atomic and Molecular Database}, please cite Sch\"oier, F.~L., van der Tak, F.~F.~S., van Dishoeck, E.~F., and Black, J.~H., 2005, ``An atomic and molecular database for analysis of submillimetre line observations", \textit{Astronomy \& Astrophysics}, 432, 369, and please cite the individual data sources for particular LAMDA files. These sources may be found at the \href{http://home.strw.leidenuniv.nl/~moldata/}{LAMDA website}.
 
@@ -49,23 +49,19 @@ This will create a directory \verb=despotic=, which will contain the subdirector
 
 At this point you can start using \despotic\ immediately, but you might want to either set the environment variable \verb=$PYTHONPATH= to the \verb=despotic= subdirectory, or you might want to install \despotic\ as a site package. If you do neither of these, you will only be able to run \despotic\ when you are in the directory you just downloaded.
 
-To install \despotic\ as a site package, follow these steps (assuming you are in a unix or mac environment):
-\begin{enumerate}
-\item From the directory where you just downloaded \despotic, type \verb=cd dist= to go into the \verb=dist= directory.
-\item Un-tar the distribution by typing \verb=tar -xzf DESPOTIC-1.0.2.tar.gz=.
-\item Go into the newly created directory by typing \verb=cd DESPOTIC-1.0.2=.
-\item Install by typing \verb=python setup.py install=. For this last step, depending on how your system python is configured, you may need administrator / root access. If so, type \verb=sudo python setup.py install= instead.
-\end{enumerate}
+To install \despotic\ as a site package, simply cd into the \verb=despotic= subdirectory and type
+\begin{verbatim}
+python setup.py install
+\end{verbatim}
+Depending on how your python installation is configured, you may need to prepend the command above with \verb=sudo=.
 
 \subsection{Downloading from the Python Package Index}
 
 You can also download and the \despotic\ package from the Python Package Index, at \url{https://pypi.python.org/pypi/DESPOTIC/}. This distribution includes only the \despotic\ source, not any of the documentation or example files. The easiest way to install from PPI is using pip, the Python Installer Package. If you have pip installed, you can download \despotic\ simply by typing
-
 \begin{verbatim}
 pip install despotic
 \end{verbatim}
-
-Depending on how your Python distribution is installed, you may need to prepend \verb=sudo= to the above statement. Alternately, you can manually download the file DESPOTIC-1.0.2.tar.gz from the above URL, then follow the last three steps from the previous section to install this as a site package.
+Depending on how your python installation is configured, you may need to prepend the command above with \verb=sudo=.
 
 
 \subsection{Specifying the Location of LAMDA}
@@ -235,6 +231,32 @@ clouds, t = mycloud.tempEvol(tFinal, fullOutput=True)
 The \verb=fullOutput= optional argument, if True, causes the routine to return a full copy of the state of the cloud at each output time, instead of just the gas temperature \verb=Tg=. In this case, \verb=clouds= is a sequence of 100 clouds, and one may interrogate their states (e.g.~calculating their line emission) using the usual routines.
 
 
+\subsection{Computing Chemical Equilibria}
+
+As of version 1.1.0, \despotic\ can also compute the chemical abundances in clouds using chemistry networks. There are a vast number of possible chemical networks, but at present \despotic\ only includes the reduced carbon-oxygen chemistry network of Nelson \& Langer (1999, \textit{Astrophysical Journal}, 524, 923), which computes most of the important reactions involving carbon and oxygen. (\despotic\ provides a generic chemical network class and drivers so that it is straightforward to expand to include other chemical networks; see Section \ref{sec:chem}.)
+
+To perform computations with this network, one must first import the class that defines it:
+\begin{verbatim}
+from despotic.chemistry import NL99
+\end{verbatim}
+One can set the equilibrium abundances of a cloud to the equilibrium values determined by the network via the command
+\begin{verbatim}
+mycloud.setChemEq(network=NL99)
+\end{verbatim}
+The argument \verb=network= specifies that the calculation should use the \verb=NL99= class. This call sets the abundances of all the emitters that are included in the network to their equilibrium values. In this case, the network includes CO, and assumes that $^{13}$CO to $^{12}$CO ratio is constant, and thus it sets both the CO and $^{13}$CO abundances to new values:
+\begin{verbatim}
+print mycloud.emitters['co'].abundance, mycloud.emitters['13co'].abundance
+\end{verbatim}
+
+One can also see the abundances of all the species included in the network, including those that do not correspond to emitters in the cloud, by printing the chemical network property \verb=abundances=:
+\begin{verbatim}
+print mycloud.chemnetwork.abundances
+\end{verbatim}
+Once the chemical network is associated with the cloud, subsequent calls to \verb=setChemEq= need not include the \verb=network= keyword. \despotic\ assumes that all subsequent chemical calculations are to be performed with the same chemical network unless it is explicitly told otherwise via a call to \verb=setChemEq= or \verb=chemEvol= (see the next section) that specifies a different chemical network.
+
+\subsection{Computing Time-Dependent Chemical Evolution}
+
+
 \subsection{Computing Line Profiles}
 
 Line profile computation operates somewhat differently then the previous examples, because it is provided through a stand-alone procedure rather than through the \verb=cloud= class. This procedure is called \verb=lineProfLTE=, and may be imported directly from the \despotic\ package. The routine also requires emitter data stored in an \verb=emitterData= object. The first step in a line profile calculation is therefore to import these two objects into the Python environment:
@@ -289,7 +311,11 @@ A variety of other optional arguments can be used to control the velocities at w
 \subsection{Escape Probability Geometries}
 \label{sec:escapeprobgeom}
 
-\despotic\ currently supports three possible geometries that can be used when computing escape probabilities, and which are controlled by the \verb=escapeProbGeom= optional argument to most \despotic\ functions. This optional argument, if included, must be set equal to one of the three strings \verb='sphere'= (the default), \verb='slab'=, or \verb='LVG'=. In the examples provided in the previous sections, the methods \verb=cloud.lineLum=, \verb=cloud.dEdt=, \verb=cloud.setTempEq=, \verb=cloud.setGasTempEq=, \verb=cloud.setDustTempEq=, and \verb=cloud.tempEvol= all accept the optional argument \verb=escapeProbGeom=.
+\despotic\ currently supports three possible geometries that can be used when computing escape probabilities, and which are controlled by the \verb=escapeProbGeom= optional argument to most \despotic\ functions. This optional argument, if included, must be set equal to one of the three strings \verb='sphere'= (the default), \verb='slab'=, or \verb='LVG'=. In the examples provided in the previous sections, the methods \verb=cloud.lineLum=, \verb=cloud.dEdt=, \verb=cloud.setTempEq=, \verb=cloud.setGasTempEq=, \verb=cloud.setDustTempEq=, and \verb=cloud.tempEvol= all accept the optional argument 
+\verb=escapeProbGeom=.
+
+
+
 
 \clearpage
 
@@ -365,6 +391,11 @@ The optional items \verb=extrapolate= and \verb=energySkip= change how \despotic
 Finally, the optional items \verb=file:FILE= and \verb=url:URL= specify locations of atomic and molecular data files, either on the local file system or on the web. This capability is useful in part because some LAMDA files do not follow the usual naming convention, or because for some species LAMDA provides more than one version of the data for that species (e.g.~two versions of the data file for atomic C exist, one with only the low-lying IR levels, and another including the higher-energy UV levels). File specifications must be of the form \verb=file:FILE= with \verb=FILE= replaced by a file name, which can include both absolute and relative paths. If no path or a relative path is given, \despotic\ searches for the file first in the current directory, and then in the directory \verb=$DESPOTIC_HOME/LAMDA=, where \verb=$DESPOTIC_HOME= is an environment variable. If it is not specified, \despotic\ just looks for a directory called LAMDA relative to the current directory.
 
 The \verb=url:URL= option can be used to specify the location of a file on the web, usually somewhere on the LAMDA website. It must be specified as \verb=url:URL=, where \verb=URL= is replaced by an absolute or relative URL. If an absolute URL is given, \despotic\ attempts to download the file from that location. If a relative URL is given, \despotic\ attempts to download the file from at \verb=http://$DESPOTIC_LAMDAURL/datafiles/URL=, where \verb=$DESPOTIC_LAMDAURL= is an environment variable. If this environment variable is not specified, \despotic\ searches for the file at \verb=http://home.strw.leidenuniv.nl/~moldata/URL=.
+
+\clearpage
+
+\section{Chemistry and Chemical Networks}
+\label{sec:chem}
 
 \clearpage
 
