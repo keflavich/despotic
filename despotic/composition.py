@@ -245,8 +245,11 @@ class composition(object):
 
     @property
     def H2OPR(self):
-        if hasattr(self,'_H2OPR'):
-            return self._H2OPR
+        if self.xoH2 == 0.0 and self.xpH2 == 0.0:
+            self._H2OPR = 0.25
+        else:
+            self._H2OPR = self.xoH2 / self.xpH2
+        return self._H2OPR
 
     @H2OPR.setter
     def H2OPR(self, opr):
@@ -257,12 +260,12 @@ class composition(object):
 
     @property
     def xH2(self):
-        if hasattr(self,'_xH2'):
-            return self._xH2
+        self._xH2 = self.xoH2 + self.xpH2
+        return self._xH2
 
     @xH2.setter
     def xH2(self, xH2):
         self._xH2 = xH2
-        opr = self.H2OPR or 0.25
+        opr = self.H2OPR
         self.xpH2 = 1.0/(1.0+opr)*xH2
         self.xoH2 = opr/(1.0+opr)*xH2

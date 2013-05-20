@@ -139,6 +139,9 @@ class collPartner:
         # Generate interpolating functions from table
         self._buildInterp(extrap)
 
+        # Store whether extrapolation is allowed
+        self._extrap = extrap
+
 
 ########################################################################
 # Method to return collision rates for every downward transition in the
@@ -266,9 +269,9 @@ class collPartner:
                 # an low temperatures, and use that to construct our
                 # inteprolating functions
                 logTempExtrap = zeros(self.ntemp+2)
-                logTempExtrap[0] = -30.0
+                logTempExtrap[0] = -100.0
                 logTempExtrap[1:-1] = log(self.tempTable)
-                logTempExtrap[-1] = 30.0
+                logTempExtrap[-1] = 100.0
                 logColRateExtrap = zeros(self.ntemp+2)
                 for i in range(self.ntrans):
                     logColRateExtrap[1:-1] = log(self.colRate[i,:])
@@ -280,24 +283,26 @@ class collPartner:
                         (logTempExtrap[-1] - logTempExtrap[-2]) * \
                         (logColRateExtrap[-2] - logColRateExtrap[-3]) / \
                         (logTempExtrap[-2] - logTempExtrap[-3])
-                    self.colRateInterp.append( \
-                        interp1d(logTempExtrap, logColRateExtrap, \
-                                     kind='linear') )
+                    self.colRateInterp.append(
+                        interp1d(logTempExtrap, logColRateExtrap,
+                                 kind='linear',
+                                 bounds_error=False, fill_value=0) )
         else:
             # Special case: the table only gives a single
             # temperature. In this case, just construct an
             # interpolating function that assumes the rate coefficient
             # is constant
             logTempExtrap = zeros(3)
-            logTempExtrap[0] = -30.0
+            logTempExtrap[0] = -100.0
             logTempExtrap[1] = log(self.tempTable[0])
-            logTempExtrap[2] = 30.0
+            logTempExtrap[2] = 100.0
             logColRateExtrap = zeros(3)
             for i in range(self.ntrans):
                 logColRateExtrap[:] = log(self.colRate[i,0])
                 self.colRateInterp.append( \
-                    interp1d(logTempExtrap, logColRateExtrap, \
-                                 kind='linear') )
+                    interp1d(logTempExtrap, logColRateExtrap, 
+                             kind='linear', bounds_error=False, 
+                             fill_value=logColRateExtrap[0]) )
         
 
 ########################################################################

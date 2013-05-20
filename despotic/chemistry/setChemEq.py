@@ -34,7 +34,7 @@ __small = 1e-100
 
 def setChemEq(cloud, tEqGuess=None, network=None, info=None,
               addEmitters=False, tol=1e-6, maxTime=1e16,
-              verbose=False, convList=None):
+              verbose=False, smallabd=1e-15, convList=None):
     """
     Set the chemical abundances for a cloud to their equilibrium
     values, computed using a specified chemical netowrk.
@@ -67,6 +67,11 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
         decide if network is converged; species not listed are not
         considered. If this is None, then all species are considered
         in deciding if the calculation is converged.
+    smallabd : float
+        abundances below smallabd are not considered when checking for
+        convergence; set to 0 or a negative value to consider all
+        abundances, but beware that this may result in false
+        non-convergence due to roundoff error in very small abundances
     verbose : Boolean
         if True, diagnostic information is printed as the calculation
         proceeds
@@ -117,15 +122,17 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
 
         # Compute current time derivatives
         xdot1 = cloud.chemnetwork.dxdt(cloud.chemnetwork.x, 0.0)
-        dt = cloud.chemnetwork.x / (xdot1+__small)
-        x2 = cloud.chemnetwork.x + dt*xdot1
+        dt1 = np.amin(np.abs((cloud.chemnetwork.x+max(smallabd,0)) /
+                            (xdot1+__small)))
+        x2 = cloud.chemnetwork.x + dt1*xdot1
         xdot2 = cloud.chemnetwork.dxdt(x2, 0.0)
+        dt2 = np.amin(np.abs((x2+max(smallabd,0)) / (xdot2+__small)))
 
         # Use larger of the two xdot's to define a timescale, but
-        # divide by 10 for safety
-        tEqGuess = max(np.amax(cloud.chemnetwork.x/(xdot1+__small)),
-                       np.amax(x2/(xdot2+__small)))
+        # divide by 10 for safety, with a minimum of 10^7 sec
+        tEqGuess = max(dt1, dt2)
         tEqGuess /= 10.0
+        tEqGuess = max(tEqGuess, 1e7)
 
         # Make sure tEqGuess doesn't exceed maxTime
         if tEqGuess > maxTime:
@@ -158,6 +165,11 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
 
         # Compute residual
         err = abs(xOut[-2,convArray]/(xOut[-1,convArray]+__small)-1)
+
+        # If smallabd is set, exclude species will small abundances
+        # from the calculation
+        if smallabd > 0.0:
+            err[xOut[-1,convArray] < smallabd] = 0.1*tol
 
         # Write results to chemnetwork
         cloud.chemnetwork.x = xOut[-1,:]
@@ -195,6 +207,11 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
         else:
             print "setChemEquil: reached maximum time of " + \
                 str(maxTime) + " sec without converging"
+
+    # Floor small negative abundances to avoid numerical problems
+    idx = np.where(np.logical_and(cloud.chemnetwork.x <= 0.0,
+                                  np.abs(cloud.chemnetwork.x) < smallabd))
+    cloud.chemnetwork.x[idx] = smallabd
 
     # Write results to the cloud
     cloud.chemnetwork.applyAbundances(addEmitters=addEmitters)

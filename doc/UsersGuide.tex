@@ -42,7 +42,7 @@ This section describes several options for how to get \despotic.
 To download the full \despotic\ distribution, just type
 
 \begin{verbatim}
-svn checkout http://despotic.googlecode.com/svn/trunk/ despotic
+svn checkout http://despotic.googlecode.com/svn/trunk/ despotic-read-only
 \end{verbatim}
 
 This will create a directory \verb=despotic=, which will contain the subdirectories \verb=cloudfiles=, \verb=despotic=, \verb=dist=, \verb=doc=, and \verb=examples=. The \despotic\ package is in the \verb=despotic= directory, while the other directories contain sample cloud files, a distribution that can be installed as a site package, this User's Guide, and some example Python scripts that use \despotic.
@@ -139,14 +139,15 @@ from despotic import cloud
 The most basic task in \despotic\ is computing the line emission emerging from a cloud of specified physical properties. The first step in any computation of line emission is to create a \verb=cloud= object with the desired properties. This is often most easily done by creating a \despotic\ cloud file following the directions in Section \ref{sec:cloudfiles}, but the user can also create a cloud with the desired properties manually. The properties that are important for line emission are the gas volume density, column density, temperature, velocity dispersion, and chemical composition; these are stored in the \verb=cloud= class and the composition class within it. For example, the following code snippet
 \begin{verbatim}
 mycloud = cloud()
-mycloud.nH = 1.0e3
+mycloud.nH = 1.0e2
 mycloud.colDen = 1.0e22
-mycloud.sigmaNT = 4.0e5
+mycloud.sigmaNT = 2.0e5
 mycloud.Tg = 10.0
 mycloud.comp.xoH2 = 0.1
 mycloud.comp.xpH2 = 0.4
+mycloud.comp.xHe = 0.1
 \end{verbatim}
-creates a cloud with all its parameters set to default values, a volume density of $n_{\rm H} = 10^3$ cm$^{-3}$, a column density of $N_{\rm H} = 10^{22}$ cm$^{-2}$, a non-thermal velocity dispersion of $\sigma_{\rm NT} = 4.0\times 10^5$ cm s$^{-1}$, a gas temperature of $T_g = 10$ K, and a composition that is $0.1$ ortho-H$_2$ molecules per H nucleus, and 0.4 para-H$_2$ molecules per H nucleus.
+creates a cloud with all its parameters set to default values, a volume density of $n_{\rm H} = 10^2$ cm$^{-3}$, a column density of $N_{\rm H} = 10^{22}$ cm$^{-2}$, a non-thermal velocity dispersion of $\sigma_{\rm NT} = 2.0\times 10^5$ cm s$^{-1}$, a gas temperature of $T_g = 10$ K, and a composition that is $0.1$ ortho-H$_2$ molecules per H nucleus, 0.4 para-H$_2$ molecules, and $0.1$ He atoms per H nucleus.
 
 The next step is to specify the emitting species whose line emission is to be computed. As with the physical properties of the cloud, this is often most easily done by creating a cloud file. However, it can also be done manually by using the \verb=cloud.addEmitter= method, which allows users to add emitting species to clouds. The following code snippet adds CO as an emitting species, at an abundance of $10^{-4}$ CO molecules per H nucleus:
 \begin{verbatim}
@@ -243,9 +244,9 @@ One can set the equilibrium abundances of a cloud to the equilibrium values dete
 \begin{verbatim}
 mycloud.setChemEq(network=NL99)
 \end{verbatim}
-The argument \verb=network= specifies that the calculation should use the \verb=NL99= class. This call sets the abundances of all the emitters that are included in the network to their equilibrium values. In this case, the network includes CO, and assumes that $^{13}$CO to $^{12}$CO ratio is constant, and thus it sets both the CO and $^{13}$CO abundances to new values:
+The argument \verb=network= specifies that the calculation should use the \verb=NL99= class. This call sets the abundances of all the emitters that are included in the network to their equilibrium values. In this case, the network includes CO, and thus it sets the CO abundance to a new value:
 \begin{verbatim}
-print mycloud.emitters['co'].abundance, mycloud.emitters['13co'].abundance
+print mycloud.emitters['CO'].abundance
 \end{verbatim}
 
 One can also see the abundances of all the species included in the network, including those that do not correspond to emitters in the cloud, by printing the chemical network property \verb=abundances=:
@@ -255,6 +256,25 @@ print mycloud.chemnetwork.abundances
 Once the chemical network is associated with the cloud, subsequent calls to \verb=setChemEq= need not include the \verb=network= keyword. \despotic\ assumes that all subsequent chemical calculations are to be performed with the same chemical network unless it is explicitly told otherwise via a call to \verb=setChemEq= or \verb=chemEvol= (see the next section) that specifies a different chemical network.
 
 \subsection{Computing Time-Dependent Chemical Evolution}
+
+\despotic\ can also calculate time-dependent chemical evolution. This is accomplished through the method \verb=cloud.chemEvol=.  At with \verb=cloud.tempEvol=, this routine accepts an argument specifying the amount of time for which the cloud is to be integrated, and returning the chemical abundances as a function of time during this evolution:
+\begin{verbatim}
+mycloud.rad.ionRate = 2.0e-16     # Raise the ionization rate a lot
+tFinal = 0.5 * 3.16e13            # 0.5 Myr
+abd, t = mycloud.chemEvol(tFinal)
+\end{verbatim}
+Note that the chemical network is not specified here, which is fine assuming that one has previously executed the \verb+mycloud.setChemEq(network=NL99)+ statement in the previous section, which assigns the NL99 network to the cloud. If one has not executed that statement, then the keyword \verb+network=NL99+ must be added to the call to \verb=mycloud.chemEvol=.
+
+The output quantity \verb=abd= here is an object of class \verb=abundanceDict=, which is a specialized dict for handling chemical abundances. One can examine the abundances of specific species just by giving their chemical names. For example, to see the time-dependent evolution of the abundances of CO, C, and C$^+$, one could do
+\begin{verbatim}
+plot(t, abd['CO'])
+plot(t, abd['C'])
+plot(t, abd['C+'])
+\end{verbatim}
+As with \verb=setChemEq=, this routine modifies the abundances of emitters in the cloud to the values they achieve at the end of the evolution, so to see the final CO abundance one could do
+\begin{verbatim}
+print mycloud.emitters['CO'].abundance
+\end{verbatim}
 
 
 \subsection{Computing Line Profiles}
@@ -396,6 +416,63 @@ The \verb=url:URL= option can be used to specify the location of a file on the w
 
 \section{Chemistry and Chemical Networks}
 \label{sec:chem}
+
+The chemistry capabilities in \despotic, which are new as of version 1.1.0, are located in the \verb=despotic.chemistry= sub-package. This package defines a generic class to describe chemical reaction networks, and two procedures that can operate on chemical networks and their associated clouds to compute chemical equilibria and time-dependent chemical evolution. These capabilities are add-ons to the capabilities of earlier versions of \despotic, and versions 1.1.0 retains full backwards compatibility with earlier versions.
+
+\subsection{Operations on Chemical Networks: Time Evolution and Equilibria}
+
+In its most generic form, a chemical network is defined by a list of $N$ chemical species, a set of abundances $\mathbf{x}$ for those species (defined relative to H nuclei, like all other abundances in \despotic), and a function $f(\mathbf{x},\mathbf{p})$ that gives the time rate of change of those abundances $d\mathbf{x}/dt = f(\mathbf{x},\mathbf{p})$. The function $f$ generally depends on the instantaneous abundances $\mathbf{x}$, and may also depend on any number of other parameters $\mathbf{p}$. Examples of quantities that might enter $\mathbf{p}$ include but are not limited to the ambient radiation field (for photochemical reactions), the cosmic ray ionization rate, abundances of species that are not explicitly included in the network, and the gas density and temperature. Given these definitions, \despotic\ is capable of two operations:
+\begin{itemize}
+\item Given an initial set of abundances at $\mathbf{x}(t_0)$ at time $t_0$, compute the abundances at some later time $t_1$. This is simply a matter of numerically integrating the ordinary differential equation $d\mathbf{x}/dt = f(\mathbf{x},\mathbf{p})$ from $t_0$ to $t_1$, where $f$ is a known function that is defined by the chemical network. In \despotic, this capability is implemented by the routine \verb=chemEvol= in the \verb=despotic.chemistry.chemEvol= module. The \verb=cloud= class contains a wrapper around this routine, which allows it to be called to operate on a specific instance of \verb=cloud=.
+\item Find an equilibrium set of abundances $\mathbf{x}_{\rm eq}$ such that $d\mathbf{x}/dt = f(\mathbf{x}_{\rm eq},\mathbf{p}) = 0$. Note that these is in general no guarantee that such an equilibrium exists, or that it is unique, and there are no general techniques for identifying such equilibria for arbitrary vector functions $f$. \despotic\ handles this problem by explicitly integrating the ODE $d\mathbf{x}/dt = f(\mathbf{x},\mathbf{p})$ until $\mathbf{x}$ reaches constant values (within some tolerance) or until a specified maximum time is reached. In \despotic, this capability is implemented by the routine \verb=setChemEq= in the \verb=despotic.chemistry.setChemEq= module. The \verb=cloud= class contains a wrapper around this routine, which allows it to be called to operate on a specific instance of \verb=cloud=.
+\end{itemize}
+Full details of these modules are given in Sections \ref{sec:chemevol} and \ref{sec:setchemeq}.
+
+\subsection{The NL99 Network}
+
+As of version 1.1.0, \despotic\ only ships with a a single-predefined chemistry network: the reduced C-O network introduced by Nelson \& Langer (1999, \textit{Astrophysical Journal}, 524, 923; hereafter NL99). Readers are refereed to that paper for a full description of the network and the physical approximations on which it relies. To summarize briefly here, the network is intended to capture the chemistry of carbon and oxygen as it occurs at moderate densities and low temperatures in H$_2$-dominated clouds. It includes the species C~\textsc{i}, C$^+$, CH$_x$, CO, HCO$^+$, H$_3^+$, He$^+$, O~\textsc{i}, OH$_x$, M, and M$^+$. Several of these are ``super-species" that agglomerate several distinct species with similar reaction rates and pathways, including CH$_x$ (where $x=1-4$), OH$_x$ (where $x=1-2$), and M and M$^+$ (which are stand-ins for metals such as iron and nickel). The network involves two-body reactions among these species, as well as photochemical reactions induces by UV from the ISRF and reactions initiated by cosmic ray ionizations. In addition to the initial abundances of the various species, the network depends on the ISRF, the ionization rate, and the total abundances of C and O nuclei.
+
+In implementing the NL99 network in \despotic\ there are a three design choices to be made. First, photochemical and ionization reactions depend on the UV radiation field strength and the ionization rate. When performing computations on a cloud, \despotic\ takes these from the parameters \verb=chi= and \verb=ionRate= that are part of the \verb=radiation= class attached to the cloud.
+
+Second, photochemical reactions depend on the amount of shielding against the ISRF provided by dust, and, in the case of the reaction $\mbox{CO} + h\nu \rightarrow \mbox{C} + \mbox{O}$, line shielding by CO and H$_2$. Following its usual approximation for implementing such shielding in a one-zone model, \despotic\ takes the relevant column density to be $N_{\rm H}/2$, where $N_{\rm H}$ is the column density \verb=colDen= of the cloud, so that the typical amount of shielding is assumed to correspond to half the area-averaged column density. For the dust shielding, NL99 express the shielding in terms of the V-band extinction $A_V$; unless instructed otherwise, \despotic\ computes this via
+\begin{displaymath}
+A_V = 0.4 \sigma_{\rm PE} (N_{\rm H}/2).
+\end{displaymath}
+This ratio of V-band to 1000 \AA\ extinction is intermediate between the values expected for Milky Way and SMC dust opacity curves, as discussed in Krumholz, Leroy, \& McKee (2011, \textit{Astrophysical Journal}, 731, 25). However, the user may override this choice. For line shielding, \despotic\ computes the H$_2$ and CO column densities via
+\begin{eqnarray*}
+N_{\rm H_2} & = & x_{\rm H_2} N_{\rm H}/2 \\
+N_{\rm CO} & = & x_{\rm CO} N_{\rm H}/2,
+\end{eqnarray*}
+which amounts to assuming that the CO and H$_2$ are uniformly distributed. Note that the NL99 network explicitly assumes $x_{\rm H_2} = 0.5$, as no reactions involving atomic H are included. These column densities are then used to find a shielding factor by interpolating the tabulated values of van Dishoeck \& Black (1998, \textit{Astrophysical Journal}, 334, 771).
+
+The third choice is how to map between the species included in the chemistry network and the actual emitting species that are required to compute line emission, cooling, etc. This is non-trivial both because the chemical network includes super-species, because the chemical network does not distinguish between ortho- and para- sub-species while the rest of \despotic\ does, and because the network does not distinguish between different isotopomers of the same species, while the rest of \despotic\ does. This does not create problems in mapping from cloud emitter abundances to the chemical network, since the abundances can simply be summed, but it does create a question about how to map output chemical abundances computed by the network into the abundances of emitters that can be operated on by the remainder of \despotic. In order to handle this issue, \despotic\ makes the following assumptions: (1) OH$_x$ is divided evenly between OH and OH$_2$; (2) the abundances of the para- and ortho- states of a given species are equal; (3) the abundances ratios of all isotopomers of a species remain fixed as reactions occur, so, for example, the final abundance ratio of C$^{18}$O to C$^{16}$O as computed by the chemical network is always the same as the initial one.
+
+
+\subsection{Implementing New Chemical Networks via the \texttt{chemNetwork} Class}
+
+\despotic\ implements chemical networks through the abstract base class \verb=chemNetwork=, which is defined by module \verb=despotic.chemistry.chemNetwork=. This class defines the required elements that all chemistry networks must contain; users who wish to implement their own chemistry networks must derive them from this class, and must override the class methods listed below. Users are encouraged to examine the \verb=NL99= class for an example of how to derive a new chemical network class from \verb=chemNetwork=.
+
+The required non-callable attributes of a chemistry network class \verb=cn= are as follows:
+\begin{itemize}
+\item \verb=cn.specList= is a list of strings the describes the chemical species included in the network. The names in \verb=specList= can be arbitrary, and are not used for any purpose other than providing human-readable labels on outputs.
+\item \verb=cn.x= is a numpy array of rank 1, with each element specifying the abundance of a particular species in the network. The number of elements in the array must match the length of \verb=cn.specList=. As with all abundances in \verb=despotic=, abundances must be specified relative to H nuclei, so that if, for example, \verb=x[3]= is $0.1$, this means that there is 1 particle of species 3 per 10 H nuclei.
+\item \verb=cn.cloud= is an instance of the \verb=cloud= class to which the chemical network is attached. This can be \verb=None=, as chemical networks can be free-standing at not attached to specified instances of \verb=cloud=. However, much of the functionality of chemical networks is based around integration with the \verb=cloud= class.
+\end{itemize}
+The required callable attributes are
+\begin{itemize}
+\item \verb+cn.__init__(self, cloud=None, info=None)+ is the initialization method. It must accept two keyword arguments. The first, \verb=cloud=, is an instanced of the \verb=cloud= class to which this chemical network will be attached. This routine should set \verb+cn.cloud+ equal to the input \verb=cloud= instance, and it may also extract information from the input \verb=cloud= instances in order to initialize \verb=cn.x= or any other required quantities. The second keyword argument, \verb=info=, is a dict containing any additional initialization parameters that the chemical network can be or must be passed upon instantiation.
+\item \verb+cn.dxdt(self, xin, time)+ is a method that computes the time derivative of the abundances. Given an input numpy array of abundances \verb=xin= (which is the same shape as \verb=cn.x=) and a time \verb=time=, it must return a numpy array giving the time derivative of all abundances in units of s$^{-1}$.
+\item \verb+cn.applyAbundances(self, addEmitters=False)+ is a method to take the abundances stored in the chemical network and use them to update the abundances of the corresponding emitters in the \verb=cloud= instances associated with this chemical network. This method is called at the end of every chemical calculation, and is responsible for copying information from the chemical network back into the cloud. The optional Boolean argument \verb=addEmitters=, if \verb=True=, specifies that the method should attempt to not only alter the abundances of any emitters associated with the cloud, it should also attempt to add new emitters that are included in the chemical network, and whose abundances are to be determined from it. It is up to the user whether or not to honor this request and implement this behavior.
+\end{itemize}
+
+Once a chemical network class that defines the above methods has been defined, that class can be passed as an argument associated with the \verb=network= keyword to the \verb=cloud.setChemEq= and \verb=cloud.chemEvol= methods, and these methods will automatically perform chemical calculations using the input network.
+
+Finally, \verb=chemNetwork= defines a property \verb=abundances=, which returns the abundance information defined in \verb=cn.x= as a object of class \verb=abundanceDict=. This class is a utility class that provides an interface to the chemical abundances in a network that operates like a Python dict. For example, to print the abundance of CO in a chemical network, and then set the abundance of C$^+$ to zero, one can simply type
+\begin{verbatim}
+print cn.abundances['CO']
+cn.abundances['C+'] = 0.0
+\end{verbatim}
+This save the user the trouble of remembering the numerical indices for CO and C$^+$ in a given network, and provides a means for external programs to access the abundances of particular species in a manner that is independent of the mapping between species name and index number, which might vary between two chemical networks that both contain the same species. Full details of the \verb=abundanceDict= class are given in Section \ref{sec:abundancedict}.
 
 \clearpage
 
@@ -1127,9 +1204,44 @@ This procedure returns nothing.
 
 \clearpage
 
+\subsection{chemEvol}
+\label{sec:chemevol}
+
+\clearpage
+
+\subsection{setChemEq}
+\label{sec:setchemeq}
+
+\clearpage
+
+\subsection{chemNetwork}
+\label{sec:chemnetwork}
+
+\clearpage
+
+\subsection{NL99}
+\label{sec:nl99}
+
+\clearpage
+
+\subsection{shielding}
+\label{sec:shielding}
+
+\clearpage
+
+\subsection{abundanceDict}
+\label{sec:abundancedict}
+
+The \verb=abundanceDict= module defines the \verb=abundanceDict= class, a class that provides a dict-like interface to chemical abundances. An instance of this class is created via the method \verb=abundanceDict.__init__(self, specList, x)= where \verb=specList= is a list of strings giving the names of all the species, and \verb=x= is a numPy array of rank $>=1$ whose first dimension must be of the same size as the number of elements in \verb=specList=. 
+
+Once instantiated, \verb=abundanceDict= behaves exactly as would a dict whose keys are \verb=specList= and whose corresponding values are the elements of \verb=x=; all the methods available for dict are available for \verb=abundanceDict=, including \verb=__getitem__=, \verb=__setitem__=, \verb=__iter__=, \verb=__len__=, \verb=__contains__=, \verb=keys=, \verb=values=, \verb=has_key=, and \verb=copy=. In addition, \verb=abundanceDict= defines a \verb=__repr__= method that provides a nicely-formatted printed version of the information. The only difference from a standard dict is that the list of keys is immutable once the \verb=abundanceDict= is instantiated, so that the dict methods \verb=__delitem__=, \verb=clear=, \verb=pop=, \verb=popitem=, and \verb=update= are all disallowed, as is the use of \verb=__setitem__= with any key that does not match one of the keys in the \verb=abundanceDict= at the time it was instantiated.
+
+\clearpage
+
 \section{Revision History}
 
 \begin{enumerate}
+\item Version 1.1.0, 5/2013 -- added chemistry capabilities; also numerous minor bug fixes
 \item Version 1.0.4, 4/2013 -- fixed a bug with reading LAMDA files, added \verb|XH2| and \verb|H2OPR| as \verb|cloud| properties
 \item Version 1.0.3, 4/2013 -- fixed a bug introduced in version 1.0.2; also added section on dependencies to the manual; no functional changes
 \item Version 1.0.2, 4/2013 -- revised the way residuals are calculated in \verb=cloud.setTempEq=, \verb=cloud.setDustTempEq=, and \verb=cloud.setGasTempEq= to provide a higher probability of convergence when the initial guess is very far from the correct answer.
