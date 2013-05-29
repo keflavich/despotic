@@ -99,6 +99,7 @@ _out2bdy2 = np.array([10, 10, 10, 10, 8, 10, 10, 10, 10, 10, 10,
 ########################################################################
 # Set some default abundances
 ########################################################################
+_xHedefault = 0.1
 _xCdefault = 2.0e-4
 _xOdefault = 4.0e-4
 _xMdefault = 2.0e-7
@@ -179,7 +180,7 @@ class NL99(chemNetwork):
             self.cloud = None
 
             # Physical properties
-            self._xHe = 0.1
+            self._xHe = _xHedefault
             self._ionRate = 2.0e-17
             self._NH = small
             self._temp = small
@@ -214,6 +215,12 @@ class NL99(chemNetwork):
             if cloud.comp.xH2 != 0.5:
                 raise despoticError, "NL99 network only valid " + \
                     "for pure H2 composition"
+
+            # Sanity check: make sure cloud contains some He, since
+            # network will not function properly at He abundance of 0
+            if cloud.comp.xHe == 0.0:
+                raise despoticError, "NL99 network requires " + \
+                    "non-zero He abundance"
 
             # Set abundances
 

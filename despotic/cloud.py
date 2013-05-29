@@ -748,7 +748,7 @@ class cloud(object):
                             # retries before giving up
                             dFac = dFac / 2.0
                             attempts = attempts + 1
-                            if attempts > 3:
+                            if attempts > 5:
                                 raise despoticError, "convergence " + \
                                     "failed for "+em.name
                             else:
@@ -1535,7 +1535,7 @@ class cloud(object):
 ########################################################################
     def setChemEq(self, tEqGuess=None, network=None, info=None,
               addEmitters=False, tol=1e-6, maxTime=1e16,
-              verbose=False, convList=None):
+              verbose=False, smallabd=1e-15, convList=None):
         """
         Set the chemical abundances for a cloud to their equilibrium
         values, computed using a specified chemical netowrk.
@@ -1566,6 +1566,11 @@ class cloud(object):
             decide if network is converged; species not listed are not
             considered. If this is None, then all species are considered
             in deciding if the calculation is converged.
+        smallabd : float
+            abundances below smallabd are not considered when checking for
+            convergence; set to 0 or a negative value to consider all
+            abundances, but beware that this may result in false
+            non-convergence due to roundoff error in very small abundances
         verbose : Boolean
             if True, diagnostic information is printed as the calculation
             proceeds
@@ -1588,7 +1593,8 @@ class cloud(object):
 
         return setChemEq(self, tEqGuess=tEqGuess, network=network,
                          info=info, tol=tol, maxTime=maxTime,
-                         verbose=verbose, convList=convList)
+                         verbose=verbose, smallabd=smallabd, 
+                         convList=convList)
 
 ########################################################################
 # Method to calculate time-dependent evolution of chemical abundances;

@@ -50,5 +50,5 @@ class dustProp:
     sigmaISRF = 3.0e-22
     Zd = 1.0
     beta = 2.0
-    alphaGd = 3.2e-34
+    alphaGD = 3.2e-34
 
