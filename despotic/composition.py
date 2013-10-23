@@ -65,6 +65,7 @@ class composition(object):
     -------------
     computeDerived -- compute derived quantities: mu, muH, qIon
     computeCv -- compute cv
+    computeEint -- computer the internal energy per H nucleus
 
 
     """
@@ -121,11 +122,11 @@ class composition(object):
         """
 
         # Mean particle masses
-        self.mu = (self.xHI + self.xHplus + \
-                       2.0*(self.xpH2 + self.xoH2) + \
-                       4.0*self.xHe) / \
-            (self.xHI + self.xHplus + self.xpH2 + \
-                 self.xoH2 + self.xHe + self.xe)
+        self.mu = (self.xHI + self.xHplus      + \
+                   2.0*(self.xpH2 + self.xoH2) + \
+                   4.0*self.xHe) / \
+                   (self.xHI + self.xHplus + self.xpH2 + \
+                    self.xoH2 + self.xHe + self.xe)
         self.muH = self.xHI + self.xHplus + \
             2.0*(self.xpH2 + self.xoH2) + \
             4.0*self.xHe
@@ -156,7 +157,12 @@ class composition(object):
 ########################################################################
     def computeCv(self, T, noSet=False, Jmax=40):
         """
-        Compute the specific heat per H nucleus, in erg K^-1 H^-1
+        Compute the dimensionless specific heat per H nucleus; the
+        dimensional specific heat per H nucleus is this value
+        multiplied by kB, the dimensional specific heat per unit
+        volume is this value multiplied by kB * nH, and the
+        dimensional specific heat per unit mass is this value
+        multiplied by kB * nH * muH
 
         Parameters
         ----------
@@ -238,6 +244,77 @@ class composition(object):
             else:
                 self.cv = (cvtrans + cvvib + cvpH2rot + cvoH2rot)[0]
             return self.cv
+
+########################################################################
+# Method to compute cv(T)
+########################################################################
+    def computeEint(self, T, Jmax=40):
+        """
+        Compute the dimensionless internal energy per H nucleus; the internal
+        energy per H nucleus in K is this value multiplied by T, and
+        the internal energy per H nucleus in erg is this value
+        multiplied by kB * T
+
+        Parameters
+        ----------
+        T : float or array
+            temperature in K
+        Jmax : int
+            maximum J to be used in evaluating the rotational
+            partition function; should be set to a value such that T
+            << J(J+1) * thetaRot, there thetaRot = 85.3 K. Defaults to
+            40.
+
+        Returns
+        -------
+        Eint : float or array
+            value of Eint
+        """
+
+        # Translational part
+        Einttrans = 1.5 * (self.xHI + self.xHplus + self.xpH2 +
+                           self.xoH2 + self.xHe + self.xe)
+
+        # Vibrational part, given by 
+        # theta_V exp(-theta_Vib/T) / (1 - exp(-theta_Vib/T))
+        x = -thetaVib/T
+        Eintvib = (self.xoH2 + self.xpH2) * (-x) * \
+                  np.exp(x) / (1.0-np.exp(x))
+
+        # para-H2 rotational part. The value we want is given by
+        # T^2/Z dZ/dT
+        if self.xoH2 > 0:
+            x = -thetaRot/T
+            j = np.arange(0,Jmax+0.1,2)
+            zpH2 = np.tensordot( 2*j+1, np.exp(np.outer(j*(j+1), x)), axes=1 )
+            d_zpH2_dT = (thetaRot/T**2) * \
+                np.tensordot( (2*j+1)*(j+1)*j, \
+                               np.exp(np.outer(j*(j+1), x)), axes=1 )
+            EintpH2rot = self.xpH2 * T * d_zpH2_dT / zpH2
+        else:
+            EintpH2rot = 0.0
+
+        # do ortho-H2; this is the same as para-H2, except that the
+        # partition function is multiplied by an extra factor of 3 for
+        # degeneracy, and that J is odd instead of even
+        if self.xoH2 > 0:
+            x = -thetaRot/T
+            j = np.arange(1,Jmax+0.1,2)
+            zoH2 = 3.0*np.tensordot( 2*j+1, np.exp(np.outer(j*(j+1), x)), axes=1 )
+            d_zoH2_dT = 3.0*(thetaRot/T**2) * \
+                np.tensordot( (2*j+1)*(j+1)*j, \
+                               np.exp(np.outer(j*(j+1), x)), axes=1 )
+            EintoH2rot = self.xoH2 * T * d_zoH2_dT / zoH2
+        else:
+            EintoH2rot = 0.0
+
+        # Total internal energy per H; if T is an array, return an
+        # array; if not, return a scalar
+        if hasattr(T, '__iter__'):
+            return Einttrans + Eintvib + EintpH2rot + EintoH2rot
+        else:
+            return (Einttrans + Eintvib + EintpH2rot + EintoH2rot)[0]
+
 
 ########################################################################
 # Some properties (things that update other numbers when changed)

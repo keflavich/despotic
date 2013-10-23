@@ -814,6 +814,12 @@ class cloud(object):
                     (self.rad.TradDust/10.)**self.dust.beta * \
                     c * a * self.rad.TradDust**4
 
+                # Optically thick IR heating limit
+                GammaDIRThick = c * a * self.rad.TradDust**4 / self.colDen
+
+                # Actual heating rate
+                GammaDIR = min(GammaDIR, GammaDIRThick)
+
         # End dust terms
 
         # Grain-gas energy exchange rate
@@ -1531,7 +1537,7 @@ class cloud(object):
 ########################################################################
 # Method to calculate time-dependent evolution of chemical abundances;
 # note that this is just a wrapper routine for
-# despotic.chemistry.chemEvol.setChemEq
+# despotic.chemistry.setChemEq.setChemEq
 ########################################################################
     def setChemEq(self, tEqGuess=None, network=None, info=None,
               addEmitters=False, tol=1e-6, maxTime=1e16,
@@ -1594,7 +1600,7 @@ class cloud(object):
         return setChemEq(self, tEqGuess=tEqGuess, network=network,
                          info=info, tol=tol, maxTime=maxTime,
                          verbose=verbose, smallabd=smallabd, 
-                         convList=convList)
+                         convList=convList, addEmitters=addEmitters)
 
 ########################################################################
 # Method to calculate time-dependent evolution of chemical abundances;
@@ -1659,6 +1665,291 @@ class cloud(object):
 ########################################################################
 
 
+#try:    
+from PyQt4 import QtGui, QtCore
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+import pylab
+import numpy
+import sys
+
+class cloud_gui(QtGui.QWidget):
+
+    def __init__(self, parent=None):
+        '''A class which implements an interactive GUI to run the 'cloud' class.'''
+
+        super(cloud_gui, self).__init__(parent)
+
+        self.initUI()
+
+    def initUI(self):
+        '''Initialize the user interface'''
+
+        #instantiating the cloud object
+        self.cloud = cloud()
+
+        # settig up the plotting figure and axes (axs[0,0] is the one in the top left corner)
+        self.figure, self.axs = pylab.subplots(4, 1, sharex = False, sharey = False, figsize=(8,8) )
+        pylab.subplots_adjust(left=0.1, bottom=0.15, right=0.95, top=0.95, wspace=0.0, hspace=0.0)            
+        
+        # this is the Canvas Widget that displays the `figure`
+        # it takes the `figure` instance as a parameter to __init__
+        self.canvas = FigureCanvas(self.figure)
+
+        # this is the Navigation widget
+        # it takes the Canvas widget and a parent
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+        #---------laying out the line QT edit feilds----------------------       
+        self.lbl_emitter = QtGui.QLabel('emitter')
+        self.qle_emitter = QtGui.QLineEdit('CO', self)
+
+        self.lbl_x_emitter = QtGui.QLabel('x_emitter')
+        self.qle_x_emitter = QtGui.QLineEdit('1e-4', self)
+        
+        self.lbl_nH = QtGui.QLabel('nH') 
+        self.qle_nH = QtGui.QLineEdit('1e3', self)
+        
+        self.lbl_colDen = QtGui.QLabel('colDen')
+        self.qle_colDen = QtGui.QLineEdit('1e22', self)        
+
+        self.lbl_sigmaNT = QtGui.QLabel('sigmaNT')
+        self.qle_sigmaNT = QtGui.QLineEdit('20e3', self)        
+
+        self.lbl_Tg = QtGui.QLabel('Tg')
+        self.qle_Tg = QtGui.QLineEdit('30.0', self)        
+
+        self.lbl_xoH2 = QtGui.QLabel('xoH2')
+        self.qle_xoH2 = QtGui.QLineEdit('0.1', self)        
+
+        self.lbl_xpH2 = QtGui.QLabel('xpH2')
+        self.qle_xpH2 = QtGui.QLineEdit('0.4', self)        
+
+        self.lbl_xHe = QtGui.QLabel('xH2')
+        self.qle_xHe = QtGui.QLineEdit('0.1', self)        
+        #-------------------------------------------------------------------
+        
+        # The button connected to `plot` method
+        self.button = QtGui.QPushButton('Plot')
+        self.button.clicked.connect(self.plot)
+        
+        grid = QtGui.QGridLayout()
+        grid.setSpacing(10)
+        
+        #location 1,0 on the grid spanning 1 row and 3 columns
+        grid.addWidget(self.toolbar, 1, 0, 1, 3) 
+
+        #adding the parameter widgets to the UI
+        grid.addWidget(self.lbl_emitter, 1, 4)
+        grid.addWidget(self.qle_emitter, 1, 5, 1, 2)
+
+        grid.addWidget(self.lbl_x_emitter, 2, 4)
+        grid.addWidget(self.qle_x_emitter, 2, 5, 1, 2)
+
+        grid.addWidget(self.lbl_nH, 3, 4)
+        grid.addWidget(self.qle_nH, 3, 5, 1, 2)
+
+        grid.addWidget(self.lbl_colDen, 4, 4)
+        grid.addWidget(self.qle_colDen, 4, 5, 1, 2)
+        
+        grid.addWidget(self.lbl_sigmaNT, 5, 4)
+        grid.addWidget(self.qle_sigmaNT, 5, 5, 1, 2)
+
+        grid.addWidget(self.lbl_Tg, 6, 4)
+        grid.addWidget(self.qle_Tg, 6, 5, 1, 2)
+
+        grid.addWidget(self.lbl_xoH2, 7, 4)
+        grid.addWidget(self.qle_xoH2, 7, 5, 1, 2)
+
+        grid.addWidget(self.lbl_xpH2, 8, 4)
+        grid.addWidget(self.qle_xpH2, 8, 5, 1, 2)
+
+        grid.addWidget(self.lbl_xHe, 9, 4)
+        grid.addWidget(self.qle_xHe, 9, 5, 1, 2)
+
+        #adding the plot button to the widget        
+        grid.addWidget(self.button , 15, 5)
+        
+        grid.addWidget(self.canvas , 2, 0, 15, 3)
+
+        self.setLayout(grid) 
+        
+        #setting the default ranges and plot data and labels and removing all xticks
+        for ax in self.axs:
+            ax.set_xticklabels([])
+            ax.set_xlim(0, 20)
+        
+        #setting the label of the bottom x-axis and the ticklabels
+        self.axs[-1].set_xlabel(r'J$_{\rm upper}$')
+        self.axs[-1].set_xticklabels(numpy.int32(numpy.linspace(0, 20, 5)))
+        
+        #setting the default limits of the y-axes
+        pylab.setp(self.axs[0], 'yscale', 'log'   , 'ylim', [1e-8 , 1e8], 'ylabel', r'T$_B$') 
+        pylab.setp(self.axs[1], 'yscale', 'log'   , 'ylim', [1e-15, 1e3], 'ylabel', r'I$_{\rm int}$') 
+        pylab.setp(self.axs[2], 'yscale', 'linear', 'ylim', [0.0  , 1e3], 'ylabel', r'$\tau$') 
+        pylab.setp(self.axs[3], 'yscale', 'linear', 'ylim', [0.0  , 1e3], 'ylabel', r'$\tau_{\rm dust}$')
+
+        #making the y-ticks more organized
+        self.axs[0].set_yticks(self.axs[0].get_yticks()[2:-2])
+        self.axs[1].set_yticks(self.axs[1].get_yticks()[2:-2])
+        self.axs[2].set_yticks(self.axs[2].get_yticks()[1:-1])
+        self.axs[3].set_yticks(self.axs[3].get_yticks()[1:-1])
+        
+        #making dummpy plots to be used later for faster plotting
+        self.plt0_em,  = self.axs[0].plot([], [], 'ro')
+        self.plt0_ab,  = self.axs[0].plot([], [], 'bo')
+        self.plt0_all, = self.axs[0].plot([], [], 'k--')
+        
+        self.plt1_em,  = self.axs[1].plot([], [], 'ro')
+        self.plt1_ab,  = self.axs[1].plot([], [], 'bo')
+        self.plt1_all, = self.axs[1].plot([], [], 'k--')
+        
+        self.plt2_em,  = self.axs[2].plot([], [], 'ro')
+        self.plt2_ab,  = self.axs[2].plot([], [], 'bo')
+        self.plt2_all, = self.axs[2].plot([], [], 'k--')        
+        
+        self.plt3_em,  = self.axs[3].plot([], [], 'ro')
+        self.plt3_ab,  = self.axs[3].plot([], [], 'bo')
+        self.plt3_all, = self.axs[3].plot([], [], 'k--')
+        
+        self.setGeometry(300, 300, 1000, 700)
+        self.setWindowTitle('Despotic-cloud')    
+        self.show()
+        
+    def plot(self):
+
+        #setting the parameters from the gui to the cloud object
+        self.cloud.nH        = numpy.float(getattr(self, 'qle_' + 'nH').text())
+        self.cloud.colDen    = numpy.float(getattr(self, 'qle_' + 'colDen').text())
+        self.cloud.sigmaNT   = numpy.float(getattr(self, 'qle_' + 'sigmaNT').text())
+        self.cloud.Tg        = numpy.float(getattr(self, 'qle_' + 'Tg').text())
+        self.cloud.comp.xoH2 = numpy.float(getattr(self, 'qle_' + 'xoH2').text())
+        self.cloud.comp.xpH2 = numpy.float(getattr(self, 'qle_' + 'xpH2').text())
+        self.cloud.comp.xHe  = numpy.float(getattr(self, 'qle_' + 'xHe').text())
+
+        emitter_str = numpy.string_(getattr(self, 'qle_' + 'emitter').text())         
+        emitter_x   = numpy.float(getattr(self, 'qle_' + 'x_emitter').text())
+
+        self.cloud.addEmitter(emitter_str, emitter_x)  
+        
+        #solving for the emission
+        lines = self.cloud.lineLum(emitter_str)
+
+        #plotting the info of the emitter
+        
+        #the upper level of the transition
+        u = numpy.array([l['upper'] for l in lines])
+        
+        #brightness temperature (in K.km.s-1)
+        intTB = numpy.array([l['intTB'] for l in lines])
+
+        self.plt0_all.set_xdata(u)
+        self.plt0_all.set_ydata(numpy.fabs(intTB))
+        self.axs[0].set_ylim([numpy.fabs(intTB).min()/10.0, numpy.fabs(intTB).max()*10.0])
+        
+        ind_em = numpy.where(intTB > 0.0)[0]
+        ind_ab = numpy.where(intTB < 0.0)[0]
+        if ind_em.size > 0:                
+            self.plt0_em.set_xdata(u[ind_em])
+            self.plt0_em.set_ydata(intTB[ind_em])
+        else:
+            self.plt0_em.set_xdata([])
+            self.plt0_em.set_ydata([])
+            
+        if ind_ab.size > 0:
+            self.plt0_ab.set_xdata(u[ind_ab])
+            self.plt0_ab.set_ydata(numpy.fabs(intTB[ind_ab]))
+        else:
+            self.plt0_ab.set_xdata([])
+            self.plt0_ab.set_ydata([])
+
+        #intensity after subtracting the CMB contributuin (in erg.cm-2.s-1)
+        intIntensity = numpy.array([l['intIntensity'] for l in lines])
+        mn, mx = [max(numpy.fabs(intIntensity).min()/10.0, 1e-15), numpy.fabs(intIntensity).max()*10.0] 
+        self.axs[1].set_ylim([mn, mx])
+ 
+        self.plt1_all.set_xdata(u)
+        self.plt1_all.set_ydata(numpy.fabs(intIntensity))
+        ind_em = numpy.where(intIntensity > 0.0)[0]
+        ind_ab = numpy.where(intIntensity < 0.0)[0]
+        if ind_em.size > 0:                
+            self.plt1_em.set_xdata(u[ind_em])
+            self.plt1_em.set_ydata(intIntensity[ind_em])
+        else:
+            self.plt1_em.set_xdata([])
+            self.plt1_em.set_ydata([])
+            
+        if ind_ab.size > 0:
+            self.plt1_ab.set_xdata(u[ind_ab])
+            self.plt1_ab.set_ydata(numpy.fabs(intIntensity[ind_ab]))
+        else:
+            self.plt1_ab.set_xdata([])
+            self.plt1_ab.set_ydata([])
+
+        #optical depth
+        tau = numpy.array([l['tau'] for l in lines])
+        mn, mx = [numpy.fabs(tau).min()/2, numpy.fabs(tau).max()*2]
+        self.axs[2].set_ylim(mn, mx)
+        self.axs[2].set_yticks(numpy.linspace(mn, mx, 4))
+        self.axs[2].set_yticks(self.axs[2].get_yticks()[0:-1])
+        
+        self.plt2_all.set_xdata(u)
+        self.plt2_all.set_ydata(numpy.fabs(tau))
+        ind_em = numpy.where(tau > 0.0)[0]
+        ind_ab = numpy.where(tau < 0.0)[0]
+        if ind_em.size > 0:                
+            self.plt2_em.set_xdata(u[ind_em])
+            self.plt2_em.set_ydata(tau[ind_em])
+        else:
+            self.plt2_em.set_xdata([])
+            self.plt2_em.set_ydata([])
+            
+        if ind_ab.size > 0:
+            self.plt2_ab.set_xdata(u[ind_ab])
+            self.plt2_ab.set_ydata(numpy.fabs(tau[ind_ab]))
+        else:
+            self.plt2_ab.set_xdata([])
+            self.plt2_ab.set_ydata([])
+
+        #optical depth dust
+        tauDust = numpy.array([l['tauDust'] for l in lines])
+        self.axs[3].set_ylim([numpy.fabs(tauDust).min()/2, numpy.fabs(tauDust).max()*2])
+        
+        mn, mx = [numpy.fabs(tauDust).min()/2, numpy.fabs(tauDust).max()*2]
+        self.axs[3].set_ylim(mn, mx)
+        self.axs[3].set_yticks(numpy.linspace(mn, mx, 4))
+        self.axs[3].set_yticks(self.axs[3].get_yticks()[0:-1])
+
+        self.plt3_all.set_xdata(u)
+        self.plt3_all.set_ydata(numpy.fabs(tauDust))
+        ind_em = numpy.where(tauDust > 0.0)[0]
+        ind_ab = numpy.where(tauDust < 0.0)[0]
+        if ind_em.size > 0:                
+            self.plt3_em.set_xdata(u[ind_em])
+            self.plt3_em.set_ydata(tauDust[ind_em])
+        else:
+            self.plt3_em.set_xdata([])
+            self.plt3_em.set_ydata([])
+            
+        if ind_ab.size > 0:
+            self.plt3_ab.set_xdata(u[ind_ab])
+            self.plt3_ab.set_ydata(numpy.fabs(tauDust[ind_ab]))
+        else:
+            self.plt3_ab.set_xdata([])
+            self.plt3_ab.set_ydata([])
+
+        self.canvas.draw()   
+        
+def run_cloud_gui():
+    
+    app = QtGui.QApplication(sys.argv)
+    gui = cloud_gui()
+    sys.exit(app.exec_())
+
+
+#except:
+#    print 'can not use radex in gui mode. Failed to import PyQt4, or matplotlib.backends.backend_qt4agg'
+    
 
 ########################################################################
 # Helper function to return the residuals for calculation of gas and
@@ -1879,3 +2170,4 @@ def _gasTempDeriv(Tg, time, cloud, c1Grav, thin, LTE, \
             print "dE/dt = "+str(dEdtGas)+", dT/dt = " + \
                 str(dEdtGas/((cloud.comp.cv)*kB))
         return dEdtGas/(cloud.comp.cv*kB)
+

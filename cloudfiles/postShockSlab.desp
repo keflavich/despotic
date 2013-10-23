@@ -36,9 +36,11 @@ emitter    = cs   1.0e-8 extrapolate energySkip   # CS, abundance 1.0e-8
 emitter    = hco+ 1.0e-8 extrapolate energySkip   # HCO^+, abundance 1.0e-8
 emitter    = p-nh3 1.0e-8 extrapolate energySkip  # para NH_3, abundance 1.0e-8
 emitter    = o-nh3 1.0e-8 extrapolate energySkip  # ortho NH_3, abundance 1.0e-8
-emitter    = p-h2co 1.0e-8 extrapolate energySkip # para H_2CO, abundance 1.0e-8
-emitter    = o-h2co 1.0e-8 extrapolate energySkip # ortho H_2CO, abundance 1.0e-8
+emitter    = ph2co 1.0e-8 extrapolate energySkip url:ph2co-h2.dat 
+# para H_2CO, abundance 1.0e-8, custom file name
+emitter    = oh2co 1.0e-8 extrapolate energySkip url:oh2co-h2.dat
+# ortho H_2CO, abundance 1.0e-8, custom file name
 # ortho H_2O, custom file name
-emitter    = oH2O 1.0e-8 extrapolate energySkip file:oh2o@daniel.dat
+emitter    = oH2O 1.0e-8 extrapolate energySkip url:oh2o@daniel.dat
 # para H_2O, custom file name
-emitter    = pH2O 1.0e-8 extrapolate energySkip file:ph2o@daniel.dat
+emitter    = pH2O 1.0e-8 extrapolate energySkip url:ph2o@daniel.dat
