@@ -479,6 +479,10 @@ class emitterData:
             transitions from state i to state j, in s^-1
         """
 
+        # ensure that there are sane abundances defined for colliders, else the
+        # solver will fail with a rather opaque message
+        comp._check_abundance()
+
         # Initialize collision rate matrix
         q = np.zeros((self.nlev, self.nlev))
 

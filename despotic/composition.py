@@ -346,3 +346,16 @@ class composition(object):
         opr = self.H2OPR
         self.xpH2 = 1.0/(1.0+opr)*xH2
         self.xoH2 = opr/(1.0+opr)*xH2
+
+    def _check_abundance(self,tolerance=1e-6):
+        """
+        Check to make sure that the total abundances are sane
+        """
+
+        total_HI = self.xHI + 2*self.xoH2 + 2*self.xpH2 + self.xHplus
+        if np.abs(total_HI - 1) > tolerance:
+            raise ValueError("Total hydrogen abundance per hydrogen nucleus is not 1.")
+
+        total_abund = total_HI + self.xHe + self.xe
+        if total_abund <= 0:
+            raise ValueError("Total abundance of colliding particles is zero.  You probably forgot to set the collider abundanced.")
