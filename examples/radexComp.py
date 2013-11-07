@@ -76,7 +76,7 @@ timeRadex=timedelta(0)
 # Open radex input file
 fp = open('despotic_comp.inp', 'w')
 
-# Loop over the volumen and column density grids, writing to radex
+# Loop over the volume and column density grids, writing to radex
 # input file
 for i, lognH in enumerate(lognHgrid):
     for j, logcolDen in enumerate(logcolDengrid):

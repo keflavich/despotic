@@ -344,7 +344,7 @@ class emitter:
 
         # Rebuild interpolation functions and store new settings
         for p in self.data.partners.values():
-            p.buildInterp(extrap)
+            p._buildInterp(extrap)
         self.data.extrap = extrap
 
 

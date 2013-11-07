@@ -260,6 +260,7 @@ class emitterData:
             downloadName = fetchLamda(fname)
             if downloadName != None:
                 try:
+                    print "name = "+downloadName
                     fp = open(downloadName, 'r')
                     self.readLamda(fp, extrap=extrap)
                     fp.close()
@@ -447,7 +448,8 @@ class emitterData:
         # If temp is an list, return an array. If it's a number, just
         # return a number.
         if hasattr(temp, '__iter__'):
-            return np.inner(self.levWgt, np.outer(1.0/temp, self.levTemp))
+            return np.inner(self.levWgt, 
+                            np.exp(-np.outer(1.0/temp, self.levTemp)))
         else:
             return sum(self.levWgt*np.exp(-self.levTemp/temp))
 
