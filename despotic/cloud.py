@@ -1688,10 +1688,10 @@ try:
             #instantiating the cloud object
             self.cloud = cloud()
 
-            # settig up the plotting figure and axes (axs[0,0] is the one in the top left corner)
+            # set up the plotting figure and axes (axs[0,0] is the one in the top left corner)
             self.figure, self.axs = pylab.subplots(4, 1, sharex = False, sharey = False, figsize=(8,8) )
             pylab.subplots_adjust(left=0.1, bottom=0.15, right=0.95, top=0.95, wspace=0.0, hspace=0.0)            
-            
+
             # this is the Canvas Widget that displays the `figure`
             # it takes the `figure` instance as a parameter to __init__
             self.canvas = FigureCanvas(self.figure)
@@ -1946,9 +1946,11 @@ try:
         gui = cloud_gui()
         sys.exit(app.exec_())
 
-
+    fail
 except:
-    print 'can not use radex in gui mode. Failed to import PyQt4, or matplotlib.backends.backend_qt4agg'
+
+    def run_cloud_gui():
+        print 'Cannot use DESPOTIC in gui mode. Failed to import PyQt4, or matplotlib.backends.backend_qt4agg'
     
 
 ########################################################################

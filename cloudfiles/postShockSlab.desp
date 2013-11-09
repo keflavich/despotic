@@ -32,7 +32,8 @@ emitter	   = 13co 5.0e-7 extrapolate    # ^13CO, abundance 5.0e-7
 emitter    = c18o 5.0e-8 extrapolate energySkip   # C^18O, abundance 5.0e-8
 emitter    = c    5.0e-7 extrapolate energySkip   # C, abundance 5.0e-7
 emitter    = o    5.0e-6 extrapolate    # O, abundance 5.0e-7
-emitter    = cs   1.0e-8 extrapolate energySkip   # CS, abundance 1.0e-8
+# CS, abundance 1.0e-8, custom file name
+emitter    = cs   1.0e-8 extrapolate energySkip url:cs@lique.dat
 emitter    = hco+ 1.0e-8 extrapolate energySkip   # HCO^+, abundance 1.0e-8
 emitter    = p-nh3 1.0e-8 extrapolate energySkip  # para NH_3, abundance 1.0e-8
 emitter    = o-nh3 1.0e-8 extrapolate energySkip  # ortho NH_3, abundance 1.0e-8
