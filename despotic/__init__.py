@@ -7,7 +7,11 @@ __all__ = ["cloud", "collPartner", "composition", "despoticError", \
 # name. This allows users to access the classes and functions
 # directly, as despotic.cloud, rather than having to use the
 # cumbersome notation despotic.cloud.cloud or similar.
-from cloud import cloud, run_cloud_gui
+from cloud import cloud
+try:
+    from cloud import run_cloud_gui
+except:
+    pass
 from collPartner import collPartner
 from composition import composition
 from dustProp import dustProp
