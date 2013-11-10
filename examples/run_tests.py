@@ -7,9 +7,9 @@ import pylab
 # run all examples except RADEX
 # skip this one execfile('examples/radexComp.py')
 
-from despotic import fetchLambda
+from despotic import fetchLamda
 for species in ('cs','c','co','13co','c18o','hco+','o','cs','oh2co-h2','h2co-h2','o-nh3','p-nh3','oh2o@daniel','ph2o@daniel'):
-    fetchLambda(species+".dat")
+    fetchLamda(species+".dat")
 
 # keep track of timing
 start_time = time.time()
