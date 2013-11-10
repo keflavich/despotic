@@ -6,9 +6,10 @@ python:
 env:
     global:
         - PIP_WHEEL_COMMAND="pip install --find-links http://wheels.astropy.org/ --find-links http://wheels2.astropy.org/ --use-wheel --use-mirrors"
-    - NUMPY_VERSION=1.6.2 
-    - NUMPY_VERSION=1.7.0
-    - NUMPY_VERSION=1.7.1
+    matrix:
+        - NUMPY_VERSION=1.6.2 
+        - NUMPY_VERSION=1.7.0
+        - NUMPY_VERSION=1.7.1
     
 before_install:
    # http://about.travis-ci.org/docs/user/gui-and-headless-browsers/
