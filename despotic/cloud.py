@@ -1727,7 +1727,7 @@ try:
             self.lbl_xpH2 = QtGui.QLabel('xpH2')
             self.qle_xpH2 = QtGui.QLineEdit('0.4', self)        
 
-            self.lbl_xHe = QtGui.QLabel('xH2')
+            self.lbl_xHe = QtGui.QLabel('xHe')
             self.qle_xHe = QtGui.QLineEdit('0.1', self)        
             #-------------------------------------------------------------------
             
