@@ -38,5 +38,7 @@ install:
    - ls
    - ls *
    - ls cloudfiles
+   - export DESPOTIC_HOME=$PWD
+   - ls LAMDA
    - python setup.py install # I guess?
 script: python setup.py examples
