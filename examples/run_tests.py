@@ -1,5 +1,8 @@
 import time
 import os
+import matplotlib
+matplotlib.use('TkAgg')
+import pylab
 
 # run all examples except RADEX
 # skip this one execfile('examples/radexComp.py')
