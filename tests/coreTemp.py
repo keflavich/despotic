@@ -30,7 +30,7 @@ from datetime import timedelta
 nsteps = 10
 
 # Set up a range of densities
-lognHgrid = arange(2,8.01,0.2)
+lognHgrid = arange(2,6.01,0.2)
 # faster version (10 steps instead of 31)
 lognHgrid = linspace(2,8,nsteps)
 
@@ -127,8 +127,8 @@ LambdaC18O = array([r['LambdaLine']['c18o'] for r in rates])
 LambdaHCOp = array([r['LambdaLine']['hco+'] for r in rates])
 LambdaCS = array([r['LambdaLine']['cs'] for r in rates])
 LambdaO = array([r['LambdaLine']['o'] for r in rates])
-LambdaoH2CO = array([r['LambdaLine']['o-h2co'] for r in rates])
-LambdapH2CO = array([r['LambdaLine']['p-h2co'] for r in rates])
+LambdaoH2CO = array([r['LambdaLine']['oh2co'] for r in rates])
+LambdapH2CO = array([r['LambdaLine']['ph2co'] for r in rates])
 LambdaoNH3 = array([r['LambdaLine']['o-nh3'] for r in rates])
 LambdapNH3 = array([r['LambdaLine']['p-nh3'] for r in rates])
 LambdaoH2O = array([r['LambdaLine']['oH2O'] for r in rates])
@@ -141,7 +141,7 @@ plt.figure(1, figsize=(4,3))
 plt.subplot(111)
 plt.plot(lognHgrid, Tg, linewidth=2, label='Gas')
 plt.plot(lognHgrid, Td, linewidth=2, label='Dust')
-plt.xlim([2,8])
+plt.xlim([2,6])
 plt.ylim([0,30])
 plt.legend()
 plt.xlabel(r'$\log\,n_{\rm H}$ [cm$^{-3}$]')
@@ -155,8 +155,8 @@ plt.savefig('coreTemp.eps')
 # and dust cooling terms
 plt.figure(2, figsize=(8,6))
 plt.subplots_adjust(wspace=0, hspace=0)
-xlim=[2,8]
-xlim1=[2,7.999]
+xlim=[2,6]
+xlim1=[2,5.999]
 ylim=[-31,-21.5]
 ylim1=[-31,-21.5]
 
@@ -224,7 +224,7 @@ plt.plot(lognHgrid, log10(LambdaoNH3), '--', linewidth=2, label=r'oNH$_3$')
 plt.plot(lognHgrid, log10(LambdapNH3), '--', linewidth=2, label=r'pNH$_3$')
 plt.plot(lognHgrid, log10(LambdaoH2O), '--', linewidth=2, label=r'oH$_2$O')
 plt.plot(lognHgrid, log10(LambdapH2O), '--', linewidth=2, label=r'pH$_2$O')
-plt.xlim([2,8])
+plt.xlim([2,6])
 plt.ylim([-33, -27])
 plt.ylabel(r'$\log\,\Lambda$ [erg s$^{-1}$ H$^{-1}$]')
 plt.xlabel(r'$\log\,n_{\rm H}$ [cm$^{-3}$]')
