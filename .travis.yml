@@ -39,6 +39,6 @@ install:
    - ls *
    - ls cloudfiles
    - export DESPOTIC_HOME=$PWD
-   - ls LAMDA
+   - find . -name "*.dat"
    - python setup.py install # I guess?
 script: python setup.py examples
