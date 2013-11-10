@@ -1666,6 +1666,8 @@ class cloud(object):
 
 
 try:    
+    import matplotlib
+    matplotlib.use('Qt4Agg')
     from PyQt4 import QtGui, QtCore
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -1946,11 +1948,12 @@ try:
         gui = cloud_gui()
         sys.exit(app.exec_())
 
-    fail
-except:
+    #fail
+except Exception as E:
 
     def run_cloud_gui():
         print 'Cannot use DESPOTIC in gui mode. Failed to import PyQt4, or matplotlib.backends.backend_qt4agg'
+        print "The error was: ",E
     
 
 ########################################################################
