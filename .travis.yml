@@ -35,5 +35,8 @@ install:
    #- pip install -q scipy --use-mirrors
    - $PIP_WHEEL_COMMAND "matplotlib>=1.3.0"
    - $PIP_WHEEL_COMMAND "scipy==0.12.0"
+   - ls
+   - ls *
+   - ls cloudfiles
    - python setup.py install # I guess?
 script: python setup.py examples
