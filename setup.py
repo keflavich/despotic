@@ -43,6 +43,21 @@ class PyTest(Command):
         errno = subprocess.call([sys.executable, 'tests/run_tests.py'])
         raise SystemExit(errno)
 
+class RunExamples(Command):
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        errno = subprocess.call([sys.executable, 'examples/run_tests.py'])
+        raise SystemExit(errno)
+
+
 import os 
 # despotic/cloudfiles is a link back to ./cloudfiles
 if not os.path.exists('despotic/cloudfiles'):
@@ -60,7 +75,7 @@ setup(name='DESPOTIC',
       package_dir={'despotic':'despotic'}, 
       package_data={'despotic':['cloudfiles/*.desp']},
       requires=requirements,
-      cmdclass={'build_py': build_py, 'test': PyTest},
+      cmdclass={'build_py': build_py, 'test': PyTest, 'examples': RunExamples},
       classifiers=[
                    "Development Status :: 3 - Alpha",
                    "Programming Language :: Python",
