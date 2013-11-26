@@ -23,17 +23,21 @@ import matplotlib.pyplot as plt
 from despotic.lineProfLTE import lineProfLTE
 from despotic.emitterData import emitterData
 
-# Read the data files for CS and C^34S
-cs=emitterData('cs')
-c34s=emitterData('c34s')
+# Read the data files for HCN and N2H+
+HCN=emitterData('hcn')
+N2Hp=emitterData('n2h+')
 
 # Core radius; set to 0.02 pc
 R = 0.02*3.09e18
 
-# Number densities of CS and C^34S, in cm^-3; the abundance ratio is
-# set to the terrestrial value
-ncs = 1e-1
-nc34s = ncs / 22.0
+# Abundances and absolute number densities of HCN and N2H+, in cm^-3;
+# abundances are taken from the models of Lee et al. (2004, ApJ, 617,
+# 360).
+xHCN = 2e-8
+xN2Hp = 2e-9
+nH = 3e6
+nHCN = nH*xHCN
+nN2Hp = nH*xN2Hp
 
 # Define a temperature profile so that we can get a nice p Cygni
 # profile. The choice here is somewhat arbitrary. For simplicity we'll
@@ -54,7 +58,7 @@ def vProf(r):
 # subsonic.
 sigmaNT = 2.0e4
 
-# Calculate the line profile for CS(3-2). The functon returns two
+# Calculate the line profile for HCN(1-0). The functon returns two
 # arrays, the first giving the brightness temperature and the second
 # giving the velocity at which that brightness temperature is
 # measured. The arguments of the function are, in order, the molecule
@@ -64,17 +68,17 @@ sigmaNT = 2.0e4
 # the non-thermal velocity dispersion. The last four of this can be
 # either constants or functions, and additional optional arguments
 # also exist. See the User's Guide.
-TBcs, vOut = lineProfLTE(cs, 2, 1, R, ncs, TProf, vProf, sigmaNT, \
-                             vLim=[-2e5,2e5], nOut=400)
+TB_HCN, vOut = lineProfLTE(HCN, 1, 0, R, nHCN, TProf, vProf, sigmaNT, \
+                           vLim=[-2e5,2e5], nOut=400)
 
-# Perform the same calculation for C^34S(3-2)
-TBc34s, vOut1 = lineProfLTE(c34s, 2, 1, R, nc34s, TProf, vProf,
-                            sigmaNT, vLim=[-2e5,2e5], nOut=400)
+# Perform the same calculation for N2H+ (1-0)
+TB_N2Hp, vOut1 = lineProfLTE(N2Hp, 1, 0, R, nN2Hp, TProf, vProf,
+                             sigmaNT, vLim=[-2e5,2e5], nOut=400)
 
 # Now make plots of both lines; divide by 10^5 to convert cm/s to km/s
 plt.figure(1, figsize=(6,4))
-plt.plot(vOut/1e5, TBcs, label='CS(3-2)', linewidth=2)
-plt.plot(vOut1/1e5, TBc34s, label='C$\,^{34}$S(3-2)', linewidth=2)
+plt.plot(vOut/1e5, TB_HCN, label='HCN(1-0)', linewidth=2)
+plt.plot(vOut1/1e5, TB_N2Hp, label='N$_2$H$^+$(1-0)', linewidth=2)
 plt.subplots_adjust(bottom=0.15)
 
 # Adjust range and add labels
