@@ -1513,7 +1513,10 @@ class cloud(object):
 
         # Step 6. Construct output dict
         outDict = []
-        tau = em.opticalDepth(transition=transition, \
+        if thin:
+            tau = lumPerH * 0.0
+        else:
+            tau = em.opticalDepth(transition=transition, \
                                   escapeProbGeom=escapeProbGeom)
         for i, T in enumerate(TB):
             line = { \

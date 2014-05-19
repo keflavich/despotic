@@ -1,7 +1,7 @@
 DESPOTIC
 --------
 
-DESPOTIC is a radiative transfer code hosted at http://www.ucolick.org/~krumholz/codes/despotic/
+DESPOTIC is a radiative transfer code hosted at [https://sites.google.com/a/ucsc.edu/krumholz/codes/despotic](https://sites.google.com/a/ucsc.edu/krumholz/codes/despotic).
 
 Here's the README from that page:
 
@@ -16,9 +16,9 @@ temperatures, and calculating time-dependent thermal evolution of clouds.
 
 DESPOTIC is implemented as a Python package, and is released under the GPL. The
 physical model, equations, solved, and some tests and example applications are
-described in <a href="http://arxiv.org/abs/1304.2404">Krumholz (2013)</a>, and an
-extensive <a href="doc/UsersGuide.pdf">User's Guide</a> is available, and is
-included with the download.
+described in 
+[Krumholz (2014)](http://adsabs.harvard.edu/abs/2014MNRAS.437.1662K),
+and an extensive [User's Guide](https://docs.google.com/a/ucsc.edu/viewer?a=v&pid=sites&srcid=dWNzYy5lZHV8a3J1bWhvbHp8Z3g6YzBkMDk3OWI3NzA3OTU0) is available, and is included with the download.
 
 
 Downloading DESPOTIC
@@ -26,23 +26,17 @@ Downloading DESPOTIC
 
 DESPOTIC is distributed in two ways. The full source distribution, including
 example Python programs using it and sample cloud descriptor files, is hosted
-at <a href="https://code.google.com/p/despotic/">google code</a>. It may be
+at [google code](https://code.google.com/p/despotic/). It may be
 obtained from the SVN repository by typing:
 
-`svn checkout http://despotic.googlecode.com/svn/trunk/ despotic`
+`svn checkout http://despotic.googlecode.com/svn/trunk/ despotic-read-only`
 
 This will create a directory called despotic containing the distribution. The
 User's Guide is located in the despotic/doc directory.
 
-Alternately, users who just want the DESPOTIC code itself and not the
-associated examples and documentation can obtain it from the <a
-href="https://pypi.python.org/">Python Package Index</a>. For those with <a
-href="http://www.pip-installer.org">pip</a> or <a
-href="http://peak.telecommunity.com/DevCenter/EasyInstall">EasyInstall</a>
-installed, installation is as simple as typing
+Despotic is also available through the [python package index](https://pypi.python.org/pypi/DESPOTIC). Just type
 
 `pip install despotic`
 
-The tarball may also be downloaded from the <a
-href="https://pypi.python.org/pypi/DESPOTIC/">DESPOTIC page</a> in the PYPI and
-installed using the standard Python distutils method.
+The tarball may also be downloaded from PyPi and installed using the
+standard Python distutils method.

@@ -260,7 +260,6 @@ class emitterData:
             downloadName = fetchLamda(fname)
             if downloadName != None:
                 try:
-                    print "name = "+downloadName
                     fp = open(downloadName, 'r')
                     self.readLamda(fp, extrap=extrap)
                     fp.close()
