@@ -7,6 +7,7 @@ cloud as a function of its column density.
 # Import the despotic library and the NL99 network; also import numpy
 from despotic import cloud
 from despotic.chemistry import NL99
+from matplotlib.pyplot import *
 import numpy as np
 
 # Range in log column density to use
