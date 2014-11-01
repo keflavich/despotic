@@ -1669,12 +1669,9 @@ class cloud(object):
 
 
 try:    
-    import matplotlib
-    matplotlib.use('Qt4Agg')
     from PyQt4 import QtGui, QtCore
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-    import pylab
     import numpy
     import sys
 
@@ -1689,6 +1686,10 @@ try:
 
         def initUI(self):
             '''Initialize the user interface'''
+
+            import matplotlib
+            matplotlib.use('Qt4Agg')
+            import pylab
 
             #instantiating the cloud object
             self.cloud = cloud()
