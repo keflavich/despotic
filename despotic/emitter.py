@@ -941,9 +941,9 @@ class emitter:
 
                 # We finally have a well-conditioned matrix, so
                 # now construct the RHS and solve
-                b = np.zeros(len(levKeep)+1)
-                b[-1] = 1.0
-                levPop, res, rank, s = np.linalg.lstsq(mred, b)
+                bred = np.zeros(len(levKeep)+1)
+                bred[-1] = 1.0
+                levPop, res, rank, s = np.linalg.lstsq(mred, bred)
                 self.levPop[levKeep] = levPop
                 self.levPop[levDel] = 0.0
 
