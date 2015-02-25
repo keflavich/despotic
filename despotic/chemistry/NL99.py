@@ -644,7 +644,7 @@ class NL99(chemNetwork):
         if '13co' in emList:
             emList['13co'].abundance = self.x[4]*c13_12
         if 'c18o' in emList:
-            emList['c18o'].abundance = self.x[4]*c18_16
+            emList['c18o'].abundance = self.x[4]*o18_16
 
         # C
         if 'c' in emList:
