@@ -32,15 +32,16 @@ emitter	   = 13co 5.0e-7 extrapolate    # ^13CO, abundance 5.0e-7
 emitter    = c18o 5.0e-8 extrapolate    # C^18O, abundance 5.0e-8
 emitter    = c    5.0e-7 extrapolate    # C, abundance 5.0e-7
 emitter    = o    5.0e-6 extrapolate    # O, abundance 5.0e-7
-emitter    = cs   1.0e-8 extrapolate    # CS, abundance 1.0e-8
 emitter    = hco+ 1.0e-8 extrapolate    # HCO^+, abundance 1.0e-8
 emitter    = p-nh3 1.0e-8 extrapolate   # para NH_3, abundance 1.0e-8
 emitter    = o-nh3 1.0e-8 extrapolate   # ortho NH_3, abundance 1.0e-8
-emitter    = ph2co 1.0e-8 extrapolate url:ph2co-h2.dat  
+emitter    = p-h2co 1.0e-8 extrapolate url:ph2co-h2.dat  
 # para H_2CO, abundance 1.0e-8, custom file name
-emitter    = oh2co 1.0e-8 extrapolate url:oh2co-h2.dat
+emitter    = o-h2co 1.0e-8 extrapolate url:oh2co-h2.dat
 # ortho H_2CO, abundance 1.0e-8, custom file name
 # ortho H_2O, custom file name
 emitter    = oH2O 1.0e-8 extrapolate url:oh2o@daniel.dat
 # para H_2O, custom file name
 emitter    = pH2O 1.0e-8 extrapolate url:ph2o@daniel.dat
+# CS: custom file name  abundance 1.0e-8
+emitter    = cs   1.0e-8 extrapolate url:cs@lique.dat
