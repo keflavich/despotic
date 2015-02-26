@@ -615,7 +615,7 @@ class cloud(object):
         rates : dict
            A dict containing the values of the various heating and
            cooling rate terms; all quantities are in units of erg s^-1
-           Hz^-1, and by convention positive = heating, negative =
+           H^-1, and by convention positive = heating, negative =
            cooling; for dust-gas exchange, positive indicates heating
            of gas, cooling of dust
 
