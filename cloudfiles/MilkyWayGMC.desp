@@ -1,0 +1,33 @@
+# DESPOTIC data file for bulk material in a Milky Way GMC
+
+# Physical properties
+nH 	   = 100.0   	     # Volume density, H cm^-3
+colDen	   = 1.5e22	     # Column density, H cm^-2
+sigmaNT	   = 2.0e5	     # Non-thermal velocity dispersion, cm s^-1
+Tg	   = 8.0	     # Gas temperature, K
+Td	   = 10.0	     # Dust temperature, K
+
+# Dust properties
+alphaGD	   = 3.2e-34	     # Dust-gas coupling coefficient, erg cm^3 K^-3/2
+sigmaD10   = 2.0e-26         # Cross section to 10K thermal radiation, cm^2 H^-1
+sigmaDPE   = 1.0e-21         # Cross section to 8-13.6 eV photons, cm^2 H^-1
+sigmaDISRF = 3.0e-22         # Cross section to ISRF photons, cm^2 H^-1
+Zdust      = 1.0             # Dust abundance relative to solar
+betaDust   = 2.0             # Dust spectral index
+
+# Radiation field
+TCMB       = 2.73            # CMB temperature, in K
+TradDust   = 0.0	     # Dust-trapped IR radiation field temperature, in K
+ionRate    = 1.0e-16         # Cosmic- / x-ray ionization rate, s^-1 H^-1
+chi        = 1.0             # ISRF strength, relative to solar neighborhood
+
+# Chemical composition
+H2OPR	   = 0.25	     # Ratio of ortho- to para-H2
+xH2	   = 0.5	     # H2 abundance per H nucleus
+xHe	   = 0.1             # He abundance per H nucleus
+
+# Emitting species
+emitter	   = co   1.0e-4     # CO, abundance 1.0e-4
+emitter	   = 13co 5.0e-7     # ^13CO, abundance 5.0e-7
+
+

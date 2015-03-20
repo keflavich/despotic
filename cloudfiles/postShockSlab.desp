@@ -1,0 +1,47 @@
+# DESPOTIC data file for a shocked slab
+
+# Physical properties
+nH 	   = 1.0e3   	     # Volume density, H cm^-3
+colDen	   = 1.5e22	     # Column density, H cm^-2
+sigmaNT	   = 5.0e4	     # Non-thermal velocity dispersion, cm s^-1
+Tg	   = 250.0	     # Gas temperature, K
+Td	   = 8.0	     # Dust temperature, K
+
+# Dust properties
+alphaGD	   = 3.2e-34	     # Dust-gas coupling coefficient, erg cm^3 K^-3/2
+sigmaD10   = 2.0e-26         # Cross section to 10K thermal radiation, cm^2 H^-1
+sigmaDPE   = 1.0e-21         # Cross section to 8-13.6 eV photons, cm^2 H^-1
+sigmaDISRF = 3.0e-22         # Cross section to ISRF photons, cm^2 H^-1
+Zdust      = 1.0             # Dust abundance relative to solar
+betaDust   = 2.0             # Dust spectral index
+
+# Radiation field
+TCMB       = 2.73            # CMB temperature, in K
+TradDust   = 8.0	     # Dust-trapped IR radiation field temperature, in K
+ionRate    = 2.0e-17         # Cosmic- / x-ray ionization rate, s^-1 H^-1
+chi        = 1.0             # ISRF strength, relative to solar neighborhood
+
+# Chemical composition
+H2OPR	   = 0.25	     # Ratio of ortho- to para-H2
+xH2	   = 0.5	     # H2 abundance per H nucleus
+xHe	   = 0.1             # He abundance per H nucleus
+
+# Emitting species
+emitter	   = co   1.0e-4 extrapolate    # CO, abundance 1.0e-4
+emitter	   = 13co 5.0e-7 extrapolate    # ^13CO, abundance 5.0e-7
+emitter    = c18o 5.0e-8 extrapolate energySkip   # C^18O, abundance 5.0e-8
+emitter    = c    5.0e-7 extrapolate energySkip   # C, abundance 5.0e-7
+emitter    = o    5.0e-6 extrapolate    # O, abundance 5.0e-7
+# CS, abundance 1.0e-8, custom file name
+emitter    = cs   1.0e-8 extrapolate energySkip url:cs@lique.dat
+emitter    = hco+ 1.0e-8 extrapolate energySkip   # HCO^+, abundance 1.0e-8
+emitter    = p-nh3 1.0e-8 extrapolate energySkip  # para NH_3, abundance 1.0e-8
+emitter    = o-nh3 1.0e-8 extrapolate energySkip  # ortho NH_3, abundance 1.0e-8
+emitter    = ph2co 1.0e-8 extrapolate energySkip url:ph2co-h2.dat 
+# para H_2CO, abundance 1.0e-8, custom file name
+emitter    = oh2co 1.0e-8 extrapolate energySkip url:oh2co-h2.dat
+# ortho H_2CO, abundance 1.0e-8, custom file name
+# ortho H_2O, custom file name
+emitter    = oH2O 1.0e-8 extrapolate energySkip url:oh2o@daniel.dat
+# para H_2O, custom file name
+emitter    = pH2O 1.0e-8 extrapolate energySkip url:ph2o@daniel.dat
