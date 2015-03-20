@@ -1,12 +1,6 @@
 DESPOTIC
 --------
 
-DESPOTIC is a radiative transfer code hosted at [https://sites.google.com/a/ucsc.edu/krumholz/codes/despotic](https://sites.google.com/a/ucsc.edu/krumholz/codes/despotic).
-
-Here's the README from that page:
-
-The DESPOTIC Code
-
 DESPOTIC is a library to Derive the Energetics and SPectra of Optically Thick
 Interstellar Clouds. Its capabilities include calculating spectral line
 luminosities from clouds of specified physical properties and compositions,
