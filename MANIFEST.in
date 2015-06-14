@@ -1,0 +1,6 @@
+include *.py
+recursive-include *.desp
+include README.md
+include LICENSE.txt
+include REQUIREMENTS
+include CHANGES
