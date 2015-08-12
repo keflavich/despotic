@@ -26,19 +26,21 @@ from shielding import fShield_CO_vDB
 from despotic.chemistry import abundanceDict
 from despotic.chemistry import chemNetwork
 import scipy.constants as physcons
+import warnings
 
 ########################################################################
 # Physical and numerical constants
 ########################################################################
 kB = physcons.k/physcons.erg
 mH = (physcons.m_p+physcons.m_e)/physcons.gram
-__small = 1e-100
+_small = 1e-100
 
 ########################################################################
 # List of species used in this chemistry network
 ########################################################################
 specList = ['He+', 'H3+', 'OHx', 'CHx', 'CO', 'C', 'C+', 'HCO+', 'O',
             'M+']
+specListExtended = specList + ['H2', 'He', 'M', 'e-']
 
 ########################################################################
 # Data on photoreactions
@@ -114,9 +116,9 @@ class NL99(chemNetwork):
     (1999, ApJ, 524, 923).
     """
 
-########################################################################
-# Method to initialize
-########################################################################
+    ####################################################################
+    # Method to initialize
+    ####################################################################
     def __init__(self, cloud=None, info=None):
         """
         Parameters
@@ -157,6 +159,7 @@ class NL99(chemNetwork):
         # List of species for this network; provide a pointer here so
         # that it can be accessed through the class
         self.specList = specList
+        self.specListExtended = specListExtended
 
         # Store the input info dict
         self.info = info
@@ -182,10 +185,10 @@ class NL99(chemNetwork):
             # Physical properties
             self._xHe = _xHedefault
             self._ionRate = 2.0e-17
-            self._NH = small
-            self._temp = small
+            self._NH = _small
+            self._temp = _small
             self._chi = 1.0
-            self._nH = small
+            self._nH = _small
             self._AV = 0.0
             if info is not None:
                 if 'AV' in info:
@@ -339,11 +342,10 @@ class NL99(chemNetwork):
         # Initial M+
         self.x[9] = self.xM
 
-
-########################################################################
-# Define some properties so that, if we have a cloud, quantities that
-# are stored in the cloud point back to it
-########################################################################
+    ####################################################################
+    # Define some properties so that, if we have a cloud, quantities
+    # that are stored in the cloud point back to it
+    ####################################################################
     @property
     def nH(self):
         if self.cloud is None:
@@ -491,11 +493,65 @@ class NL99(chemNetwork):
             else:
                 self.info['AV'] = value
                 
+    ####################################################################
+    # Override the abundances property of the base chemNetwork class
+    # so that we return the derived abundances as well as the
+    # variables ones. For the setter, let users set abundances, but if
+    # they try to set ones that are derived, issue a warning.
+    ####################################################################
+
+    @property
+    def abundances(self):
+        self._abundances = abundanceDict(self.specListExtended,
+                                         self.extendAbundances())
+        return self._abundances
+
+    @abundances.setter
+    def abundances(self, value):
+        if len(value.x)==10:
+            self.x = value.x
+        elif len(value.x)==14:
+            self.x = value.x[:10]
+            warnings.warn('For NL99 network, cannot set abundances of H2, He, M, e-; abundances set only for other species')
+        else:
+            raise ValueError("abundnaces for NL99 network must have 10 species!")
+
+    ####################################################################
+    # Method to get derived abundances from ones being stored; this
+    # adds slots for H2, HeI, MI, and e
+    ####################################################################
+    def extendAbundances(self, xin=None):
+
+        # Object we'll be returning
+        xgrow = np.zeros(14)
+
+        # Copy abundances if passed in; otherwise user stored ones
+        if xin is None:
+            xgrow[:10] = self.x
+        else:
+            xgrow[:10] = xin
+
+        # H2 abundances is hardwired for NL99 network
+        xgrow[10] = _xH2
+
+        # He abundance = total He abundance - He+ abundance
+        xgrow[11] = self.xHe - xgrow[0]
+
+        # Neutral metal abundance = total metal abundance - ionized
+        # metal abundance
+        xgrow[12] = self.xM - xgrow[9]
+
+        # e abundance = He+ + H3+ + C+ + HCO+ + M+
+        xgrow[13] = xgrow[0] + xgrow[1] + xgrow[6] + xgrow[7] \
+                    + xgrow[9]
+
+        # Return
+        return xgrow
 
 
-########################################################################
-# Method to return the time derivative of all chemical rates
-########################################################################
+    ####################################################################
+    # Method to return the time derivative of all chemical rates
+    ####################################################################
     def dxdt(self, xin, time):
         """
         This method returns the time derivative of all abundances for
@@ -519,12 +575,7 @@ class NL99(chemNetwork):
         # some phantom slots; slots 10, 11, 12, and 13 store
         # abundances of H2, HeI, MI, and e, respectively
         xdot = np.zeros(14)
-        xgrow = np.zeros(14)
-        xgrow[:10] = xin
-        xgrow[10] = _xH2
-        xgrow[11] = self.xHe - xin[0]
-        xgrow[12] = self.xM - xin[9]
-        xgrow[13] = xin[0] + xin[1] + xin[6] + xin[7] + xin[9]
+        xgrow = self.extendAbundances(xin)
 
         # Cosmic ray / x-ray ionization reactions
         xdot[0] = xgrow[11]*self.ionRate
@@ -553,10 +604,9 @@ class NL99(chemNetwork):
         return xdot[:10]
 
 
-
-########################################################################
-# Method to write the currently stored abundances to a cloud
-########################################################################
+    ####################################################################
+    # Method to write the currently stored abundances to a cloud
+    ####################################################################
     def applyAbundances(self, addEmitters=False):
         """
         This method writes the abundances produced by the chemical
@@ -681,3 +731,4 @@ class NL99(chemNetwork):
                 self.cloud.addEmitter('o', self.x[8])
             except despoticError:
                 print 'Warning: unable to add O; cannot find LAMDA file'
+
