@@ -55,7 +55,7 @@ class abundanceDict(collections.MutableMapping,dict):
         """
 
         # Make sure input specList and x are properly formatted
-        if np.rank(x) < 1:
+        if np.ndim(x) < 1:
             raise despoticError, "x must be " + \
                 "a numpy array of rank >= 1"
         elif x.shape[0] != len(specList):
