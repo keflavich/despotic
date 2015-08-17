@@ -724,7 +724,7 @@ class cloud(object):
                 # specified assumptions
                 if fixedLevPop == False:
                     if LTE==True:   # LTE
-                        em.setLevPopLTE(self) 
+                        em.setLevPopLTE(self.Tg) 
                         if thin==False:  # LTE, not optically thin
                             em.setEscapeProb(self)
                     elif thin==True:
