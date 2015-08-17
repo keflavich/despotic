@@ -874,7 +874,7 @@ class emitter:
 
             else:
 
-                # Condition numberis not ok, so we need to eliminate
+                # Condition number is not ok, so we need to eliminate
                 # some levels
 
                 # Track levels we're keeping; initially this is all
