@@ -27,7 +27,7 @@ except ImportError:  # Python 2.x
 from despotic import __version__ as version
 tagname = "despotic_%s" % (version)
 
-download_url = "https://despotic.googlecode.com/svn/trunk/dist/DESPOTIC-%s.tar.gz" % version
+download_url = "https://bitbucket.org/krumholz/despotic/get/dfc8dc4b047d.zip"
 
 class PyTest(Command):
 
@@ -69,7 +69,7 @@ setup(name='DESPOTIC',
       long_description=long_description,
       author=['Mark Krumholz'],
       author_email=['mkrumhol@ucsc.edu'], 
-      url='https://code.google.com/p/despotic/',
+      url='https://bitbucket.org/krumholz/despotic/',
       download_url=download_url,
       packages=['despotic','despotic.chemistry'],
       package_dir={'despotic':'despotic'}, 
