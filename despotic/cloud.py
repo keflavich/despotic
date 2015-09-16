@@ -891,9 +891,9 @@ class cloud(object):
 # Method to calculate equilibrium dust temperature for fixed gas
 # temperature
 ########################################################################
-    def setDustTempEq(self, PsiUser=None, Tdinit=None, \
-                          noLines=False, noClump=False, \
-                          verbose=False, dampFactor=0.5):
+    def setDustTempEq(self, PsiUser=None, Tdinit=None,
+                      noLines=False, noClump=False,
+                      verbose=False, dampFactor=0.5):
         """
         Set Td to equilibrium dust temperature at fixed Tg
 
@@ -1543,8 +1543,10 @@ class cloud(object):
 # despotic.chemistry.setChemEq.setChemEq
 ########################################################################
     def setChemEq(self, tEqGuess=None, network=None, info=None,
-              addEmitters=False, tol=1e-6, maxTime=1e16,
-              verbose=False, smallabd=1e-15, convList=None):
+                  addEmitters=False, tol=1e-6, maxTime=1e16,
+                  verbose=False, smallabd=1e-15, convList=None, 
+                  evolveTemp='fixed', isobaric=False,
+                  tempEqParam=None, dEdtParam=None):
         """
         Set the chemical abundances for a cloud to their equilibrium
         values, computed using a specified chemical netowrk.
@@ -1568,6 +1570,35 @@ class cloud(object):
             be added; if False, abundances of emitters already in the
             emitter list will be updated, but new emiters will not be
             added to the cloud
+        evolveTemp : 'fixed' | 'iterate' | 'iterateDust' | 'gasEq' | 
+                     'fullEq' | 'evol'
+            how to treat the temperature evolution during the chemical
+            evolution; 'fixed' = treat tempeature as fixed; 'iterate' =
+            iterate between setting the gas temperature and chemistry to
+            equilibrium; 'iterateDust' = iterate between setting the gas
+            and dust temperatures and the chemistry to equilibrium;
+            'gasEq' = hold dust temperature fixed, set gas temperature to
+            instantaneous equilibrium value as the chemistry evolves;
+            'fullEq' = set gas and dust temperatures to instantaneous
+            equilibrium values while evolving the chemistry network;
+            'evol' = evolve gas temperature in time along with the
+            chemistry, assuming the dust is always in instantaneous
+            equilibrium
+        isobaric : Boolean
+            if set to True, the gas is assumed to be isobaric during
+            the evolution (constant pressure); otherwise it is assumed
+            to be isochoric; note that (since chemistry networks at
+            present are not allowed to change the mean molecular
+            weight), this option has no effect if evolveTemp is 'fixed'
+        tempEqParam : None | dict
+            if this is not None, then it must be a dict of values that
+            will be passed as keyword arguments to the cloud.setTempEq,
+            cloud.setGasTempEq, or cloud.setDustTempEq routines; only
+            used if evolveTemp is not 'fixed'
+        dEdtParam : None | dict
+            if this is not None, then it must be a dict of values that
+            will be passed as keyword arguments to the cloud.dEdt
+            routine; only used if evolveTemp is 'evol'
         tol : float
             tolerance requirement on the equilibrium solution
         convList : list
@@ -1603,7 +1634,10 @@ class cloud(object):
         return setChemEq(self, tEqGuess=tEqGuess, network=network,
                          info=info, tol=tol, maxTime=maxTime,
                          verbose=verbose, smallabd=smallabd, 
-                         convList=convList, addEmitters=addEmitters)
+                         convList=convList, addEmitters=addEmitters,
+                         evolveTemp=evolveTemp,
+                         isobaric=isobaric, tempEqParam=tempEqParam,
+                         dEdtParam=dEdtParam)
 
 ########################################################################
 # Method to calculate time-dependent evolution of chemical abundances;
@@ -1612,7 +1646,9 @@ class cloud(object):
 ########################################################################
     def chemEvol(self, tFin, tInit=0.0, nOut=100, dt=None,
                  tOut=None, network=None, info=None,
-                 addEmitters=False):
+                 addEmitters=False, evolveTemp='fixed',
+                 isobaric=False, tempEqParam=None,
+                 dEdtParam=None):
         """
         Evolve the chemical abundances of this cloud in time.
 
@@ -1644,13 +1680,43 @@ class cloud(object):
              be added; if False, abundances of emitters already in the
              emitter list will be updated, but new emiters will not be
              added to the cloud
+        evolveTemp : 'fixed' | 'gasEq' | 'fullEq' | 'evol'
+            how to treat the temperature evolution during the
+            chemical evolution; 'fixed' = treat tempeature as fixed;
+            'gasEq' = hold dust temperature fixed, set gas temperature
+            to instantaneous equilibrium value; 'fullEq' = set gas and
+            dust temperatures to instantaneous equilibrium values;
+            'evol' = evolve gas temperature in time along with the
+            chemistry, assuming the dust is always in instantaneous
+            equilibrium
+        isobaric : Boolean
+            if set to True, the gas is assumed to be isobaric during
+            the evolution (constant pressure); otherwise it is assumed
+            to be isochoric; note that (since chemistry networks at
+            present are not allowed to change the mean molecular
+            weight), this option has no effect if evolveTemp is 'fixed'
+        tempEqParam : None | dict
+            if this is not None, then it must be a dict of values that
+            will be passed as keyword arguments to the cloud.setTempEq,
+            cloud.setGasTempEq, or cloud.setDustTempEq routines; only
+            used if evolveTemp is not 'fixed'
+        dEdtParam : None | dict
+            if this is not None, then it must be a dict of values that
+            will be passed as keyword arguments to the cloud.dEdt
+            routine; only used if evolveTemp is 'evol'
 
         Returns
         -------
-        abundances : class abundanceDict
-             an abundanceDict giving the abundances as a function of time
         time : array of floats
              array of output times, in sec
+        abundances : class abundanceDict
+             an abundanceDict giving the abundances as a function of time
+        Tg : array
+            gas temperature as a function of time; returned only if
+            evolveTemp is not 'fixed'
+        Td : array
+            dust temperature as a function of time; returned only if
+            evolveTemp is not 'fixed' or 'gasEq'
 
         Raises
         ------
@@ -1660,7 +1726,10 @@ class cloud(object):
 
         return chemEvol(self, tFin, tInit=tInit, nOut=nOut,
                         dt=dt, tOut=tOut, network=network, info=info,
-                        addEmitters=addEmitters)
+                        addEmitters=addEmitters,
+                        evolveTemp=evolveTemp,
+                        isobaric=isobaric, tempEqParam=tempEqParam,
+                        dEdtParam=dEdtParam)
 
 
 ########################################################################
@@ -2150,19 +2219,19 @@ def _gasTempDeriv(Tg, time, cloud, c1Grav, thin, LTE, \
             ", nH = "+str(cloud.nH)
 
     # Compute new dust temperature
-    cloud.setDustTempEq(PsiUser=PsiUser, verbose=verbose, \
-                            dampFactor=dampFactor)
+    cloud.setDustTempEq(PsiUser=PsiUser, verbose=verbose,
+                        dampFactor=dampFactor)
 
     # Call dEdt to get time rate of change of energy for gas; note
     # that the level populations do not need to be recomputed here,
     # because they were already computed in solving for the dust
-    # temperature value, whcih depends on the line heating rate
-    rates = cloud.dEdt(c1Grav=c1Grav, \
-                           thin=thin, LTE=LTE, \
-                           escapeProbGeom=escapeProbGeom, \
-                           gasOnly=True, noClump=noClump, \
-                           sumOnly=True, PsiUser=PsiUser, \
-                           fixedLevPop=True)
+    # temperature value, which depends on the line heating rate
+    rates = cloud.dEdt(c1Grav=c1Grav,
+                       thin=thin, LTE=LTE,
+                       escapeProbGeom=escapeProbGeom,
+                       gasOnly=True, noClump=noClump,
+                       sumOnly=True, PsiUser=PsiUser,
+                       fixedLevPop=True)
     dEdtGas = rates['dEdtGas']
 
     # Compute specific heat c_v at current temperature
