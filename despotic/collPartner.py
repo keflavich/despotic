@@ -26,6 +26,9 @@ method that returns collision rates at a specified temperature.
 from numpy import *
 from scipy.interpolate import interp1d
 from despoticError import *
+from collPartner_helper import colRates_all_scalar, \
+    colRates_all_vector, colRates_some_scalar, \
+    colRates_some_vector
 
 class collPartner:
     """
@@ -78,12 +81,10 @@ class collPartner:
             a file object that points to the start of the collision
             rate data for one species in a LAMDA file
         extrap : Boolean
-            if True, when the interpolation functions for this
-            collision partner are created, data points will be added
-            at low and high temperatures so that it is possible to
-            extrapolate off the table. Extrapolation is done by
-            assuming the the collision rate follows a powerlaw in
-            temperature
+            if True, then computing the collision rate with a
+            temperature that is outside the table will result in the
+            maximum or minimum value in the table being returned; if
+            False, it will raise an error
 
         Returns
         -------
@@ -136,11 +137,13 @@ class collPartner:
         # Mask zeros in collision rates to avoid numerical problems
         self.colRate[self.colRate==0.0] = 1.0e-30
 
-        # Generate interpolating functions from table
-        self._buildInterp(extrap)
-
         # Store whether extrapolation is allowed
-        self._extrap = extrap
+        self.extrap = extrap
+
+        # Compute log of temperatures and collision rates; these will
+        # be used for interpolation
+        self.logTempTable = log(self.tempTable)
+        self.logColRate = log(self.colRate)
 
 
 ########################################################################
@@ -168,37 +171,33 @@ class collPartner:
             collision rates at the specified temperature(s)
         """
 
-        if transition==None:
+        # If extrapolation is not allowed, make sure all temperatures
+        # we've gotten are in the allowed range
+        if not self.extrap:
+            if any(array(temp) < self.tempTable[0]) or \
+               any(array(temp) > self.tempTable[-1]):
+                raise despoticError, \
+                    "temperature out of bounds in collPartner"
+
+        # Handle the four possible cases; all transitions or some,
+        # single scalar temperature or array of temperatures
+        if transition is None:
             if hasattr(temp, '__iter__'):
-                # Temperature is a list or array
-                rates=zeros((self.ntrans, len(temp)))
-                for i in range(self.ntrans):
-                    rates[i,:]=self.colRateInterp[i](log(temp))
+                rates = colRates_all_vector(
+                    self.logColRate, self.logTempTable, array(temp))
             else:
-                # Temperature is a scalar
-                rates=zeros(self.ntrans)
-                for i in range(self.ntrans):
-                    rates[i]=self.colRateInterp[i](log(temp))
-            return exp(rates)
+                rates = colRates_all_scalar(
+                    self.logColRate, self.logTempTable, temp)
+            return rates
         else:
-            u=transition[0]
-            l=transition[1]
             if hasattr(temp, '__iter__'):
-                # Temperature is a list or array
-                rates=zeros((len(u), len(temp)))
-                for i, ulev in enumerate(u):
-                    idx=where(self.colUpper == u and self.colLower == l)[0]
-                    if len(idx) == 1:
-                        rates[i,:] = \
-                            exp(self.colRateInterp[idx](log(temp)))
+                rates = colRates_some_vector(
+                    self.colUpper, self.colLower, self.logColRate,
+                    self.logTempTable, array(temp), transition)
             else:
-                # Temperature is a scalar
-                rates=zeros(len(u))
-                for i, ulev in enumerate(u):
-                    idx=where(self.colUpper == u and self.colLower == l)[0]
-                    if len(idx) == 1:
-                        rates[i] = \
-                            exp(self.colRateInterp[idx](log(temp)))
+                rates = colRates_some_scalar(
+                    self.colUpper, self.colLower, self.logColRate,
+                    self.logTempTable, temp, transition)
             return rates
 
 
@@ -236,74 +235,7 @@ class collPartner:
             (levWgt[self.colUpper] / levWgt[self.colLower]) * \
             exp( -(levTemp[self.colUpper]-levTemp[self.colLower]) / \
                       temp )
-        return k
-
-########################################################################
-# Method to turn extrapolation on/off
-########################################################################
-    def _buildInterp(self, extrap):
-        """
-        Build collision rate interpolation functions
-
-        Parameters
-        ----------
-        extrap : Boolean
-            true turns on extrapolation, false turns it off
-
-        Returns
-        -------
-        Nothing
-        """
-        # Generate interpolating functions from table
-        self.colRateInterp = []
-        if self.ntemp > 1:
-            if extrap==False:   # Standard case, no extrapolation allowed
-                for i in range(self.ntrans):
-                    self.colRateInterp.append( \
-                        interp1d(log(self.tempTable), \
-                                     log(self.colRate[i,:]), \
-                                     kind='linear') )
-            else:  # Extrapolation allowed
-                # In this case we create a new collision rate table, which
-                # contains linearly extrapolated data points at very high
-                # an low temperatures, and use that to construct our
-                # inteprolating functions
-                logTempExtrap = zeros(self.ntemp+2)
-                logTempExtrap[0] = -100.0
-                logTempExtrap[1:-1] = log(self.tempTable)
-                logTempExtrap[-1] = 100.0
-                logColRateExtrap = zeros(self.ntemp+2)
-                for i in range(self.ntrans):
-                    logColRateExtrap[1:-1] = log(self.colRate[i,:])
-                    logColRateExtrap[0] = logColRateExtrap[1] + \
-                        (logTempExtrap[0] - logTempExtrap[1]) * \
-                        (logColRateExtrap[1] - logColRateExtrap[2]) / \
-                        (logTempExtrap[1] - logTempExtrap[2])
-                    logColRateExtrap[-1] = logColRateExtrap[-2] + \
-                        (logTempExtrap[-1] - logTempExtrap[-2]) * \
-                        (logColRateExtrap[-2] - logColRateExtrap[-3]) / \
-                        (logTempExtrap[-2] - logTempExtrap[-3])
-                    self.colRateInterp.append(
-                        interp1d(logTempExtrap, logColRateExtrap,
-                                 kind='linear',
-                                 bounds_error=False, fill_value=0) )
-        else:
-            # Special case: the table only gives a single
-            # temperature. In this case, just construct an
-            # interpolating function that assumes the rate coefficient
-            # is constant
-            logTempExtrap = zeros(3)
-            logTempExtrap[0] = -100.0
-            logTempExtrap[1] = log(self.tempTable[0])
-            logTempExtrap[2] = 100.0
-            logColRateExtrap = zeros(3)
-            for i in range(self.ntrans):
-                logColRateExtrap[:] = log(self.colRate[i,0])
-                self.colRateInterp.append( \
-                    interp1d(logTempExtrap, logColRateExtrap, 
-                             kind='linear', bounds_error=False, 
-                             fill_value=logColRateExtrap[0]) )
-        
+        return k        
 
 ########################################################################
 # End of collPartner class

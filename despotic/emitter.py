@@ -438,9 +438,9 @@ class emitter:
         infoDict = {}
 
         # Get collision rate matrix
-        q = self.data.collRateMatrix(thisCloud.nH, \
-                                         thisCloud.comp, \
-                                         thisCloud.Tg)
+        q = self.data.collRateMatrix(thisCloud.nH,
+                                     thisCloud.comp,
+                                     thisCloud.Tg)
         infoDict['qNoClump'] = q
 
         # Apply clumping factor
@@ -827,7 +827,6 @@ class emitter:
         # their LTE values as an initial guess
         if self.levPopInitialized == False:
             self.setLevPopLTE(thisCloud.Tg)
-            #self.setLevPop(thisCloud, thin=True, noClump=noClump)
 
         # Create workspace matrices, and initialize the last rows
         # M and b, which hold the summation constraint

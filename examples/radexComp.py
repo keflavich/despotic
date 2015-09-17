@@ -168,4 +168,4 @@ for i, lognH in enumerate(lognHgrid):
         ctr = ctr+1
 
 # Print difference
-print 'Maximum level population differecnce = '+str(amax(maxLevPopDiff))
+print 'Maximum level population difference = '+str(amax(maxLevPopDiff))

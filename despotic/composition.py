@@ -358,4 +358,4 @@ class composition(object):
 
         total_abund = total_HI + self.xHe + self.xe
         if total_abund <= 0:
-            raise ValueError("Total abundance of colliding particles is zero.  You probably forgot to set the collider abundanced.")
+            raise ValueError("Total abundance of colliding particles is zero.  You probably forgot to set the collider abundances.")
