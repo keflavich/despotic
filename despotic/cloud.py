@@ -1546,7 +1546,7 @@ class cloud(object):
                   addEmitters=False, tol=1e-6, maxTime=1e16,
                   verbose=False, smallabd=1e-15, convList=None, 
                   evolveTemp='fixed', isobaric=False,
-                  tempEqParam=None, dEdtParam=None):
+                  tempEqParam=None, dEdtParam=None, maxTempIter=50):
         """
         Set the chemical abundances for a cloud to their equilibrium
         values, computed using a specified chemical netowrk.
@@ -1611,6 +1611,10 @@ class cloud(object):
             convergence; set to 0 or a negative value to consider all
             abundances, but beware that this may result in false
             non-convergence due to roundoff error in very small abundances
+        maxTempIter : int
+            maximum number of iterations when iterating between chemistry
+            and temperature; only used if evolveTemp is 'iterate' or
+            'iterateDust'
         verbose : Boolean
             if True, diagnostic information is printed as the calculation
             proceeds
@@ -1637,7 +1641,8 @@ class cloud(object):
                          convList=convList, addEmitters=addEmitters,
                          evolveTemp=evolveTemp,
                          isobaric=isobaric, tempEqParam=tempEqParam,
-                         dEdtParam=dEdtParam)
+                         dEdtParam=dEdtParam,
+                         maxTempIter=maxTempIter)
 
 ########################################################################
 # Method to calculate time-dependent evolution of chemical abundances;
