@@ -63,7 +63,7 @@ class collPartner:
     __init__ -- initialization method
     colRates -- method to return collision rates for all downward
         transitions at a given temperature or list of temperatures
-    collRateMatrix -- method to return the collision rate matrix for
+    colRateMatrix -- method to return the collision rate matrix for
         all transitions for this collision patner as a function of
         temperature
     """
@@ -227,15 +227,14 @@ class collPartner:
         """
         k = zeros((self.nlev, self.nlev))
         # Downward transitions
-        k[self.colUpper, self.colLower] += \
-            self.colRates(temp)
+        k[self.colUpper, self.colLower] += self.colRates(temp)
         # Upward transitions
-        k[self.colLower, self.colUpper] += \
-            k[self.colUpper, self.colLower] * \
+        k[self.colLower, self.colUpper] \
+            += k[self.colUpper, self.colLower] * \
             (levWgt[self.colUpper] / levWgt[self.colLower]) * \
             exp( -(levTemp[self.colUpper]-levTemp[self.colLower]) / \
-                      temp )
-        return k        
+                 temp )
+        return k
 
 ########################################################################
 # End of collPartner class

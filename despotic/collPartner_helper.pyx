@@ -38,10 +38,10 @@ cpdef np.ndarray[NPFLOAT_T, ndim=1] colRates_all_scalar(
 
     # Check for temperatures above or below the ends of the table
     if logtemp <= logTempTable[0]:
-        logrates = logColRate[0,:]
+        logrates = logColRate[:,0]
         return np.exp(logrates)
     elif logtemp >= logTempTable[ntemp-1]:
-        logrates = logColRate[ntemp-1,:]
+        logrates = logColRate[:,ntemp-1]
         return np.exp(logrates)
 
     # Loop over transitions
@@ -53,6 +53,7 @@ cpdef np.ndarray[NPFLOAT_T, ndim=1] colRates_all_scalar(
                       (logColRate[i,j]-logColRate[i,j-1]) / \
                       (logTempTable[j]-logTempTable[j-1]) * \
                       (logtemp - logTempTable[j-1])
+
     # Return
     return np.exp(logrates)
 
@@ -75,9 +76,9 @@ cpdef np.ndarray[NPFLOAT_T, ndim=2] colRates_all_vector(
 
         # Check for temperatures above or below the ends of the table
         if logtemp[k] <= logTempTable[0]:
-            logrates[:,k] = logColRate[0,:]
+            logrates[:,k] = logColRate[:,0]
         elif logtemp[k] >= logTempTable[ntemp-1]:
-            logrates[:,k] = logColRate[ntemp-1,:]
+            logrates[:,k] = logColRate[:,ntemp-1]
         else:
             # Loop over transitions
             for i in range(ntrans):
@@ -122,9 +123,9 @@ cpdef np.ndarray[NPFLOAT_T, ndim=1] colRates_some_scalar(
         # Check for temperatures above or below the ends of the table
         idx = idxtmp[0]
         if logtemp <= logTempTable[0]:
-            rates[i] = np.exp(logColRate[0,idx])
+            rates[i] = np.exp(logColRate[idx,0])
         elif logtemp >= logTempTable[ntemp-1]:
-            rates[i] = np.exp(logColRate[ntemp-1,idx])
+            rates[i] = np.exp(logColRate[idx,ntemp-1])
         else:
             # Interpolate in temperature
             for j in range(1,ntemp):
@@ -171,9 +172,9 @@ cpdef np.ndarray[NPFLOAT_T, ndim=1] colRates_some_vector(
             # Check for temperatures above or below the ends of the table
             idx = idxtmp[0]
             if logtemp[k] <= logTempTable[0]:
-                rates[i,k] = np.exp(logColRate[0,idx])
+                rates[i,k] = np.exp(logColRate[idx,0])
             elif logtemp[k] >= logTempTable[ntemp-1]:
-                rates[i,k] = np.exp(logColRate[ntemp-1,idx])
+                rates[i,k] = np.exp(logColRate[idx,ntemp-1])
             else:
                 # Interpolate in temperature
                 for j in range(1,ntemp):
