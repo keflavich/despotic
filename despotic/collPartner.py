@@ -23,9 +23,11 @@ method that returns collision rates at a specified temperature.
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
 
-from numpy import *
+import numpy as np
 from scipy.interpolate import interp1d
 from despoticError import *
+import pyximport
+pyximport.install(setup_args={'include_dirs':np.get_include()})
 from collPartner_helper import colRates_all_scalar, \
     colRates_all_vector, colRates_some_scalar, \
     colRates_some_vector
@@ -109,7 +111,7 @@ class collPartner:
 
         # Read temperature list
         self.ntemp = int(line.strip())
-        self.tempTable = zeros(self.ntemp)
+        self.tempTable = np.zeros(self.ntemp)
         line = ''
         while (line.strip() == ''):
             line = fp.readline()
@@ -119,9 +121,9 @@ class collPartner:
             self.tempTable[i] = float(t)
 
         # Read table of collision rate coefficients
-        self.colUpper = zeros(self.ntrans, dtype='int')
-        self.colLower = zeros(self.ntrans, dtype='int')
-        self.colRate = zeros((self.ntrans, self.ntemp))
+        self.colUpper = np.zeros(self.ntrans, dtype='int')
+        self.colLower = np.zeros(self.ntrans, dtype='int')
+        self.colRate = np.zeros((self.ntrans, self.ntemp))
         for i in range(self.ntrans):
             line = ''
             while (line.strip() == ''):
@@ -142,8 +144,8 @@ class collPartner:
 
         # Compute log of temperatures and collision rates; these will
         # be used for interpolation
-        self.logTempTable = log(self.tempTable)
-        self.logColRate = log(self.colRate)
+        self.logTempTable = np.log(self.tempTable)
+        self.logColRate = np.log(self.colRate)
 
 
 ########################################################################
@@ -174,8 +176,8 @@ class collPartner:
         # If extrapolation is not allowed, make sure all temperatures
         # we've gotten are in the allowed range
         if not self.extrap:
-            if any(array(temp) < self.tempTable[0]) or \
-               any(array(temp) > self.tempTable[-1]):
+            if np.any(np.array(temp) < self.tempTable[0]) or \
+               np.any(np.array(temp) > self.tempTable[-1]):
                 raise despoticError, \
                     "temperature out of bounds in collPartner"
 
@@ -225,14 +227,14 @@ class collPartner:
             of the matrix gives the collision rate from state i to
             state j
         """
-        k = zeros((self.nlev, self.nlev))
+        k = np.zeros((self.nlev, self.nlev))
         # Downward transitions
         k[self.colUpper, self.colLower] += self.colRates(temp)
         # Upward transitions
         k[self.colLower, self.colUpper] \
             += k[self.colUpper, self.colLower] * \
             (levWgt[self.colUpper] / levWgt[self.colLower]) * \
-            exp( -(levTemp[self.colUpper]-levTemp[self.colLower]) / \
+            np.exp( -(levTemp[self.colUpper]-levTemp[self.colLower]) / \
                  temp )
         return k
 
