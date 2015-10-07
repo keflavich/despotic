@@ -384,7 +384,7 @@ class emitterData:
             elif idstring=='4':
                 partName = 'e'
             elif idstring=='5':
-                partName = 'H'
+                partName = 'HI'
             elif idstring=='6':
                 partName = 'He'
             elif idstring=='7':
