@@ -32,9 +32,9 @@ class abundanceDict(collections.MutableMapping,dict):
     applies can be altered.
     """
 
-########################################################################
-# Initialization method
-########################################################################
+    ########################################################################
+    # Initialization method
+    ########################################################################
     def __init__(self, specList, x):
         """
         This method initializes the species list for this abundance
@@ -68,9 +68,9 @@ class abundanceDict(collections.MutableMapping,dict):
             self.__specDict[s] = i
 
 
-########################################################################
-# getitem, setitem methods operate on the associated numpy array
-########################################################################
+    ########################################################################
+    # getitem, setitem methods operate on the associated numpy array
+    ########################################################################
     def __getitem__(self, key):
         """
         __getitem__ works just as for an ordinary dict
@@ -89,9 +89,9 @@ class abundanceDict(collections.MutableMapping,dict):
                 "abundanceDict"
         self.x[self.__specDict[key]] = value
 
-########################################################################
-# disallow deletions from the __specDict key
-########################################################################
+    ########################################################################
+    # disallow deletions from the __specDict key
+    ########################################################################
     def __delitem__(self, key):
         """
         raises an error, since abundanceDicts are
@@ -132,9 +132,9 @@ class abundanceDict(collections.MutableMapping,dict):
         raise despoticError, "cannot delete species from " + \
             "abundanceDict"
 
-########################################################################
-# define how to print abundanceDict objects
-########################################################################
+    ########################################################################
+    # define how to print abundanceDict objects
+    ########################################################################
     def __repr__(self):
         """
         define how to print abundanceDict objects
@@ -148,10 +148,10 @@ class abundanceDict(collections.MutableMapping,dict):
         stringRep += "}"
         return stringRep
 
-########################################################################
-# the methods below act just like they do on an ordinary dict
-# whose keys are __specDict and whose values are the elements of x
-########################################################################
+    ########################################################################
+    # the methods below act just like they do on an ordinary dict
+    # whose keys are __specDict and whose values are the elements of x
+    ########################################################################
     def __iter__(self):
         """
         __iter__ works just as for an ordinary dict
@@ -198,3 +198,36 @@ class abundanceDict(collections.MutableMapping,dict):
             specList[self.__specDict[k]] = k
         newAD = abundanceDict(specList, self.x)
         return newAD
+
+    ########################################################################
+    # define an index method that allows users to get the indicates for
+    # one or more species
+    ########################################################################
+
+    def index(self, spec):
+        """
+        Parameters
+        ----------
+        spec : string or iterable containing strings
+           list of species whose indices are to be returns
+
+        Returns
+        -------
+        index : int or array of ints
+           indices of the input species; if spec is a string, this is
+           an int; otherwise it is an array of ints
+
+        Raises
+        ------
+        KeyError, if spec or any of its elements is not in the species
+        list
+        """
+
+        if hasattr(spec, '__iter__'):
+            idx = np.zeros(len(spec), dtype='int')
+            for i, s in enumerate(spec):
+                idx[i] = self.__specDict[s]
+        else:
+            idx = self.__specDict[spec]
+        return idx
+
