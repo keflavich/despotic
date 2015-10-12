@@ -48,7 +48,7 @@ knownPart=['HI', 'pH2', 'oH2', 'He', 'e', 'H+']
 ########################################################################
 # class emitterData
 ########################################################################
-class emitterData:
+class emitterData(object):
     """
     Class to store the physical properties of a single emitting
     species, and preform computations on those properties. Note that
@@ -145,7 +145,7 @@ class emitterData:
         """
 
         # Save extrapolation state
-        self.extrap = extrap
+        self.__extrap = extrap
 
         # Check if we have been given a file name for this emitter. If
         # we have, try to read it, and raise an error if we fail.
@@ -424,6 +424,20 @@ class emitterData:
         for i in range(self.nlev):
             self.wgtRatio[i,:] = self.levWgt[i]/self.levWgt
 
+
+    ####################################################################
+    # Extrapolation decorator
+    ####################################################################
+    @property
+    def extrap(self):
+        return self.__extrap
+
+    @extrap.setter
+    def extrap(self, ext):
+        # Change value for all collision partners
+        for p in self.partners.values():
+            p.extrap = ext
+        self.__extrap = ext
 
 ########################################################################
 # Method to compute partition function

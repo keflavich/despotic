@@ -66,8 +66,6 @@ class composition(object):
     computeDerived -- compute derived quantities: mu, muH, qIon
     computeCv -- compute cv
     computeEint -- computer the internal energy per H nucleus
-
-
     """
 
 ########################################################################

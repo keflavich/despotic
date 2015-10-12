@@ -55,7 +55,7 @@ knownEmitterData = {}
 ########################################################################
 # class emitter definition
 ########################################################################
-class emitter:
+class emitter(object):
     """
     Class to store the properties of a single emitting species, and
     preform computations on those properties. Note that all quantities
@@ -88,6 +88,8 @@ class emitter:
     __deepcopy__ -- override the default deepcopy operation
     __getstate__ -- routine to provide pickling support
     __setstate__ -- routine to provide pickling support
+    extrap -- a decorator that determines whether or not extrapolation
+        is used with this species
     setLevPopLTE -- set level populations to their LTE values at the
         given temperature
     setThin -- reset all escape probabilities to unity, the value for
@@ -105,7 +107,6 @@ class emitter:
         currently-stored escape probabilities
     luminosityPerH -- compute the luminosity per H nucleus due to line
         emission
-    setExtrap -- turns extrapolation on or off for this emitter
     """
 
 ########################################################################
@@ -168,6 +169,22 @@ class emitter:
         self.escapeProb = np.zeros((self.data.nlev, self.data.nlev)) \
             + 1.0
 
+        # Record if we're using extrapolation
+        self.__extrap = extrap
+
+    ####################################################################
+    # Extrapolation decorator
+    ####################################################################
+    @property
+    def extrap(self):
+        return self.__extrap
+
+    @extrap.setter
+    def extrap(self, ext):
+        # Change value for emitter data; this will affect all
+        # collision partners
+        self.data.extrap = ext
+        self.__extrap = ext
 
 ########################################################################
 # Override deepcopy method
@@ -312,40 +329,6 @@ class emitter:
 
             # Store emitter in list
             knownEmitterData[self.name] = self.data
-
-
-########################################################################
-# Method to turn extrapolation on or off
-########################################################################
-    def setExtrap(self, extrap):
-        """
-        Turn extrapolation on or off for this emitter
-
-        Parameters
-        ----------
-        extrap : Boolean
-           true = extrapolation on, false = extrapolation off
-
-        Returns
-        -------
-        Nothing
-
-        Remarks
-        -------
-        Since emitter data is shared by all emitters of the same
-        species, turning extrapolation on or off affects all instances
-        of emitters of this species, not just this instance.
-        """
-
-        # Check if new setting is different from current one; if not,
-        # do nothing
-        if extrap == self.data.extrap:
-            return
-
-        # Rebuild interpolation functions and store new settings
-        for p in self.data.partners.values():
-            p._buildInterp(extrap)
-        self.data.extrap = extrap
 
 
 ########################################################################
