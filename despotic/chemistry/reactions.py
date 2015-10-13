@@ -161,26 +161,29 @@ class reaction_matrix(object):
 
         # For each reaction, record the indices and stochiometric
         # factors on the left hand side; record these in a square
-        # matrix
+        # matrix; also record the sum of the LHS stochiometric factors
         self.lhsidx = np.zeros((nreact, nlhsmax), dtype=int)
         self.lhsstoch = np.zeros((nreact, nlhsmax), dtype=int)
         for i in np.arange(nreact):
             self.lhsidx[i,:len(lhs[i])] = lhs[i]
             self.lhsstoch[i,:len(lhs[i])] = lhsstoch[i]
-            
+        self.lhssum = np.sum(self.lhsstoch, axis=1)
 
-    def dxdt(self, x, ratecoef):
+    def dxdt(self, x, n, ratecoef):
         """
         This returns the rate of change of species abundances given a
         set of rate coefficients.
 
         Parameters
         ----------
-        x : array(Nspec)
+        x : array(N_species)
            array of current species abundances
-        ratecoef : array(Nreactions)
-           rate coefficients for each reaction; reaction rates are
-           taken to be ratecoef * product of abundances of reactants
+        n : float
+           number density of H nuclei
+        ratecoef : array(N_reactions)
+           rate coefficients for each reaction; reaction rate per unit
+           volume = ratecoef * product of densities of reactants;
+           dxdt = reaction rate / unit volume / n
 
         Returns
         -------
@@ -190,7 +193,8 @@ class reaction_matrix(object):
 
         # Get rates from rate coefficients
         rates = ratecoef * \
-                np.prod(x[self.lhsidx]**self.lhsstoch, axis=1)
+                np.prod(x[self.lhsidx]**self.lhsstoch, axis=1) * \
+                n**(self.lhssum-1)
 
         # Compute dxdt
         dxdt = self.mat.dot(rates)
@@ -254,7 +258,7 @@ class cr_reactions(reaction_matrix):
         self.rate_fac = np.array([r['rate'] for r in reactions])
 
 
-    def dxdt(self, x, ionrate):
+    def dxdt(self, x, n, ionrate):
         """
         This function returns the time derivative of the abundances x
         for a given cosmic ray ionization rate.
@@ -263,6 +267,10 @@ class cr_reactions(reaction_matrix):
         ----------
         x : array(N)
            array of current species abundances
+        n : float
+           number density of H nuclei; only used if some reactions
+           have multiple species on the LHS, otherwise can be set to
+           any positive value
         ionrate : float
            cosmic ray primary ionization rate
 
@@ -276,7 +284,7 @@ class cr_reactions(reaction_matrix):
         ratecoef = self.rate_fac * ionrate
 
         # Compute dxdt
-        dxdt = super(cr_reactions, self).dxdt(x, ratecoef)
+        dxdt = super(cr_reactions, self).dxdt(x, n, ratecoef)
 
         # Return
         return dxdt
@@ -320,7 +328,7 @@ class photoreactions(reaction_matrix):
                  shielding factor; see the dxdt method for an
                  explanation of how to specify its arguments
            Reaction rates per target are given by 
-              G0 * rate_fac * shield_fac * exp(-av_fac * A_V)
+              chi * rate_fac * shield_fac * exp(-av_fac * A_V)
         sparse : bool
            If True, the reaction rate matrix is represented as a
            sparse matrix; otherwise it is a dense matrix. This has no
@@ -365,7 +373,8 @@ class photoreactions(reaction_matrix):
                 argspec.keywords is not None)
 
 
-    def dxdt(self, x, G0, AV, shield_args=None, shield_kw_args=None):
+    def dxdt(self, x, n, chi, AV, shield_args=None,
+             shield_kw_args=None):
         """
         This function returns the time derivative of the abundances x
         for a given ISRF, extinction, and gas shielding factor.
@@ -374,8 +383,12 @@ class photoreactions(reaction_matrix):
         ----------
         x : array(N)
            array of current species abundances
-        G0 : float
-           ISRF strength in units of the Habing field
+        n : float
+           number density of H nuclei; only used if some reactions
+           have multiple species on the LHS, otherwise can be set to
+           any positive value
+        chi : float
+           ISRF strength normalized to the solar neighborhood value
         AV : float
            visual extinction to apply to the ISRF
         shield_args : list
@@ -420,12 +433,12 @@ class photoreactions(reaction_matrix):
                     fshield[i] = f()
  
         # Get rate coefficients
-        ratecoef = self.rate_fac * G0 * np.exp(-AV*self.av_fac)
+        ratecoef = self.rate_fac * chi * np.exp(-AV*self.av_fac)
         if len(self.shield_func) > 0:
             ratecoef[self.shield_func_idx] *= fshield
 
         # Compute dxdt
-        dxdt = super(photoreactions, self).dxdt(x, ratecoef)
+        dxdt = super(photoreactions, self).dxdt(x, n, ratecoef)
 
         # Return
         return dxdt
@@ -490,7 +503,7 @@ class gr_reactions(reaction_matrix):
                 grain.append(False)
         self.grain = np.where(grain)[0]
 
-    def dxdt(self, x, ratecoef, Zd):
+    def dxdt(self, x, n, ratecoef, Zd):
         """
         This returns the rate of change of species abundances given a
         set of rate coefficients.
@@ -499,6 +512,8 @@ class gr_reactions(reaction_matrix):
         ----------
         x : array(Nspec)
            array of current species abundances
+        n : float
+           number density of H nuclei
         ratecoef : array(Nreactions)
            rate coefficients for each reaction, at Solar neighborhood
            grain abundances
@@ -518,7 +533,7 @@ class gr_reactions(reaction_matrix):
         rcoef[self.grain] *= Zd
 
         # Compute dxdt
-        dxdt = super(gr_reactions, self).dxdt(x, rcoef)
+        dxdt = super(gr_reactions, self).dxdt(x, n, rcoef)
 
         # Return
         return dxdt
