@@ -32,6 +32,7 @@ from copy import deepcopy
 from despoticError import despoticError
 from collPartner import collPartner
 from fetchLamda import fetchLamda
+import warnings
 
 # Define some global physical constants in cgs units
 import scipy.constants as physcons
@@ -509,34 +510,16 @@ class emitterData(object):
                     continue
                 else:
                     n = nH * comp.xHI
-                    if not 'HI' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xHI > 0:" + \
-                            " HI collision rates unavailable"
             elif p=='pH2':
                 if comp.xpH2==0:
                     continue
                 else:
                     n = nH * comp.xpH2
-                    if not 'pH2' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xpH2 > 0:" + \
-                            " pH2 collision rates unavailable"
             elif p=='oH2':
                 if comp.xoH2==0:
                     continue
                 else:
                     n = nH * comp.xoH2
-                    if not 'oH2' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xoH2 > 0:" + \
-                            " oH2 collision rates unavailable"
             elif p=='He':
                 if comp.xHe==0:
                     continue
@@ -551,34 +534,16 @@ class emitterData(object):
                         mredHe = self.molWgt*4.0 / (self.molWgt + 4.0)
                         mredH2 = self.molWgt*2.0 / (self.molWgt + 2.0)
                         n = n / np.sqrt(mredHe/mredH2)
-                        if not 'pH2' in self.partners:
-                            raise despoticError, \
-                                "cannot compute level " + \
-                                "popluations for " + \
-                                self.name + " with xHe > 0:" + \
-                                " He collision rates unavailable"
             elif p=='e':
                 if comp.xe==0:
                     continue
                 else:
                     n = nH * comp.xe
-                    if not 'e' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xe > 0:" + \
-                            " e collision rates unavailable"
             elif p=='H+':
                 if comp.xHplus==0:
                     continue
                 else:
                     n = nH * comp.xHplus
-                    if not 'e' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xH+ > 0:" + \
-                            " H+ collision rates unavailable"
 
             # Compute downward transition rates, handling He as a
             # proxy for H2 as a special case
@@ -593,6 +558,12 @@ class emitterData(object):
                         str(self.partners[p].tempTable[-1]) + \
                         " K for species "+self.name+", partner " + \
                         p
+                except KeyError:
+                    warnings.warn("collision rates not "
+                                  "available for species "
+                                  +p+" (fractional abundance "
+                                  "{:e}".format(n/nH)+") will be "
+                                  "omitted from calculation")
             else:
                 p1='pH2'
                 try:
@@ -605,6 +576,12 @@ class emitterData(object):
                         str(self.partners[p1].tempTable[-1]) + \
                         " K for species "+self.name+", partner " + \
                         p
+                except KeyError:
+                    warnings.warn("collision rates not "
+                                  "available for species "
+                                  +p+" (fractional abundance "
+                                  "{:e}".format(n/nH)+") will be "
+                                  "omitted from calculation")
 
         # Return matrix
         return q
