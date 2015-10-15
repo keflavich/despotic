@@ -45,7 +45,7 @@ def sum_by_group(values, groups):
     return values, groups
 
 ########################################################################
-# A general reaction class; it knows about stochiometric factors, and
+# A general reaction class; it knows about stoichiometric factors, and
 # how to compute reaction rates and rates of change of various species
 # given a set of rate coefficients and abundances
 ########################################################################
@@ -71,15 +71,15 @@ class reaction_matrix(object):
         reactions : list of dict
            A list listing all the reactions to be registered; each
            entry in the list must be a dict containing the keys 'spec'
-           and 'stoch', which list the species involved in the
-           reaction and the stochiometric factors for each species,
+           and 'stoich', which list the species involved in the
+           reaction and the stoichiometric factors for each species,
            respectively. Sign convention is that reactants on the left
-           hand side have negative stochiometric factors, those on the
+           hand side have negative stoichiometric factors, those on the
            right hand side have positive factors. Examples:
               C + O -> CO is listed as 
-              { 'spec' : ['C', 'O', 'CO'], 'stoch' : [-1, -1, 1] }
+              { 'spec' : ['C', 'O', 'CO'], 'stoich' : [-1, -1, 1] }
               H + H -> H2 is listed as
-              { 'spec' : ['H', 'H2'], 'stoch' : [-2, 1] }
+              { 'spec' : ['H', 'H2'], 'stoich' : [-2, 1] }
         sparse : bool
            If True, the reaction rate matrix is represented as a
            sparse matrix; otherwise it is a dense matrix. This has no
@@ -105,13 +105,13 @@ class reaction_matrix(object):
         # rate of change of the abundance of each species, M is the
         # reaction rate matrix, and R is the rate of every individual
         # reaction; at the same time, store the index and
-        # stochiometric factor for every reactant on the LHS of the
+        # stoichiometric factor for every reactant on the LHS of the
         # reaction; NB: we need to be careful to handle properly the
         # case where the same species appears on both sides of the
         # reaction, to ensure that we properly cancel the
-        # stochiometric factors
+        # stoichiometric factors
         lhs = []
-        lhsstoch = []
+        lhsstoich = []
         nlhsmax = 0
         if sparse:
 
@@ -121,24 +121,24 @@ class reaction_matrix(object):
             # routine
             mat_i = np.zeros(0, dtype=int)
             mat_j = np.zeros(0, dtype=int)
-            stoch = np.zeros(0, dtype=int)
+            stoich = np.zeros(0, dtype=int)
             for i, r in enumerate(reactions):
                 spec = self.specDict.index(r['spec'])
-                stoch_tmp = np.array(r['stoch'], dtype=int)
+                stoich_tmp = np.array(r['stoich'], dtype=int)
                 # These next two lines handle the case where the same
                 # species appears on the LHS and RHS of the reactions
                 spec_unq, inv = np.unique(spec, return_inverse=True)
-                stoch_unq = sum_by_group(stoch_tmp, inv)[0]
+                stoich_unq = sum_by_group(stoich_tmp, inv)[0]
                 mat_i = np.append(mat_i, spec_unq)
                 mat_j = np.append(mat_j, np.zeros(len(spec_unq), dtype=int)+i)
-                stoch = np.append(stoch, stoch_unq)
-                lhs.append(spec[stoch_tmp < 0])
-                lhsstoch.append(-stoch_tmp[stoch_tmp < 0])
-                if nlhsmax < np.sum(stoch_tmp < 0):
-                    nlhsmax = np.sum(stoch_tmp < 0)
+                stoich = np.append(stoich, stoich_unq)
+                lhs.append(spec[stoich_tmp < 0])
+                lhsstoich.append(-stoich_tmp[stoich_tmp < 0])
+                if nlhsmax < np.sum(stoich_tmp < 0):
+                    nlhsmax = np.sum(stoich_tmp < 0)
 
             # Build matrix
-            self.mat = sp.coo_matrix((stoch, (mat_i, mat_j)), 
+            self.mat = sp.coo_matrix((stoich, (mat_i, mat_j)), 
                                      shape=(nspec, nreact), dtype='int')
             self.mat = sp.csr_matrix(self.mat)
 
@@ -152,22 +152,22 @@ class reaction_matrix(object):
                 spec = self.specDict.index(r['spec'])
                 np.add.at(self.mat[:, i], 
                           (spec, np.zeros(len(spec), dtype=int)), 
-                          r['stoch'])
-                spec_stoch = np.array(r['stoch'])
-                lhs.append(spec[spec_stoch < 0])
-                lhsstoch.append(-spec_stoch[spec_stoch < 0])
-                if nlhsmax < np.sum(spec_stoch < 0):
-                    nlhsmax = np.sum(spec_stoch < 0)
+                          r['stoich'])
+                spec_stoich = np.array(r['stoich'])
+                lhs.append(spec[spec_stoich < 0])
+                lhsstoich.append(-spec_stoich[spec_stoich < 0])
+                if nlhsmax < np.sum(spec_stoich < 0):
+                    nlhsmax = np.sum(spec_stoich < 0)
 
-        # For each reaction, record the indices and stochiometric
+        # For each reaction, record the indices and stoichiometric
         # factors on the left hand side; record these in a square
-        # matrix; also record the sum of the LHS stochiometric factors
+        # matrix; also record the sum of the LHS stoichiometric factors
         self.lhsidx = np.zeros((nreact, nlhsmax), dtype=int)
-        self.lhsstoch = np.zeros((nreact, nlhsmax), dtype=int)
+        self.lhsstoich = np.zeros((nreact, nlhsmax), dtype=int)
         for i in np.arange(nreact):
             self.lhsidx[i,:len(lhs[i])] = lhs[i]
-            self.lhsstoch[i,:len(lhs[i])] = lhsstoch[i]
-        self.lhssum = np.sum(self.lhsstoch, axis=1)
+            self.lhsstoich[i,:len(lhs[i])] = lhsstoich[i]
+        self.lhssum = np.sum(self.lhsstoich, axis=1)
 
     def dxdt(self, x, n, ratecoef):
         """
@@ -193,7 +193,7 @@ class reaction_matrix(object):
 
         # Get rates from rate coefficients
         rates = ratecoef * \
-                np.prod(x[self.lhsidx]**self.lhsstoch, axis=1) * \
+                np.prod(x[self.lhsidx]**self.lhsstoich, axis=1) * \
                 n**(self.lhssum-1)
 
         # Compute dxdt
@@ -229,14 +229,14 @@ class cr_reactions(reaction_matrix):
         reactions : list of dict
            A list listing all the reactions to be registered; each
            entry in the list must be a dict containing the keys 'spec'
-           'stoch', and 'rate', which list the species involved in the
-           reaction, the stochiometric factors for each species, and
+           'stoich', and 'rate', which list the species involved in the
+           reaction, the stoichiometric factors for each species, and
            the reaction rate per primary CR ionization,
            respectively. Sign convention is that reactants on the left 
-           hand side have negative stochiometric factors, those on the
+           hand side have negative stoichiometric factors, those on the
            right hand side have positive factors. Examples:
               cr + H -> H+ + e- is listed as 
-              { 'spec' : ['H', 'H+', 'e-'], 'stoch' : [-1, 1, 1],
+              { 'spec' : ['H', 'H+', 'e-'], 'stoich' : [-1, 1, 1],
                 'rate' : 1.0 }
         sparse : bool
            If True, the reaction rate matrix is represented as a
@@ -321,7 +321,7 @@ class photoreactions(reaction_matrix):
            A list listing all the reactions to be registered; each
            entry in the list must be a dict containing the keys:
               'spec' : list of the species involved in the reaction
-              'stoch' : stochiometric factor for each species
+              'stoich' : stoichiometric factor for each species
               'rate' : reaction rate per target in free space
               'av_fac' : optical depth per unit A_V
               'shield_fac' : (optional) callable to compute the
@@ -470,7 +470,7 @@ class gr_reactions(reaction_matrix):
            A list listing all the reactions to be registered; each
            entry in the list must be a dict containing the keys:
               'spec' : list of the species involved in the reaction
-              'stoch' : stochiometric factor for each species
+              'stoich' : stoichiometric factor for each species
               'grain' : (optional) if this key exists and is True, the
                  reaction is grain catalyzed and the rate scales as
                  the dust abundance; if this key is absence, the
