@@ -69,16 +69,16 @@ _cr = cr_reactions(specListExtended, _cr_react)
 ########################################################################
 _ph_react = [
     { 'spec' : ['C', 'C+', 'e-'], 'stoich' : [-1, 1, 1],
-      'rate' : 3.0e-10, 'av_fac' : 3.0 },
+      'rate' : 3.0e-10*1.7, 'av_fac' : 3.0 },
     { 'spec' : ['CHx', 'C'], 'stoich' : [-1, 1],
-      'rate' : 1.0e-9, 'av_fac' : 1.5 },
+      'rate' : 1.0e-9*1.7, 'av_fac' : 1.5 },
     { 'spec' : ['CO', 'C', 'O'], 'stoich' : [-1, 1, 1],
-      'rate' : 1.0e-10, 'av_fac' : 1.7, 
+      'rate' : 1.0e-10*1.7, 'av_fac' : 1.7, 
       'shield_fac' : fShield_CO_vDB },
     { 'spec' : ['OHx', 'O'], 'stoich' : [-1, 1],
-      'rate' : 5.0e-10, 'av_fac' : 1.9 },
+      'rate' : 5.0e-10*1.7, 'av_fac' : 1.9 },
     { 'spec' : ['HCO+', 'CO'], 'stoich' : [-1, 1],
-      'rate' : 1.5e-10, 'av_fac' : 2.5 }
+      'rate' : 1.5e-10*1.7, 'av_fac' : 2.5 }
 ]
 _ph = photoreactions(specListExtended, _ph_react)
 
