@@ -1,6 +1,6 @@
 """
 This module implements the reduced carbon-oxygen chemistry network of
-Nelson & Langer (1999, ApJ, 524, 923)
+Nelson & Langer (1999, ApJ, 524, 923).
 """
 
 ########################################################################
@@ -23,8 +23,9 @@ import numpy as np
 import string
 from despotic.despoticError import despoticError
 from shielding import fShield_CO_vDB
-from despotic.chemistry import abundanceDict
-from despotic.chemistry import chemNetwork
+from abundanceDict import abundanceDict
+from chemNetwork import chemNetwork
+from reactions import cr_reactions, photoreactions, reaction_matrix
 import scipy.constants as physcons
 import warnings
 
@@ -36,50 +37,104 @@ mH = (physcons.m_p+physcons.m_e)/physcons.gram
 _small = 1e-100
 
 ########################################################################
-# List of species used in this chemistry network
+# List of species used in this chemistry network; note that the
+# network does not track H or H+
 ########################################################################
 specList = ['He+', 'H3+', 'OHx', 'CHx', 'CO', 'C', 'C+', 'HCO+', 'O',
             'M+']
 specListExtended = specList + ['H2', 'He', 'M', 'e-']
 
+
+########################################################################
+# Data on cosmic ray reactions
+# Reactions are, in order:
+# (1)       cr + H2      -> H3+  + e-
+# (2)       cr + He      -> He+  + e-
+########################################################################
+_cr_react = [
+    { 'spec' : ['H2', 'H3+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 2.0 },
+    { 'spec' : ['He', 'He+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.1 }
+]
+_cr = cr_reactions(specListExtended, _cr_react)
+
 ########################################################################
 # Data on photoreactions
 # Reactions are, in order:
-# h nu + CI -> C+ + e
-# h nu + CHx -> CI + H
-# h nu + CO -> CI + O
-# h nu + OHx -> OI + H
-# h nu + M -> M+ + e
-# h nu + HCO+ -> CO + H
+# (1) h nu + C -> C+ + e
+# (2) h nu + CHx -> C
+# (3) h nu + CO -> C + O
+# (4) h nu + OHx -> O
+# (5) h nu + M -> M+ + e
+# (6) h nu + HCO+ -> CO
 ########################################################################
-_kph = np.array([ 
-        3.0e-10, 1.0e-9, 1.0e-10, 5.0e-10, 
-        2.0e-10, 1.5e-10])
-_avfac = np.array([3.0, 1.5, 3.0, 1.7, 1.9, 2.5])
-_inph = np.array([5, 3, 4, 2, 12, 7], dtype='int')
-_outph1 = np.array([6, 5, 5, 8, 9, 4], dtype='int')
-_outph2 = np.array([10, 10, 8, 10, 10, 10], dtype='int')
-
+_ph_react = [
+    { 'spec' : ['C', 'C+', 'e-'], 'stoich' : [-1, 1, 1],
+      'rate' : 3.0e-10, 'av_fac' : 3.0 },
+    { 'spec' : ['CHx', 'C'], 'stoich' : [-1, 1],
+      'rate' : 1.0e-9, 'av_fac' : 1.5 },
+    { 'spec' : ['CO', 'C', 'O'], 'stoich' : [-1, 1, 1],
+      'rate' : 1.0e-10, 'av_fac' : 1.7, 
+      'shield_fac' : fShield_CO_vDB },
+    { 'spec' : ['OHx', 'O'], 'stoich' : [-1, 1],
+      'rate' : 5.0e-10, 'av_fac' : 1.9 },
+    { 'spec' : ['HCO+', 'CO'], 'stoich' : [-1, 1],
+      'rate' : 1.5e-10, 'av_fac' : 2.5 }
+]
+_ph = photoreactions(specListExtended, _ph_react)
 
 ########################################################################
 # Data on two-body reactions
 # Reactions are, in order:
-# (0) H3+ + CI -> CHx + H2
-# (1) H3+ + OI -> OHx + H2
-# (2) H3+ + CO -> HCO+ + H2
-# (3) He+ + H2 -> He + H + H+
-# (4) He+ + CO -> C+ + O + He
-# (5) C+ + H2 -> CHx + H
-# (6) C+ + OHx -> HCO+
-# (7) OI + CHx -> CO + H
-# (8) CI + OHx -> CO + H
-# (9) He+ + e -> He + h nu
-# (10) H3+ + e -> H2 + H
-# (11) C+ + e -> CI + h nu
-# (12) HCO+ + e -> CO + H
-# (13) M+ + e -> M + h nu
-# (14) H3+ + M -> M+ + H + H2
+# (1)  H3+  + C   -> CHx  + H2
+# (2)  H3+  + O   -> OHx  + H2
+# (3)  H3+  + CO  -> HCO+ + H2
+# (4)  He+  + H2  -> He
+# (5)  He+  + CO  -> C+   + O  + He
+# (6)  C+   + H2  -> CHx
+# (7)  C+   + OHx -> HCO+
+# (8)  O    + CHx -> CO
+# (9)  C    + OHx -> CO
+# (10) He+  + e-  -> He
+# (11) H3+  + e-  -> H2
+# (12) C+   + e-  -> C
+# (13) HCO+ + e-  -> CO
+# (14) M+   + e-  -> M
+# (15) H3+  + M   -> M+  + H2
 ########################################################################
+_twobody_react = [
+    { 'spec'   : [  'H3+',   'C',  'CHx', 'H2'       ],
+      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+    { 'spec'   : [  'H3+',   'O',  'OHx', 'H2'       ],
+      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+    { 'spec'   : [  'H3+',  'CO', 'HCO+', 'H2'       ],
+      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+    { 'spec'   : [  'He+',  'H2',   'He'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [  'He+',  'CO',   'C+',  'O', 'He' ],
+      'stoich' : [    -1 ,   -1 ,     1 ,   1 ,   1  ] },
+    { 'spec'   : [   'C+',  'H2',  'CHx'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [   'C+', 'OHx', 'HCO+'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [    'O', 'CHx',   'CO'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [    'C', 'OHx',   'CO'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [  'He+',  'e-',   'He'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [  'H3+',  'e-',   'H2'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [   'C+',  'e-',    'C'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [ 'HCO+',  'e-',   'CO'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [   'M+',  'e-',    'M'             ],
+      'stoich' : [    -1 ,   -1 ,     1              ] },
+    { 'spec'   : [  'H3+',   'M',   'M+', 'H2'       ],
+      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] } ]
+_twobody = reaction_matrix(specListExtended, _twobody_react)
+
+# Two-body reaciton rate coefficients
 _k2 = np.array([ 
         2.0e-9, 8.0e-10, 1.7e-9, 7.0e-15, 1.6e-9, 4.0e-16, 1.0e-9, 
         2.0e-10, 5.8e-12, 9.0e-11, 1.9e-6, 1.4e-10, 3.3e-5, 
@@ -87,15 +142,8 @@ _k2 = np.array([
 _k2Texp = np.array([ 
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, -0.64, -0.54, 
         -0.61, -1.0, -0.65, 0.0])
-_in2bdy1 = np.array([1, 1, 1, 0, 0, 6, 6, 8, 5, 0, 1, 6, 7, 9, 1], 
-                    dtype='int') 
-_in2bdy2 = np.array([5, 8, 4, 10, 4, 10, 2, 3, 2, 13, 13, 13, 13, 
-                     13, 12], dtype='int')
-_out2bdy1 = np.array([3, 2, 7, 10, 6, 3, 7, 4, 4, 10, 10, 5, 4, 10, 
-                      9], dtype='int')
-_out2bdy2 = np.array([10, 10, 10, 10, 8, 10, 10, 10, 10, 10, 10, 
-                      10, 10, 10, 10], dtype='int')
-
+def _twobody_ratecoef(T):
+    return _k2 * T**_k2Texp
 
 
 ########################################################################
@@ -375,13 +423,20 @@ class NL99(chemNetwork):
             self.cloud.Tg = value
 
     @property
+    def sigmaNT(self):
+        if self.cloud is None:
+            return 0.0
+        else:
+            return self.cloud.sigmaNT
+
+    @property
     def cfac(self):
         if self.cloud is None:
             return 1.0
         else:
             if self.info is None:
                 cs2 = kB * self.cloud.Tg / (self.cloud.comp.mu * mH)
-                return np.sqrt(1.0 + 0.75*self.cloud.sigmaNT**2/cs2)
+                return np.sqrt(1.0 + 0.75*self.sigmaNT**2/cs2)
             elif 'noClump' in self.info:
                 if self.info['noClump'] == True:
                     return 1.0
@@ -571,37 +626,25 @@ class NL99(chemNetwork):
              time derivative of x
         """
 
-        # Vector to store results; it is convenient for this to have
-        # some phantom slots; slots 10, 11, 12, and 13 store
-        # abundances of H2, HeI, MI, and e, respectively
-        xdot = np.zeros(14)
+        # Get abundances of derived quantities
         xgrow = self.extendAbundances(xin)
 
-        # Cosmic ray / x-ray ionization reactions
-        xdot[0] = xgrow[11]*self.ionRate
-        xdot[1] = self.ionRate
+        # Get clumping factor and effective density
+        cfac = self.cfac
+        n = self.nH * cfac
 
-        # Photon reactions
-        ratecoef = 1.7*self.chi*np.exp(-_avfac*self.AV)*_kph
-        rate = ratecoef*xgrow[_inph]
-        # Apply CO line shielding factor
-        rate[2] = rate[2] * fShield_CO_vDB(xgrow[4]*self.NH, self.NH/2.0) 
-        for i, n in enumerate(_inph):
-            xdot[_inph[i]] -= rate[i]
-            xdot[_outph1[i]] += rate[i]
-            xdot[_outph2[i]] += rate[i]
+        # Use the cosmic ray and photoreaction rate calculators to get
+        # their contributions to dxdt
+        xdot = _cr.dxdt(xgrow, n, self.ionRate)
+        xdot += _ph.dxdt(xgrow, n, self.chi, self.AV, 
+                         [[self.NH*xgrow[4], self.NH/2.0]])
 
-        # Two-body reactions
-        rate = _k2*self.temp**_k2Texp*self.cfac*self.nH * \
-            xgrow[_in2bdy1]*xgrow[_in2bdy2]
-        for i, n in enumerate(_in2bdy1):
-            xdot[_in2bdy1[i]] -= rate[i]
-            xdot[_in2bdy2[i]] -= rate[i]
-            xdot[_out2bdy1[i]] += rate[i]
-            xdot[_out2bdy2[i]] += rate[i]
+
+        # Add two-body reactions
+        xdot += _twobody.dxdt(xgrow, n, _twobody_ratecoef(self.temp))
 
         # Return results
-        return xdot[:10]
+        return np.ravel(xdot)[:len(specList)]
 
 
     ####################################################################
