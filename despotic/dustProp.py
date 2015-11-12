@@ -26,18 +26,19 @@ class dustProp:
     Attributes
     ----------
     sigma10 : float
-        dust opacity to thermal radiation at 10 K, in cm^2 H^-1
+       dust opacity to thermal radiation at 10 K, in cm^2 H^-1
     sigmaPE : float
-        dust opacity averaged over 8 - 13.6 eV, the range that
-        dominates grain photoelectric heatin
+       dust opacity averaged over 8 - 13.6 eV, the range that
+       dominates grain photoelectric heatin
     sigmaISRF : float
-        dust opacity averaged the range that dominates grain starlight
-        heating
+       dust opacity averaged the range that dominates grain starlight
+       heating
     Zd : float
-        dust abundance normalized to solar neighborhood value
+       dust abundance normalized to solar neighborhood value
     beta : float
-        dust spectral index in the mm, sigma ~ nu^beta
-    alphaGD : grain-gas coupling coefficient
+       dust spectral index in the mm, sigma ~ nu^beta
+    alphaGD : float
+       grain-gas coupling coefficient
 
     Methods
     ------
