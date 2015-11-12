@@ -235,7 +235,8 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
                                dEdtParam=dEdtParam)
             else:
                 out = chemEvol(cloud, t+tEvol, tInit=t, nOut=3,
-                               evolveTemp='fixed')
+                               evolveTemp='fixed', 
+                               addEmitters=addEmitters)
             xOut = np.array(out[1].values())
 
             # Compute residual

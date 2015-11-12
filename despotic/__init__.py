@@ -8,6 +8,7 @@ __all__ = ["cloud", "collPartner", "composition", "despoticError",
 # directly, as despotic.cloud, rather than having to use the
 # cumbersome notation despotic.cloud.cloud or similar.
 from cloud import cloud
+from zonedcloud import zonedcloud
 try:
     from cloud import run_cloud_gui
 except:
