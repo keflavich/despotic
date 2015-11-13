@@ -579,7 +579,8 @@ class emitterData(object):
                         p
                 except KeyError:
                     warnings.warn("collision rates not "
-                                  "available for species "
+                                  "available for "+self.name+
+                                  " with species "
                                   +p+" (fractional abundance "
                                   "{:e}".format(n/nH)+") will be "
                                   "omitted from calculation")
