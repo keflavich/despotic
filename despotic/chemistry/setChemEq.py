@@ -24,7 +24,7 @@ exist.
 
 import numpy as np
 from scipy.integrate import odeint
-from despotic.despoticError import despoticError
+from .. import despoticError
 from abundanceDict import abundanceDict
 from copy import deepcopy
 from chemEvol import chemEvol

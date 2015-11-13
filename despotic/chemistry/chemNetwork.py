@@ -77,7 +77,7 @@ class chemNetwork(object):
     # provides a convenient way of getting the abundances in a nice,
     # user-readable form using abundanceDict. Derived classes
     # generally will not need to override this definition, but they
-    # are free to do so, as none of the chemical netowrk driver
+    # are free to do so, as none of the chemical network driver
     # classes rely on these definitions.
     @property
     def abundances(self):
@@ -85,6 +85,7 @@ class chemNetwork(object):
         return self._abundances
 
     @abundances.setter
-    def abundances(self, value):
-        self.x = value.x
-        self._abundances = value
+    def abundances(self, other):
+        self._abundances = abundanceDict(self.specList, self.x)
+        self._abundances.update(other)
+        self.applyAbundances()

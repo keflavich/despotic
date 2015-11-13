@@ -563,13 +563,22 @@ class NL99(chemNetwork):
 
     @abundances.setter
     def abundances(self, value):
-        if len(value.x)==10:
-            self.x = value.x
-        elif len(value.x)==14:
-            self.x = value.x[:10]
-            warnings.warn('For NL99 network, cannot set abundances of H2, He, M, e-; abundances set only for other species')
-        else:
-            raise ValueError("abundnaces for NL99 network must have 10 species!")
+        # Loop over key-value pairs in the and update them, but skip
+        # any that are in the extended species list but not the main
+        # list; issue warning if this happens
+        warn = False
+        abd = abundanceDict(self.specList, self.x)
+        for k, v in other.items():
+            if (k in specListExtended) and \
+               (k not in specList):
+                warn = True
+                continue
+            abd[k] = v
+        if warn:
+            warnings.warn("For NL99 network, cannot set abundances"
+            " of derived species H2, He, M, e-; abundances set only "
+            " for other species")
+
 
     ####################################################################
     # Method to get derived abundances from ones being stored; this

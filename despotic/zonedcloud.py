@@ -446,6 +446,101 @@ class zonedcloud(object):
             return mass
 
     ####################################################################
+    # These methods get and set abundances; each comes in two
+    # versions, one of which handles quantities that are mass-weighted
+    # over the entire cloud, and the other of which deals with
+    # zone-by-zone values
+    ####################################################################
+
+    @property
+    def abundances_zone(self):
+        """
+        Return abundances of all emitting species in all zones
+        """
+        return [z.abundances for z in self.zones]
+
+    @abundances_zone.setter
+    def abundances_zone(self, other):
+        """
+        Set abundances in all zones
+        """
+        if hasattr(other, '__iter__'):
+            for z, o in zip(self.zones, other):
+                z.abundances = o
+        else:
+            for z in self.zones:
+                z.abundances = other
+
+    @property
+    def abundances(self):
+        """
+        Returns abundances of all emitting species, mass-weighted over
+        cloud
+        """
+        mass = self.mass()
+        abd = self.abundances_zone
+        abd_sum = mass[0]*abd[0]
+        for m, a in zip(mass[1:], abd[1:]):
+            abd_sum += m*a
+        return abd_sum / np.sum(mass)
+
+    @abundances.setter
+    def abundances(self, other):
+        """
+        Set all abundances
+        """
+        if hasattr(other, '__iter__'):
+            for z, o in zip(self.zones, other):
+                z.abundances = o
+        else:
+            for z in self.zones:
+                z.abundances = other
+
+    @property
+    def chemabundances_zone(self):
+        """
+        Return abundances of all emitting species in all zones
+        """
+        return [z.chemabundances for z in self.zones]
+
+    @chemabundances_zone.setter
+    def chemabundances_zone(self, other):
+        """
+        Set abundances of all emitting species in all zones
+        """
+        if hasattr(other, '__iter__'):
+            for z, o in zip(self.zones, other):
+                z.chemabundances = o
+        else:
+            for z in self.zones:
+                z.chemabundances = other
+
+    @property
+    def chemabundances(self):
+        """
+        Returns abundances of all species in the chemical network,
+        mass-weighted over the zonedcloud
+        """
+        mass = self.mass()
+        abd = self.chemabundances_zone
+        abd_sum = mass[0]*abd[0]
+        for m, a in zip(mass[1:], abd[1:]):
+            abd_sum += m*a
+        return abd_sum / np.sum(mass)
+
+    @chemabundances.setter
+    def chemabundances(self, other):
+        """
+        Set all abundances in the chemical network
+        """
+        if hasattr(other, '__iter__'):
+            for z, o in zip(self.zones, other):
+                z.chemabundances = o
+        else:
+            for z in self.zones:
+                z.chemabundances = other
+
+    ####################################################################
     # These methods wrap the corresponding method in the cloud class,
     # and apply them to all zones
     ####################################################################
@@ -901,7 +996,11 @@ class zonedcloud(object):
               not
         """
         conv = []
-        for z in self.zones:
+        for i, z in enumerate(self.zones):
+            if 'verbose' in kwargs.keys():
+                if kwargs['verbose']:
+                    print("Finding equilibrium for zone " +
+                          str(i+1) + " / " + str(len(self.zones)))
             conv.append(z.setDustTempEq(**kwargs))
         return np.all(conv)
 
@@ -926,7 +1025,11 @@ class zonedcloud(object):
         if 'escapeProbGeom' not in kwargs.keys():
             kwargs['escapeProbGeom'] = self.geometry
         conv = []
-        for z in self.zones:
+        for i, z in enumerate(self.zones):
+            if 'verbose' in kwargs.keys():
+                if kwargs['verbose']:
+                    print("Finding equilibrium for zone " +
+                          str(i+1) + " / " + str(len(self.zones)))
             conv.append(z.setGasTempEq(**kwargs))
         return np.all(conv)
 
@@ -951,7 +1054,11 @@ class zonedcloud(object):
         if 'escapeProbGeom' not in kwargs.keys():
             kwargs['escapeProbGeom'] = self.geometry
         conv = []
-        for z in self.zones:
+        for i, z in enumerate(self.zones):
+            if 'verbose' in kwargs.keys():
+                if kwargs['verbose']:
+                    print("Finding equilibrium for zone " +
+                          str(i+1) + " / " + str(len(self.zones)))
             conv.append(z.setTempEq(**kwargs))
         return np.all(conv)
 
@@ -980,6 +1087,10 @@ class zonedcloud(object):
         elif 'escapeProbGeom' not in kwargs['tempEqParam'].keys():
             kwargs['tempEqParam']['escapeProbGeom'] = self.geometry
         conv = []
-        for z in self.zones:
+        for i, z in enumerate(self.zones):
+            if 'verbose' in kwargs.keys():
+                if kwargs['verbose']:
+                    print("Finding equilibrium for zone " +
+                          str(i+1) + " / " + str(len(self.zones)))
             conv.append(z.setChemEq(**kwargs))
         return np.all(conv)

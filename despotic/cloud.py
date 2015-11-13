@@ -144,30 +144,64 @@ class cloud(object):
         return self.emitters.keys()
 
     ####################################################################
-    # Method to return abundances in a cloud
+    # Method to get and set abundances in a cloud
     ####################################################################
-    def abundances(self, chem=False):
+
+    @property
+    def abundances(self):
         """
-        Return abundances in a cloud
+        Returns abundances of all emitting species
+        """
+        specList = self.emitters.keys()
+        x = np.array([self.emitters[s].abundance for s in
+                      specList])
+        return abundanceDict(specList, x)
+
+    @abundances.setter
+    def abundances(self, abd):
+        """
+        Set abundances of all emitting species; if these species exist
+        in the chemical network, they will be updated too
 
         Parameters
-           chem : Boolean
-              if True, and if a chemnetwork is set for this cloud, the
-              abundances returned are those of the chemical network;
-              otherwise they are the abundances of the emitters
-
-        Returns
-           abundances : abundanceDict
-              abundances of all species
+           abd : dict or abundanceDict
+              dict containing species names as keys, and abundances of
+              those species as values; species in abd that are not
+              already in the emitter list will be added
         """
-        if chem and self.chemnetwork is not None:
-            return self.chemnetwork.abundances
-        else:
-            specList = self.emitters.keys()
-            x = np.array([self.emitters[s].abundance for s in
-                          specList])
-            return abundanceDict(specList, x)
+        for k in abd.keys():
+            if k in self.emitters.keys():
+                self.emitters[k].abundance = abd[k]
+            else:
+                self.addEmitter(k, abd[k])
 
+    @property
+    def chemabundances(self):
+        """
+        Returns abundances of all species in the chemical network
+        """
+        if self.chemnetwork is None:
+            raise despoticError, "cloud: cannot get " + \
+                "chemabundances when chemnetwork is None"
+        return self.chemnetwork.abundances
+
+    @chemabundances.setter
+    def chemabundances(self, abd):
+        """
+        Set abundances of all species in the chemical network, and
+        update the emitter abundances to match
+
+        Parameters
+           abd : dict or abundanceDict
+              dict containing species names as keys, and abundances of
+              those species as values; species in abd that are not
+              already in the emitter list will be added
+        """
+        if self.chemnetwork is None:
+            raise despoticError, "cloud: cannot set " + \
+                "chemabundances when chemnetwork is None"
+        self.chemnetwork.abundances = abd
+        self.chemnetwork.applyAbundances()
 
     ####################################################################
     # Method to set velocity dispersion to virial value
