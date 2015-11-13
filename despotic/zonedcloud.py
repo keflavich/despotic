@@ -489,7 +489,7 @@ class zonedcloud(object):
         """
         Set all abundances
         """
-        if hasattr(other, '__iter__'):
+        if not isinstance(other, dict):
             for z, o in zip(self.zones, other):
                 z.abundances = o
         else:
@@ -508,7 +508,7 @@ class zonedcloud(object):
         """
         Set abundances of all emitting species in all zones
         """
-        if hasattr(other, '__iter__'):
+        if not isinstance(other, dict):
             for z, o in zip(self.zones, other):
                 z.chemabundances = o
         else:
