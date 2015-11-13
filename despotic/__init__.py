@@ -1,14 +1,14 @@
 __version__ = '1.1.0'
 __all__ = ["cloud", "collPartner", "composition", "despoticError",
            "dustProp", "emitter", "emitterData", "fetchLamda",
-           "lineProfLTE", "radiation", "refreshLamda"]
+           "lineProfLTE", "radiation", "refreshLamda",
+           "zonedcloud"]
 
 # Import the classes and functions from the files of the same
 # name. This allows users to access the classes and functions
 # directly, as despotic.cloud, rather than having to use the
 # cumbersome notation despotic.cloud.cloud or similar.
 from cloud import cloud
-from zonedcloud import zonedcloud
 try:
     from cloud import run_cloud_gui
 except:
@@ -22,4 +22,5 @@ from fetchLamda import fetchLamda
 from lineProfLTE import lineProfLTE
 from radiation import radiation
 from refreshLamda import refreshLamda
+from zonedcloud import zonedcloud
 import chemistry
