@@ -1204,11 +1204,24 @@ class cloud(object):
         lumScale[1] = rates['maxAbsdEdtDust']
 
         # Iterate to get equilibrium temperatures
-        res = root(_gdTempResid, Tinit, \
-                           args=(self, c1Grav, thin, \
-                                     LTE, escapeProbGeom, \
-                                     PsiUser, noClump, lumScale, \
-                                     verbose), \
+        res = root(_gdTempResid, Tinit,
+                   args=(self, c1Grav, thin,
+                         LTE, escapeProbGeom, 
+                         PsiUser, noClump, lumScale, 
+                         verbose), 
+                   method='hybr', options = { 'xtol' : tol })
+
+        # If we failed to converge, make one more try from a
+        # significantly larger starting temperature; larger starting
+        # temperatures seem to provide easier convergence sometimes
+        if not res.success:
+            Tnew = Tinit * 5.0
+            Tnew[Tnew < 50.] = 50.
+            res = root(_gdTempResid, Tnew, 
+                       args=(self, c1Grav, thin, 
+                             LTE, escapeProbGeom, 
+                             PsiUser, noClump, lumScale, 
+                             verbose), 
                        method='hybr', options = { 'xtol' : tol })
 
         # Make sure we've converged.

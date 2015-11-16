@@ -620,32 +620,25 @@ class emitter(object):
 # transitions, but optional keywords can specify a specific [upper,
 # lower] combination.
 ########################################################################
-    def setEscapeProb(self, thisCloud, transition=None, \
-                          escapeProbGeom='sphere'):
+    def setEscapeProb(self, thisCloud, transition=None,
+                      escapeProbGeom='sphere'):
         """
         Compute escape probabilities from stored level populations
 
         Parameters
-        ----------
-        thisCloud : class cloud
-            a cloud object containing the physical and chemical
-            properties of this cloud
-        transition : sequence of two sequences of int
-                     transition[0] = array of upper states
-                     transition[1] = array of lower states
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-             sets problem geometry that will be assumed in calculating
-             escape probabilities
+           thisCloud : class cloud
+              a cloud object containing the physical and chemical
+              properties of this cloud
+           transition : list
+              list of transition for which to set escape probability;
+              transition[0] = array of upper states, transition[1] =
+              array of lower states
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              sets problem geometry that will be assumed in calculating
+              escape probabilities
 
         Returns
-        -------
-        Nothing
-
-        Raises
-        ------
-        despoticError, if the level populations are not initialized or
-        the escape probability geometry is not 'sphere', 'slab', or
-        'LVG'
+           Nothing
         """
 
         if self.levPopInitialized == False:
@@ -717,79 +710,74 @@ class emitter(object):
 # Method to compute the escape probabilities and level populations
 # simultaneously.
 ########################################################################
-    def setLevPopEscapeProb(self, thisCloud, escapeProbGeom='sphere', \
-                                noClump=False, verbose=False, \
-                                reltol=1e-6, abstol=1e-8, \
-                                maxiter=200, veryverbose=False, \
-                                dampFactor=0.5):
+    def setLevPopEscapeProb(self, thisCloud, escapeProbGeom='sphere',
+                            noClump=False, verbose=False,
+                            reltol=1e-6, abstol=1e-8,
+                            maxiter=200, veryverbose=False,
+                            dampFactor=0.5):
         """
         Compute escape probabilities and level populations
         simultaneously.
 
         Parameters
-        ----------
-        thisCloud : class cloud
-            a cloud object containing the physical and chemical
-            properties of this cloud
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-           sets problem geometry that will be assumed in calculating
-           escape probabilities
-        noClump : Boolean
-           if set to True, the clumping factor used in estimating
-           rates for n^2 processes is set to unity
+           thisCloud : class cloud
+              a cloud object containing the physical and chemical
+              properties of this cloud
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              sets problem geometry that will be assumed in calculating
+              escape probabilities
+           noClump : Boolean
+              if set to True, the clumping factor used in estimating
+              rates for n^2 processes is set to unity
 
         Returns
-        -------
-        success: Boolean
-           true if iteration converges, false if it does not
+           success: Boolean
+              True if iteration converges, False if it does not
 
         Additional Parameters
-        ---------------------
-        verbose : Boolean
-           if true, diagnostic information is printed
-        veryverbose : Boolean
-           if true, a very large amount of diagnostic information is
-           printed; probably useful only for debugging
-        reltol : float
-           relative tolerance; convergence is considered to have
-           occured when |f_i(n+1) - f_i(n)| / 
-           max(f_i(n+1), f_i(n)) < reltol
-        abstol : float
-           absolute tolerance; convergence is considered to have
-           occured when |f_i(n)+1 - f_i(n)| < abstol
-        maxiter : int
-           maximum number of iterations to allow
-        dampFactor : float
-           a number in the range (0, 1] that damps out changes in level
-           populations at each iteration. A value of 1 means no
-           damping, while a value of 0 means the level populations
-           never change.
-
-        Raises
-        ------
-        despoticError, if the escape probability geometry is not
-        'sphere', 'slab', or 'LVG'
+           verbose : Boolean
+              if True, diagnostic information is printed
+           veryverbose : Boolean
+              if True, a very large amount of diagnostic information is
+              printed; probably useful only for debugging
+           reltol : float
+              relative tolerance; convergence is considered to have
+              occured when |f_i(n+1) - f_i(n)| / 
+              max(f_i(n+1), f_i(n)) < reltol
+           abstol : float
+              absolute tolerance; convergence is considered to have
+              occured when |f_i(n)+1 - f_i(n)| < abstol
+           maxiter : int
+              maximum number of iterations to allow
+           dampFactor : float
+              a number in the range (0, 1] that damps out changes in level
+              populations at each iteration. A value of 1 means no
+              damping, while a value of 0 means the level populations
+              never change.
 
         Remarks
-        -------
-        Convergence occurs when either the relative or the absolute
-        tolerance condition is satisfied. To disable either relative
-        or absolute tolerance checking, just set the appropriate
-        tolerance <= 0. However, be warned that in many circumstances
-        disabling absolute tolerances will gaurantee non-convergence,
-        because truncation errors tend to produce large relative
-        residuals for high energy states whose populations are very
-        low, and no amount of iterating will reduce these errors
-        substantially.
+           Convergence occurs when either the relative or the absolute
+           tolerance condition is satisfied. To disable either relative
+           or absolute tolerance checking, just set the appropriate
+           tolerance <= 0. However, be warned that in many circumstances
+           disabling absolute tolerances will gaurantee non-convergence,
+           because truncation errors tend to produce large relative
+           residuals for high energy states whose populations are very
+           low, and no amount of iterating will reduce these errors
+           substantially.
         """
 
+        # Sanitize inputs
+        nH = np.maximum(thisCloud.nH, small)
+        Tg = np.maximum(thisCloud.Tg, small)
+        sigmaNT = np.maximum(thisCloud.sigmaNT, 0.0)
+
         # Get collision rate matrix with clumping factor correction
-        qcoltrans = self.data.collRateMatrix(thisCloud.nH, \
-                                                 thisCloud.comp, \
-                                                 thisCloud.Tg)
+        qcoltrans = self.data.collRateMatrix(
+            nH, thisCloud.comp, Tg)
         if noClump == False:
             cs2 = kB * thisCloud.Tg / (thisCloud.comp.mu * mH)
-            cfac = np.sqrt(1.0 + 0.75*thisCloud.sigmaNT**2/cs2)
+            cfac = np.sqrt(1.0 + 0.75*sigmaNT**2/cs2)
             qcoltrans *= cfac
         qcol = np.transpose(qcoltrans)
 
@@ -809,7 +797,7 @@ class emitter(object):
         # If current level populations are unitialized, set them to
         # their LTE values as an initial guess
         if self.levPopInitialized == False:
-            self.setLevPopLTE(thisCloud.Tg)
+            self.setLevPopLTE(Tg)
 
         # Create workspace matrices, and initialize the last rows
         # M and b, which hold the summation constraint
@@ -840,12 +828,12 @@ class emitter(object):
             levPopOld = self.levPop.copy()
 
             # compute new escape probabilities
-            self.setEscapeProb(thisCloud, \
-                                   escapeProbGeom=escapeProbGeom)
+            self.setEscapeProb(thisCloud, escapeProbGeom=escapeProbGeom)
 
             # calculate new transition rate matrix
             m1 = qcol + self.escapeProb*qrad
-            m[:-1,:] = np.transpose(np.transpose(m1)/(np.sum(m1,axis=0)+small)) - \
+            m[:-1,:] = np.transpose(np.transpose(m1) / 
+                                    (np.sum(m1,axis=0)+small)) - \
                 np.identity(self.data.nlev)
 
             # check condition number
@@ -864,8 +852,8 @@ class emitter(object):
                 
                 # Calculate populations in LTE with gas and radiation
                 levPopLTEGas = self.data.levWgt * \
-                    np.exp(-self.data.levTemp/thisCloud.Tg) / \
-                    self.data.partFunc(thisCloud.Tg)
+                    np.exp(-self.data.levTemp/Tg) / \
+                    self.data.partFunc(Tg)
                 levPopLTERad = self.data.levWgt * \
                     np.exp(-self.data.levTemp/thisCloud.rad.TCMB) / \
                     self.data.partFunc(thisCloud.rad.TCMB)
@@ -873,15 +861,17 @@ class emitter(object):
                 # Kill levels that are below the minimum for both
                 levPopMax = np.maximum(levPopLTEGas, levPopLTERad)
                 levKeep = np.delete(levKeep, np.where(levPopMax < machineeps))
-                levDel = np.setdiff1d(np.arange(self.data.nlev, dtype='int'), levKeep)
+                levDel = np.setdiff1d(np.arange(self.data.nlev, dtype='int'),
+                                      levKeep)
 
                 # Build reduced m
                 mred1=np.delete(m1, levDel, axis=0)
                 mred1=np.delete(mred1, levDel, axis=1)
                 mred = np.zeros((len(levKeep)+1, len(levKeep)))
-                mred[:-1,:] = np.transpose(np.transpose(mred1) / \
-                                            (np.sum(mred1,axis=0)+small)) - \
-                                            np.identity(len(levKeep))
+                mred[:-1,:] = np.transpose(
+                    np.transpose(mred1) / 
+                    (np.sum(mred1,axis=0)+small)) - \
+                    np.identity(len(levKeep))
                 mred[-1,:] = 1.0
 
                 # Check condition number again
