@@ -31,6 +31,8 @@ shielding function of van Dishoeck & Black (1988) is fShield_CO_vDB.
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
+small = 1.0e-50
+
 ######################################################################
 # Self-shielding of H2, following Draine & Bertoldi (1996, ApJ, 468,
 # 269)
@@ -56,8 +58,8 @@ def fShield_H2_DB(NH2, sigma):
          the shielding factor for the input NH2 and sigma
     """
 
-    x = NH2 / 5e14
-    b5 = np.sqrt(2.0) * sigma / 1.0e5
+    x = np.maximum(NH2 / 5e14, small)
+    b5 = np.maximum(np.sqrt(2.0) * sigma / 1.0e5, small)
     return 0.965/(1.0+x/b5)**2 + 0.035/(1.0+x)**0.5 * \
         np.exp(-8.5e-4*(1.0+x)**0.5)
 
