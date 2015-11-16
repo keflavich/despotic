@@ -551,7 +551,7 @@ class emitterData(object):
                 try:
                     q += n * self.partners[p].\
                         colRateMatrix(temp, self.levWgt, self.levTemp)
-                except ValueError:
+                except ValueError, despoticError:
                     raise despoticError, "Temperature T = "+str(temp) + \
                         " K is outside tabulated range " + \
                         str(self.partners[p].tempTable[0])+" - " + \
@@ -570,7 +570,7 @@ class emitterData(object):
                 try:
                     q += n * self.partners[p1].\
                         colRateMatrix(temp, self.levWgt, self.levTemp)
-                except ValueError:
+                except ValueError, despoticError:
                     raise despoticError, "Temperature T = "+str(temp) + \
                         " K is outside tabulated range " + \
                         str(self.partners[p1].tempTable[0])+" - " + \

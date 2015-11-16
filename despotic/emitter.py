@@ -941,9 +941,9 @@ class emitter(object):
             if veryverbose:
                 print 'setLevPopEscapeProb for ' + self.name + \
                     ': iter ' + str(ctr) + ': abs resid = ' + \
-                    str(absnorm) + ', state; ' + str(argmax(resid)) + \
+                    str(absnorm) + ', state; ' + str(np.argmax(resid)) + \
                     ', rel resid = ' + str(relnorm) + \
-                    ', state = ' + str(argmax(relResid))
+                    ', state = ' + str(np.argmax(relResid))
             # update counter
             ctr = ctr+1
 
