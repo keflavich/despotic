@@ -47,6 +47,10 @@ G = physcons.G*1e3
 # Small numerical value
 small = 1e-50
 
+# Hardwired temperature limits for solvers
+Tlo = 1.0
+Thi = 1.0e4
+
 class cloud(object):
     """
     A class describing the properties of an interstellar cloud, and
@@ -1011,8 +1015,8 @@ class cloud(object):
         # Step 5: solve for T_d using Brent's method
         try:
             self.Td = np.exp(
-                brentq(_dustTempResid, 0, np.log(1e5),
-                       maxiter=200,
+                brentq(_dustTempResid, np.log(Tlo), 
+                       np.log(Thi), maxiter=200,
                        args=(self, PsiUser,
                              GammaSum, GammaSumMax,
                              lumScale, verbose)))
@@ -1117,8 +1121,23 @@ class cloud(object):
 
         # Solve for Tg
         try:
+            resid1 = _gasTempResid(
+                np.log(Tlo), self, c1Grav, thin, LTE,
+                escapeProbGeom, PsiUser, noClump,
+                lumScale, verbose)
+            Thi_in = Thi
+            while True:
+                resid2 = _gasTempResid(
+                    np.log(Thi_in), self, c1Grav, thin, LTE,
+                    escapeProbGeom, PsiUser, noClump,
+                    lumScale, verbose)
+                if resid1 * resid2 > 0:
+                    Thi_in *= 10.0
+                else:
+                    break
             self.Tg = np.exp(
-                brentq(_gasTempResid, 0, np.log(1e5),
+                brentq(_gasTempResid, np.log(Tlo), 
+                       np.log(Thi_in),
                        args=(self, c1Grav, thin, LTE,
                              escapeProbGeom, PsiUser,
                              noClump, lumScale, verbose)))
