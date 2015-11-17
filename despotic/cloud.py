@@ -24,7 +24,7 @@ computations on that cloud.
 
 import numpy as np
 from scipy.optimize import root
-from scipy.optimize import newton
+from scipy.optimize import brentq
 from scipy.integrate import odeint
 from emitter import emitter
 from composition import composition
@@ -981,14 +981,14 @@ class cloud(object):
         # useful so that we can compute the terms that don't depend on
         # the dust temperature just once and store them for the rest
         # of the calculation
-        rates = self.dEdt(PsiUser=PsiUser, dustOnly=noLines, \
-                              noClump=noClump, verbose=verbose, \
-                              dampFactor=dampFactor)
+        rates = self.dEdt(PsiUser=PsiUser, dustOnly=noLines,
+                          noClump=noClump, verbose=verbose,
+                          dampFactor=dampFactor)
         GammaSum = rates['GammaDustISRF'] + rates['GammaDustIR'] + \
             rates['GammaDustCMB']
-        GammaSumMax = max(rates['GammaDustISRF'], \
-                              rates['GammaDustIR'], \
-                              rates['GammaDustCMB'])
+        GammaSumMax = max(rates['GammaDustISRF'],
+                          rates['GammaDustIR'],
+                          rates['GammaDustCMB'])
         if noLines == False:
             GammaSum += rates['GammaDustLine']
             GammaSumMax = max(GammaSumMax, rates['GammaDustLine'])
@@ -997,49 +997,52 @@ class cloud(object):
         # assuming that dust-gas coupling is negligible, and that the
         # cloud is not optically thick, which are often the case
         if self.Td == 0.0:
-            self.Td = \
-                (GammaSum / \
-                     (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
-                     (1.0/(4.0+self.dust.beta))
+            self.Td = (GammaSum /
+                       (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
+                (1.0/(4.0+self.dust.beta))
 
         # Step 4: get initial scaling
-        rates = self.dEdt(dustOnly=True, sumOnly=True, \
-                               PsiUser=PsiUser, \
-                               fixedLevPop=True, \
-                               verbose=verbose)
+        rates = self.dEdt(dustOnly=True, sumOnly=True,
+                          PsiUser=PsiUser,
+                          fixedLevPop=True,
+                          verbose=verbose)
         lumScale = rates['maxAbsdEdtDust']
 
-        # Step 5: solve for T_d using Newton's method
+        # Step 5: solve for T_d using Brent's method
         try:
-            self.Td = newton(_dustTempResid, self.Td, \
-                                 maxiter=200, \
-                                 args=(self, PsiUser, \
-                                           GammaSum, GammaSumMax, \
-                                           lumScale, verbose))
+            self.Td = np.exp(
+                brentq(_dustTempResid, 0, np.log(1e5),
+                       maxiter=200,
+                       args=(self, PsiUser,
+                             GammaSum, GammaSumMax,
+                             lumScale, verbose)))
         except (despoticError, RuntimeError):
             pass
 
         # Check that we're really converged; if not, try again
         # starting from guessed starting position
-        if abs(_dustTempResid(self.Td, self, PsiUser, GammaSum, \
-                                  GammaSumMax, lumScale, False)) > 1.0e-3:
+        if abs(_dustTempResid(
+                np.log(self.Td), self, PsiUser, GammaSum,
+                GammaSumMax, lumScale, False)) > 1.0e-3:
             self.Td = \
-                (GammaSum / \
-                     (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
-                     (1.0/(4.0+self.dust.beta))
+                (GammaSum /
+                 (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
+                (1.0/(4.0+self.dust.beta))
             try:
-                self.Td = newton(_dustTempResid, self.Td, \
-                                     maxiter=200, \
-                                     args=(self, PsiUser, \
-                                               GammaSum, GammaSumMax, \
-                                               lumScale, verbose))
+                self.Td = np.exp(
+                    brentq(_dustTempResid, 0, np.log(1e5),
+                           maxiter=200,
+                           args=(self, PsiUser,
+                                 GammaSum, GammaSumMax,
+                                 lumScale, verbose)))
             except (despoticError, RuntimeError):
                 # If we're here, we failed to converge
                 return False
 
         # Test for success and return appropriate value
-        if abs(_dustTempResid(self.Td, self, PsiUser, GammaSum, \
-                                  GammaSumMax, lumScale, False)) > 1.0e-3:
+        if abs(_dustTempResid(
+                np.log(self.Td), self, PsiUser, GammaSum,
+                GammaSumMax, lumScale, False)) > 1.0e-3:
             return False
         else:
             return True
@@ -1105,28 +1108,29 @@ class cloud(object):
                 self.Tg = 10.0
 
         # Get initial scaling
-        rates = self.dEdt(c1Grav=c1Grav, \
-                               thin=thin, LTE=LTE, \
-                               escapeProbGeom=escapeProbGeom, \
-                               gasOnly=True, noClump=noClump, \
-                               sumOnly=True, PsiUser=PsiUser)
+        rates = self.dEdt(c1Grav=c1Grav,
+                          thin=thin, LTE=LTE,
+                          escapeProbGeom=escapeProbGeom,
+                          gasOnly=True, noClump=noClump,
+                          sumOnly=True, PsiUser=PsiUser)
         lumScale = rates['maxAbsdEdtGas']
 
         # Solve for Tg
         try:
-            self.Tg = newton(_gasTempResid, self.Tg, \
-                                 args=(self, c1Grav, \
-                                           thin, LTE, \
-                                           escapeProbGeom, PsiUser, \
-                                           noClump, lumScale, verbose))
+            self.Tg = np.exp(
+                brentq(_gasTempResid, 0, np.log(1e5),
+                       args=(self, c1Grav, thin, LTE,
+                             escapeProbGeom, PsiUser,
+                             noClump, lumScale, verbose)))
         except (despoticError, RuntimeError):
             # If we're here, we failed to converge
             return False
 
         # Check for success and return appropriate value
-        if abs(_gasTempResid(self.Tg, self, c1Grav, thin, LTE, \
-                                 escapeProbGeom, PsiUser, \
-                                 noClump, lumScale, verbose)) > 1.0e-3:
+        if abs(_gasTempResid(
+                np.log(self.Tg), self, c1Grav, thin, LTE,
+                escapeProbGeom, PsiUser,
+                noClump, lumScale, verbose)) > 1.0e-3:
             return False
         else:
             return True
@@ -1182,29 +1186,32 @@ class cloud(object):
         if self.comp.mu == 0.0:
             self.comp.computeDerived(self.nH)
 
-        # Initialize gas and dust temperatures if necessary
-        if Tinit != None:
-            self.Tg = Tinit[0]
-            self.Td = Tinit[1]
-        else:
-            if self.Tg==0.0:
-                self.Tg = 10.0
-            if self.Td==0.0:
-                self.Td = 10.0
+        # As an initial guess, set the dust temperature to equilibrium
+        # at fixed gas temperature, then set the gas temperature to
+        # equilibrium at fixed dust temperature
+        if Tinit is None:
+            Tinit = [None, None]
+        self.setDustTempEq(noClump=noClump, Tdinit=Tinit[1], 
+                           PsiUser=PsiUser, verbose=verbose)
+        self.setGasTempEq(
+            c1Grav=c1Grav, thin=thin, noClump=noClump,
+            LTE=LTE, Tginit=Tinit[0], fixedLevPop=fixedLevPop,
+            escapeProbGeom=escapeProbGeom, PsiUser=PsiUser,
+            verbose=verbose)
         Tinit = np.array([self.Tg, self.Td])
 
         # Get luminosity scaling
-        rates = self.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE, \
-                               escapeProbGeom=escapeProbGeom, \
-                               sumOnly=True, PsiUser=PsiUser, \
-                               noClump=noClump, \
-                               verbose=verbose)
+        rates = self.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE, 
+                          escapeProbGeom=escapeProbGeom, 
+                          sumOnly=True, PsiUser=PsiUser, 
+                          noClump=noClump, 
+                          verbose=verbose)
         lumScale = np.zeros(2)
         lumScale[0] = rates['maxAbsdEdtGas']
         lumScale[1] = rates['maxAbsdEdtDust']
 
         # Iterate to get equilibrium temperatures
-        res = root(_gdTempResid, Tinit,
+        res = root(_gdTempResid, np.log(Tinit),
                    args=(self, c1Grav, thin,
                          LTE, escapeProbGeom, 
                          PsiUser, noClump, lumScale, 
@@ -1217,7 +1224,7 @@ class cloud(object):
         if not res.success:
             Tnew = Tinit * 5.0
             Tnew[Tnew < 50.] = 50.
-            res = root(_gdTempResid, Tnew, 
+            res = root(_gdTempResid, np.log(Tnew), 
                        args=(self, c1Grav, thin, 
                              LTE, escapeProbGeom, 
                              PsiUser, noClump, lumScale, 
@@ -1229,8 +1236,8 @@ class cloud(object):
             return False
 
         # Store final result
-        self.Tg = res.x[0]
-        self.Td = res.x[1]
+        self.Tg = np.exp(res.x[0])
+        self.Td = np.exp(res.x[1])
         return True
 
 
@@ -2102,15 +2109,15 @@ except Exception as E:
 #        heating and cooling
 #    noClump -- Boolean; if true, clumping factors are turned off
 ########################################################################
-def _gdTempResid(Tgd, cloud, c1Grav, thin, LTE, \
-                     escapeProbGeom, PsiUser, noClump, lumScale, \
-                     verbose):
+def _gdTempResid(logTgd, cloud, c1Grav, thin, LTE,
+                 escapeProbGeom, PsiUser, noClump, lumScale,
+                 verbose):
 
     # Insert current dust and gas temperatures into cloud structure;
     # floor to CMB temperature to prevent numerical badness in case
     # the iterative solver has wantered off to negative values
-    cloud.Tg = max(Tgd[0], cloud.rad.TCMB)
-    cloud.Td = max(Tgd[1], cloud.rad.TCMB)
+    cloud.Tg = max(np.exp(logTgd[0]), cloud.rad.TCMB)
+    cloud.Td = max(np.exp(logTgd[1]), cloud.rad.TCMB)
     if verbose:
         print ""
         print "***"
@@ -2118,19 +2125,14 @@ def _gdTempResid(Tgd, cloud, c1Grav, thin, LTE, \
             str(cloud.Tg) + " K, Td = " + str(cloud.Td) + " K..."
 
     # Get net heating / cooling rates
-    rates = cloud.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE, \
-                           escapeProbGeom=escapeProbGeom, \
-                           sumOnly=True, PsiUser=PsiUser, \
-                           noClump=noClump, \
-                           verbose=verbose)
+    rates = cloud.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE,
+                       escapeProbGeom=escapeProbGeom,
+                       sumOnly=True, PsiUser=PsiUser,
+                       noClump=noClump,
+                       verbose=verbose)
 
     # Print status
     if verbose:
-        #print "setTempEq: dE_gas/dt = " + str(rates['dEdtGas']) + \
-        #    " erg s^-1 H^-1, dE_dust/dt = " + \
-        #    str(rates['dEdtDust']) + " erg s^-1 H^-1, " + \
-        #    "residuals = " + str(rates['dEdtGas']/rates['maxAbsdEdtGas']) + \
-        #    " " + str(rates['dEdtDust']/rates['maxAbsdEdtDust'])
         print "setTempEq: dE_gas/dt = " + str(rates['dEdtGas']) + \
             " erg s^-1 H^-1, dE_dust/dt = " + \
             str(rates['dEdtDust']) + " erg s^-1 H^-1, " + \
@@ -2155,20 +2157,19 @@ def _gdTempResid(Tgd, cloud, c1Grav, thin, LTE, \
 #        that go into GammaSum, needed for normalization
 #    verbose -- verbose or not
 ########################################################################
-def _dustTempResid(Td, cloud, PsiUser, GammaSum, GammaSumMax, lumScale, \
-                       verbose):
+def _dustTempResid(logTd, cloud, PsiUser, GammaSum, GammaSumMax, 
+                   lumScale, verbose):
 
     # Insert current dust temperature into gas structure, with a floor
     # equal to the CMB floor to prevent numerical problems if the
     # rootfinder wanders into negative values
-    cloud.Td = max(Td, small)
+    cloud.Td = max(np.exp(logTd), small)
 
     # Get net heating / cooling rates
-    rates = cloud.dEdt(dustCoolOnly=True, sumOnly=True, \
-                           PsiUser=PsiUser, \
-                           fixedLevPop=True, \
-                           verbose=verbose)
-
+    rates = cloud.dEdt(dustCoolOnly=True, sumOnly=True,
+                       PsiUser=PsiUser,
+                       fixedLevPop=True,
+                       verbose=verbose)
 
     # Print status if verbose
     if verbose:
@@ -2198,34 +2199,29 @@ def _dustTempResid(Td, cloud, PsiUser, GammaSum, GammaSumMax, lumScale, \
 #    noClump -- Boolean; if true, clumping factors are turned off
 #    verbose -- verbose or not
 ########################################################################
-def _gasTempResid(Tg, cloud, c1Grav, thin, LTE, \
-                      escapeProbGeom, PsiUser, noClump, lumScale, \
-                      verbose):
+def _gasTempResid(logTg, cloud, c1Grav, thin, LTE,
+                  escapeProbGeom, PsiUser, noClump, lumScale,
+                  verbose):
 
     # Insert current dust temperature into gas structure, using CMB
     # temperature as a floor
-    cloud.Tg = max(Tg, cloud.rad.TCMB)
+    cloud.Tg = max(np.exp(logTg), cloud.rad.TCMB)
 
     # Get net heating / cooling rates
-    rates = cloud.dEdt(c1Grav=c1Grav, \
-                           thin=thin, LTE=LTE, \
-                           escapeProbGeom=escapeProbGeom, \
-                           gasOnly=True, noClump=noClump, \
-                           sumOnly=True, PsiUser=PsiUser)
+    rates = cloud.dEdt(c1Grav=c1Grav,
+                       thin=thin, LTE=LTE,
+                       escapeProbGeom=escapeProbGeom,
+                       gasOnly=True, noClump=noClump,
+                       sumOnly=True, PsiUser=PsiUser)
 
     # If verbose, print status
     if verbose:
-        #print "_gasTempResid called with Tg = "+str(cloud.Tg) + \
-        #    ", dEdt = " + str(rates['dEdtGas']) + \
-        #    ", residual = " + \
-        #    str(rates['dEdtGas']/rates['maxAbsdEdtGas'])
         print "_gasTempResid called with Tg = "+str(cloud.Tg) + \
             ", dEdt = " + str(rates['dEdtGas']) + \
             ", residual = " + \
             str(rates['dEdtGas']/lumScale)
 
     # Return dE/dt with correct normalization
-    #return rates['dEdtGas']/rates['maxAbsdEdtGas']
     return rates['dEdtGas']/lumScale
 
 
