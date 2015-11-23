@@ -41,13 +41,15 @@ class zonedcloud(object):
     ####################################################################
     # Method to initialize
     ####################################################################
-    def __init__(self, colDen=None, AV=None, nZone=16, fileName=None, 
+    def __init__(self, fileName=None, colDen=None, AV=None, nZone=16, 
                  geometry='sphere', verbose=False):
         """
         This creates a zoned cloud, with zones at different column
         densities. The user must set one of colDen, AV, or fileName.
 
         Parameters
+           fileName : string
+              name of file from which to read cloud description
            colDen : array
               Array of column densities marking zone centers
            AV : array
@@ -60,8 +62,6 @@ class zonedcloud(object):
               to the maximum column density found in the cloud
               description file fileName; ignored if colDen or AV is
               not None
-           fileName : string
-              name of file from which to read cloud description
            geometry : 'sphere' | 'slab'
               geometry to assume for the cloud, either 'sphere'
               (onion-like) or 'slab' (layer cake-like)
