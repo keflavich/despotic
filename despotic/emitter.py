@@ -112,9 +112,9 @@ class emitter(object):
 ########################################################################
 # Class initialization method
 ########################################################################
-    def __init__(self, emitName, emitAbundance, extrap=False, \
-                     energySkip=False, emitterFile=None, \
-                     emitterURL=None):
+    def __init__(self, emitName, emitAbundance, extrap=True,
+                 energySkip=False, emitterFile=None,
+                 emitterURL=None):
 
         """
         Initialization routine
@@ -317,15 +317,14 @@ class emitter(object):
 
             try:
                 # Look for data file in stored location
-                self.data = emitterData(self.name, \
-                                            emitterFile=lamdaFile, \
-                                            extrap=extrap)
+                self.data = emitterData(self.name,
+                                        emitterFile=lamdaFile,
+                                        extrap=extrap)
             except despoticError:
                 # We didn't find the file in the stored location, so
                 # try looking for it as we would any other data file,
                 # without specifying a location
-                self.data = emitterData(self.name, \
-                                            extrap=extrap)
+                self.data = emitterData(self.name, extrap=extrap)
 
             # Store emitter in list
             knownEmitterData[self.name] = self.data

@@ -117,8 +117,8 @@ class emitterData(object):
 ########################################################################
 # Initialization routine
 ########################################################################
-    def __init__(self, emitName, emitterFile=None, emitterURL=None, \
-                     extrap=False, noRefresh=False):
+    def __init__(self, emitName, emitterFile=None, emitterURL=None,
+                 extrap=True, noRefresh=False):
         """
         Initialization routine
 

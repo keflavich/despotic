@@ -490,7 +490,7 @@ class cloud(object):
                 # Emitter lines are complicated. There are two
                 # required elements, a name and an abundance, that
                 # must come first. There are also four optional
-                # elements: energySkip, extrapolate, file:FileName,
+                # elements: energySkip, noExtrap, file:FileName,
                 # and URL:url
 
                 # Split up the tokens after the equal sign
@@ -516,14 +516,17 @@ class cloud(object):
                     # options to their defaults, then alter them based
                     # on the tokens we've been given
                     energySkip=False
-                    extrap=False
+                    extrap=True
                     emitterFile=None
                     emitterURL=None
                     for token in linesplit3[2:]:
                         if token.upper().strip() == 'ENERGYSKIP':
                             energySkip=True
                         elif token.upper().strip() == 'EXTRAPOLATE':
-                            extrap=True
+                            # Allowed to maintain backward compatibility
+                            pass
+                        elif token.upper().strip() == 'NOEXTRAP':
+                            extrap=False
                         elif token.upper().strip()[0:5] == 'FILE:':
                             emitterFile=token[5:].strip()
                         elif token.upper().strip()[0:4] == 'URL:':
@@ -540,19 +543,19 @@ class cloud(object):
                                   " with abundance "+linesplit3[1]
                         if energySkip:
                             msg += "; setting energySkip"
-                        if extrap:
-                            msg += "; allowing extrapolation"
+                        if not extrap:
+                            msg += "; disallowing extrapolation"
                         if emitterFile != None:
                             msg += "; using file name "+emitterFile
                         if emitterURL != None:
                             msg += "; using URL "+emitterURL
                         print msg
-                    self.addEmitter(linesplit3[0], \
-                                        float(linesplit3[1]), \
-                                        energySkip=energySkip, \
-                                        extrap=extrap, \
-                                        emitterFile=emitterFile, \
-                                        emitterURL=emitterURL)
+                    self.addEmitter(linesplit3[0],
+                                    float(linesplit3[1]),
+                                    energySkip=energySkip,
+                                    extrap=extrap,
+                                    emitterFile=emitterFile,
+                                    emitterURL=emitterURL)
 
             else:
                 # Line does not correspond to any known keyword, so
@@ -592,7 +595,7 @@ class cloud(object):
     # Method to add an emitter
     ####################################################################
     def addEmitter(self, emitName, emitAbundance, emitterFile=None,
-                   emitterURL=None, energySkip=False, extrap=False):
+                   emitterURL=None, energySkip=False, extrap=True):
         """
         Add an emitting species
 
@@ -611,9 +614,9 @@ class cloud(object):
               if set to True, this species is ignored when calculating
               line cooling rates
            extrap : Boolean
-              if set to True, collision rate coefficients for this species
+              If set to True, collision rate coefficients for this species
               will be extrapolated to temperatures outside the range given
-              in the LAMDA table. By default, no extrapolation is perfomed,
+              in the LAMDA table. If False, no extrapolation is perfomed,
               and providing temperatures outside the range in the table
               produces an error
 

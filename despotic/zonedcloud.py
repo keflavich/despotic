@@ -584,7 +584,7 @@ class zonedcloud(object):
     # Method to add an emitter; this is applied to every zone
     ####################################################################
     def addEmitter(self, emitName, emitAbundance, emitterFile=None,
-                   emitterURL=None, energySkip=False, extrap=False):
+                   emitterURL=None, energySkip=False, extrap=True):
         """
         Add an emitting species
 
@@ -607,7 +607,7 @@ class zonedcloud(object):
            extrap : Boolean
               if set to True, collision rate coefficients for this species
               will be extrapolated to temperatures outside the range given
-              in the LAMDA table. By default, no extrapolation is perfomed,
+              in the LAMDA table. If False, no extrapolation is perfomed,
               and providing temperatures outside the range in the table
               produces an error
 

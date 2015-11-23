@@ -73,7 +73,7 @@ class collPartner:
 ########################################################################
 # Class initialization method
 ########################################################################
-    def __init__(self, fp, nlev, extrap=False):
+    def __init__(self, fp, nlev, extrap=True):
         """
         Initialize a collPartner object
 
