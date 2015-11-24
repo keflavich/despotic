@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Chemistry and Chemical Networks &mdash; DESPOTIC 2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <link rel="prev" title="Atomic and Molecular Data" href="data.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="chemistry-and-chemical-networks">
+<span id="sec-chemistry"></span><h1>Chemistry and Chemical Networks<a class="headerlink" href="#chemistry-and-chemical-networks" title="Permalink to this headline">¶</a></h1>
+<p>The chemistry capabilities in DESPOTIC are located in the
+<code class="docutils literal"><span class="pre">despotic.chemistry</span></code> module.</p>
+<div class="section" id="operations-on-chemical-networks">
+<span id="sec-operations"></span><h2>Operations on Chemical Networks<a class="headerlink" href="#operations-on-chemical-networks" title="Permalink to this headline">¶</a></h2>
+<p>The central object in a chemical calculation is a chemical network,
+which consists of a set of chemical species and a set of reactions
+that change the concentrations of each of them. Formally, a network is
+defined by a set of <span class="math">\(N\)</span> species with abundances
+<span class="math">\(\mathbf{x}\)</span> (defined as number density of each species per H
+nucleus), and a function <span class="math">\(d\mathbf{x}/dt = \mathbf{f}(\mathbf{x},
+\mathbf{p})\)</span> that gives the time rate of change of the abundances. The
+vector <span class="math">\(\mathbf{p}\)</span> specifies a set of parameters on which the
+reaction rates depend, and it may include quantities such as the
+ambient radiation field (for photoreactions), the density, the
+temperature, etc. The numerical implementation of chemical networks is
+described in <a class="reference internal" href="#ssec-chemnetworks"><span>Defining New Chemical Networks: the chemNetwork Class</span></a>. Given any chemical network,
+DESPOTIC is capable of two operations:</p>
+<ul class="simple">
+<li>Given an initial set of abundances at <span class="math">\(\mathbf{x}(t_0)\)</span> at
+time <span class="math">\(t_0\)</span>, compute the abundances at some later time
+<span class="math">\(t_1\)</span>. This is simply a matter of numerically integrating the
+ordinary differential equation <span class="math">\(d\mathbf{x}/dt =
+\mathbf{f}(\mathbf{x},\mathbf{p})\)</span> from <span class="math">\(t_0\)</span> to <span class="math">\(t_1\)</span>,
+where <span class="math">\(\mathbf{f}\)</span> is a known function. In DESPOTIC, this
+capability is implemented by the routine <code class="docutils literal"><span class="pre">chemEvol</span></code> in the
+<code class="docutils literal"><span class="pre">despotic.chemistry.chemEvol</span></code> module. The <code class="docutils literal"><span class="pre">cloud</span></code> class
+contains a wrapper around this routine, which allows it to be
+called to operate on a specific instance of <code class="docutils literal"><span class="pre">cloud</span></code> or
+<code class="docutils literal"><span class="pre">zonedcloud</span></code>.</li>
+<li>Find an equilibrium set of abundances
+<span class="math">\(\mathbf{x}_{\mathrm{eq}}\)</span> such that <span class="math">\(d\mathbf{x}/dt =
+\mathbf{f}(\mathbf{x}_{\mathrm{eq}}, \mathbf{p}) = 0\)</span>. Note that
+these is in general no guarantee that such an equilibrium exists, or
+that it is unique, and there are no general techniques for
+identifying such equilibria for arbitrary vector functions
+<span class="math">\(\mathbf{f}\)</span>. DESPOTIC handles this problem by explicitly
+integrating the ODE <span class="math">\(d\mathbf{x}/dt =
+\mathbf{f}(\mathbf{x},\mathbf{p})\)</span> until <span class="math">\(\mathbf{x}\)</span> reaches
+constant values (within some tolerance) or until a specified maximum
+time is reached. In DESPOTIC, this capability is implemented by
+the routine <code class="docutils literal"><span class="pre">setChemEq</span></code> in the <code class="docutils literal"><span class="pre">despotic.chemistry.setChemEq</span></code>
+module. The <code class="docutils literal"><span class="pre">cloud</span></code> and <code class="docutils literal"><span class="pre">zonedcloud</span></code> classed contains a wrapper
+around this routine, which allows it to be called to operate on a
+specific instance of <code class="docutils literal"><span class="pre">cloud</span></code> or <code class="docutils literal"><span class="pre">zonedcloud</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="available-chemical-networks">
+<h2>Available Chemical Networks<a class="headerlink" href="#available-chemical-networks" title="Permalink to this headline">¶</a></h2>
+<p>DESPOTIC ships with two predefined chemical networks, described below.</p>
+<div class="section" id="nl99">
+<span id="sssec-nl99"></span><h3><code class="docutils literal"><span class="pre">NL99</span></code><a class="headerlink" href="#nl99" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">NL99</span></code> network implements the reduced C-O network introduced by
+<a class="reference external" href="http://adsabs.harvard.edu/abs/1999ApJ...524..923N">Nelson &amp; Langer (1999, Astrophysical Journal, 524, 923; hereafter
+NL99)</a>. Readers
+are refereed to that paper for a full description of the network and
+the physical approximations on which it relies. To summarize briefly
+here, the network is intended to capture the chemistry of carbon and
+oxygen as it occurs at moderate densities and low temperatures in
+<span class="math">\(\mathrm{H}_2\)</span> dominated clouds. It includes the species C,
+<span class="math">\(\mathrm{C}^+\)</span>, CHx, CO, <span class="math">\(\mathrm{HCO}^+\)</span>,
+<span class="math">\(\mathrm{H}^+_3\)</span>, <span class="math">\(\mathrm{He}^+\)</span>, O, OHx, M, and
+<span class="math">\(\mathrm{M}^+\)</span>. Several of these are &#8220;super-species&#8221; that
+agglomerate several distinct species with similar reaction rates and
+pathways, including CHx (where <span class="math">\(x = 1-4\)</span>), OHx (where <span class="math">\(x =
+1-2\)</span>), and M and <span class="math">\(\mathrm{M}^+\)</span> (which are stand-ins for metals
+such as iron and nickel). The network involves two-body reactions
+among these species, as well as photochemical reactions induces by UV
+from the ISRF and reactions initiated by cosmic ray ionizations. In
+addition to the initial abundances of the various species, the network
+depends on the ISRF, the ionization rate, and the total abundances of
+C and O nuclei.</p>
+<p>In implementing the NL99 network in DESPOTIC there are a three design
+choices to be made. First, photochemical and ionization reactions
+depend on the UV radiation field strength and the ionization
+rate. When performing computations on a cloud, DESPOTIC takes these
+from the parameters <code class="docutils literal"><span class="pre">chi</span></code> and <code class="docutils literal"><span class="pre">ionRate</span></code> that are part of the radiation
+class attached to the cloud.</p>
+<p>Second, photochemical reactions depend on the amount of shielding
+against the ISRF provided by dust, and, in the case of the reaction
+<span class="math">\(\mathrm{CO}\rightarrow\mathrm{C}+\mathrm{O}\)</span>, line shielding by
+CO and <span class="math">\(\mathrm{H}_2\)</span>. Following its usual approximation for
+implementing such shielding in a one-zone model, DESPOTIC takes the
+relevant column density to be <span class="math">\(N_{\mathrm{H}}/2\)</span>, where
+<span class="math">\(N_\mathrm{H}\)</span> is the column density colDen of the cloud, so
+that the typical amount of shielding is assumed to correspond to
+half the area-averaged column density. For the dust shielding,
+NL99 express the shielding in terms of the V-band extinction
+<span class="math">\(A_V\)</span>; unless instructed otherwise, DESPOTIC computes this via</p>
+<div class="math">
+\[A_V = 0.4 \sigma_{\mathrm{PE}}(N_{\mathrm{H}}/2).\]</div>
+<p>This ratio of V-band to 100 nm extinction is intermediate
+between the values expected for Milky Way and SMC dust opacity curves,
+as discussed in <a class="reference external" href="http://adsabs.harvard.edu/abs/2011ApJ...731...25K">Krumholz, Leroy, &amp; McKee (2011, Astrophysical
+Journal, 731, 25)</a>. However, the
+user may override this choice. For line shielding, DESPOTIC computes
+the <span class="math">\(\mathrm{H}_2\)</span> and CO column densities</p>
+<div class="math">
+\[N_{\mathrm{H}_2} = x_{\mathrm{H}_2} N_{\mathrm{H}}/2\]\[N_\mathrm{CO} = x_\mathrm{CO} N_\mathrm{H} /2,\]</div>
+<p>which amounts to assuming that the CO and <span class="math">\(\mathrm{H}_2\)</span> are
+uniformly distributed. Note that the NL99 network explicitly assumes
+<span class="math">\(x_{\mathrm{H}_2} = 0.5\)</span>, as no reactions involving atomic H are
+included &#8211; see <a class="reference internal" href="#sssec-nl99-gc"><span>NL99_GC</span></a> for a network that does include
+hydrogen chemistry. These column densities are then used to find a
+shielding factor by interpolating the tabulated values of <a class="reference external" href="http://adsabs.harvard.edu/abs/1988ApJ...334..771V">van Dishoeck
+&amp; Black (1988, Astrophysical Journal, 334, 771)</a>.</p>
+<p>The third choice is how to map between the species included in the
+chemistry network and the actual emitting species that are required
+to compute line emission, cooling, etc. This is non-trivial both
+because the chemical network includes super-species, because the
+chemical network does not distinguish between ortho- and para-
+sub-species while the rest of DESPOTIC does, and because the network
+does not distinguish between different isotopomers of the same
+species, while the rest of DESPOTIC does. This does not create
+problems in mapping from cloud emitter abundances to the chemical
+network, since the abundances can simply be summed, but it does create
+a question about how to map output chemical abun- dances computed by
+the network into the abundances of emitters that can be operated on by
+the remainder of DESPOTIC. In order to handle this issue, DESPOTIC
+makes the following assumptions:</p>
+<ol class="arabic simple">
+<li>OHx is divided evenly between OH and <span class="math">\(\mathrm{OH}_2\)</span></li>
+<li>The ratio of ortho- to para- for all species is the same as that of
+<span class="math">\(\mathrm{H}_2\)</span></li>
+<li>The abundances ratios of all isotopomers of a species remain fixed
+as reactions occur, so, for example, the final abundance ratio of
+<span class="math">\(\mathrm{C}^{18}\mathrm{O}\)</span> to
+<span class="math">\(\mathrm{C}^{16}\mathrm{O}\)</span> as computed by the chemical
+network is always the same as the initial one.</li>
+</ol>
+</div>
+<div class="section" id="nl99-gc">
+<span id="sssec-nl99-gc"></span><h3><code class="docutils literal"><span class="pre">NL99_GC</span></code><a class="headerlink" href="#nl99-gc" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="defining-new-chemical-networks-the-chemnetwork-class">
+<span id="ssec-chemnetworks"></span><h2>Defining New Chemical Networks: the <code class="docutils literal"><span class="pre">chemNetwork</span></code> Class<a class="headerlink" href="#defining-new-chemical-networks-the-chemnetwork-class" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="helper-modules-for-chemical-networks">
+<h2>Helper Modules for Chemical Networks<a class="headerlink" href="#helper-modules-for-chemical-networks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="abundancedict">
+<h3><code class="docutils literal"><span class="pre">abundanceDict</span></code><a class="headerlink" href="#abundancedict" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="reactions">
+<h3><code class="docutils literal"><span class="pre">reactions</span></code><a class="headerlink" href="#reactions" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Chemistry and Chemical Networks</a><ul>
+<li><a class="reference internal" href="#operations-on-chemical-networks">Operations on Chemical Networks</a></li>
+<li><a class="reference internal" href="#available-chemical-networks">Available Chemical Networks</a><ul>
+<li><a class="reference internal" href="#nl99"><code class="docutils literal"><span class="pre">NL99</span></code></a></li>
+<li><a class="reference internal" href="#nl99-gc"><code class="docutils literal"><span class="pre">NL99_GC</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-new-chemical-networks-the-chemnetwork-class">Defining New Chemical Networks: the <code class="docutils literal"><span class="pre">chemNetwork</span></code> Class</a></li>
+<li><a class="reference internal" href="#helper-modules-for-chemical-networks">Helper Modules for Chemical Networks</a><ul>
+<li><a class="reference internal" href="#abundancedict"><code class="docutils literal"><span class="pre">abundanceDict</span></code></a></li>
+<li><a class="reference internal" href="#reactions"><code class="docutils literal"><span class="pre">reactions</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="data.html" title="previous chapter">Atomic and Molecular Data</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chemistry.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Mark R. Krumholz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/chemistry.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

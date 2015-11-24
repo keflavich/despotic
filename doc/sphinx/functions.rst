@@ -9,9 +9,15 @@ library's capabilities, and users who wish to understand every
 available option should refer to :ref:`sec-full`. The routines used in
 this section are all described in full detail there. For all of these
 operations, the user should first have imported the basic DESPOTIC
-class cloud by doing::
+class ``cloud`` by doing::
 
   from despotic import cloud
+
+In the examples below we will also assume that ``matplotlib`` and
+``numpy`` have both been imported, via::
+
+  import matplotlib.pyplot as plt
+  import numpy as np
 
 Unit Conventions
 ----------------
@@ -24,14 +30,15 @@ important conventions to keep in mind.
    neighborhood values (e.g. metallicity and interstellar radiation
    field strength) and quantities where the conventional unit is
    non-CGS (e.g. integrated brightness temperatures are expressed in
-   the usual units of K km / s).
+   the usual units of K km/s).
 2. All rates are expressed per H nucleus, rather than per unit mass or
-   per unit volume. This includes chemical abundances.
+   per unit volume. This includes chemical abundances. Thus for
+   example a heating rate of :math:`\Gamma=10^{-26}` should be
+   understood as :math:`10^{-26}` erg/s/H nucleus. An abundance
+   :math:`x_{\mathrm{He}}=0.1` should be understood as 1 He atom per
+   10 H nuclei.
 
-Thus for example a heating rate of :math:`\Gamma=10^{-26}` should be
-understood as :math:`10^{-26}` erg / s / H nucleus. An abundance
-:math:`x_{\mathrm{He}}=0.1` should be understood as 1 He atom per 10 H nuclei.
-
+.. _ssec-line-emission:
 
 Line Emission
 -------------
@@ -79,7 +86,7 @@ snippet adds CO as an emitting species, at an abundance of
 The first argument is the name of the emitting species, and the second
 is the abundance. The requisite molecular data file will be read from
 disk if it is available, or automatically downloaded from the Leiden
-Atomic and Molecular Database if it is not (see :ref:`data`).
+Atomic and Molecular Database if it is not (see :ref:`sec-data`).
 
 Once an emitter has been added, only a single call is required to
 calculate the luminosity of its lines::
@@ -208,6 +215,8 @@ time is often faster, and if dust-gas coupling is known to be
 negligible will produce nearly identical results as solving for the
 two together.
 
+.. _ssec-temp-evol:
+
 Time-Dependent Temperature Evolution
 ------------------------------------
 
@@ -215,7 +224,9 @@ To perform computations of time-dependent temperature evolution,
 DESPOTIC provides the method ``cloud.tempEvol``. In its most basic
 form, this routine simply accepts an argument specifying the amount of
 time for which the cloud is to be integrated, and returning the
-temperature as a function of time during this evolution::
+temperature as a function of time during this evolution (note that
+executing this command may take a few minutes, depending on your
+processor)::
 
   mycloud.Tg = 50.0         # Start the cloud out of equilibrium
   tFinal = 20 * 3.16e10     # 20 kyr
@@ -251,11 +262,12 @@ Chemical Equilibria
 
 DESPOTIC can also compute the chemical state of clouds from a chemical
 network. Full details on chemical networks are given in
-:ref:`chemistry`, but for this example we will use a simple network
+:ref:`sec-chemistry`, but for this example we will use a simple network
 that DESPOTIC ships with, that of `Nelson & Langer (1999, ApJ,
 524, 923) <http://adsabs.harvard.edu/abs/1999ApJ...524..923N>`_. This
 network computes the chemistry of carbon and oxygen in a region where
-the hydrogen is fully molecular.
+the hydrogen is fully molecular. For more details see
+:ref:`sssec-NL99`.
 
 To perform computations with this network, one must first import the
 class that defines it::
@@ -338,3 +350,191 @@ in systems where multiple equilibria exist.
 
 Time-Dependent Chemical Evolution
 ---------------------------------
+
+DESPOTIC can also calculate time-dependent chemical evolution. This is
+accomplished through the method cloud.chemEvol. At with
+``cloud.tempEvol`` (see :ref:`ssec-temp-evol`), this routine accepts
+an argument specifying the amount of time for which the cloud is to be
+integrated, and returning the chemical abundances as a function of
+time during this evolution::
+
+  mycloud.rad.ionRate = 2.0e-16 # Raise the ionization rate a lot
+  tFinal = 0.5 * 3.16e13 # 0.5 Myr
+  abd, t = mycloud.chemEvol(tFinal, network=NL99)
+
+Note that the ``network=NL99`` option may be omitted if one has
+previously assigned that network to the cloud (for example by
+executing the examples in :ref:`ssec-chem-eq`).
+
+The output quantity abd here is an object of class ``abundanceDict``,
+which is a specialized dict for handling chemical abundances -- see
+:ref:`ssec-abundanceDict`. One can examine the abundances of specific
+species just by giving their chemical names. For example, to see
+the time-dependent evolution of the abundances of CO, C, and
+:math:`\mathrm{C}^+`, one could do::
+
+  plt.plot(t, abd["CO"])
+  plt.plot(t, abd["C"])
+  plt.plot(t, abd["C+"])
+
+As with ``setChemEq``, this routine modifies the abundances of
+emitters in the cloud to the values they achieve at the end of the
+evolution, so to see the final CO abundance one could do::
+
+  print mycloud.emitters["CO"].abundance
+
+Multi-Zone Clouds
+-----------------
+
+While most DESPOTIC functionality is provided through the ``cloud``
+class, which represents a single cloud, it is sometimes useful to have
+a cloud that contains zones of different optical depths. This
+functionality is provided through the ``zonedcloud`` class. A
+``zonedcloud`` is just a collection of ``cloud`` objects that are
+characterized by having different column densities (and optionally
+volume densities), and on which all the operations listed above can be
+performed in a batch fashion.
+
+One can create a ``zonedcloud`` in much the same way as a ``cloud``,
+but reading from an input file::
+
+  from despotic import zonedcloud
+  zc = zonedcloud(fileName="cloudfiles/MilkyWayGMC.desp")
+
+A ``zonedcloud`` is characterized by column densities for each of its
+zones, which can be accessed through the ``colDen`` property::
+
+  print zc.colDen
+
+The column densities of all zones, and the number of zones, can be
+controlled when the ``zonedcloud`` is created using the keywords
+``nZone`` and ``colDen``; see :ref:`ssec-full` for the full list of
+keywords.
+
+Once a ``zonedcloud`` exists, all of the functions described above in
+this section are available for it, and will be applied zone by
+zone. For example, one can do::
+
+  zc.setTempEq()
+  print zc.Tg
+
+to set and then print the temperature in each zone. Commands the
+report observable quantities or abundances will return
+appropriately-weighted sums over the entire cloud. For example::
+
+  zc.lineLum('co')[0]
+
+returns a dict describing the :math:`J=1\rightarrow 0` line of CO. The
+quantities ``intTB`` and ``intIntensity`` that are part of the dict
+and contain the velocity-integrated brightness temperature and
+frequency-integrated intensity, respectively (see
+:ref:`ssec-line-emission`), are sums over all zones, while ones
+like ``Tex`` (the excitation temperature) that do not make sense to
+sum are returned as an array giving zone-by-zone values.
+
+
+Computing Line Profiles
+-----------------------
+
+Line profile computation operates somewhat differently then the
+previous examples, because it is provided through a stand-alone
+procedure rather than through the cloud class. This procedure is
+called lineProfLTE, and may be imported directly from the DESPOTIC
+package. The routine also requires emitter data stored in an
+``emitterData`` object. The first step in a line profile calculation is
+therefore to import these two objects into the python environment::
+
+  from despotic import lineProfLTE
+  from despotic import emitterData
+
+The second step is to read in the emitter data. The interface to read
+emitter data is essentially identical to the one used to add an
+emitter to a cloud. One simply declares an ``emitterData`` object,
+giving the name of the emitter as an argument::
+
+  csData = emitterData(’CS’) # Reads emitter data for the CS molecule
+
+Alternately, emitter data may be obtained from a ``cloud``, since clouds
+store emitter data for all their emitters. Using the examples from the
+previous sections::
+
+  coData = mycloud.emitters["CO"].data
+
+copies the emitter data for CO to the variable ``coData``.
+
+The third step is to specify the radius of the cloud, and the profiles
+of any quantities within the cloud that are to change with radius,
+including density, temperature, radial velocity, and non-thermal
+velocity dispersion. Each of these can be constant, but the most
+interesting applications are when one or more of them are not, in
+which case they must be defined by functions. These function each take
+a single argument, the radius in units where the outer radius of the
+cloud is unity, and return a single floating point value, giving the
+quantity in question in CGS units. For example, to compute line
+profiles through a cloud of spatially-varying temperature and infall
+velocity, one might define the functions::
+
+  R = 0.02 * 3.09e18 # 0.2 pc
+  def TProf(r):
+      return 8.0 + 12.0*np.exp(-r**2/(2.0*0.5**2))
+  def vProf(r):
+      return -4.0e4*r
+
+The first function sets a temperature that varies from 20 K in the
+center of close to 8 K at the outer edge, and the second defines a
+velocity that varies from 0 in the center to :math:`-0.4` km
+:math:`\mathrm{s}^{-1}` (where negative indicates infall) at the outer
+edge. Similar functions can be defined by density and non-thermal
+velocity dispersion if the user so desires. Alternately, the user can
+simply define them as constants::
+
+  ncs = 0.1       # CS density 0.1 cm^-3
+  sigmaNT = 2.0e4 # Non-thermal velocity dispersion 0.2 km s^-1
+
+The final step is to use the ``lineProfLTE`` routine to compute the
+brightness temperature versus velocity::
+
+  TB, v = lineProfLTE(cs, 2, 1, R, ncs, TProf, vProf, sigmaNT).
+
+Here the first argument is the emitter data, the second and third are
+the upper and lower quantum states between which the line is to be
+computed (ordered by energy, with ground state = 0), followed by the
+cloud radius, the volume density, the temperature, the velocity, and
+the non-thermal velocity dispersion. Each of these quantities can be
+either a float or a callable function of one variable, as in the
+example above. If it is a float, that quantity is taken to be
+constant, independent of radius. This routine returns two arrays, the
+first of which is the brightness temperature and the second of which
+is the velocity at which that brightness temperature is computed,
+relative to line center. These can be examined in any of the usual
+numpy ways, for example by plotting them::
+
+  plt.plot(v, TB)
+
+By default the velocity is sampled at 100 values. The routine attempts
+to guess a reasonable range of velocities based on the input values of
+radial velocity and velocity dispersion, but these defaults may be
+overridden by the optional argument ``vLim``, which is a sequence of
+two values giving the lower and upper limits on the velocity::
+
+  TB, v = lineProfLTE(cs, 2, 1, R, ncs, TProf, vProf, sigmaNT,
+                      vLim=[-2e5,2e5]).
+
+A variety of other optional arguments can be used to control the
+velocities at which the brightness temperature is computed. It is also
+possible to compute line profiles at positions offset from the
+geometric center of the cloud, using the optional argument offset --
+see :ref:`ssec-full`.
+
+Escape Probability Geometries
+-----------------------------
+
+DESPOTIC supports three possible geometries that can be used when
+computing escape probabilities, and which are controlled by the
+``escapeProbGeom`` optional argument. This argument is accepted by all
+DESPOTIC functions that use the escape probability formalism,
+including all those involving computation of line emission. This
+optional argument, if included, must be set equal to one of the three
+strings ``sphere`` (the default), ``slab``, or ``LVG``. These choices
+correspond to spherical geometry, slab geometry, and the large
+velocity gradient approximation, respectively.

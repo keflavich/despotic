@@ -44,10 +44,13 @@ the name of the file to be read::
 
   gmc = cloud(fileName="cloudfiles/MilkyWayGMC.desp", verbose=True)
 
-Note the optional argument ``verbose``, which we have set to
-``True``. Most DESPOTIC methods accept the ``verbose`` argument, which
-causes them to produce printed output containing a variety of
-information. By default DESPOTIC operations are silent. 
+Note that, if you're not running DESPOTIC from the directory where you
+installed it, you'll need to include the full path to the ``cloudfiles``
+subdirectory in this command. Also note the optional argument
+``verbose``, which we have set to ``True``. Most DESPOTIC methods
+accept the ``verbose`` argument, which causes them to produce printed
+output containing a variety of information. By default DESPOTIC
+operations are silent.
 
 Computing Temperatures
 ----------------------

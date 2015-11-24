@@ -56,3 +56,4 @@ DESPOTIC requires
 
 * `scipy >= 0.11.0`
 * `cython >= 0.20.x`
+* `matplotlib >= 1.3.x`

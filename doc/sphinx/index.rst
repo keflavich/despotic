@@ -16,8 +16,8 @@ Contents:
    quickstart
    functions
    cloudfiles
-   chemistry
    data
+   chemistry
    fulldoc
    acknowledgements
 
