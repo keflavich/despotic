@@ -938,8 +938,7 @@ class NL99_GC(chemNetwork):
         abd = self.abundances
 
         # Hydrogen; leave the ortho-to-para ratio unchanged
-        fortho = self.cloud.comp.xoH2 / \
-                 (self.cloud.comp.xpH2 + self.cloud.comp.xoH2 + _small)
+        fortho = self.cloud.comp.xoH2 / (self.cloud.comp.xH2 + _small)
         self.cloud.comp.xHI = abd['H']
         self.cloud.comp.xHplus = abd['H+']
         self.cloud.comp.xoH2 = abd['H2'] * fortho
@@ -981,24 +980,25 @@ class NL99_GC(chemNetwork):
             except despoticError:
                 print 'Warning: unable to add OH; cannot find LAMDA file'
 
-        # H2O, assuming OHx is half H2O, and that oH2O and pH2O are
-        # equally abundance
+        # H2O, assuming OHx is half H2O, and that oH2O and pH2O are in
+        # the same ratio as oH2 and pH2
         if 'ph2o' in emList:
-            emList['ph2o'].abundance = abd['OHx']/4.0
+            emList['ph2o'].abundance = abd['OHx']/2.0*(1-fortho)
         elif 'p-h2o' in emList:
-            emList['p-h2o'].abundance = abd['OHx']/4.0
+            emList['p-h2o'].abundance = abd['OHx']/2.0*(1-fortho)
         elif addEmitters:
             try:
-                self.cloud.addEmitter('ph2o', abd['OHx']/4.0)
+                self.cloud.addEmitter('ph2o', 
+                                      abd['OHx']/2.0*(1-fortho))
             except despoticError:
                 print 'Warning: unable to add p-H2O; cannot find LAMDA file'
         if 'oh2o' in emList:
-            emList['oh2o'].abundance = abd['OHx']/4.0
+            emList['oh2o'].abundance = abd['OHx']/2.0*fortho
         elif 'o-h2o' in emList:
-            emList['o-h2o'].abundance = abd['OHx']/4.0
+            emList['o-h2o'].abundance = abd['OHx']/2.0*fortho
         elif addEmitters:
             try:
-                self.cloud.addEmitter('oh2o', abd['OHx']/4.0)
+                self.cloud.addEmitter('oh2o', abd['OHx']/2.0*fortho)
             except despoticError:
                 print 'Warning: unable to add o-H2O; cannot find LAMDA file'
 

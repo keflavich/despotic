@@ -645,6 +645,7 @@ class NL99(chemNetwork):
         # Use the cosmic ray and photoreaction rate calculators to get
         # their contributions to dxdt
         xdot = _cr.dxdt(xgrow, n, self.ionRate)
+        import pdb; pdb.set_trace()
         xdot += _ph.dxdt(xgrow, n, self.chi, self.AV, 
                          [[self.NH*xgrow[4], self.NH/2.0]])
 
@@ -712,23 +713,24 @@ class NL99(chemNetwork):
                 print 'Warning: unable to add OH; cannot find LAMDA file'
 
         # H2O, assuming OHx is half H2O, and that oH2O and pH2O are
-        # equally abundance
+        # in the same ratio as H2
+        fp = self.cloud.comp.xpH2 / self.cloud.comp.xH2
         if 'ph2o' in emList:
-            emList['ph2o'].abundance = self.x[2]/4.0
+            emList['ph2o'].abundance = self.x[2]/2.0*fp
         elif 'p-h2o' in emList:
-            emList['p-h2o'].abundance = self.x[2]/4.0
+            emList['p-h2o'].abundance = self.x[2]/2.0*fp
         elif addEmitters:
             try:
-                self.cloud.addEmitter('ph2o', self.x[2]/4.0)
+                self.cloud.addEmitter('ph2o', self.x[2]/2.0*fp)
             except despoticError:
                 print 'Warning: unable to add p-H2O; cannot find LAMDA file'
         if 'oh2o' in emList:
-            emList['oh2o'].abundance = self.x[2]/4.0
+            emList['oh2o'].abundance = self.x[2]/2.0*(1-fp)
         elif 'o-h2o' in emList:
-            emList['o-h2o'].abundance = self.x[2]/4.0
+            emList['o-h2o'].abundance = self.x[2]/2.0*(1-fp)
         elif addEmitters:
             try:
-                self.cloud.addEmitter('oh2o', self.x[2]/4.0)
+                self.cloud.addEmitter('oh2o', self.x[2]/2.0*(1-fp))
             except despoticError:
                 print 'Warning: unable to add o-H2O; cannot find LAMDA file'
 
