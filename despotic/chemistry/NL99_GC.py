@@ -937,8 +937,12 @@ class NL99_GC(chemNetwork):
         # Get the current abundances as an abundanceDict
         abd = self.abundances
 
-        # Hydrogen; leave the ortho-to-para ratio unchanged
-        fortho = self.cloud.comp.xoH2 / (self.cloud.comp.xH2 + _small)
+        # Hydrogen; leave the ortho-to-para ratio unchanged, or set it
+        # to 0.25 if the initial value is undefined
+        if self.comp.xH2 != 0:
+            fortho = self.cloud.comp.xoH2 / self.cloud.comp.xH2
+        else:
+            fortho = 1./3.
         self.cloud.comp.xHI = abd['H']
         self.cloud.comp.xHplus = abd['H+']
         self.cloud.comp.xoH2 = abd['H2'] * fortho
