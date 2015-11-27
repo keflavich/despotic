@@ -471,6 +471,13 @@ class cloud(object):
                     print "Setting T_radDust = " + \
                         str(self.rad.TradDust)+" K"
 
+            elif linesplit[0].upper().strip() == 'RADDUTDILUTION':
+
+                self.rad.fdDilute = float(linesplit2[0])
+                if verbose:
+                    print "Setting radDust dilution factor = " + \
+                        str(self.rad.fdDilute)
+
             elif linesplit[0].upper().strip() == 'IONRATE':
 
                 self.rad.ionRate = float(linesplit2[0])

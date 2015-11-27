@@ -50,8 +50,8 @@ class radiation:
     Methods
     -------
     __init__ -- initializes
-    ngamma -- returns the photon occupation number due to the CMB at a
-        given frequency
+    ngamma -- returns the photon occupation number due to the CMB and
+       any diluted dust field at a given frequency
     """
 
 ########################################################################
@@ -76,14 +76,17 @@ class radiation:
         self.TradDust = 0.0
         self.ionRate = 2.0e-17
         self.chi = 1.0
-
+        self.rad.fdDilute = 0.0
 
 ########################################################################
 # Method to return the photon occupation number at the CMB temperature
 ########################################################################
     def ngamma(self, Tnu):
         """
-        Return the photon occupation number 1 / [exp(-h nu / k T_CMB) - 1].
+        Return the photon occupation number from the CMB and dust
+        radiation fields, equal to 
+        1 / [exp(-h nu / k T_CMB) - 1] + 
+        fdDilute * 1 / [exp(-h nu / k T_radDust) - 1]
 
         Parameters
         ----------
@@ -93,10 +96,12 @@ class radiation:
         Returns
         -------
         ngamma : float or array
-            photon occupation number 1 /  [exp(-T_nu / T_CMB) - 1]
+            photon occupation number
         """
 
         # Return value, written in such a way as to produce underflows
         # rather than overflows when Tnu >> TCMB
         expfac = np.exp(-Tnu/self.TCMB)
-        return expfac / (1.0 - expfac)
+        expfacdust = np.exp(-Tnu/self.TradDust)
+        return expfac / (1.0 - expfac) + \
+            self.fdDilute * expfacdust / (1.0 - expfacdust)
