@@ -1030,8 +1030,8 @@ class emitter(object):
 # absorption. Also note that this can be negative, indicating that the
 # gas absorbs more energy than the CMB than it emits.
 ########################################################################
-    def luminosityPerH(self, rad, transition=None, total=False, \
-                           thin=False):
+    def luminosityPerH(self, rad, transition=None, total=False,
+                       thin=False):
         """
         Return the luminosities of various lines, computed from the
         stored level populations and escape probabilities.
@@ -1074,7 +1074,7 @@ class emitter(object):
             l = transition[1]
 
         # Get photon occupation number
-        if rad.TCMB > 0.0:
+        if rad.TCMB > 0.0 or (rad.TradDust > 0 and rad.fdDilute > 0):
             Tnu = self.data.freq[u,l]*h/kB
             Tnu[Tnu == 0.0] = rad.TCMB*1e20
             ngamma = rad.ngamma(Tnu)
@@ -1082,9 +1082,9 @@ class emitter(object):
             ngamma = 0.0
 
         # Get net luminosity
-        lum = ((1.0+ngamma)*self.levPop[u] - \
-                   self.data.wgtRatio[u,l]*ngamma*self.levPop[l]) * \
-                   self.data.EinsteinA[u,l] * h*self.data.freq[u,l] * \
+        lum = ((1.0+ngamma)*self.levPop[u] -
+                   self.data.wgtRatio[u,l]*ngamma*self.levPop[l]) *
+                   self.data.EinsteinA[u,l] * h*self.data.freq[u,l] * 
                    self.abundance
         if thin==False:
             lum *= self.escapeProb[u,l]
