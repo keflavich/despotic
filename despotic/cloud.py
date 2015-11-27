@@ -1541,10 +1541,10 @@ class cloud(object):
             elif thin==True:
                 em.setLevPop(self, thin=True, noClump=noClump)
             else:
-                em.setLevPopEscapeProb(\
-                    self, noClump=noClump, dampFactor=dampFactor, \
-                        escapeProbGeom=escapeProbGeom, \
-                        abstol=abstol, verbose=verbose)
+                em.setLevPopEscapeProb(
+                    self, noClump=noClump, dampFactor=dampFactor, 
+                    escapeProbGeom=escapeProbGeom, 
+                    abstol=abstol, verbose=verbose)
         # Safety check: make sure we're initialized
         if em.levPopInitialized == False:
             raise despoticError, 'cannot use noRecompute if level' + \
@@ -1555,8 +1555,8 @@ class cloud(object):
 
         # Step 3. Compute luminosity per H
         lumPerH = self.emitters[emitName]. \
-            luminosityPerH(self.rad, transition=transition, \
-                               thin=thin)
+            luminosityPerH(self.rad, transition=transition,
+                           thin=thin)
         if lumOnly == True:
             return lumPerH
 

@@ -42,13 +42,14 @@ small = 1e-50
 # This routine computes the line profile for a specified transition,
 # assuming that the gas is in LTE
 ########################################################################
-def lineProfLTE(emdat, u, l, R, denProf, TProf, \
-                    vProf=0.0, sigmaProf=0.0, \
-                    offset=0.0, TCMB=2.73, vOut=None, vLim=None, \
-                    nOut=100, dv=None, mxstep=10000):
+def lineProfLTE(emdat, u, l, R, denProf, TProf,
+                vProf=0.0, sigmaProf=0.0,
+                offset=0.0, TCMB=2.73, vOut=None, vLim=None,
+                nOut=100, dv=None, mxstep=10000):
         """
         Return the brightness temperature versus velocity for a
-        specified line, assuming the level populations are in LTE.
+        specified line, assuming the level populations are in LTE. The
+        calculation is done along an infinitely thin pencil beam.
 
         Parameters
         ----------
