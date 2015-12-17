@@ -29,61 +29,52 @@ thetaVib = 5984.   # Vibrational constant in K
 
 class composition(object):
     """
-    A class describing the chemical composition of an interstellar
-    cloud, and providing methods to perform calculations using those
-    properties.
+    A class describing the chemical composition of the dominant
+    components (hydrogen, helium, electrons) of an interstellar cloud,
+    and for computing various quantities from them.
 
-    Attributes
-    ----------
-    xHI : float
-        abundance of HI per H nucleus
-    xoH2 : float
-        abundance of ortho-H2 per H nucleus (note that the maximum
-        possible value of xoH2 is 0.5, since it is per H nucleus)
-    xpH2 : float
-        abundance of paa-H2 per H nucleus  (note that the maximum
-        possible value of xoH2 is 0.5, since it is per H nucleus)
-    xH2 : float
-        sum of xoH2 and xpH2
-    xHe : float
-        abundance of He per H nucleus
-    xe : float
-        abundance of free electrons per H nucleus
-    xHplus : float
-        abundance of H+ per H nucleus
-    mu : float
-        mean mass per free particle, in units of H mass
-    muH : float
-        mean mass per H nucleus, in units of H mass
-    qIon : float
-        energy added to the gas per primary CR / x-ray ionization
-    cv : float
-        dimensionless specific heat per H nucleus at constant volume;
-        the usual specific heat per unit volume may be obtained by
-        multiplying this by nH * kB, and the specific heat per unit
-        mass may be obtained by multiplying by nH * muH * kB
+    Parameters
+       None
 
-    Class methods
-    -------------
-    computeDerived -- compute derived quantities: mu, muH, qIon
-    computeCv -- compute cv
-    computeEint -- computer the internal energy per H nucleus
+    Class attributes
+       xHI : float
+          abundance of HI per H nucleus
+       xoH2 : float
+          abundance of ortho-H2 per H nucleus (note that the maximum
+          possible value of xoH2 is 0.5, since it is per H nucleus)
+       xpH2 : float
+          abundance of para-H2 per H nucleus  (note that the maximum
+          possible value of xoH2 is 0.5, since it is per H nucleus)
+       xH2 : float
+          sum of xoH2 and xpH2
+       xHe : float
+          abundance of He per H nucleus
+       xe : float
+          abundance of free electrons per H nucleus
+       xHplus : float
+          abundance of H+ per H nucleus
+       mu : float
+          mean mass per free particle, in units of H mass
+       muH : float
+          mean mass per H nucleus, in units of H mass
+       qIon : float
+          energy added to the gas per primary CR / x-ray ionization
+       cv : float
+          dimensionless specific heat per H nucleus at constant volume;
+          the usual specific heat per unit volume may be obtained by
+          multiplying this by nH * kB, and the specific heat per unit
+          mass may be obtained by multiplying by nH * muH * kB
     """
 
-########################################################################
-# Method to initialize
-########################################################################
+    ####################################################################
+    # Method to initialize
+    ####################################################################
     def __init__(self):
         """
         This method initializes the class.
 
         Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        Nothing
+           None
         """
 
         # Initial values when class is created
@@ -99,26 +90,23 @@ class composition(object):
         self.cv = 0.0           # Specific heat per H nucleus
 
 
-########################################################################
-# Method to compute mu, muH, qIon from stored composition
-########################################################################
+    ####################################################################
+    # Method to compute mu, muH, qIon from stored composition
+    ####################################################################
     def computeDerived(self, nH):
         """
         Compute the derived quantities mu, muH, qIon
 
         Parameters
-        ----------
-        nH : float
-            volume density in H cm^-3
+           nH : float
+              volume density in H cm^-3
 
         Returns
-        -------
-        Nothing
+           Nothing
 
         Remarks
-        -------
-        For the purposes of this procedure, we treat electrons as
-        massless.
+           For the purposes of this procedure, we treat electrons as
+           massless.
         """
 
         # Mean particle masses
@@ -152,9 +140,9 @@ class composition(object):
         self.qIon = (qHI + qH2) * 1.6e-12
 
 
-########################################################################
-# Method to compute cv(T)
-########################################################################
+    ####################################################################
+    # Method to compute cv(T)
+    ####################################################################
     def computeCv(self, T, noSet=False, Jmax=40):
         """
         Compute the dimensionless specific heat per H nucleus; the
@@ -165,22 +153,20 @@ class composition(object):
         multiplied by kB * nH * muH
 
         Parameters
-        ----------
-        T : float or array
-            temperature in K
-        noSet : Boolean
-            if True, the value of cv stored in the class is not
-            altered, but the calculated cv is still returned
-        Jmax : int
-            maximum J to be used in evaluating the rotational
-            partition function; should be set to a value such that T
-            << J(J+1) * thetaRot, there thetaRot = 85.3 K. Defaults to
-            40.
+           T : float | array
+              temperature in K
+           noSet : Boolean
+              if True, the value of cv stored in the class is not
+              altered, but the calculated cv is still returned
+           Jmax : int
+              maximum J to be used in evaluating the rotational
+              partition function; should be set to a value such that T
+              << J(J+1) * thetaRot, there thetaRot = 85.3 K. Defaults to
+              40.
 
         Returns
-        -------
-        cv : float or array
-            value of cv
+           cv : float | array
+              value of cv
         """
 
         # Translational part
@@ -245,9 +231,9 @@ class composition(object):
                 self.cv = (cvtrans + cvvib + cvpH2rot + cvoH2rot)[0]
             return self.cv
 
-########################################################################
-# Method to compute cv(T)
-########################################################################
+    ####################################################################
+    # Method to compute cv(T)
+    ####################################################################
     def computeEint(self, T, Jmax=40):
         """
         Compute the dimensionless internal energy per H nucleus; the internal
@@ -256,19 +242,17 @@ class composition(object):
         multiplied by kB * T
 
         Parameters
-        ----------
-        T : float or array
-            temperature in K
-        Jmax : int
-            maximum J to be used in evaluating the rotational
-            partition function; should be set to a value such that T
-            << J(J+1) * thetaRot, there thetaRot = 85.3 K. Defaults to
-            40.
+           T : float | array
+              temperature in K
+           Jmax : int
+              maximum J to be used in evaluating the rotational
+              partition function; should be set to a value such that T
+              << J(J+1) * thetaRot, there thetaRot = 85.3 K. Defaults to
+              40.
 
         Returns
-        -------
-        Eint : float or array
-            value of Eint
+           Eint : float | array
+              value of Eint
         """
 
         # Translational part
@@ -316,9 +300,9 @@ class composition(object):
             return (Einttrans + Eintvib + EintpH2rot + EintoH2rot)[0]
 
 
-########################################################################
-# Some properties (things that update other numbers when changed)
-########################################################################
+    ####################################################################
+    # Some properties
+    ####################################################################
 
     @property
     def H2OPR(self):

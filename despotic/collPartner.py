@@ -34,63 +34,63 @@ from collPartner_helper import colRates_all_scalar, \
 
 class collPartner:
     """
-    Store information about a particular collision partner for a given
-    species.
+    A utility class to store information about a particular collision
+    partner for a given species, and to interpolate collision rates
+    from those data
 
-    Attributes
-    ----------
-    nlev : int
-        number of energy levels for the emitting species
-    ntrans : int
-        number of collisional transitions in the data table
-    ntemp : int
-        number of temperatures in the data table
-    tempTable : array(ntemp)
-        list of temperatues at which collision rate coefficients are
-        given
-    colUpper : int array(ntrans)
-        list of upper states for collisions
-    colLower : int array(ntrans)
-        list of lower states for collisions
-    colRate : array(ntrans, ntemp)
-        table of downward collision rate coefficients, in cm^3 s^-1
-    colRateInterp : list(ntrans) of functions
-        each function in the list takes one variable, the temperature,
-        as an argument, and returns the collision rate coefficient for
-        the corresponding transition at the given temperature; only
-        downard transitions are included
+    Parameters
+       fp : file
+          a file object that points to the start of the collision
+          rate data for one species in a LAMDA file
+       nlev : int
+          number of levels for the emitting species
+       extrap : Boolean
+          if True, then computing the collision rate with a
+          temperature that is outside the table will result in the
+          maximum or minimum value in the table being returned; if
+          False, it will raise an error
 
-    Methods
-    -------
-    __init__ -- initialization method
-    colRates -- method to return collision rates for all downward
-        transitions at a given temperature or list of temperatures
-    colRateMatrix -- method to return the collision rate matrix for
-        all transitions for this collision patner as a function of
-        temperature
+    Class attributes
+       nlev : int
+          number of energy levels for the emitting species
+       ntrans : int
+          number of collisional transitions in the data table
+       ntemp : int
+          number of temperatures in the data table
+       tempTable : array(ntemp)
+          list of temperatues at which collision rate coefficients are
+          given
+       colUpper : int array(ntrans)
+          list of upper states for collisions
+       colLower : int array(ntrans)
+          list of lower states for collisions
+       colRate : array(ntrans, ntemp)
+          table of downward collision rate coefficients, in cm^3 s^-1
+       colRateInterp : list(ntrans) of functions
+          each function in the list takes one variable, the temperature,
+          as an argument, and returns the collision rate coefficient for
+          the corresponding transition at the given temperature; only
+          downard transitions are included
     """
 
-########################################################################
-# Class initialization method
-########################################################################
+    #####################################################################
+    # Class initialization method
+    #####################################################################
     def __init__(self, fp, nlev, extrap=True):
         """
         Initialize a collPartner object
 
         Parameters
-        ----------
-        fp : file
-            a file object that points to the start of the collision
-            rate data for one species in a LAMDA file
-        extrap : Boolean
-            if True, then computing the collision rate with a
-            temperature that is outside the table will result in the
-            maximum or minimum value in the table being returned; if
-            False, it will raise an error
-
-        Returns
-        -------
-        Nothing
+           fp : file
+              a file object that points to the start of the collision
+              rate data for one species in a LAMDA file
+           nlev : int
+              number of levels for the emitting species
+           extrap : Boolean
+              if True, then computing the collision rate with a
+              temperature that is outside the table will result in the
+              maximum or minimum value in the table being returned; if
+              False, it will raise an error
         """
 
         # Store number of levels
@@ -148,29 +148,27 @@ class collPartner:
         self.logColRate = np.log(self.colRate)
 
 
-########################################################################
-# Method to return collision rates for every downward transition in the
-# table at a specified temperature; if keyword transition is specied,
-# the value is returned for a specified set of transitions
-########################################################################
+    #####################################################################
+    # Method to return collision rates for every downward transition in
+    # the table at a specified temperature; if keyword transition is
+    # specified, the value is returned for a specified set of transitions
+    #####################################################################
     def colRates(self, temp, transition=None):
         """
         Return interpolated collision rates for all transitions at a
         given temperature or list of temperatures
 
         Parameters
-        ----------
-        temp : float or array of floats
-            temperature(s) at which collision rates are computed, in K
-        transition : int array(2, N)
-            list of upper and lower states for which collision rates
-            are to be computed; default behavior is to computer for
-            all known transitions
+           temp : float | array
+              temperature(s) at which collision rates are computed, in K
+           transition : array of int, shape (2, N)
+              list of upper and lower states for which collision rates
+              are to be computed; default behavior is to computer for
+              all known transitions
 
         Returns
-        -------
-        rates : array(ntrans) or array(ntrans, ntemp)
-            collision rates at the specified temperature(s)
+           rates : array, shape (ntrans) | array, shape (ntrans, ntemp)
+              collision rates at the specified temperature(s)
         """
 
         # If extrapolation is not allowed, make sure all temperatures
@@ -203,29 +201,27 @@ class collPartner:
             return rates
 
 
-########################################################################
-# Method to return the collision rate matrix
-########################################################################
+    #####################################################################
+    # Method to return the collision rate matrix
+    #####################################################################
     def colRateMatrix(self, temp, levWgt, levTemp):
         """
         Return interpolated collision rates for all transitions at a
         given temperature, stored as an nlev x nlev matrix.
 
         Parameters
-        ----------
-        temp : float
-            temperature at which collision rates are computed, in K
-        levWgt : array of float
-            array of statistical weights for each level
-        levTemp : array of float
-            array of level energies, measured in K
+           temp : float
+              temperature at which collision rates are computed, in K
+           levWgt : array
+              array of statistical weights for each level
+           levTemp : array
+              array of level energies, measured in K
 
         Returns
-        -------
-        k : array(nlev, nlev)
-            collision rates at the specified temperature; element i,j
-            of the matrix gives the collision rate from state i to
-            state j
+           k : array, shape (nlev, nlev)
+              collision rates at the specified temperature; element i,j
+              of the matrix gives the collision rate from state i to
+              state j
         """
         k = np.zeros((self.nlev, self.nlev))
         # Downward transitions
