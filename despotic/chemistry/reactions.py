@@ -300,7 +300,7 @@ class photoreactions(reaction_matrix):
     rates for any reaction of the form
     gamma + ... -> ...
     with a rate that scales as the ISRF strength, parameterized in
-    units of the Habiong (1968) field, multiplied by dust and gas
+    units of the Habing (1968) field, multiplied by dust and gas
     shielding factors. In addition to the constructor, the class has
     only a single method: dxdt, which returns the reaction rates.
     """
@@ -322,13 +322,13 @@ class photoreactions(reaction_matrix):
            entry in the list must be a dict containing the keys:
               'spec' : list of the species involved in the reaction
               'stoich' : stoichiometric factor for each species
-              'rate' : reaction rate per target in free space
+              'rate' : reaction rate per target in a chi = 1 radiation field
               'av_fac' : optical depth per unit A_V
               'shield_fac' : (optional) callable to compute the
                  shielding factor; see the dxdt method for an
                  explanation of how to specify its arguments
            Reaction rates per target are given by 
-              chi * rate_fac * shield_fac * exp(-av_fac * A_V)
+              chi * rate * shield_fac * exp(-av_fac * A_V)
         sparse : bool
            If True, the reaction rate matrix is represented as a
            sparse matrix; otherwise it is a dense matrix. This has no
