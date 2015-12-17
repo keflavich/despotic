@@ -43,6 +43,8 @@ class composition(object):
     xpH2 : float
         abundance of paa-H2 per H nucleus  (note that the maximum
         possible value of xoH2 is 0.5, since it is per H nucleus)
+    xH2 : float
+        sum of xoH2 and xpH2
     xHe : float
         abundance of He per H nucleus
     xe : float
