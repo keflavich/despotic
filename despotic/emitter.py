@@ -1083,8 +1083,8 @@ class emitter(object):
 
         # Get net luminosity
         lum = ((1.0+ngamma)*self.levPop[u] -
-                   self.data.wgtRatio[u,l]*ngamma*self.levPop[l]) *
-                   self.data.EinsteinA[u,l] * h*self.data.freq[u,l] * 
+                   self.data.wgtRatio[u,l]*ngamma*self.levPop[l]) * \
+                   self.data.EinsteinA[u,l] * h*self.data.freq[u,l] * \
                    self.abundance
         if thin==False:
             lum *= self.escapeProb[u,l]
