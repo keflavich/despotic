@@ -33,6 +33,8 @@ if on_rtd:
             return Mock()
         def __add__(self, other):
             return 1.0
+        def __sub__(self, other):
+            return 1.0
         def __mul__(self, other):
             return 1.0
         def __rmul__(self, other):
