@@ -37,6 +37,14 @@ if on_rtd:
             return Mock()
         def __rmul__(self, other):
             return Mock()
+        def __div__(self, other):
+            return Mock()
+        def __rdiv__(self, other):
+            return Mock()
+        def __truediv__(self, other):
+            return Mock()
+        def __floordiv__(self, other):
+            return Mock()
     MOCK_MODULES = ['numpy', 'scipy', 'astropy', 'scipy.interpolate', 
                     'scipy.constants', 'astropy.io', 'astropy.io.fits',
                     'astropy.io.ascii', 'numpy.ctypeslib', 'scipy.optimize',
