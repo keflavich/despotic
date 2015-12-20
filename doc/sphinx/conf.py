@@ -31,9 +31,11 @@ if on_rtd:
         @classmethod
         def __getattr__(cls, name):
             return Mock()
-        def mul(self, other):
+        def __add__(self, other):
             return Mock()
-        def rmul(self, other):
+        def __mul__(self, other):
+            return Mock()
+        def __rmul__(self, other):
             return Mock()
     MOCK_MODULES = ['numpy', 'scipy', 'astropy', 'scipy.interpolate', 
                     'scipy.constants', 'astropy.io', 'astropy.io.fits',
