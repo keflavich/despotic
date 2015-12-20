@@ -54,7 +54,7 @@ can be overridden by manually specifying a file name, either in the
 cloud file (see :ref:`sec-cloudfiles`) or when invoking
 the ``cloud.addEmitter`` or ``emitter.__init__`` methods. Users
 can also force updates of the local database more frequently using the
-``refreshLamda`` function -- see :ref:`sec-full`.
+``refreshLamda`` function -- see :ref:`sssec-full-refreshLamda`.
 
 .. _ssec-database-internal:
 
@@ -63,7 +63,7 @@ DESPOTIC's Internal Model for Atomic and Molecular Data
 
 When it is running, DESPOTIC maintains a list of emitting species for
 which data have been read within the ``emitter`` module (see
-:ref:`sec-full`). Whenever a new emitter is created, either for an
+:ref:`sssec-full-emitter`). Whenever a new emitter is created, either for an
 existing cloud, for a new cloud being created, or as a free-standing
 object of the emitter class, DESPOTIC checks the emitter name against
 the central list. If the name is found in the list, DESPOTIC will
@@ -74,7 +74,7 @@ associated with different clouds. However, this model has some
 important consequences of which the user should be aware.
 
 1. Since data on level structure, collision rates, etc. (everything
-   stored in the ``emitterData`` class -- see :ref:`sec-full`) is
+   stored in the ``emitterData`` class -- see :ref:`sssec-full-emitterData`) is
    shared between all emitters of the same name, and any alterations
    made to the data for one emitter will affect all others of the same
    name.
@@ -85,4 +85,4 @@ important consequences of which the user should be aware.
    emitters different names, such as ``co_ver1`` and ``co_ver2``.
 3. Maintenance of a central emitter list affects how deepcopy and
    pickling operations operate on emitters. See
-   :ref:`sec-full` for details.
+   :ref:`sssec-full-emitterData` for details.

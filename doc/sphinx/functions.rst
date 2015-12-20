@@ -6,7 +6,7 @@ Functional Guide to DESPOTIC Capabilities
 This section covers the most common tasks for which DESPOTIC can be
 used. They are not intended to provide a comprehensive overview of the
 library's capabilities, and users who wish to understand every
-available option should refer to :ref:`sec-full`. The routines used in
+available option should refer to :ref:`sec-fulldoc`. The routines used in
 this section are all described in full detail there. For all of these
 operations, the user should first have imported the basic DESPOTIC
 class ``cloud`` by doing::
@@ -112,7 +112,7 @@ highest. Each ``dict`` contains the following keys-value pairs
   in the cloud, in :math:`\mathrm{erg}\,\mathrm{s}^{-1}`. 
 
 This is a partial list of what the ``dict`` contains; see
-:ref:`sec-full` for a complete listing.
+:ref:`sssec-full-cloud` for a complete listing.
 
 Once the data been obtained, the user can do what he or she wishes
 with them. For example, to plot velocity-integrated brightness
@@ -236,7 +236,8 @@ The two values returned are arrays, the second of which gives a series
 of 100 equally-spaced times between 0 and ``tFinal``, and the first of
 which gives the temperatures at those times. The number of output
 times, the spacing between them, and their exact values may all be
-controlled by optional arguments -- see :ref:`fulldoc` for details. At
+controlled by optional arguments -- see :ref:`sssec-full-cloud` for
+details. At
 the end of this evolution, the cloud temperature ``mycloud.Tg``
 will be changed to its value at the end of 20 kyr of evolution, and
 the dust temperature ``mycloud.Tg`` will be set to its thermal
@@ -368,7 +369,7 @@ executing the examples in :ref:`ssec-chem-eq`).
 
 The output quantity abd here is an object of class ``abundanceDict``,
 which is a specialized dict for handling chemical abundances -- see
-:ref:`ssec-abundanceDict`. One can examine the abundances of specific
+:ref:`sssec-abundanceDict`. One can examine the abundances of specific
 species just by giving their chemical names. For example, to see
 the time-dependent evolution of the abundances of CO, C, and
 :math:`\mathrm{C}^+`, one could do::
@@ -408,8 +409,8 @@ zones, which can be accessed through the ``colDen`` property::
 
 The column densities of all zones, and the number of zones, can be
 controlled when the ``zonedcloud`` is created using the keywords
-``nZone`` and ``colDen``; see :ref:`ssec-full` for the full list of
-keywords.
+``nZone`` and ``colDen``; see :ref:`sssec-full-zonedcloud` for the
+full list of keywords.
 
 Once a ``zonedcloud`` exists, all of the functions described above in
 this section are available for it, and will be applied zone by
@@ -524,7 +525,7 @@ A variety of other optional arguments can be used to control the
 velocities at which the brightness temperature is computed. It is also
 possible to compute line profiles at positions offset from the
 geometric center of the cloud, using the optional argument offset --
-see :ref:`ssec-full`.
+see :ref:`sssec-full-lineProfLTE`.
 
 Escape Probability Geometries
 -----------------------------

@@ -45,13 +45,13 @@
 <h2>File Structure<a class="headerlink" href="#file-structure" title="Permalink to this headline">¶</a></h2>
 <p>DESPOTIC cloud files contain descriptions of clouds that can be read
 by the <code class="docutils literal"><span class="pre">cloud</span></code> or <code class="docutils literal"><span class="pre">zonedcloud</span></code> classes, using either the class
-constructor or the read method; see <span class="xref std std-ref">sec-full</span> for
+constructor or the read method; see <a class="reference internal" href="fulldoc.html#sssec-full-cloud"><span>cloud</span></a> for
 details. This section contains a description of the format for these
 files. It is recommended but not required that cloud files have names
 that end in the extension <code class="docutils literal"><span class="pre">.desp</span></code>.</p>
 <p>Each line of a cloud file must be blank, contain a comment starting
 with the character <code class="docutils literal"><span class="pre">#</span></code>, or contain a key-value pair formatted as:</p>
-<div class="highlight-cloudfiles"><div class="highlight"><pre>key = value
+<div class="highlight-python"><div class="highlight"><pre><span class="n">key</span> <span class="o">=</span> <span class="n">value</span>
 </pre></div>
 </div>
 <p>The line may also contain comments after <code class="docutils literal"><span class="pre">value</span></code>, again beginning
@@ -171,7 +171,7 @@ chemical abundances).</p>
 <span id="ssec-emitters"></span><h2>Emitters<a class="headerlink" href="#emitters" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal"><span class="pre">emitter</span></code> key is more complex than most, and requires special
 mention. Lines describing emitters follow the format:</p>
-<div class="highlight-cloudfiles"><div class="highlight"><pre>emitter = name abundance [noextrap] [energySkip] [file:FILE] [url:URL]
+<div class="highlight-python"><div class="highlight"><pre>emitter = name abundance [noextrap] [energySkip] [file:FILE] [url:URL]
 </pre></div>
 </div>
 <p>Here the brackets indicate optional items, and the optional items may
@@ -194,7 +194,7 @@ isotope. Thus LAMDA refers to <span class="math">\(^{28}\mathrm{Si}^{16}\mathrm{
 search for files in LAMDA also includes common variants of
 the file name used in LAMDA. The actual file name from
 which DESPOTIC reads data for a given emitter is stored in
-the emitterData class &#8211; see <span class="xref std std-ref">sec-full</span>.</p>
+the emitterData class &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span>emitterData</span></a>.</p>
 <p>The second mandatory item, <code class="docutils literal"><span class="pre">abundance</span></code>, gives the abundance of that
 species relative to H nuclei. For example, an abundance of 0.1 would
 indicate that there is 1 of that species per 10 H nuclei.</p>
@@ -207,7 +207,7 @@ data file. If not, DESPOTIC will instead handle temperatures outside
 the tabulated range by substituting the closest temperature inside the
 tabulated range. Note that this behavior can be altered within a
 DESPOTIC program by using the <code class="docutils literal"><span class="pre">extrap</span></code> property of the
-<code class="docutils literal"><span class="pre">emitterData</span></code> class &#8211; see <span class="xref std std-ref">sec-fulldoc</span>.</p>
+<code class="docutils literal"><span class="pre">emitterData</span></code> class &#8211; see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a>.</p>
 <p>The optional item <code class="docutils literal"><span class="pre">energySkip</span></code> specifies that a species should be
 ignored when computing heating and cooling rates via the
 <code class="docutils literal"><span class="pre">cloud.dEdt</span></code> method, and by extension whenever thermal equilibria or

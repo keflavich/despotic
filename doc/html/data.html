@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <link rel="next" title="Chemistry and Chemical Networks" href="chemistry.html" />
     <link rel="prev" title="Cloud Files" href="cloudfiles.html" />
    
   
@@ -81,13 +82,13 @@ can be overridden by manually specifying a file name, either in the
 cloud file (see <a class="reference internal" href="cloudfiles.html#sec-cloudfiles"><span>Cloud Files</span></a>) or when invoking
 the <code class="docutils literal"><span class="pre">cloud.addEmitter</span></code> or <code class="docutils literal"><span class="pre">emitter.__init__</span></code> methods. Users
 can also force updates of the local database more frequently using the
-<code class="docutils literal"><span class="pre">refreshLamda</span></code> function &#8211; see <span class="xref std std-ref">sec-full</span>.</p>
+<code class="docutils literal"><span class="pre">refreshLamda</span></code> function &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-refreshlamda"><span>refreshLamda</span></a>.</p>
 </div>
 <div class="section" id="despotic-s-internal-model-for-atomic-and-molecular-data">
 <span id="ssec-database-internal"></span><h2>DESPOTIC&#8217;s Internal Model for Atomic and Molecular Data<a class="headerlink" href="#despotic-s-internal-model-for-atomic-and-molecular-data" title="Permalink to this headline">¶</a></h2>
 <p>When it is running, DESPOTIC maintains a list of emitting species for
 which data have been read within the <code class="docutils literal"><span class="pre">emitter</span></code> module (see
-<span class="xref std std-ref">sec-full</span>). Whenever a new emitter is created, either for an
+<a class="reference internal" href="fulldoc.html#sssec-full-emitter"><span>emitter</span></a>). Whenever a new emitter is created, either for an
 existing cloud, for a new cloud being created, or as a free-standing
 object of the emitter class, DESPOTIC checks the emitter name against
 the central list. If the name is found in the list, DESPOTIC will
@@ -98,7 +99,7 @@ associated with different clouds. However, this model has some
 important consequences of which the user should be aware.</p>
 <ol class="arabic simple">
 <li>Since data on level structure, collision rates, etc. (everything
-stored in the <code class="docutils literal"><span class="pre">emitterData</span></code> class &#8211; see <span class="xref std std-ref">sec-full</span>) is
+stored in the <code class="docutils literal"><span class="pre">emitterData</span></code> class &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span>emitterData</span></a>) is
 shared between all emitters of the same name, and any alterations
 made to the data for one emitter will affect all others of the same
 name.</li>
@@ -109,7 +110,7 @@ and a newer one), the way to achieve this is to give the two
 emitters different names, such as <code class="docutils literal"><span class="pre">co_ver1</span></code> and <code class="docutils literal"><span class="pre">co_ver2</span></code>.</li>
 <li>Maintenance of a central emitter list affects how deepcopy and
 pickling operations operate on emitters. See
-<span class="xref std std-ref">sec-full</span> for details.</li>
+<a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span>emitterData</span></a> for details.</li>
 </ol>
 </div>
 </div>
@@ -134,6 +135,7 @@ pickling operations operate on emitters. See
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="cloudfiles.html" title="previous chapter">Cloud Files</a></li>
+      <li>Next: <a href="chemistry.html" title="next chapter">Chemistry and Chemical Networks</a></li>
   </ul></li>
 </ul>
 </div>

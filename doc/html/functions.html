@@ -44,7 +44,7 @@
 <p>This section covers the most common tasks for which DESPOTIC can be
 used. They are not intended to provide a comprehensive overview of the
 library&#8217;s capabilities, and users who wish to understand every
-available option should refer to <span class="xref std std-ref">sec-full</span>. The routines used in
+available option should refer to <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a>. The routines used in
 this section are all described in full detail there. For all of these
 operations, the user should first have imported the basic DESPOTIC
 class <code class="docutils literal"><span class="pre">cloud</span></code> by doing:</p>
@@ -145,7 +145,7 @@ subtracting off the CMB) in
 in the cloud, in <span class="math">\(\mathrm{erg}\,\mathrm{s}^{-1}\)</span>.</li>
 </ul>
 <p>This is a partial list of what the <code class="docutils literal"><span class="pre">dict</span></code> contains; see
-<span class="xref std std-ref">sec-full</span> for a complete listing.</p>
+<a class="reference internal" href="fulldoc.html#sssec-full-cloud"><span>cloud</span></a> for a complete listing.</p>
 <p>Once the data been obtained, the user can do what he or she wishes
 with them. For example, to plot velocity-integrated brightness
 temperature versus line frequency, the user might do:</p>
@@ -262,7 +262,8 @@ Tg, t = mycloud.tempEvol(tFinal)
 of 100 equally-spaced times between 0 and <code class="docutils literal"><span class="pre">tFinal</span></code>, and the first of
 which gives the temperatures at those times. The number of output
 times, the spacing between them, and their exact values may all be
-controlled by optional arguments &#8211; see <span class="xref std std-ref">fulldoc</span> for details. At
+controlled by optional arguments &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-cloud"><span>cloud</span></a> for
+details. At
 the end of this evolution, the cloud temperature <code class="docutils literal"><span class="pre">mycloud.Tg</span></code>
 will be changed to its value at the end of 20 kyr of evolution, and
 the dust temperature <code class="docutils literal"><span class="pre">mycloud.Tg</span></code> will be set to its thermal
@@ -384,7 +385,7 @@ previously assigned that network to the cloud (for example by
 executing the examples in <a class="reference internal" href="#ssec-chem-eq"><span>Chemical Equilibria</span></a>).</p>
 <p>The output quantity abd here is an object of class <code class="docutils literal"><span class="pre">abundanceDict</span></code>,
 which is a specialized dict for handling chemical abundances &#8211; see
-<span class="xref std std-ref">ssec-abundanceDict</span>. One can examine the abundances of specific
+<a class="reference internal" href="chemistry.html#sssec-abundancedict"><span>abundanceDict</span></a>. One can examine the abundances of specific
 species just by giving their chemical names. For example, to see
 the time-dependent evolution of the abundances of CO, C, and
 <span class="math">\(\mathrm{C}^+\)</span>, one could do:</p>
@@ -423,8 +424,8 @@ zones, which can be accessed through the <code class="docutils literal"><span cl
 </div>
 <p>The column densities of all zones, and the number of zones, can be
 controlled when the <code class="docutils literal"><span class="pre">zonedcloud</span></code> is created using the keywords
-<code class="docutils literal"><span class="pre">nZone</span></code> and <code class="docutils literal"><span class="pre">colDen</span></code>; see <span class="xref std std-ref">ssec-full</span> for the full list of
-keywords.</p>
+<code class="docutils literal"><span class="pre">nZone</span></code> and <code class="docutils literal"><span class="pre">colDen</span></code>; see <a class="reference internal" href="fulldoc.html#sssec-full-zonedcloud"><span>zonedcloud</span></a> for the
+full list of keywords.</p>
 <p>Once a <code class="docutils literal"><span class="pre">zonedcloud</span></code> exists, all of the functions described above in
 this section are available for it, and will be applied zone by
 zone. For example, one can do:</p>
@@ -535,7 +536,7 @@ two values giving the lower and upper limits on the velocity:</p>
 velocities at which the brightness temperature is computed. It is also
 possible to compute line profiles at positions offset from the
 geometric center of the cloud, using the optional argument offset &#8211;
-see <span class="xref std std-ref">ssec-full</span>.</p>
+see <a class="reference internal" href="fulldoc.html#sssec-full-lineproflte"><span>lineProfLTE</span></a>.</p>
 </div>
 <div class="section" id="escape-probability-geometries">
 <h2>Escape Probability Geometries<a class="headerlink" href="#escape-probability-geometries" title="Permalink to this headline">¶</a></h2>

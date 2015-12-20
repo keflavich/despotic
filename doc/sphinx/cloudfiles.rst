@@ -1,5 +1,3 @@
-.. highlight:: cloudfiles
-
 .. _sec-cloudfiles:
 
 Cloud Files
@@ -10,7 +8,7 @@ File Structure
 
 DESPOTIC cloud files contain descriptions of clouds that can be read
 by the ``cloud`` or ``zonedcloud`` classes, using either the class
-constructor or the read method; see :ref:`sec-full` for
+constructor or the read method; see :ref:`sssec-full-cloud` for
 details. This section contains a description of the format for these
 files. It is recommended but not required that cloud files have names
 that end in the extension ``.desp``.
@@ -124,7 +122,7 @@ isotope. Thus LAMDA refers to :math:`^{28}\mathrm{Si}^{16}\mathrm{O}`
 search for files in LAMDA also includes common variants of
 the file name used in LAMDA. The actual file name from
 which DESPOTIC reads data for a given emitter is stored in
-the emitterData class -- see :ref:`sec-full`. 
+the emitterData class -- see :ref:`sssec-full-emitterData`. 
 
 The second mandatory item, ``abundance``, gives the abundance of that
 species relative to H nuclei. For example, an abundance of 0.1 would

@@ -6,6 +6,8 @@ Full Documentation of All DESPOTIC Classes and Functions
 despotic classes
 ----------------
 
+.. _sssec-full-cloud:
+
 ``cloud``
 ^^^^^^^^^
 
@@ -36,11 +38,15 @@ despotic classes
 .. autoclass:: despotic.dustProp
    :members:
 
+.. _sssec-full-emitter:
+
 ``emitter``
 ^^^^^^^^^^^
 
 .. autoclass:: despotic.emitter
    :members:
+
+.. _sssec-full-emitterData:
 
 ``emitterData``
 ^^^^^^^^^^^^^^^
@@ -52,6 +58,8 @@ despotic classes
 ^^^^^^^^^^^^^
 .. autoclass:: despotic.radiation
    :members:
+
+.. _sssec-full-zonedcloud:
 
 ``zonedcloud``
 ^^^^^^^^^^^^^^
@@ -67,11 +75,15 @@ despotic functions
 
 .. autofunction:: despotic.fetchLamda
 
+.. _sssec-full-lineProfLTE:
+
 ``lineProfLTE``
 ^^^^^^^^^^^^^^^
 
 .. autofunction:: despotic.lineProfLTE
 		  
+.. _sssec-full-refreshLamda:
+
 ``refreshLamda``
 ^^^^^^^^^^^^^^^^
 
@@ -80,6 +92,8 @@ despotic functions
 		  
 despotic.chemistry classes
 --------------------------
+
+.. _sssec-full-abundanceDict:
 
 ``abundanceDict``
 ^^^^^^^^^^^^^^^^^
