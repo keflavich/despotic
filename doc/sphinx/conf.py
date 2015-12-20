@@ -21,6 +21,8 @@ import shlex
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
+sys.path.insert(0, os.path.join(os.path.abspath('.'), '..', '..'))
+
 # Mock imports to avoid problems on readthedocs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
