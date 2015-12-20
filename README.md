@@ -15,6 +15,12 @@ described in
 and an extensive [User's Guide](https://bitbucket.org/krumholz/despotic/downloads/UsersGuide.pdf) is available, and is included with the download.
 
 
+Documentation
+=============
+
+Full documentation for DESPOTIC is hosted at [readthedocs](http://despotic.readthedocs.org/).
+
+
 Downloading DESPOTIC
 ====================
 
