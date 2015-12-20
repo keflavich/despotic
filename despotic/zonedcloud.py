@@ -36,6 +36,28 @@ class zonedcloud(object):
     """
     A class consisting of an interstellar cloud divided into different
     column density / extinction zones.
+
+
+    Parameters
+       fileName : string
+          name of file from which to read cloud description
+       colDen : array
+          Array of column densities marking zone centers
+       AV : array
+          Array of visual extinction values (in mag) marking zone
+          centers; AV is converted to column density using a V-band
+          cross section equal to 0.4 * sigmaPE; this argument
+          ignored if colDen is not None
+       nZone : int
+          Number of zones into which to divide the cloud, from 0
+          to the maximum column density found in the cloud
+          description file fileName; ignored if colDen or AV is
+          not None
+       geometry : 'sphere' | 'slab'
+          geometry to assume for the cloud, either 'sphere'
+          (onion-like) or 'slab' (layer cake-like)
+       verbose : Boolean
+          print out information about the cloud as we read it
     """
 
     ####################################################################
@@ -551,12 +573,14 @@ class zonedcloud(object):
         virial value
 
         Parameters
-        ----------
-        alphaVir : float
-            virial ratio to be used in computation; defaults to 1
-        NTonly : Boolean
-            if True, the virial ratio is computed considering only the
-            non-thermal component of the velocity dispersion
+           alphaVir : float
+              virial ratio to be used in computation; defaults to 1
+           NTonly : Boolean
+              if True, the virial ratio is computed considering only the
+              non-thermal component of the velocity dispersion
+
+        Returns
+           Nothing
         """
         
         # Thermal velocity disperison squared

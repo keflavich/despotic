@@ -46,16 +46,14 @@ def fShield_H2_DB(NH2, sigma):
     & Bertoldi (1996)
 
     Parameters
-    ----------
-    NH2 : float or array
-        H2 column density in cm^-2
-    sigma : float or array
-        velocity dispersion in cm s^-1
+       NH2 : float | array
+          H2 column density in cm^-2
+       sigma : float | array
+          velocity dispersion in cm s^-1
 
     Returns
-    -------
-    fShield : float or array
-         the shielding factor for the input NH2 and sigma
+       fShield : float | array
+          the shielding factor for the input NH2 and sigma
     """
 
     x = np.maximum(NH2 / 5e14, small)
@@ -120,24 +118,21 @@ def fShield_CO_vDB(NCO, NH2, order=1):
     based on the model of van Dishoeck & Black (1987)
 
     Parameters
-    ----------
-    NCO : float or array
-        CO column density in cm^-2
-    NH2 : float or array
-        H2 column density in cm^-2
-    order : integer
-        order of spline interpolation on van Dishoeck & Black's table;
-        1 is the safest choice, but 2 and 3 are also provided, and may
-        be more accurate in some ranges
+       NCO : float | array
+          CO column density in cm^-2
+       NH2 : float | array
+          H2 column density in cm^-2
+       order : 1 | 2 | 3
+          order of spline interpolation on van Dishoeck & Black's table;
+          1 is the safest choice, but 2 and 3 are also provided, and may
+          be more accurate in some ranges
 
     Returns
-    -------
-    fShield : array
-        the shielding factor for the input NCO and NH2 values
+       fShield : array
+          the shielding factor for the input NCO and NH2 values
 
     Raises
-    ------
-    ValueError if order is not 1, 2, or 3
+       ValueError if order is not 1, 2, or 3
     """
     logNCO = np.log10(np.clip(NCO, 10.**_logNCOvDB[0], 10.**_logNCOvDB[-1]))
     logNH2 = np.log10(np.clip(NH2, 10.**_logNH2vDB[0], 10.**_logNH2vDB[-1]))

@@ -25,12 +25,29 @@ from .. import despoticError
 
 class abundanceDict(collections.MutableMapping,dict):
     """
-    An abundanceDict object is a wrapper around an array of
+    An abundanceDict object is a wrapper around a numpy array of
     abundances, and maps between human-readable chemical names
-    (e.g. CO) and numeric indices in the array. This mapping is
-    created when the dict is first initialized, and is immutable
-    thereafter. However, the underlying array to which the mapping
-    applies can be altered.
+    (e.g. CO) and numeric indices in the array. Elements can be
+    queried and addressed using a dict-like interface (e.g. if abd is
+    an abundanceDict object, one could do abd['CO'] = 1.0e-4), but the
+    underlying data structure can be manipulated with the speed and
+    flexibility of a numpy array. In particular, one can perform
+    arithmetic operations such as addition on abundance dicts, and they
+    are simply applied to the underyling numpy array using the usual
+    numpy operator rules.
+
+    This mapping between species names and array indices is created
+    when the dict is first initialized, and is immutable
+    thereafter. Thus operations that modify the keys in a dict are
+    disallowed for abundanceDict objects.
+
+    Parameters
+       specList : list
+          list of species names for this abundanceDict; each list
+          element must be a string
+       x : array of rank 1 or 2
+          array of abundances; the length of the first dimension of
+          x must be equal to the length of specList
     """
 
     ########################################################################
@@ -43,16 +60,12 @@ class abundanceDict(collections.MutableMapping,dict):
         around.
 
         Parameters
-        ----------
-        specList : list of strings
-             list of species names for this abundanceDict
-        x : array of rank 1 or 2
-             array of abundances; the length of the first dimension of
-             x must be equal to the length of specList
-
-        Returns
-        -------
-        Nothing
+           specList : list
+              list of species names for this abundanceDict; each list
+              element must be a string
+           x : array of rank 1 or 2
+              array of abundances; the length of the first dimension of
+              x must be equal to the length of specList
         """
 
         # Make sure input specList and x are properly formatted
@@ -311,20 +324,21 @@ class abundanceDict(collections.MutableMapping,dict):
     def index(self, spec):
         """
         Parameters
-        ----------
-        spec : string or iterable containing strings
-           list of species whose indices are to be returns
+           spec : string | iterable
+              if this is a string, the method returns the index of
+              that chemical species; if it is an iterable, the
+              iterable must contain strings, and  the method
+              returns an array containing the indices of all species in
+              the iterable
 
         Returns
-        -------
-        index : int or array of ints
-           indices of the input species; if spec is a string, this is
-           an int; otherwise it is an array of ints
+           index : int | array
+              indices of the input species; if spec is a string, this is
+              an int; otherwise it is an array of ints
 
         Raises
-        ------
-        KeyError, if spec or any of its elements is not in the species
-        list
+           KeyError, if spec or any of its elements is not in the species
+           list
         """
 
         if hasattr(spec, '__iter__'):

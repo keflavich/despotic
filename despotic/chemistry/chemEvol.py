@@ -42,76 +42,73 @@ def chemEvol(cloud, tFin, tInit=0.0, nOut=100, dt=None,
     network.
 
     Parameters
-    ----------
-    cloud : class cloud
-        cloud on which computation is to be performed
-    tFin : float
-        end time of integration, in sec
-    tInit : float
-        start time of integration, in sec
-    nOut : int
-        number of times at which to report the temperature; this
-        is ignored if dt or tOut are set
-    dt : float
-        time interval between outputs, in sec; this is ignored if
-        tOut is set
-    tOut : array
-        list of times at which to output the temperature, in s;
-        must be sorted in increasing order
-    network : chemical network class
-        a valid chemical network class; this class must define the
-        methods __init__, dxdt, and applyAbundances; if None, the
-        existing chemical network for the cloud is used
-    info : dict
-        a dict of additional initialization information to be passed
-        to the chemical network class when it is instantiated
-    addEmitters : Boolean
-        if True, emitters that are included in the chemical
-        network but not in the cloud's existing emitter list will
-        be added; if False, abundances of emitters already in the
-        emitter list will be updated, but new emiters will not be
-        added to the cloud
-    evolveTemp : 'fixed' | 'gasEq' | 'fullEq' | 'evol'
-        how to treat the temperature evolution during the chemical
-        evolution; 'fixed' = treat tempeature as fixed; 'gasEq' = hold
-        dust temperature fixed, set gas temperature to instantaneous
-        equilibrium value; 'fullEq' = set gas and dust temperatures to
-        instantaneous equilibrium values; 'evol' = evolve gas
-        temperature in time along with the chemistry, assuming the
-        dust is always in instantaneous equilibrium
-    isobaric : Boolean
-        if set to True, the gas is assumed to be isobaric during the
-        evolution (constant pressure); otherwise it is assumed to be
-        isochoric; note that (since chemistry networks at present are
-        not allowed to change the mean molecular weight), this option
-        has no effect if evolveTemp is 'fixed'
-    tempEqParam : None | dict
-        if this is not None, then it must be a dict of values that
-        will be passed as keyword arguments to the cloud.setTempEq,
-        cloud.setGasTempEq, or cloud.setDustTempEq routines; only used
-        if evolveTemp is not 'fixed'
-    dEdtParam : None | dict
-        if this is not None, then it must be a dict of values that
-        will be passed as keyword arguments to the cloud.dEdt
-        routine; only used if evolveTemp is 'evol'
+       cloud : class cloud
+          cloud on which computation is to be performed
+       tFin : float
+          end time of integration, in sec
+       tInit : float
+          start time of integration, in sec
+       nOut : int
+          number of times at which to report the temperature; this
+          is ignored if dt or tOut are set
+       dt : float
+          time interval between outputs, in sec; this is ignored if
+          tOut is set
+       tOut : array
+          list of times at which to output the temperature, in s;
+          must be sorted in increasing order
+       network : chemical network class
+          a valid chemical network class; this class must define the
+          methods __init__, dxdt, and applyAbundances; if None, the
+          existing chemical network for the cloud is used
+       info : dict
+          a dict of additional initialization information to be passed
+          to the chemical network class when it is instantiated
+       addEmitters : Boolean
+          if True, emitters that are included in the chemical
+          network but not in the cloud's existing emitter list will
+          be added; if False, abundances of emitters already in the
+          emitter list will be updated, but new emiters will not be
+          added to the cloud
+       evolveTemp : 'fixed' | 'gasEq' | 'fullEq' | 'evol'
+          how to treat the temperature evolution during the chemical
+          evolution; 'fixed' = treat tempeature as fixed; 'gasEq' = hold
+          dust temperature fixed, set gas temperature to instantaneous
+          equilibrium value; 'fullEq' = set gas and dust temperatures to
+          instantaneous equilibrium values; 'evol' = evolve gas
+          temperature in time along with the chemistry, assuming the
+          dust is always in instantaneous equilibrium
+       isobaric : Boolean
+          if set to True, the gas is assumed to be isobaric during the
+          evolution (constant pressure); otherwise it is assumed to be
+          isochoric; note that (since chemistry networks at present are
+          not allowed to change the mean molecular weight), this option
+          has no effect if evolveTemp is 'fixed'
+       tempEqParam : None | dict
+          if this is not None, then it must be a dict of values that
+          will be passed as keyword arguments to the cloud.setTempEq,
+          cloud.setGasTempEq, or cloud.setDustTempEq routines; only used
+          if evolveTemp is not 'fixed'
+       dEdtParam : None | dict
+          if this is not None, then it must be a dict of values that
+          will be passed as keyword arguments to the cloud.dEdt
+          routine; only used if evolveTemp is 'evol'
 
     Returns
-    -------
-    time : array of floats
-        array of output times, in sec
-    abundances : class abundanceDict
-        an abundanceDict giving the abundances as a function of time
-    Tg : array
-        gas temperature as a function of time; returned only if
-        evolveTemp is not 'fixed'
-    Td : array
-        dust temperature as a function of time; returned only if
-        evolveTemp is not 'fixed' or 'gasEq'
+       time : array
+          array of output times, in sec
+       abundances : class abundanceDict
+          an abundanceDict giving the abundances as a function of time
+       Tg : array
+          gas temperature as a function of time; returned only if
+          evolveTemp is not 'fixed'
+       Td : array
+          dust temperature as a function of time; returned only if
+          evolveTemp is not 'fixed' or 'gasEq'
 
     Raises
-    ------
-    despoticError, if network is None and the cloud does not already
-    have a defined chemical network associated with it
+       despoticError, if network is None and the cloud does not already
+       have a defined chemical network associated with it
     """
 
     # Check if we have been passed a new chemical network. If so,

@@ -56,6 +56,35 @@ class reaction_matrix(object):
     of chemical species from chemical reactions. This class does the
     work of mapping from the reaction rates to rates of change in
     species abundances.
+
+    Parameters
+       specList: listlike of string
+          List of all chemical species in the full reaction network,
+          including those that are derived from conservation laws
+          instead of being computed directly
+       reactions : list of dict
+          A list listing all the reactions to be registered; each
+          entry in the list must be a dict containing the keys 'spec'
+          and 'stoich', which list the species involved in the
+          reaction and the stoichiometric factors for each species,
+          respectively. Sign convention is that reactants on the left
+          hand side have negative stoichiometric factors, those on the
+          right hand side have positive factors.
+       sparse : bool
+          If True, the reaction rate matrix is represented as a
+          sparse matrix; otherwise it is a dense matrix. This has no
+          effect on results, but depending on the chemical network it
+          may lead to improved execution speed and/or reduced memory
+          usage.
+
+    Examples
+       To describe the reaction C + O -> CO, the correct dict entry is::
+
+          { 'spec' : ['C', 'O', 'CO'], 'stoich' : [-1, -1, 1] }
+
+       To describe the reaction H + H -> H2, the dict is::
+
+          { 'spec' : ['H', 'H2'], 'stoich' : [-2, 1] }
     """
 
     def __init__(self, specList, reactions, sparse=False):
@@ -63,33 +92,33 @@ class reaction_matrix(object):
         This creates a reactions object.
 
         Parameters
-        ----------
-        specList: listlike of string
-           List of all chemical species in the full reaction network,
-           including those that are derived from conservation laws
-           instead of being computed directly
-        reactions : list of dict
-           A list listing all the reactions to be registered; each
-           entry in the list must be a dict containing the keys 'spec'
-           and 'stoich', which list the species involved in the
-           reaction and the stoichiometric factors for each species,
-           respectively. Sign convention is that reactants on the left
-           hand side have negative stoichiometric factors, those on the
-           right hand side have positive factors. Examples:
-              C + O -> CO is listed as 
-              { 'spec' : ['C', 'O', 'CO'], 'stoich' : [-1, -1, 1] }
-              H + H -> H2 is listed as
-              { 'spec' : ['H', 'H2'], 'stoich' : [-2, 1] }
-        sparse : bool
-           If True, the reaction rate matrix is represented as a
-           sparse matrix; otherwise it is a dense matrix. This has no
-           effect on results, but depending on the chemical network it
-           may lead to improved execution speed and/or reduced memory
-           usage.
+           specList: listlike of string
+              List of all chemical species in the full reaction network,
+              including those that are derived from conservation laws
+              instead of being computed directly
+           reactions : list of dict
+              A list listing all the reactions to be registered; each
+              entry in the list must be a dict containing the keys 'spec'
+              and 'stoich', which list the species involved in the
+              reaction and the stoichiometric factors for each species,
+              respectively. Sign convention is that reactants on the left
+              hand side have negative stoichiometric factors, those on the
+              right hand side have positive factors.
+           sparse : bool
+              If True, the reaction rate matrix is represented as a
+              sparse matrix; otherwise it is a dense matrix. This has no
+              effect on results, but depending on the chemical network it
+              may lead to improved execution speed and/or reduced memory
+              usage.
 
-        Returns
-        -------
-        Nothing
+        Examples
+           To describe the reaction C + O -> CO, the correct dict entry is::
+
+              { 'spec' : ['C', 'O', 'CO'], 'stoich' : [-1, -1, 1] }
+
+           To describe the reaction H + H -> H2, the dict is::
+
+              { 'spec' : ['H', 'H2'], 'stoich' : [-2, 1] }
         """
 
         # Count number of species and number of reactions
@@ -175,20 +204,18 @@ class reaction_matrix(object):
         set of rate coefficients.
 
         Parameters
-        ----------
-        x : array(N_species)
-           array of current species abundances
-        n : float
-           number density of H nuclei
-        ratecoef : array(N_reactions)
-           rate coefficients for each reaction; reaction rate per unit
-           volume = ratecoef * product of densities of reactants;
-           dxdt = reaction rate / unit volume / n
+           x : array(N_species)
+              array of current species abundances
+           n : float
+              number density of H nuclei
+           ratecoef : array(N_reactions)
+              rate coefficients for each reaction; reaction rate per unit
+              volume = ratecoef * product of densities of reactants;
+              dxdt = reaction rate / unit volume / n
 
         Returns
-        -------
-        dxdt: array(N)
-           rate of change of all species abundances
+           dxdt : array(N)
+              rate of change of all species abundances
         """
 
         # Get rates from rate coefficients
@@ -213,6 +240,33 @@ class cr_reactions(reaction_matrix):
     cosmic ray-induced reaction rates. In addition to the constructor,
     the class has only a single method: dxdt, which returns the
     reaction rates.
+
+    Parameters
+       specList: listlike of string
+          List of all chemical species in the full reaction network,
+          including those that are derived from conservation laws
+          instead of being computed directly
+       reactions : list of dict
+          A list listing all the reactions to be registered; each
+          entry in the list must be a dict containing the keys 'spec'
+          'stoich', and 'rate', which list the species involved in the
+          reaction, the stoichiometric factors for each species, and
+          the reaction rate per primary CR ionization,
+          respectively. Sign convention is that reactants on the left 
+          hand side have negative stoichiometric factors, those on the
+          right hand side have positive factors.
+       sparse : bool
+          If True, the reaction rate matrix is represented as a
+          sparse matrix; otherwise it is a dense matrix. This has no
+          effect on results, but depending on the chemical network it
+          may lead to improved execution speed and/or reduced memory
+          usage.
+
+    Examples
+       To list the reaction cr + H -> H+ + e-, the dict entry should be::
+
+          { 'spec' : ['H', 'H+', 'e-'], 'stoich' : [-1, 1, 1],
+            'rate' : 1.0 }
     """
 
     def __init__(self, specList, reactions, sparse=False):
@@ -221,33 +275,32 @@ class cr_reactions(reaction_matrix):
         computing rates for reactions of the form CR + ... -> ....
 
         Parameters
-        ----------
-        specList: listlike of string
-           List of all chemical species in the full reaction network,
-           including those that are derived from conservation laws
-           instead of being computed directly
-        reactions : list of dict
-           A list listing all the reactions to be registered; each
-           entry in the list must be a dict containing the keys 'spec'
-           'stoich', and 'rate', which list the species involved in the
-           reaction, the stoichiometric factors for each species, and
-           the reaction rate per primary CR ionization,
-           respectively. Sign convention is that reactants on the left 
-           hand side have negative stoichiometric factors, those on the
-           right hand side have positive factors. Examples:
-              cr + H -> H+ + e- is listed as 
+           specList: listlike of string
+              List of all chemical species in the full reaction network,
+              including those that are derived from conservation laws
+              instead of being computed directly
+           reactions : list of dict
+              A list listing all the reactions to be registered; each
+              entry in the list must be a dict containing the keys 'spec'
+              'stoich', and 'rate', which list the species involved in the
+              reaction, the stoichiometric factors for each species, and
+              the reaction rate per primary CR ionization,
+              respectively. Sign convention is that reactants on the left 
+              hand side have negative stoichiometric factors, those on the
+              right hand side have positive factors.
+           sparse : bool
+              If True, the reaction rate matrix is represented as a
+              sparse matrix; otherwise it is a dense matrix. This has no
+              effect on results, but depending on the chemical network it
+              may lead to improved execution speed and/or reduced memory
+              usage.
+
+        Examples
+           To list the reaction cr + H -> H+ + e-, the dict entry
+           should be::
+
               { 'spec' : ['H', 'H+', 'e-'], 'stoich' : [-1, 1, 1],
                 'rate' : 1.0 }
-        sparse : bool
-           If True, the reaction rate matrix is represented as a
-           sparse matrix; otherwise it is a dense matrix. This has no
-           effect on results, but depending on the chemical network it
-           may lead to improved execution speed and/or reduced memory
-           usage.
-
-        Returns
-        -------
-        Nothing
         """
 
         # Call the parent constructor
@@ -264,20 +317,18 @@ class cr_reactions(reaction_matrix):
         for a given cosmic ray ionization rate.
 
         Parameters
-        ----------
-        x : array(N)
-           array of current species abundances
-        n : float
-           number density of H nuclei; only used if some reactions
-           have multiple species on the LHS, otherwise can be set to
-           any positive value
-        ionrate : float
-           cosmic ray primary ionization rate
+           x : array(N)
+              array of current species abundances
+           n : float
+              number density of H nuclei; only used if some reactions
+              have multiple species on the LHS, otherwise can be set to
+              any positive value
+           ionrate : float
+              cosmic ray primary ionization rate
 
         Returns
-        -------
-        dxdt: array(N)
-           rate of change of all species abundances
+           dxdt: array(N)
+              rate of change of all species abundances
         """
 
         # Get rate coefficients and rates
@@ -303,6 +354,37 @@ class photoreactions(reaction_matrix):
     units of the Habing (1968) field, multiplied by dust and gas
     shielding factors. In addition to the constructor, the class has
     only a single method: dxdt, which returns the reaction rates.
+
+    Parameters
+       specList: listlike of string
+          List of all chemical species in the full reaction network,
+          including those that are derived from conservation laws
+          instead of being computed directly
+       reactions : list of dict
+          A list listing all the reactions to be registered; each
+          entry in the list must be a dict containing the keys:
+
+          * 'spec' : list 
+             list of strings giving the species involved in the reaction
+          * 'stoich' : list
+             list of int stoichiometric factor for each species
+          * 'rate' : float
+             reaction rate per target in a chi = 1 radiation field
+          * 'av_fac' : float
+             optical depth per unit A_V
+          * 'shield_fac' : (optional) callable 
+             callable to compute the
+             shielding factor; see the dxdt method for an
+             explanation of how to specify its arguments
+
+          Reaction rates per target are given by 
+             chi * rate * shield_fac * exp(-av_fac * A_V)
+       sparse : bool
+          If True, the reaction rate matrix is represented as a
+          sparse matrix; otherwise it is a dense matrix. This has no
+          effect on results, but depending on the chemical network it
+          may lead to improved execution speed and/or reduced memory
+          usage.
     """
 
     def __init__(self, specList, reactions, sparse=False):
@@ -312,33 +394,35 @@ class photoreactions(reaction_matrix):
         ...
 
         Parameters
-        ----------
-        specList: listlike of string
-           List of all chemical species in the full reaction network,
-           including those that are derived from conservation laws
-           instead of being computed directly
-        reactions : list of dict
-           A list listing all the reactions to be registered; each
-           entry in the list must be a dict containing the keys:
-              'spec' : list of the species involved in the reaction
-              'stoich' : stoichiometric factor for each species
-              'rate' : reaction rate per target in a chi = 1 radiation field
-              'av_fac' : optical depth per unit A_V
-              'shield_fac' : (optional) callable to compute the
+           specList: listlike of string
+              List of all chemical species in the full reaction network,
+              including those that are derived from conservation laws
+              instead of being computed directly
+           reactions : list of dict
+              A list listing all the reactions to be registered; each
+              entry in the list must be a dict containing the keys:
+
+              * 'spec' : list 
+                 list of strings giving the species involved in the reaction
+              * 'stoich' : list
+                 list of int stoichiometric factor for each species
+              * 'rate' : float
+                 reaction rate per target in a chi = 1 radiation field
+              * 'av_fac' : float
+                 optical depth per unit A_V
+              * 'shield_fac' : (optional) callable 
+                 callable to compute the
                  shielding factor; see the dxdt method for an
                  explanation of how to specify its arguments
-           Reaction rates per target are given by 
-              chi * rate * shield_fac * exp(-av_fac * A_V)
-        sparse : bool
-           If True, the reaction rate matrix is represented as a
-           sparse matrix; otherwise it is a dense matrix. This has no
-           effect on results, but depending on the chemical network it
-           may lead to improved execution speed and/or reduced memory
-           usage.
 
-        Returns
-        -------
-        Nothing
+              Reaction rates per target are given by 
+                 chi * rate * shield_fac * exp(-av_fac * A_V)
+           sparse : bool
+              If True, the reaction rate matrix is represented as a
+              sparse matrix; otherwise it is a dense matrix. This has no
+              effect on results, but depending on the chemical network it
+              may lead to improved execution speed and/or reduced memory
+              usage.
         """
 
         # Call the parent constructor
@@ -380,36 +464,34 @@ class photoreactions(reaction_matrix):
         for a given ISRF, extinction, and gas shielding factor.
 
         Parameters
-        ----------
-        x : array(N)
-           array of current species abundances
-        n : float
-           number density of H nuclei; only used if some reactions
-           have multiple species on the LHS, otherwise can be set to
-           any positive value
-        chi : float
-           ISRF strength normalized to the solar neighborhood value
-        AV : float
-           visual extinction to apply to the ISRF
-        shield_args : list
-           list of argument lists to be passed to the shielding
-           functions; *(shield_args[0]) will be passed to the first
-           shielding function, *(shield_args[1]) to the second
-           shielding function, etc. Arguments must be supplied for
-           shielding functions that expect them, or an error is
-           raised.
-        shield_kw_args : list
-           same as shield_args, but instead of the list items being
-           lists themselves, they are dicts, and are passed as
-           keywords to the shielding functions as **(shield_kw_args[0]),
-           **(shield_kw_args[1]), etc. If this is not None, the list
-           must have the same number of elements as the number of
-           shielding functions.
+           x : array(N)
+              array of current species abundances
+           n : float
+              number density of H nuclei; only used if some reactions
+              have multiple species on the LHS, otherwise can be set to
+              any positive value
+           chi : float
+              ISRF strength normalized to the solar neighborhood value
+           AV : float
+              visual extinction to apply to the ISRF
+           shield_args : list
+              list of argument lists to be passed to the shielding
+              functions; *(shield_args[0]) will be passed to the first
+              shielding function, *(shield_args[1]) to the second
+              shielding function, etc. Arguments must be supplied for
+              shielding functions that expect them, or an error is
+              raised.
+           shield_kw_args : list
+              same as shield_args, but instead of the list items being
+              lists themselves, they are dicts, and are passed as
+              keywords to the shielding functions as **(shield_kw_args[0]),
+              **(shield_kw_args[1]), etc. If this is not None, the list
+              must have the same number of elements as the number of
+              shielding functions.
 
         Returns
-        -------
-        dxdt: array(N)
-           rate of change of all species abundances
+           dxdt: array(N)
+              rate of change of all species abundances
         """
 
         # Evaluate the shielding function with the appropriate call

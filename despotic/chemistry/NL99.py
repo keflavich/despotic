@@ -162,6 +162,32 @@ class NL99(chemNetwork):
     """
     This class the implements the chemistry network of Nelson & Langer
     (1999, ApJ, 524, 923).
+
+    Parameters
+       cloud : class cloud
+          a DESPOTIC cloud object from which initial data are to be
+          taken
+       info : dict
+          a dict containing additional parameters
+
+    Remarks
+       The dict info may contain the following key - value pairs:
+
+       'xC' : float
+          the total C abundance per H nucleus; defaults to 2.0e-4
+       'xO' : float
+          the total H abundance per H nucleus; defaults to 4.0e-4
+       'xM' : float
+          the total refractory metal abundance per H
+          nucleus; defaults to 2.0e-7
+       'sigmaDustV' : float
+          V band dust extinction cross
+          section per H nucleus; if not set, the default behavior
+          is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE
+       'AV' : float
+          total visual extinction; ignored if sigmaDustV is set
+       'noClump' : bool
+          if True, the clumping factor is set to 1.0; defaults to False
     """
 
     ####################################################################
@@ -170,38 +196,33 @@ class NL99(chemNetwork):
     def __init__(self, cloud=None, info=None):
         """
         Parameters
-        ----------
-        cloud : class cloud
-             a DESPOTIC cloud object from which initial data are to be
-             taken
-        info : dict
-             a dict containing additional parameters
-
-        Returns
-        -------
-        Nothing
-
-        Raises
-        ------
-        despoticError, if the dict info contains non-allowed entries
+           cloud : class cloud
+              a DESPOTIC cloud object from which initial data are to be
+              taken
+           info : dict
+              a dict containing additional parameters
 
         Remarks
-        -------
-        The dict info may contain the following key - value pairs:
+           The dict info may contain the following key - value pairs:
 
-        'xC' : float giving the total C abundance per H nucleus;
-             defaults to 2.0e-4
-        'xO' : float giving the total H abundance per H nucleus;
-             defaults to 4.0e-4
-        'xM' : float giving the total refractory metal abundance per H
-             nucleus; defaults to 2.0e-7
-        'sigmaDustV' : float giving the V band dust extinction cross
-             section per H nucleus; if not set, the default behavior
-             is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE
-        'AV' : float giving the total visual extinction; ignored if
-             sigmaDustV is set
-        'noClump' : a Boolean; if True, the clump factor is set to
-             1.0; defaults to False
+           'xC' : float
+              the total C abundance per H nucleus; defaults to 2.0e-4
+           'xO' : float
+              the total H abundance per H nucleus;
+              defaults to 4.0e-4
+           'xM' : float
+              the total refractory metal abundance per H
+              nucleus; defaults to 2.0e-7
+           'sigmaDustV' : float
+              V band dust extinction cross
+              section per H nucleus; if not set, the default behavior
+              is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE
+           'AV' : float
+              total visual extinction; ignored if
+              sigmaDustV is set
+           'noClump' : bool
+              if True, the clump factor is set to
+              1.0; defaults to False
         """
 
         # List of species for this network; provide a pointer here so
@@ -396,6 +417,9 @@ class NL99(chemNetwork):
     ####################################################################
     @property
     def nH(self):
+        """
+        volume density of H nuclei
+        """
         if self.cloud is None:
             return self._nH
         else:
@@ -408,8 +432,11 @@ class NL99(chemNetwork):
         else:
             self.cloud.nH = value
 
-    @property
+    @property    
     def temp(self):
+        """
+        gas kinetic temperature
+        """
         if self.cloud is None:
             return self._temp
         else:
@@ -424,6 +451,9 @@ class NL99(chemNetwork):
 
     @property
     def sigmaNT(self):
+        """
+        non-thermal velocity dispersion
+        """
         if self.cloud is None:
             return 0.0
         else:
@@ -431,6 +461,10 @@ class NL99(chemNetwork):
 
     @property
     def cfac(self):
+        """
+        clumping factor; cannot be set directly, calculated from temp
+        and sigmaNT
+        """
         if self.cloud is None:
             return 1.0
         else:
@@ -449,10 +483,13 @@ class NL99(chemNetwork):
 
     @cfac.setter
     def cfac(self, value):
-        raise despoticError, "cannot set cfac directly"
+        raise despoticError, "cannot set cfac directly; set sigmaNT or temp instead"
 
     @property
     def xHe(self):
+        """
+        He abundance
+        """
         if self.cloud is None:
             return self._xHe
         else:
@@ -467,6 +504,9 @@ class NL99(chemNetwork):
 
     @property
     def ionRate(self):
+        """
+        primary ionization rate from cosmic rays and x-rays
+        """
         if self.cloud is None:
             return self._ionRate
         else:
@@ -481,6 +521,9 @@ class NL99(chemNetwork):
 
     @property
     def chi(self):
+        """
+        ISRF strength, normalized to solar neighborhood value
+        """
         if self.cloud is None:
             return self._chi
         else:
@@ -495,6 +538,9 @@ class NL99(chemNetwork):
 
     @property
     def NH(self):
+        """
+        column density of H nuclei
+        """
         if self.cloud is None:
             return self._NH
         else:
@@ -509,6 +555,9 @@ class NL99(chemNetwork):
 
     @property
     def AV(self):
+        """
+        visual extinction in mag
+        """
         if self.cloud is None:
             if self.info is None:
                 return self._AV
@@ -557,6 +606,9 @@ class NL99(chemNetwork):
 
     @property
     def abundances(self):
+        """
+        abundances of all species in the chemical network
+        """
         self._abundances = abundanceDict(self.specListExtended,
                                          self.extendAbundances())
         return self._abundances
@@ -585,6 +637,20 @@ class NL99(chemNetwork):
     # adds slots for H2, HeI, MI, and e
     ####################################################################
     def extendAbundances(self, xin=None):
+        """
+        Compute abundances of derived species not directly followed in
+        the network.
+
+        Parameters
+           xin : array
+              abundances of species directly tracked in the network;
+              if left as None, the abundances stored internally to the
+              network are used
+
+        Returns
+           x : array
+              abundances, including those of derived species
+        """
 
         # Object we'll be returning
         xgrow = np.zeros(14)
@@ -622,17 +688,15 @@ class NL99(chemNetwork):
         this chemical network.
 
         Parameters
-        ----------
-        xin : array(10)
-             current abundances of all species
-        time : float
-             current time; not actually used, but included as an
-             argument for compatibility with odeint
+           xin : array(10)
+              current abundances of all species
+           time : float
+              current time; not actually used, but included as an
+              argument for compatibility with odeint
 
         Returns
-        -------
-        dxdt : array(10)
-             time derivative of x
+           dxdt : array(10)
+              time derivative of x
         """
 
         # Get abundances of derived quantities
@@ -666,22 +730,19 @@ class NL99(chemNetwork):
         network to the cloud's emitter list.
 
         Parameters
-        ----------
-        addEmitters : Boolean
-             if True, emitters that are included in the chemical
-             network but not in the cloud's existing emitter list will
-             be added; if False, abundances of emitters already in the
-             emitter list will be updated, but new emiters will not be
-             added to the cloud
+           addEmitters : Boolean
+              if True, emitters that are included in the chemical
+              network but not in the cloud's existing emitter list will
+              be added; if False, abundances of emitters already in the
+              emitter list will be updated, but new emiters will not be
+              added to the cloud
 
         Returns
-        -------
-        Nothing
+           Nothing
 
         Remarks
-        -------
-        If there is no cloud associated with this chemical network,
-        this routine does nothing and silently returns.
+           If there is no cloud associated with this chemical network,
+           this routine does nothing and silently returns.
         """
 
         # SAFETY check: make sure we have an associated cloud to which

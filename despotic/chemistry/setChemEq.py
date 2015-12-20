@@ -44,89 +44,88 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
     values, computed using a specified chemical netowrk.
 
     Parameters
-    ----------
-    cloud : class cloud
-        cloud on which computation is to be performed
-    tEqGuess : float
-        a guess at the timescale over which equilibrium will be
-        achieved; if left unspecified, the code will attempt to
-        estimate this time scale on its own
-    network : chemical network class
-        a valid chemical network class; this class must define the
-        methods __init__, dxdt, and applyAbundances; if None, the
-        existing chemical network for the cloud is used
-    info : dict
-        a dict of additional initialization information to be passed
-        to the chemical network class when it is instantiated
-    addEmitters : Boolean
-        if True, emitters that are included in the chemical
-        network but not in the cloud's existing emitter list will
-        be added; if False, abundances of emitters already in the
-        emitter list will be updated, but new emiters will not be
-        added to the cloud
-    evolveTemp : 'fixed' | 'iterate' | 'iterateDust' | 'gasEq' | 
-                 'fullEq' | 'evol'
-        how to treat the temperature evolution during the chemical
-        evolution; 'fixed' = treat tempeature as fixed; 'iterate' =
-        iterate between setting the gas temperature and chemistry to
-        equilibrium; 'iterateDust' = iterate between setting the gas
-        and dust temperatures and the chemistry to equilibrium;
-        'gasEq' = hold dust temperature fixed, set gas temperature to
-        instantaneous equilibrium value as the chemistry evolves;
-        'fullEq' = set gas and dust temperatures to instantaneous
-        equilibrium values while evolving the chemistry network;
-        'evol' = evolve gas temperature in time along with the
-        chemistry, assuming the dust is always in instantaneous
-        equilibrium
-    isobaric : Boolean
-        if set to True, the gas is assumed to be isobaric during the
-        evolution (constant pressure); otherwise it is assumed to be
-        isochoric; note that (since chemistry networks at present are
-        not allowed to change the mean molecular weight), this option
-        has no effect if evolveTemp is 'fixed'
-    tempEqParam : None | dict
-        if this is not None, then it must be a dict of values that
-        will be passed as keyword arguments to the cloud.setTempEq,
-        cloud.setGasTempEq, or cloud.setDustTempEq routines; only used
-        if evolveTemp is not 'fixed'
-    dEdtParam : None | dict
-        if this is not None, then it must be a dict of values that
-        will be passed as keyword arguments to the cloud.dEdt
-        routine; only used if evolveTemp is 'evol'
-    tol : float
-        tolerance requirement on the equilibrium solution
-    convList : list
-        list of species to include when calculating tolerances to
-        decide if network is converged; species not listed are not
-        considered. If this is None, then all species are considered
-        in deciding if the calculation is converged.
-    smallabd : float
-        abundances below smallabd are not considered when checking for
-        convergence; set to 0 or a negative value to consider all
-        abundances, but beware that this may result in false
-        non-convergence due to roundoff error in very small abundances
-    maxTempIter : int
-        maximum number of iterations when iterating between chemistry
-        and temperature; only used if evolveTemp is 'iterate' or
-        'iterateDust'
-    verbose : Boolean
-        if True, diagnostic information is printed as the calculation
-        proceeds
+       cloud : class cloud
+          cloud on which computation is to be performed
+       tEqGuess : float
+          a guess at the timescale over which equilibrium will be
+          achieved; if left unspecified, the code will attempt to
+          estimate this time scale on its own
+       network : chemNetwork class
+          a valid chemNetwork class; this class must define the
+          methods __init__, dxdt, and applyAbundances; if None, the
+          existing chemical network for the cloud is used
+       info : dict
+          a dict of additional initialization information to be passed
+          to the chemical network class when it is instantiated
+       addEmitters : Boolean
+          if True, emitters that are included in the chemical
+          network but not in the cloud's existing emitter list will
+          be added; if False, abundances of emitters already in the
+          emitter list will be updated, but new emiters will not be
+          added to the cloud
+       evolveTemp : 'fixed' | 'iterate' | 'iterateDust' | 'gasEq' | 'fullEq' | 'evol'
+          how to treat the temperature evolution during the chemical
+          evolution:
+
+          * 'fixed' = treat tempeature as fixed
+          * 'iterate' = iterate between setting the gas temperature and
+            chemistry to equilibrium
+          * 'iterateDust' = iterate between setting the gas and dust
+            temperatures and the chemistry to equilibrium
+          * 'gasEq' = hold dust temperature fixed, set gas temperature to
+            instantaneous equilibrium value as the chemistry evolves
+          * 'fullEq' = set gas and dust temperatures to instantaneous
+            equilibrium values while evolving the chemistry network
+          * 'evol' = evolve gas temperature in time along with the
+            chemistry, assuming the dust is always in instantaneous
+            equilibrium
+
+       isobaric : Boolean
+          if set to True, the gas is assumed to be isobaric during the
+          evolution (constant pressure); otherwise it is assumed to be
+          isochoric; note that (since chemistry networks at present are
+          not allowed to change the mean molecular weight), this option
+          has no effect if evolveTemp is 'fixed'
+       tempEqParam : None | dict
+          if this is not None, then it must be a dict of values that
+          will be passed as keyword arguments to the cloud.setTempEq,
+          cloud.setGasTempEq, or cloud.setDustTempEq routines; only used
+          if evolveTemp is not 'fixed'
+       dEdtParam : None | dict
+          if this is not None, then it must be a dict of values that
+          will be passed as keyword arguments to the cloud.dEdt
+          routine; only used if evolveTemp is 'evol'
+       tol : float
+          tolerance requirement on the equilibrium solution
+       convList : list
+          list of species to include when calculating tolerances to
+          decide if network is converged; species not listed are not
+          considered. If this is None, then all species are considered
+          in deciding if the calculation is converged.
+       smallabd : float
+          abundances below smallabd are not considered when checking for
+          convergence; set to 0 or a negative value to consider all
+          abundances, but beware that this may result in false
+          non-convergence due to roundoff error in very small abundances
+       maxTempIter : int
+          maximum number of iterations when iterating between chemistry
+          and temperature; only used if evolveTemp is 'iterate' or
+          'iterateDust'
+       verbose : Boolean
+          if True, diagnostic information is printed as the calculation
+          proceeds
 
     Returns
-    -------
-    converged : Boolean
-        True if the calculation converged, False if not
+       converged : Boolean
+          True if the calculation converged, False if not
 
     Raises
-    ------
-    despoticError, if network is None and the cloud does not already
-    have a defined chemical network associated with it
+       despoticError, if network is None and the cloud does not already
+       have a defined chemical network associated with it
 
     Remarks
-    -------
-    The final abundances are written to the cloud whether or not the
-    calculation converges.
+       The final abundances are written to the cloud whether or not the
+       calculation converges.
     """
 
     # Check if we have been passed a new chemical network. If so,

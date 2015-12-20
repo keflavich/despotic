@@ -35,28 +35,31 @@ class radiation:
     """
     A class describing the radiation field affecting a cloud.
 
-    Attributes
-    ----------
-    TCMB : float
-        the temperature of the CMB, in K
-    TradDust : float
-        the temperature of the dust IR background field, in K
-    ionRate : float
-        the primary ionization rate due to cosmic rays and x-rays, in
-        s^-1 H^-1
-    chi : float
-        strength of the ISRF, normalized to the solar neighborhood value
+    Parameters
+       None
 
-    Methods
-    -------
-    __init__ -- initializes
-    ngamma -- returns the photon occupation number due to the CMB and
-       any diluted dust field at a given frequency
+    Class attributes
+       TCMB : float
+          the temperature of the CMB, in K
+       TradDust : float
+          the temperature of the dust IR background field, in K
+       ionRate : float
+          the primary ionization rate due to cosmic rays and x-rays, in
+          s^-1 H^-1
+       chi : float
+          strength of the ISRF, normalized to the solar neighborhood
+          value
+       fdDilute : float
+          dilution factor for the dust radiation field; a value of 0
+          means infinite dilution, so the dust does not contribute to the
+          photon occupation number, while 1 means zero dilution, so
+          the dust contributes as a full blackbody radiation field at
+          temperature TradDust
     """
 
-########################################################################
-# Method to initialize
-########################################################################
+    ####################################################################
+    # Method to initialize
+    ####################################################################
     def __init__(self):
         """
         This method initializes the value of the attributes to
@@ -76,11 +79,12 @@ class radiation:
         self.TradDust = 0.0
         self.ionRate = 2.0e-17
         self.chi = 1.0
-        self.rad.fdDilute = 0.0
+        self.fdDilute = 0.0
 
-########################################################################
-# Method to return the photon occupation number at the CMB temperature
-########################################################################
+    ####################################################################
+    # Method to return the photon occupation number as a function of
+    # frequency, specified as an equivalent temperature
+    ####################################################################
     def ngamma(self, Tnu):
         """
         Return the photon occupation number from the CMB and dust
@@ -89,14 +93,12 @@ class radiation:
         fdDilute * 1 / [exp(-h nu / k T_radDust) - 1]
 
         Parameters
-        ----------
-        Tnu : float or array of float
-            frequency translated into K, i.e. frequency times h/kB
+           Tnu : float | array
+              frequency translated into K, i.e. frequency times h/kB
 
         Returns
-        -------
-        ngamma : float or array
-            photon occupation number
+           ngamma : float | array
+              photon occupation number
         """
 
         # Return value, written in such a way as to produce underflows
