@@ -32,18 +32,22 @@ if on_rtd:
         def __getattr__(cls, name):
             return Mock()
         def __add__(self, other):
-            return Mock()
+            return 1.0
         def __mul__(self, other):
-            return Mock()
+            return 1.0
         def __rmul__(self, other):
-            return Mock()
+            return 1.0
         def __div__(self, other):
-            return Mock()
+            return 1.0
         def __rdiv__(self, other):
-            return Mock()
+            return 1.0
         def __truediv__(self, other):
-            return Mock()
+            return 1.0
         def __floordiv__(self, other):
+            return 1.0
+        def __setitem__(self, other):
+            return Mock()
+        def __getitem__(self, other):
             return Mock()
     MOCK_MODULES = ['numpy', 'scipy', 'astropy', 'scipy.interpolate', 
                     'scipy.constants', 'astropy.io', 'astropy.io.fits',
