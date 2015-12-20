@@ -45,9 +45,9 @@ if on_rtd:
             return 1.0
         def __floordiv__(self, other):
             return 1.0
-        def __setitem__(self, other):
+        def __setitem__(self, key, item):
             return Mock()
-        def __getitem__(self, other):
+        def __getitem__(self, key, item):
             return Mock()
     MOCK_MODULES = ['numpy', 'scipy', 'astropy', 'scipy.interpolate', 
                     'scipy.constants', 'astropy.io', 'astropy.io.fits',
