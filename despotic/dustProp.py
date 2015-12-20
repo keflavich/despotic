@@ -21,28 +21,26 @@ about the properties of the dust in a cloud.
 
 class dustProp:
     """
-    A class describing the properties of dust grains.
+    A class to hold paremeters describing the properties of dust grains.
 
-    Attributes
-    ----------
-    sigma10 : float
-       dust opacity to thermal radiation at 10 K, in cm^2 H^-1
-    sigmaPE : float
-       dust opacity averaged over 8 - 13.6 eV, the range that
-       dominates grain photoelectric heatin
-    sigmaISRF : float
-       dust opacity averaged the range that dominates grain starlight
-       heating
-    Zd : float
-       dust abundance normalized to solar neighborhood value
-    beta : float
-       dust spectral index in the mm, sigma ~ nu^beta
-    alphaGD : float
-       grain-gas coupling coefficient
+    Parameters
+       None
 
-    Methods
-    ------
-    None
+    Class attributes
+       sigma10 : float
+          dust opacity to thermal radiation at 10 K, in cm^2 H^-1
+       sigmaPE : float
+          dust opacity averaged over 8 - 13.6 eV, the range that
+          dominates grain photoelectric heatin
+       sigmaISRF : float
+          dust opacity averaged the range that dominates grain starlight
+          heating
+       Zd : float
+          dust abundance normalized to solar neighborhood value
+       beta : float
+          dust spectral index in the mm, sigma ~ nu^beta
+       alphaGD : float
+          grain-gas coupling coefficient
     """
 
     # Initialize to generic MW values

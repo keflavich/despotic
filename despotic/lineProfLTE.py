@@ -52,77 +52,69 @@ def lineProfLTE(emdat, u, l, R, denProf, TProf,
         calculation is done along an infinitely thin pencil beam.
 
         Parameters
-        ----------
-        em : class emitterData
-            emitterData object describing the emitting species for
-            which the computation is to be made
-        u : int
-            upper state of line to be computed
-        l : int
-            lower state of line to be computed
-        R : float
-            cloud radius in cm
-        denProf : float or callable
-            If denProf is a float, this give the density in particles
-            cm^-3 of the emitting species, which is taken to be
-            uniform. denProf can also be a function giving the density
-            as a function of radius; see remarks below for details.
-        TProf : float or callable
-            same as denProf, but giving the temperature in K
-        vProf : float or callable, optional
-            same as vProf, but giving the bulk radial
-            velocity in cm/s; if omitted, bulk velocity is set to 0
-        sigmaProf : float or callable, optional
-            same as denProf, but giving the non-thermal
-            velocity dispersion in cm/s; if omitted, non-thermal
-            velocity dispersion is set to 0
-
+           em : class emitterData
+              emitterData object describing the emitting species for
+              which the computation is to be made
+           u : int
+              upper state of line to be computed
+           l : int
+              lower state of line to be computed
+           R : float
+              cloud radius in cm
+           denProf : float or callable
+              If denProf is a float, this give the density in particles
+              cm^-3 of the emitting species, which is taken to be
+              uniform. denProf can also be a function giving the density
+              as a function of radius; see remarks below for details.
+           TProf : float | callable
+              same as denProf, but giving the temperature in K
+           vProf : float | callable
+              same as vProf, but giving the bulk radial
+              velocity in cm/s; if omitted, bulk velocity is set to 0
+           sigmaProf : float | callable
+              same as denProf, but giving the non-thermal
+              velocity dispersion in cm/s; if omitted, non-thermal
+              velocity dispersion is set to 0
+           offset : float
+              fractional distance from cloud center at which
+              measurement is made; 0 = at cloud center, 1 = at
+              cloud edge; valid values are 0 - 1
+           vOut : sequence
+              sequence of velocities (relative to line center at 0) at
+              which the output is to be returned
+           vLim : sequence (2)
+              maximum and minimum velocities relative to line center at
+              which to compute TB
+           nOut : int
+              number of velocities at which to output
+           dv : float, optional
+              velocity spacing at which to produce output
+           TCMB : float
+              CMB temperature used as a background to the cloud, in
+              K. Defaults to 2.73.
+           mxstep : int
+              maximum number of steps in the ODE solver; default is
+              10,000
 
         Returns
-        -------
-        TB : array
-             brightness temperature as a function of velocity (in K)
-        vOut : array
-               velocities at which TB is computed (in cm s^-1)
-
-        Additional parameters
-        ---------------------
-        offset : float, optional
-            fractional distance from cloud center at which
-            measurement is made; 0 = at cloud center, 1 = at
-            cloud edge; valid values are 0 - 1
-        vOut : sequence, optional
-            sequence of velocities (relative to line center at 0) at
-            which the output is to be returned
-        vLim : sequence (2), optional
-            maximum and minimum velocities relative to line center at
-            which to compute TB
-        nOut : int, optional
-            number of velocities at which to output
-        dv : float, optional
-            velocity spacing at which to produce output
-        TCMB : float, optional
-            CMB temperature used as a background to the cloud, in
-            K. Defaults to 2.73.
-        mxstep : int, optional
-            maximum number of steps in the ODE solver; default is
-            10,000
+           TB : array
+              brightness temperature as a function of velocity (in K)
+           vOut : array
+              velocities at which TB is computed (in cm s^-1)
 
 	Raises
-	------
-	despoticError is the specified upper and lower state have no
-	radiative transition between them, or if offset is not in the
-	range 0 - 1
+	   despoticError is the specified upper and lower state have no
+	   radiative transition between them, or if offset is not in the
+	   range 0 - 1
 
         Remarks
-        -------
-        The functions denProf, TProf, vProf, and sigmaProf, if
-        specified, should accept one floating argument, and return one
-        floating value. The argument r is the radial position within
-        the cloud in normalized units, so that the center is at r = 0
-        and the edge at r = 1. The return value should be the density,
-        temperature, velocity, or non-thermal velocity dispesion at
-        that position, in cgs units. 
+           The functions denProf, TProf, vProf, and sigmaProf, if
+           specified, should accept one floating argument, and return one
+           floating value. The argument r is the radial position within
+           the cloud in normalized units, so that the center is at r = 0
+           and the edge at r = 1. The return value should be the density,
+           temperature, velocity, or non-thermal velocity dispesion at
+           that position, in cgs units. 
         """
 
         # Step 1: safety check

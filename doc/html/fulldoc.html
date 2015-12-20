@@ -41,8 +41,10 @@
             
   <div class="section" id="full-documentation-of-all-despotic-classes-and-functions">
 <span id="sec-fulldoc"></span><h1>Full Documentation of All DESPOTIC Classes and Functions<a class="headerlink" href="#full-documentation-of-all-despotic-classes-and-functions" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="class-cloud">
-<h2>class <code class="docutils literal"><span class="pre">cloud</span></code><a class="headerlink" href="#class-cloud" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="despotic-classes">
+<h2>despotic classes<a class="headerlink" href="#despotic-classes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cloud">
+<h3><code class="docutils literal"><span class="pre">cloud</span></code><a class="headerlink" href="#cloud" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="despotic.cloud">
 <em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">cloud</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud" title="Permalink to this definition">¶</a></dt>
@@ -771,8 +773,8 @@ value at that time.</dd>
 </dd></dl>
 
 </div>
-<div class="section" id="class-collpartner">
-<h2>class <code class="docutils literal"><span class="pre">collPartner</span></code><a class="headerlink" href="#class-collpartner" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="collpartner">
+<h3><code class="docutils literal"><span class="pre">collPartner</span></code><a class="headerlink" href="#collpartner" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="despotic.collPartner">
 <em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">collPartner</code><span class="sig-paren">(</span><em>fp</em>, <em>nlev</em>, <em>extrap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/collPartner.html#collPartner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.collPartner" title="Permalink to this definition">¶</a></dt>
@@ -874,8 +876,8 @@ all known transitions</dd>
 </dd></dl>
 
 </div>
-<div class="section" id="class-composition">
-<h2>class <code class="docutils literal"><span class="pre">composition</span></code><a class="headerlink" href="#class-composition" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="composition">
+<h3><code class="docutils literal"><span class="pre">composition</span></code><a class="headerlink" href="#composition" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="despotic.composition">
 <em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">composition</code><a class="reference internal" href="_modules/despotic/composition.html#composition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.composition" title="Permalink to this definition">¶</a></dt>
@@ -1000,6 +1002,599 @@ partition function; should be set to a value such that T
 </dd></dl>
 
 </div>
+<div class="section" id="despoticerror">
+<h3><code class="docutils literal"><span class="pre">despoticError</span></code><a class="headerlink" href="#despoticerror" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.despoticError">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">despoticError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/despoticError.html#despoticError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.despoticError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class derived from Exception to handle exceptions raised by
+DESPOTIC-specific errors.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>message <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>the error message</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="dustprop">
+<h3><code class="docutils literal"><span class="pre">dustProp</span></code><a class="headerlink" href="#dustprop" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.dustProp">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">dustProp</code><a class="reference internal" href="_modules/despotic/dustProp.html#dustProp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.dustProp" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to hold paremeters describing the properties of dust grains.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd>None</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>sigma10 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust opacity to thermal radiation at 10 K, in cm^2 H^-1</dd>
+<dt>sigmaPE <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust opacity averaged over 8 - 13.6 eV, the range that
+dominates grain photoelectric heatin</dd>
+<dt>sigmaISRF <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust opacity averaged the range that dominates grain starlight
+heating</dd>
+<dt>Zd <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust abundance normalized to solar neighborhood value</dd>
+<dt>beta <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust spectral index in the mm, sigma ~ nu^beta</dd>
+<dt>alphaGD <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>grain-gas coupling coefficient</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="emitter">
+<h3><code class="docutils literal"><span class="pre">emitter</span></code><a class="headerlink" href="#emitter" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.emitter">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">emitter</code><span class="sig-paren">(</span><em>emitName</em>, <em>emitAbundance</em>, <em>extrap=True</em>, <em>energySkip=False</em>, <em>emitterFile=None</em>, <em>emitterURL=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to store the properties of a single emitting species, and
+preform computations on those properties. Note that all quantities
+are stored in cgs units.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of this species</dd>
+<dt>emitAbundance <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of species relative to H</dd>
+<dt>emitterFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>emitterURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>energySkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, this species is skipped when computing line
+cooling rates</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this species will
+be extrapolated to temperatures outside the range given in
+the LAMDA tables</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of emitting species</dd>
+<dt>abundance <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of emitting species relative to H nuclei</dd>
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">class emitterData</span></dt>
+<dd>physical data for this emitter</dd>
+<dt>levPop <span class="classifier-delimiter">:</span> <span class="classifier">array, shape(nlev)</span></dt>
+<dd>array giving populations of each level</dd>
+<dt>levPopInitialized <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>flag for whether levPop is initialized or uninitialized</dd>
+<dt>escapeProb <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array giving escape probability for photons emitted in a
+line connecting the given level pair</dd>
+<dt>escapeProbInitialized <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>flag for whether escapeProb is initialized or uninitialized</dd>
+<dt>energySkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>flag that this species should be skipped when computing line
+cooling rates</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.emitter.luminosityPerH">
+<code class="descname">luminosityPerH</code><span class="sig-paren">(</span><em>rad</em>, <em>transition=None</em>, <em>total=False</em>, <em>thin=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.luminosityPerH"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.luminosityPerH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the luminosities of various lines, computed from the
+stored level populations and escape probabilities.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>rad <span class="classifier-delimiter">:</span> <span class="classifier">class radiation</span></dt>
+<dd>radiation field impinging on the cloud</dd>
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>A list containing two 1D arrays of integer type;
+transition[0] = array of upper states, transition[1] =
+array of lower states</dd>
+<dt>total <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the routine returns a single float rather than an
+array; this float is the sum of the luminosities per H
+nucleus of all lines</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>lum <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>luminosities per H in specified lines; by default</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError, if the level populations are not initialized,
+or if the escape probabilities are not initialized and thin is
+not True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.opticalDepth">
+<code class="descname">opticalDepth</code><span class="sig-paren">(</span><em>transition=None</em>, <em>escapeProbGeom='sphere'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.opticalDepth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.opticalDepth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the optical depths of various lines, computed from the
+stored escape probabilities.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>A list containing two 1D arrays of integer type;
+transition[0] = array of upper states, transition[1] =
+array of lower states</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>tau <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>optical depths in specified lines; by default</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setEscapeProb">
+<code class="descname">setEscapeProb</code><span class="sig-paren">(</span><em>thisCloud</em>, <em>transition=None</em>, <em>escapeProbGeom='sphere'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setEscapeProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setEscapeProb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute escape probabilities from stored level populations</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>thisCloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object containing the physical and chemical
+properties of this cloud</dd>
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of transition for which to set escape probability;
+transition[0] = array of upper states, transition[1] =
+array of lower states</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setLevPop">
+<code class="descname">setLevPop</code><span class="sig-paren">(</span><em>thisCloud</em>, <em>thin=False</em>, <em>noClump=False</em>, <em>diagOnly=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setLevPop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setLevPop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the level populations for this species using the
+stored escape probabilities</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>thisCloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object containing the physical and chemical
+properties of this cloud</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the stored escape probabilities are ignored, and
+the cloud is assumed to be optically thin (equivalent to
+assuming all escape probabilities are 1)</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>diagOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, diagnostic information is returned, but no
+attempt is made to solve the equations or calculate the
+level popuplations (useful for debugging)</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>infoDict <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>A dictionary containing a variety of diagnostic
+information</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setLevPopEscapeProb">
+<code class="descname">setLevPopEscapeProb</code><span class="sig-paren">(</span><em>thisCloud</em>, <em>escapeProbGeom='sphere'</em>, <em>noClump=False</em>, <em>verbose=False</em>, <em>reltol=1e-06</em>, <em>abstol=1e-08</em>, <em>maxiter=200</em>, <em>veryverbose=False</em>, <em>dampFactor=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setLevPopEscapeProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setLevPopEscapeProb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute escape probabilities and level populations
+simultaneously.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>thisCloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object containing the physical and chemical
+properties of this cloud</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success: Boolean</dt>
+<dd>True if iteration converges, False if it does not</dd>
+</dl>
+</dd>
+<dt>Additional Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, diagnostic information is printed</dd>
+<dt>veryverbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, a very large amount of diagnostic information is
+printed; probably useful only for debugging</dd>
+<dt>reltol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>relative tolerance; convergence is considered to have
+occured when the absolute value of the difference
+between two iterations, divided by the larger of the two
+results being differences, is less than reltol</dd>
+<dt>abstol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>absolute tolerance; convergence is considered to have
+occured when the absolute value of the difference
+between two iterations is less than abstol</dd>
+<dt>maxiter <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum number of iterations to allow</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>a number in the range (0, 1] that damps out changes in level
+populations at each iteration. A value of 1 means no
+damping, while a value of 0 means the level populations
+never change.</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>Convergence occurs when either the relative or the absolute
+tolerance condition is satisfied. To disable either relative
+or absolute tolerance checking, just set the appropriate
+tolerance &lt;= 0. However, be warned that in many circumstances
+disabling absolute tolerances will gaurantee non-convergence,
+because truncation errors tend to produce large relative
+residuals for high energy states whose populations are very
+low, and no amount of iterating will reduce these errors
+substantially.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setLevPopLTE">
+<code class="descname">setLevPopLTE</code><span class="sig-paren">(</span><em>temp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setLevPopLTE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setLevPopLTE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the level populations of this species to their LTE values</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>temperature in K</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setThin">
+<code class="descname">setThin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setThin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setThin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the escape probabilities for this species to unity</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd>None</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="emitterdata">
+<h3><code class="docutils literal"><span class="pre">emitterData</span></code><a class="headerlink" href="#emitterdata" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.emitterData">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">emitterData</code><span class="sig-paren">(</span><em>emitName</em>, <em>emitterFile=None</em>, <em>emitterURL=None</em>, <em>extrap=True</em>, <em>noRefresh=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to store the physical properties of a single emitting
+species, and preform computations on those properties. Note that
+all quantities are stored in cgs units.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of this species</dd>
+<dt>emitterFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>emitterURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this species will
+be extrapolated to temperatures outside the range given in
+the LAMDA tables</dd>
+<dt>noRefresh <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the routine will not attempt to automatically
+fetch updated versions of files from the web</dd>
+</dl>
+</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of emitting species</dd>
+<dt>lamdaFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of file from which species was read</dd>
+<dt>molWgt <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>molecular weight of species, in units of H masses</dd>
+<dt>nlev <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of energy levels of the species</dd>
+<dt>levEnergy <span class="classifier-delimiter">:</span> <span class="classifier">array, shape(nlev)</span></dt>
+<dd>energies of levels</dd>
+<dt>levTemp <span class="classifier-delimiter">:</span> <span class="classifier">array, shape(nlev)</span></dt>
+<dd>energies of levels in K (i.e. levEnergy / kB)</dd>
+<dt>levWgt <span class="classifier-delimiter">:</span> <span class="classifier">array shape(nlev)</span></dt>
+<dd>degeneracies (statistical weights) of levels</dd>
+<dt>nrad <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of radiative transition this species has</dd>
+<dt>radUpper <span class="classifier-delimiter">:</span> <span class="classifier">integer array, shape (nrad)</span></dt>
+<dd>array containing upper states for radiative transitions</dd>
+<dt>radLower <span class="classifier-delimiter">:</span> <span class="classifier">integer array, shape (nrad)</span></dt>
+<dd>array containing lower states for radiative transitions</dd>
+<dt>radFreq <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>array of frequencies of radiative transitions</dd>
+<dt>radTemp <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>same as radFreq, but multiplied by h/kB to give units of K</dd>
+<dt>radTUpper <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>array of temperatures (E/kB) of upper radiative states</dd>
+<dt>radA <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>array of Einstin A coefficients of radiative transitions</dd>
+<dt>partners <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>listing collision partners; keys are partner names, values are
+objects of class collPartner</dd>
+<dt>EinsteinA <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array of nlev x nlev giving Einstein A&#8217;s for radiative
+transitions connecting each level pair</dd>
+<dt>freq <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array of nlev x nlev giving frequency of radiative
+transitions connecting each level pair</dd>
+<dt>dT <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array of nlev x nlev giving energy difference between each
+level pair in K; it is positive for i &gt; j, and negative for i
+&lt; j</dd>
+<dt>wgtRatio <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array giving ratio of statistical weights of each level
+pair</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this emitter are
+allowed to be extrapolated off the data table</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.emitterData.collRateMatrix">
+<code class="descname">collRateMatrix</code><span class="sig-paren">(</span><em>nH</em>, <em>comp</em>, <em>temp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData.collRateMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData.collRateMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>This routine computes the matrix of collision rates (not rate
+coefficients) between every pair of levels.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>nH <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>number density of H nuclei</dd>
+<dt>comp <span class="classifier-delimiter">:</span> <span class="classifier">class composition</span></dt>
+<dd>bulk composition of the gas</dd>
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>gas kinetic temperature</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>q <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>array in which element ij is the rate of collisional
+transitions from state i to state j, in s^-1</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitterData.partFunc">
+<code class="descname">partFunc</code><span class="sig-paren">(</span><em>temp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData.partFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData.partFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the partition function for this species at the given
+temperature.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>gas kinetic temperature</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>Z <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>the partition function Z(T) for this species</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitterData.readLamda">
+<code class="descname">readLamda</code><span class="sig-paren">(</span><em>fp</em>, <em>extrap=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData.readLamda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData.readLamda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a LAMDA-formatted file</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>fp <span class="classifier-delimiter">:</span> <span class="classifier">file</span></dt>
+<dd>pointer to the start of a LAMDA-formatted file</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this species will
+be extrapolated to temperatures outside the range given in
+the LAMDA tables</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="despotic-functions">
+<h2>despotic functions<a class="headerlink" href="#despotic-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fetchlamda">
+<h3><code class="docutils literal"><span class="pre">fetchLamda</span></code><a class="headerlink" href="#fetchlamda" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.fetchLamda">
+<code class="descclassname">despotic.</code><code class="descname">fetchLamda</code><span class="sig-paren">(</span><em>inputURL</em>, <em>path=None</em>, <em>fileName=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/fetchLamda.html#fetchLamda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.fetchLamda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Routine to download LAMDA files from the web.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>inputURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; if this
+does not begin with &#8220;<a class="reference external" href="http://">http://</a>&#8221;, indicating it is a URL, then
+this is assumed to be a filename within LAMDA, and a default
+URL is appended</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>relative or absolute path at which to store the file; if not
+set, the current directory is used; if the specified path does
+not exist, it is created</dd>
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name to give to file; if not set, defaults to the same as the
+name in LAMDA</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>fname <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>local file name to which downloaded file was written; if URL
+cannot be opened, None is returned instead</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="lineproflte">
+<h3><code class="docutils literal"><span class="pre">lineProfLTE</span></code><a class="headerlink" href="#lineproflte" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.lineProfLTE">
+<code class="descclassname">despotic.</code><code class="descname">lineProfLTE</code><span class="sig-paren">(</span><em>emdat</em>, <em>u</em>, <em>l</em>, <em>R</em>, <em>denProf</em>, <em>TProf</em>, <em>vProf=0.0</em>, <em>sigmaProf=0.0</em>, <em>offset=0.0</em>, <em>TCMB=2.73</em>, <em>vOut=None</em>, <em>vLim=None</em>, <em>nOut=100</em>, <em>dv=None</em>, <em>mxstep=10000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/lineProfLTE.html#lineProfLTE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.lineProfLTE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the brightness temperature versus velocity for a
+specified line, assuming the level populations are in LTE. The
+calculation is done along an infinitely thin pencil beam.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>em <span class="classifier-delimiter">:</span> <span class="classifier">class emitterData</span></dt>
+<dd>emitterData object describing the emitting species for
+which the computation is to be made</dd>
+<dt>u <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>upper state of line to be computed</dd>
+<dt>l <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>lower state of line to be computed</dd>
+<dt>R <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>cloud radius in cm</dd>
+<dt>denProf <span class="classifier-delimiter">:</span> <span class="classifier">float or callable</span></dt>
+<dd>If denProf is a float, this give the density in particles
+cm^-3 of the emitting species, which is taken to be
+uniform. denProf can also be a function giving the density
+as a function of radius; see remarks below for details.</dd>
+<dt>TProf <span class="classifier-delimiter">:</span> <span class="classifier">float | callable</span></dt>
+<dd>same as denProf, but giving the temperature in K</dd>
+<dt>vProf <span class="classifier-delimiter">:</span> <span class="classifier">float | callable</span></dt>
+<dd>same as vProf, but giving the bulk radial
+velocity in cm/s; if omitted, bulk velocity is set to 0</dd>
+<dt>sigmaProf <span class="classifier-delimiter">:</span> <span class="classifier">float | callable</span></dt>
+<dd>same as denProf, but giving the non-thermal
+velocity dispersion in cm/s; if omitted, non-thermal
+velocity dispersion is set to 0</dd>
+<dt>offset <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>fractional distance from cloud center at which
+measurement is made; 0 = at cloud center, 1 = at
+cloud edge; valid values are 0 - 1</dd>
+<dt>vOut <span class="classifier-delimiter">:</span> <span class="classifier">sequence</span></dt>
+<dd>sequence of velocities (relative to line center at 0) at
+which the output is to be returned</dd>
+<dt>vLim <span class="classifier-delimiter">:</span> <span class="classifier">sequence (2)</span></dt>
+<dd>maximum and minimum velocities relative to line center at
+which to compute TB</dd>
+<dt>nOut <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of velocities at which to output</dd>
+<dt>dv <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
+<dd>velocity spacing at which to produce output</dd>
+<dt>TCMB <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>CMB temperature used as a background to the cloud, in
+K. Defaults to 2.73.</dd>
+<dt>mxstep <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum number of steps in the ODE solver; default is
+10,000</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>TB <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>brightness temperature as a function of velocity (in K)</dd>
+<dt>vOut <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>velocities at which TB is computed (in cm s^-1)</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError is the specified upper and lower state have no
+radiative transition between them, or if offset is not in the
+range 0 - 1</dd>
+<dt>Remarks</dt>
+<dd>The functions denProf, TProf, vProf, and sigmaProf, if
+specified, should accept one floating argument, and return one
+floating value. The argument r is the radial position within
+the cloud in normalized units, so that the center is at r = 0
+and the edge at r = 1. The return value should be the density,
+temperature, velocity, or non-thermal velocity dispesion at
+that position, in cgs units.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="despotic-chemistry-classes">
+<h2>despotic.chemistry classes<a class="headerlink" href="#despotic-chemistry-classes" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="despotic-chemistry-functions">
+<h2>despotic.chemistry functions<a class="headerlink" href="#despotic-chemistry-functions" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -1011,9 +1606,23 @@ partition function; should be set to a value such that T
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Full Documentation of All DESPOTIC Classes and Functions</a><ul>
-<li><a class="reference internal" href="#class-cloud">class <code class="docutils literal"><span class="pre">cloud</span></code></a></li>
-<li><a class="reference internal" href="#class-collpartner">class <code class="docutils literal"><span class="pre">collPartner</span></code></a></li>
-<li><a class="reference internal" href="#class-composition">class <code class="docutils literal"><span class="pre">composition</span></code></a></li>
+<li><a class="reference internal" href="#despotic-classes">despotic classes</a><ul>
+<li><a class="reference internal" href="#cloud"><code class="docutils literal"><span class="pre">cloud</span></code></a></li>
+<li><a class="reference internal" href="#collpartner"><code class="docutils literal"><span class="pre">collPartner</span></code></a></li>
+<li><a class="reference internal" href="#composition"><code class="docutils literal"><span class="pre">composition</span></code></a></li>
+<li><a class="reference internal" href="#despoticerror"><code class="docutils literal"><span class="pre">despoticError</span></code></a></li>
+<li><a class="reference internal" href="#dustprop"><code class="docutils literal"><span class="pre">dustProp</span></code></a></li>
+<li><a class="reference internal" href="#emitter"><code class="docutils literal"><span class="pre">emitter</span></code></a></li>
+<li><a class="reference internal" href="#emitterdata"><code class="docutils literal"><span class="pre">emitterData</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#despotic-functions">despotic functions</a><ul>
+<li><a class="reference internal" href="#fetchlamda"><code class="docutils literal"><span class="pre">fetchLamda</span></code></a></li>
+<li><a class="reference internal" href="#lineproflte"><code class="docutils literal"><span class="pre">lineProfLTE</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#despotic-chemistry-classes">despotic.chemistry classes</a></li>
+<li><a class="reference internal" href="#despotic-chemistry-functions">despotic.chemistry functions</a></li>
 </ul>
 </li>
 </ul>
@@ -1054,7 +1663,7 @@ partition function; should be set to a value such that T
       &copy;2015, Mark R. Krumholz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
       
       |

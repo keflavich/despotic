@@ -15,6 +15,7 @@ except:
     pass
 from collPartner import collPartner
 from composition import composition
+from despoticError import despoticError
 from dustProp import dustProp
 from emitter import emitter
 from emitterData import emitterData

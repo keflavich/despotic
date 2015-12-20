@@ -3,20 +3,67 @@
 Full Documentation of All DESPOTIC Classes and Functions
 ========================================================
 
-class ``cloud``
----------------
+despotic classes
+----------------
+
+``cloud``
+^^^^^^^^^
 
 .. autoclass:: despotic.cloud
    :members:
 
-class ``collPartner``
----------------------
+``collPartner``
+^^^^^^^^^^^^^^^
 
 .. autoclass:: despotic.collPartner
    :members:
 
-class ``composition``
----------------------
+``composition``
+^^^^^^^^^^^^^^^
 
 .. autoclass:: despotic.composition
    :members:
+
+``despoticError``
+^^^^^^^^^^^^^^^^^
+
+.. autoclass:: despotic.despoticError
+   :members:
+
+``dustProp``
+^^^^^^^^^^^^
+
+.. autoclass:: despotic.dustProp
+   :members:
+
+``emitter``
+^^^^^^^^^^^
+
+.. autoclass:: despotic.emitter
+   :members:
+
+``emitterData``
+^^^^^^^^^^^^^^^
+
+.. autoclass:: despotic.emitterData
+   :members:
+
+despotic functions
+------------------
+
+``fetchLamda``
+^^^^^^^^^^^^^^
+
+.. autofunction:: despotic.fetchLamda
+
+``lineProfLTE``
+^^^^^^^^^^^^^^^
+
+.. autofunction:: despotic.lineProfLTE
+
+despotic.chemistry classes
+--------------------------
+
+despotic.chemistry functions
+----------------------------
+
