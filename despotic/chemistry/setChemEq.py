@@ -29,7 +29,7 @@ from abundanceDict import abundanceDict
 from copy import deepcopy
 from chemEvol import chemEvol
 import scipy.constants as physcons
-kB = physcons.k/physcons.erg
+kB = physcons.k*1e7
 
 # Small numerical value
 __small = 1e-100

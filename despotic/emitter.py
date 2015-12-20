@@ -35,9 +35,9 @@ from emitterData import emitterData
 
 # Define some global physical constants in cgs units
 import scipy.constants as physcons
-kB = physcons.k/physcons.erg
-c = physcons.c/physcons.centi
-mH = (physcons.m_p+physcons.m_e)/physcons.gram
+kB = physcons.k*1e7
+c = physcons.c*1e2
+mH = (physcons.m_p+physcons.m_e)*1e3
 h = physcons.h*1e7
 hc = h*c
 

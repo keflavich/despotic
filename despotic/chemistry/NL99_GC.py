@@ -34,8 +34,8 @@ import warnings
 ########################################################################
 # Physical and numerical constants
 ########################################################################
-kB = physcons.k/physcons.erg
-mH = (physcons.m_p+physcons.m_e)/physcons.gram
+kB = physcons.k*1e7
+mH = (physcons.m_p+physcons.m_e)*1e3
 _small = 1e-100
 
 ########################################################################

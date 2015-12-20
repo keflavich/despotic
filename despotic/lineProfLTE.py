@@ -27,11 +27,11 @@ from despoticError import despoticError
 
 # Define some global physical constants in cgs units
 import scipy.constants as physcons
-kB = physcons.k/physcons.erg
-c = physcons.c/physcons.centi
-mH = physcons.m_p/physcons.gram
+kB = physcons.k*1e7
+c = physcons.c*1e2
+mH = physcons.m_p*1e3
 h = physcons.h*1e7
-sigma=physcons.sigma/physcons.erg*physcons.centi**2
+sigma=physcons.sigma*1e3
 a = 4*sigma/c
 G = physcons.G*1e3
 

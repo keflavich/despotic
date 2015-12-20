@@ -26,11 +26,11 @@ from dustProp import dustProp
 from despoticError import despoticError
 from copy import deepcopy
 import scipy.constants as physcons
-mH = physcons.m_p/physcons.gram
-kB = physcons.k/physcons.erg
+mH = physcons.m_p*1e3
+kB = physcons.k*1e7
 G = physcons.G*1e3
 h = physcons.h*1e7
-c = physcons.c/physcons.centi
+c = physcons.c*1e2
 
 class zonedcloud(object):
     """

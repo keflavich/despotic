@@ -30,7 +30,7 @@ from despotic.despoticError import despoticError
 from abundanceDict import abundanceDict
 from copy import deepcopy
 import scipy.constants as physcons
-kB = physcons.k/physcons.erg
+kB = physcons.k*1e7
 
 def chemEvol(cloud, tFin, tInit=0.0, nOut=100, dt=None,
              tOut=None, network=None, info=None,
