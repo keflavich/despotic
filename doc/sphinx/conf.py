@@ -48,13 +48,14 @@ if on_rtd:
         def __floordiv__(self, other):
             return 1.0
         def __setitem__(self, key, item):
-            return Mock()
+            pass
         def __getitem__(self, key):
-            return Mock()
+            return 1.0
     MOCK_MODULES = ['numpy', 'scipy', 'astropy', 'scipy.interpolate', 
                     'scipy.constants', 'astropy.io', 'astropy.io.fits',
                     'astropy.io.ascii', 'numpy.ctypeslib', 'scipy.optimize',
-                    'scipy.integrate', 'pyximport', 'collPartner_helper']
+                    'scipy.integrate', 'scipy.sparse',
+                    'pyximport', 'collPartner_helper']
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------

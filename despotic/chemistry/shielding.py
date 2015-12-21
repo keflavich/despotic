@@ -31,6 +31,13 @@ shielding function of van Dishoeck & Black (1988) is fShield_CO_vDB.
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
+import os
+
+# Check if we're trying to compile on readthedocs, in which case we
+# need to disable a ton of this stuff because otherwise we get into
+# problems with the lack of numpy and scipy
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
 small = 1.0e-50
 
 ######################################################################
@@ -67,47 +74,51 @@ def fShield_H2_DB(NH2, sigma):
 # ApJ, 334, 771)
 ######################################################################
 
-# Tabulated data from van Dishoeck & Black
-_logNCOvDB = np.array([0, 13, 14, 15, 16, 17, 18, 19]) # CO column densities
-_logNH2vDB = np.array([0, 19, 20, 21, 22, 23])         # H2 column densities
-_ThetavDB = np.array([ \
-        [1.0, 9.681e-1, 7.764e-1, 3.631e-1, 7.013e-2, 1.295e-2, 1.738e-3, 9.985e-5], \
-            [8.215e-1, 7.916e-1, 6.160e-1, 2.749e-1, 5.351e-2, 1.065e-2, 1.519e-3, 8.818e-5], \
-            [7.160e-1, 6.900e-1, 5.360e-1, 2.359e-1, 4.416e-2, 8.769e-3, 1.254e-3, 7.558e-5], \
-            [3.500e-1, 3.415e-1, 2.863e-1, 1.360e-1, 2.500e-2, 4.983e-3, 7.151e-4, 3.796e-5], \
-            [4.973e-2, 4.877e-2, 4.296e-2, 2.110e-2, 4.958e-3, 9.245e-4, 1.745e-4, 8.377e-6], \
-            [1.310e-4, 1.293e-4, 1.160e-4, 6.346e-5, 1.822e-5, 6.842e-6, 3.622e-6, 3.572e-7], \
-            ])  # Tabulated shielding factors
+# Protect this inside this block, so that readthedocs doesn't choke
+# when trying to import
+if not on_rtd:
 
-# Extend van Dishoeck & Black's table 3 dex in each direction by
-# linear extrapolation
-_logNCOvDB1 = np.zeros(9)
-_logNCOvDB1[:-1] = _logNCOvDB
-_logNCOvDB1[-1] = 22
-_exCO = (_logNCOvDB1[-1] - _logNCOvDB1[-2]) / (_logNCOvDB1[-2] - _logNCOvDB1[-3])
-_logNH2vDB1 = np.zeros(7)
-_logNH2vDB1[:-1] = _logNH2vDB
-_logNH2vDB1[-1] = 25
-_exH2 = (_logNH2vDB1[-1] - _logNH2vDB1[-2]) / (_logNH2vDB1[-2] - _logNH2vDB1[-3])
-_ThetavDB1 = np.zeros((7,9))
-_ThetavDB1[:6,:8] = _ThetavDB
-for _i, _logNH2 in enumerate(_logNH2vDB):
-    _ThetavDB1[_i,-1] = _ThetavDB1[_i,-2] * (_ThetavDB1[_i,-2]/_ThetavDB1[_i,-3])**_exCO
-for _j, _logNH2 in enumerate(_logNCOvDB):
-    _ThetavDB1[-1,_j] = _ThetavDB1[-2,_j] * (_ThetavDB1[-2,_j]/_ThetavDB1[-3,_j])**_exH2
-_ThetavDB1[-1,-1] = np.sqrt(
-    _ThetavDB1[-1,-2] * (_ThetavDB1[-1,-2]/_ThetavDB1[-1,-3])**_exCO *
-    _ThetavDB1[-2,-1] * (_ThetavDB1[-2,-1]/_ThetavDB1[-3,-1])**_exH2)
+    # Tabulated data from van Dishoeck & Black
+    _logNCOvDB = np.array([0, 13, 14, 15, 16, 17, 18, 19]) # CO column densities
+    _logNH2vDB = np.array([0, 19, 20, 21, 22, 23])         # H2 column densities
+    _ThetavDB = np.array([
+        [1.0, 9.681e-1, 7.764e-1, 3.631e-1, 7.013e-2, 1.295e-2, 1.738e-3, 9.985e-5],
+        [8.215e-1, 7.916e-1, 6.160e-1, 2.749e-1, 5.351e-2, 1.065e-2, 1.519e-3, 8.818e-5],
+        [7.160e-1, 6.900e-1, 5.360e-1, 2.359e-1, 4.416e-2, 8.769e-3, 1.254e-3, 7.558e-5],
+        [3.500e-1, 3.415e-1, 2.863e-1, 1.360e-1, 2.500e-2, 4.983e-3, 7.151e-4, 3.796e-5],
+        [4.973e-2, 4.877e-2, 4.296e-2, 2.110e-2, 4.958e-3, 9.245e-4, 1.745e-4, 8.377e-6],
+        [1.310e-4, 1.293e-4, 1.160e-4, 6.346e-5, 1.822e-5, 6.842e-6, 3.622e-6, 3.572e-7],
+    ])  # Tabulated shielding factors
 
-# Create interpolation functions at various orders
-_logThetavDBinterp1 = RectBivariateSpline(_logNH2vDB1, _logNCOvDB1, \
-                                              np.log(_ThetavDB1), \
+    # Extend van Dishoeck & Black's table 3 dex in each direction by
+    # linear extrapolation
+    _logNCOvDB1 = np.zeros(9)
+    _logNCOvDB1[:-1] = _logNCOvDB
+    _logNCOvDB1[-1] = 22
+    _exCO = (_logNCOvDB1[-1] - _logNCOvDB1[-2]) / (_logNCOvDB1[-2] - _logNCOvDB1[-3])
+    _logNH2vDB1 = np.zeros(7)
+    _logNH2vDB1[:-1] = _logNH2vDB
+    _logNH2vDB1[-1] = 25
+    _exH2 = (_logNH2vDB1[-1] - _logNH2vDB1[-2]) / (_logNH2vDB1[-2] - _logNH2vDB1[-3])
+    _ThetavDB1 = np.zeros((7,9))
+    _ThetavDB1[:6,:8] = _ThetavDB
+    for _i, _logNH2 in enumerate(_logNH2vDB):
+        _ThetavDB1[_i,-1] = _ThetavDB1[_i,-2] * (_ThetavDB1[_i,-2]/_ThetavDB1[_i,-3])**_exCO
+    for _j, _logNH2 in enumerate(_logNCOvDB):
+        _ThetavDB1[-1,_j] = _ThetavDB1[-2,_j] * (_ThetavDB1[-2,_j]/_ThetavDB1[-3,_j])**_exH2
+    _ThetavDB1[-1,-1] = np.sqrt(
+        _ThetavDB1[-1,-2] * (_ThetavDB1[-1,-2]/_ThetavDB1[-1,-3])**_exCO *
+        _ThetavDB1[-2,-1] * (_ThetavDB1[-2,-1]/_ThetavDB1[-3,-1])**_exH2)
+
+    # Create interpolation functions at various orders
+    _logThetavDBinterp1 = RectBivariateSpline(_logNH2vDB1, _logNCOvDB1,
+                                              np.log(_ThetavDB1),
                                               kx=1, ky=1)
-_logThetavDBinterp2 = RectBivariateSpline(_logNH2vDB1, _logNCOvDB1, \
-                                              np.log(_ThetavDB1), \
+    _logThetavDBinterp2 = RectBivariateSpline(_logNH2vDB1, _logNCOvDB1,
+                                              np.log(_ThetavDB1),
                                               kx=2, ky=2)
-_logThetavDBinterp3 = RectBivariateSpline(_logNH2vDB1, _logNCOvDB1, \
-                                              np.log(_ThetavDB1), \
+    _logThetavDBinterp3 = RectBivariateSpline(_logNH2vDB1, _logNCOvDB1,
+                                              np.log(_ThetavDB1),
                                               kx=3, ky=3)
 
 # van Dishoeck & Black's shielding function

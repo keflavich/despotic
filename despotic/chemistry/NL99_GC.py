@@ -30,13 +30,20 @@ from chemNetwork import chemNetwork
 from reactions import cr_reactions, photoreactions, gr_reactions
 import scipy.constants as physcons
 import warnings
+import os
+
+# Check if we're trying to compile on readthedocs, in which case we
+# need to disable a ton of this stuff because otherwise we get into
+# problems with the lack of numpy and scipy
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 ########################################################################
 # Physical and numerical constants
 ########################################################################
-kB = physcons.k*1e7
-mH = (physcons.m_p+physcons.m_e)*1e3
-_small = 1e-100
+if not on_rtd:
+    kB = physcons.k*1e7
+    mH = (physcons.m_p+physcons.m_e)*1e3
+    _small = 1e-100
 
 ########################################################################
 # List of species used in this chemistry network; specList is the set
@@ -44,9 +51,10 @@ _small = 1e-100
 # includes both species that are evolved and those whose abundances
 # are derived from conservation laws.
 ########################################################################
-specList = ['H+', 'H2', 'H3+', 'He+', 'OHx', 'CHx', 'CO', 'C', 
-            'C+', 'HCO+', 'O', 'M+']
-specListExtended = specList + ['H', 'He', 'M', 'e-']
+if not on_rtd:
+    specList = ['H+', 'H2', 'H3+', 'He+', 'OHx', 'CHx', 'CO', 'C', 
+                'C+', 'HCO+', 'O', 'M+']
+    specListExtended = specList + ['H', 'He', 'M', 'e-']
 
 
 ########################################################################
@@ -56,12 +64,13 @@ specListExtended = specList + ['H', 'He', 'M', 'e-']
 # (2)       cr + He      -> He+  + e-
 # (3)       cr + H2      -> H3+  + H
 ########################################################################
-_cr_react = [
-    { 'spec' : ['H',  'H+',  'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.0 },
-    { 'spec' : ['He', 'He+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.1 },
-    { 'spec' : ['H2', 'H3+', 'H' ], 'stoich' : [-1, 1, 1], 'rate': 2.0 }
-]
-_cr = cr_reactions(specListExtended, _cr_react)
+if not on_rtd:
+    _cr_react = [
+        { 'spec' : ['H',  'H+',  'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.0 },
+        { 'spec' : ['He', 'He+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.1 },
+        { 'spec' : ['H2', 'H3+', 'H' ], 'stoich' : [-1, 1, 1], 'rate': 2.0 }
+    ]
+    _cr = cr_reactions(specListExtended, _cr_react)
 
 ########################################################################
 # Data on photoreactions
@@ -74,24 +83,25 @@ _cr = cr_reactions(specListExtended, _cr_react)
 # (6) h nu + M    -> M+ + e
 # (7) h nu + HCO+ -> CO + H+
 ########################################################################
-_ph_react = [
-    { 'spec' : ['H2', 'H'], 'stoich' : [-1, 2], 
-      'rate' : 3.3e-11*1.7, 'av_fac' : 3.74, 
-      'shield_fac' : fShield_H2_DB },
-    { 'spec' : ['CO', 'C', 'O'], 'stoich' : [-1, 1, 1], 
-      'rate' : 1.2e-10*1.7, 'av_fac' : 3.53, 
-      'shield_fac' : fShield_CO_vDB },
-    { 'spec' : ['C', 'C+', 'e-'], 'stoich' : [-1, 1, 1], 
-      'rate' : 1.8e-10*1.7, 'av_fac' : 3.0 },
-    { 'spec' : ['CHx', 'C', 'H'], 'stoich' : [-1, 1, 1], 
-      'rate' : 1.0e-9, 'av_fac' : 1.5 },
-    { 'spec' : ['OHx', 'O', 'H'], 'stoich' : [-1, 1, 1],
-      'rate' : 5.0e-10, 'av_fac' : 1.7 },
-    { 'spec' : ['M', 'M+', 'e-'], 'stoich' : [-1, 1, 1],
-      'rate' : 2.0e-10*1.7, 'av_fac' : 1.9 },
-    { 'spec' : ['HCO+', 'CO', 'H+'], 'stoich' : [-1, 1, 1],
-      'rate' : 1.5e-10, 'av_fac' : 2.5 } ]
-_ph = photoreactions(specListExtended, _ph_react)
+if not on_rtd:
+    _ph_react = [
+        { 'spec' : ['H2', 'H'], 'stoich' : [-1, 2], 
+          'rate' : 3.3e-11*1.7, 'av_fac' : 3.74, 
+          'shield_fac' : fShield_H2_DB },
+        { 'spec' : ['CO', 'C', 'O'], 'stoich' : [-1, 1, 1], 
+          'rate' : 1.2e-10*1.7, 'av_fac' : 3.53, 
+          'shield_fac' : fShield_CO_vDB },
+        { 'spec' : ['C', 'C+', 'e-'], 'stoich' : [-1, 1, 1], 
+          'rate' : 1.8e-10*1.7, 'av_fac' : 3.0 },
+        { 'spec' : ['CHx', 'C', 'H'], 'stoich' : [-1, 1, 1], 
+          'rate' : 1.0e-9, 'av_fac' : 1.5 },
+        { 'spec' : ['OHx', 'O', 'H'], 'stoich' : [-1, 1, 1],
+          'rate' : 5.0e-10, 'av_fac' : 1.7 },
+        { 'spec' : ['M', 'M+', 'e-'], 'stoich' : [-1, 1, 1],
+          'rate' : 2.0e-10*1.7, 'av_fac' : 1.9 },
+        { 'spec' : ['HCO+', 'CO', 'H+'], 'stoich' : [-1, 1, 1],
+          'rate' : 1.5e-10, 'av_fac' : 2.5 } ]
+    _ph = photoreactions(specListExtended, _ph_react)
 
 ########################################################################
 # Data on two-body reactions
@@ -120,57 +130,58 @@ _ph = photoreactions(specListExtended, _ph_react)
 # (22) M+   + e-  -> M
 # (23) H3+  + M   -> M+   + H   + H2
 ########################################################################
-_twobody_react = [
-    { 'spec'   : [ 'H3+' , 'C'  , 'CHx' , 'H2'      ], 
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'H3+' , 'O'  , 'OHx' , 'H2'      ], 
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'H3+' , 'CO' , 'HCO+', 'H2'      ], 
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'He+' , 'H2' , 'He'  , 'H' , 'H+'], 
-      'stoich' : [  -1   ,  -1  ,  1    ,  1  ,  1  ] },
-    { 'spec'   : [ 'He+' , 'CO' , 'C+'  , 'He', 'O' ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  1  ,  1  ] },
-    { 'spec'   : [ 'C+'  , 'H2' , 'CHx' , 'H'       ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'C+'  , 'OHx', 'HCO+'            ],
-      'stoich' : [  -1   ,  -1  ,  1                ] },
-    { 'spec'   : [ 'O'   , 'CHx', 'CO'  , 'H'       ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'C'   , 'OHx', 'CO'  , 'H'       ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'He+' , 'e-' , 'He'              ],
-      'stoich' : [  -1,     -1,    1                ] },
-    { 'spec'   : [ 'H3+' , 'e-' , 'H2'  , 'H'       ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'H3+' , 'e-' , 'H'               ],
-      'stoich' : [  -1   ,  -1  ,  3                ] },
-    { 'spec'   : [ 'C+'  , 'e-' , 'C'               ],
-      'stoich' : [  -1   ,  -1  ,  1                ] },
-    { 'spec'   : [ 'HCO+', 'e-' , 'CO'  , 'H'       ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
-    { 'spec'   : [ 'H+'   , 'e-' , 'H'              ],
-      'stoich' : [  -1   ,  -1  ,  1                ] },
-    { 'spec'   : [ 'H2'  , 'H'  , 'H'               ],
-      'stoich' : [  -1   ,  -1  ,  3                ] },
-    { 'spec'   : [ 'H2'  , 'H2' , 'H'               ],
-      'stoich' : [  -2   ,  1   ,  2                ] },
-    { 'spec'   : [ 'H'   , 'e-' , 'H+'  , 'e-'      ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  2        ] },
-    { 'spec'   : [ 'He+' , 'H2' , 'H+'  , 'He', 'H' ],
-      'stoich' : [  -1   ,  -1  ,  1    ,  1  ,  1  ] },
-    { 'spec'   : [ 'H'   , 'H2'                     ],
-      'stoich' : [  -2   ,  1                       ],
-      'grain'  : True                                 },
-    { 'spec'   : [ 'H+'  , 'e-' , 'H'               ],
-      'stoich' : [  -1   ,  -1  ,  1                ],
-      'grain'  : True                                 },
-    { 'spec'   : [ 'M+'  , 'e-' , 'M'               ],
-      'stoich' : [  -1   ,  -1  ,  1                ] },
-    { 'spec'   : [ 'H3+' , 'M'  , 'M+',   'H2', 'H' ],
-      'stoich' : [  -1   ,  -1  ,  1  ,    1  ,  1  ] }
-]
-_twobody = gr_reactions(specListExtended, _twobody_react)
+if not on_rtd:
+    _twobody_react = [
+        { 'spec'   : [ 'H3+' , 'C'  , 'CHx' , 'H2'      ], 
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'H3+' , 'O'  , 'OHx' , 'H2'      ], 
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'H3+' , 'CO' , 'HCO+', 'H2'      ], 
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'He+' , 'H2' , 'He'  , 'H' , 'H+'], 
+          'stoich' : [  -1   ,  -1  ,  1    ,  1  ,  1  ] },
+        { 'spec'   : [ 'He+' , 'CO' , 'C+'  , 'He', 'O' ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  1  ,  1  ] },
+        { 'spec'   : [ 'C+'  , 'H2' , 'CHx' , 'H'       ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'C+'  , 'OHx', 'HCO+'            ],
+          'stoich' : [  -1   ,  -1  ,  1                ] },
+        { 'spec'   : [ 'O'   , 'CHx', 'CO'  , 'H'       ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'C'   , 'OHx', 'CO'  , 'H'       ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'He+' , 'e-' , 'He'              ],
+          'stoich' : [  -1,     -1,    1                ] },
+        { 'spec'   : [ 'H3+' , 'e-' , 'H2'  , 'H'       ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'H3+' , 'e-' , 'H'               ],
+          'stoich' : [  -1   ,  -1  ,  3                ] },
+        { 'spec'   : [ 'C+'  , 'e-' , 'C'               ],
+          'stoich' : [  -1   ,  -1  ,  1                ] },
+        { 'spec'   : [ 'HCO+', 'e-' , 'CO'  , 'H'       ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  1        ] },
+        { 'spec'   : [ 'H+'   , 'e-' , 'H'              ],
+          'stoich' : [  -1   ,  -1  ,  1                ] },
+        { 'spec'   : [ 'H2'  , 'H'  , 'H'               ],
+          'stoich' : [  -1   ,  -1  ,  3                ] },
+        { 'spec'   : [ 'H2'  , 'H2' , 'H'               ],
+          'stoich' : [  -2   ,  1   ,  2                ] },
+        { 'spec'   : [ 'H'   , 'e-' , 'H+'  , 'e-'      ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  2        ] },
+        { 'spec'   : [ 'He+' , 'H2' , 'H+'  , 'He', 'H' ],
+          'stoich' : [  -1   ,  -1  ,  1    ,  1  ,  1  ] },
+        { 'spec'   : [ 'H'   , 'H2'                     ],
+          'stoich' : [  -2   ,  1                       ],
+          'grain'  : True                                 },
+        { 'spec'   : [ 'H+'  , 'e-' , 'H'               ],
+          'stoich' : [  -1   ,  -1  ,  1                ],
+          'grain'  : True                                 },
+        { 'spec'   : [ 'M+'  , 'e-' , 'M'               ],
+          'stoich' : [  -1   ,  -1  ,  1                ] },
+        { 'spec'   : [ 'H3+' , 'M'  , 'M+',   'H2', 'H' ],
+          'stoich' : [  -1   ,  -1  ,  1  ,    1  ,  1  ] }
+    ]
+    _twobody = gr_reactions(specListExtended, _twobody_react)
 
 def _twobody_ratecoef(T, Td, nH, nH2, ne, chi):
     """

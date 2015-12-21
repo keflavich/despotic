@@ -21,7 +21,7 @@ This module defines the abundanceDict class.
 import numpy as np
 import collections
 from copy import deepcopy
-from .. import despoticError
+from ..despoticError import despoticError
 
 class abundanceDict(collections.MutableMapping,dict):
     """
@@ -70,11 +70,11 @@ class abundanceDict(collections.MutableMapping,dict):
 
         # Make sure input specList and x are properly formatted
         if np.ndim(x) < 1:
-            raise despoticError, "x must be " + \
-                "a numpy array of rank >= 1"
+            raise despoticError("x must be "+
+                "a numpy array of rank >= 1")
         elif x.shape[0] != len(specList):
-            raise despoticError, "first dimension of " + \
-                "x must be same length as specList"
+            raise despoticError("first dimension of " +
+                "x must be same length as specList")
 
         self.x = x
         self.__specDict = collections.OrderedDict(

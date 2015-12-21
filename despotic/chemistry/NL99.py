@@ -29,20 +29,29 @@ from reactions import cr_reactions, photoreactions, reaction_matrix
 import scipy.constants as physcons
 import warnings
 
+import os
+
+# Check if we're trying to compile on readthedocs, in which case we
+# need to disable a ton of this stuff because otherwise we get into
+# problems with the lack of numpy and scipy
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
 ########################################################################
 # Physical and numerical constants
 ########################################################################
-kB = physcons.k*1e7
-mH = (physcons.m_p+physcons.m_e)*1e3
-_small = 1e-100
+if not on_rtd:
+    kB = physcons.k*1e7
+    mH = (physcons.m_p+physcons.m_e)*1e3
+    _small = 1e-100
 
 ########################################################################
 # List of species used in this chemistry network; note that the
 # network does not track H or H+
 ########################################################################
-specList = ['He+', 'H3+', 'OHx', 'CHx', 'CO', 'C', 'C+', 'HCO+', 'O',
-            'M+']
-specListExtended = specList + ['H2', 'He', 'M', 'e-']
+if not on_rtd:
+    specList = ['He+', 'H3+', 'OHx', 'CHx', 'CO', 'C', 'C+', 'HCO+', 'O',
+                'M+']
+    specListExtended = specList + ['H2', 'He', 'M', 'e-']
 
 
 ########################################################################
@@ -51,11 +60,12 @@ specListExtended = specList + ['H2', 'He', 'M', 'e-']
 # (1)       cr + H2      -> H3+  + e-
 # (2)       cr + He      -> He+  + e-
 ########################################################################
-_cr_react = [
-    { 'spec' : ['H2', 'H3+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 2.0 },
-    { 'spec' : ['He', 'He+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.1 }
-]
-_cr = cr_reactions(specListExtended, _cr_react)
+if not on_rtd:
+    _cr_react = [
+        { 'spec' : ['H2', 'H3+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 2.0 },
+        { 'spec' : ['He', 'He+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.1 }
+    ]
+    _cr = cr_reactions(specListExtended, _cr_react)
 
 ########################################################################
 # Data on photoreactions
@@ -67,20 +77,21 @@ _cr = cr_reactions(specListExtended, _cr_react)
 # (5) h nu + M -> M+ + e
 # (6) h nu + HCO+ -> CO
 ########################################################################
-_ph_react = [
-    { 'spec' : ['C', 'C+', 'e-'], 'stoich' : [-1, 1, 1],
-      'rate' : 3.0e-10*1.7, 'av_fac' : 3.0 },
-    { 'spec' : ['CHx', 'C'], 'stoich' : [-1, 1],
-      'rate' : 1.0e-9*1.7, 'av_fac' : 1.5 },
-    { 'spec' : ['CO', 'C', 'O'], 'stoich' : [-1, 1, 1],
-      'rate' : 1.0e-10*1.7, 'av_fac' : 1.7, 
-      'shield_fac' : fShield_CO_vDB },
-    { 'spec' : ['OHx', 'O'], 'stoich' : [-1, 1],
-      'rate' : 5.0e-10*1.7, 'av_fac' : 1.9 },
-    { 'spec' : ['HCO+', 'CO'], 'stoich' : [-1, 1],
-      'rate' : 1.5e-10*1.7, 'av_fac' : 2.5 }
-]
-_ph = photoreactions(specListExtended, _ph_react)
+if not on_rtd:
+    _ph_react = [
+        { 'spec' : ['C', 'C+', 'e-'], 'stoich' : [-1, 1, 1],
+          'rate' : 3.0e-10*1.7, 'av_fac' : 3.0 },
+        { 'spec' : ['CHx', 'C'], 'stoich' : [-1, 1],
+          'rate' : 1.0e-9*1.7, 'av_fac' : 1.5 },
+        { 'spec' : ['CO', 'C', 'O'], 'stoich' : [-1, 1, 1],
+          'rate' : 1.0e-10*1.7, 'av_fac' : 1.7, 
+          'shield_fac' : fShield_CO_vDB },
+        { 'spec' : ['OHx', 'O'], 'stoich' : [-1, 1],
+          'rate' : 5.0e-10*1.7, 'av_fac' : 1.9 },
+        { 'spec' : ['HCO+', 'CO'], 'stoich' : [-1, 1],
+          'rate' : 1.5e-10*1.7, 'av_fac' : 2.5 }
+    ]
+    _ph = photoreactions(specListExtended, _ph_react)
 
 ########################################################################
 # Data on two-body reactions
@@ -101,47 +112,49 @@ _ph = photoreactions(specListExtended, _ph_react)
 # (14) M+   + e-  -> M
 # (15) H3+  + M   -> M+  + H2
 ########################################################################
-_twobody_react = [
-    { 'spec'   : [  'H3+',   'C',  'CHx', 'H2'       ],
-      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
-    { 'spec'   : [  'H3+',   'O',  'OHx', 'H2'       ],
-      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
-    { 'spec'   : [  'H3+',  'CO', 'HCO+', 'H2'       ],
-      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
-    { 'spec'   : [  'He+',  'H2',   'He'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [  'He+',  'CO',   'C+',  'O', 'He' ],
-      'stoich' : [    -1 ,   -1 ,     1 ,   1 ,   1  ] },
-    { 'spec'   : [   'C+',  'H2',  'CHx'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [   'C+', 'OHx', 'HCO+'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [    'O', 'CHx',   'CO'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [    'C', 'OHx',   'CO'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [  'He+',  'e-',   'He'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [  'H3+',  'e-',   'H2'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [   'C+',  'e-',    'C'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [ 'HCO+',  'e-',   'CO'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [   'M+',  'e-',    'M'             ],
-      'stoich' : [    -1 ,   -1 ,     1              ] },
-    { 'spec'   : [  'H3+',   'M',   'M+', 'H2'       ],
-      'stoich' : [    -1 ,   -1 ,     1 ,   1        ] } ]
-_twobody = reaction_matrix(specListExtended, _twobody_react)
+if not on_rtd:
+    _twobody_react = [
+        { 'spec'   : [  'H3+',   'C',  'CHx', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+        { 'spec'   : [  'H3+',   'O',  'OHx', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+        { 'spec'   : [  'H3+',  'CO', 'HCO+', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+        { 'spec'   : [  'He+',  'H2',   'He'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'He+',  'CO',   'C+',  'O', 'He' ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1 ,   1  ] },
+        { 'spec'   : [   'C+',  'H2',  'CHx'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [   'C+', 'OHx', 'HCO+'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [    'O', 'CHx',   'CO'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [    'C', 'OHx',   'CO'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'He+',  'e-',   'He'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'H3+',  'e-',   'H2'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [   'C+',  'e-',    'C'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [ 'HCO+',  'e-',   'CO'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [   'M+',  'e-',    'M'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'H3+',   'M',   'M+', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] } ]
+    _twobody = reaction_matrix(specListExtended, _twobody_react)
 
-# Two-body reaciton rate coefficients
-_k2 = np.array([ 
+    # Two-body reaciton rate coefficients
+    _k2 = np.array([ 
         2.0e-9, 8.0e-10, 1.7e-9, 7.0e-15, 1.6e-9, 4.0e-16, 1.0e-9, 
         2.0e-10, 5.8e-12, 9.0e-11, 1.9e-6, 1.4e-10, 3.3e-5, 
         3.8e-10, 2.0e-9])
-_k2Texp = np.array([ 
+    _k2Texp = np.array([ 
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, -0.64, -0.54, 
         -0.61, -1.0, -0.65, 0.0])
+
 def _twobody_ratecoef(T):
     return _k2 * T**_k2Texp
 
