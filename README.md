@@ -9,7 +9,7 @@ wide range of processes, determining clouds' equilibrium gas and dust
 temperatures, and calculating time-dependent thermal evolution of clouds.
 
 DESPOTIC is implemented as a Python package, and is released under the GPL. The
-physical model, equations, solved, and some tests and example applications are
+physical model, equations solved, and some tests and example applications are
 described in 
 [Krumholz (2014)](http://adsabs.harvard.edu/abs/2014MNRAS.437.1662K).
 
