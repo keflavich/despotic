@@ -712,6 +712,8 @@ class cloud(object):
               cooling rate from lines; dictionary keys correspond to
               species in the emitter list, values give line cooling
               rate for that species
+           LambdaLyA : float
+              cooling rate via Lyman alpha emission
            PsiGD : float
               dust-gas energy exchange rate
            GammaDustISRF : float
@@ -736,6 +738,13 @@ class cloud(object):
         if self.comp.mu == 0.0:
             self.comp.computeDerived(self.nH)
 
+        # Get clumping factor
+        if noClump == False:
+            cs2 = kB * self.Tg / (self.comp.mu * mH)
+            cfac = np.sqrt(1.0 + 0.75*self.sigmaNT**2/cs2)
+        else:
+            cfac = 1.0
+
         # Gas terms
         if dustOnly == False and dustCoolOnly == False:
 
@@ -750,6 +759,12 @@ class cloud(object):
 
             # Cosmic ray heating rate
             GammaCR = self.rad.ionRate * self.comp.qIon
+
+            # Lyman alpha cooling rate; for now we use the very
+            # approximate cooling rate Koyama & Inutsuka (2002). This
+            # will be fixed when I get my books back!
+            LambdaLyA = 1.0e7*np.exp(-1.184e5 / (self.Tg+1000)) * \
+                        self.comp.xHI**2 * cfac * self.nH
 
             # Line cooling rate, and heating rate of dust by lines
             LambdaLine = {}
@@ -865,11 +880,6 @@ class cloud(object):
         # End dust terms
 
         # Grain-gas energy exchange rate
-        if noClump == False:
-            cs2 = kB * self.Tg / (self.comp.mu * mH)
-            cfac = np.sqrt(1.0 + 0.75*self.sigmaNT**2/cs2)
-        else:
-            cfac = 1.0
         PsiGD = self.dust.alphaGD * cfac * self.nH * \
             np.sqrt(self.Tg) * (self.Td - self.Tg)
 
@@ -887,6 +897,7 @@ class cloud(object):
                 rates['GammaGrav'] = GammaGrav
                 rates['GammaCR'] = GammaCR
                 rates['LambdaLine'] = LambdaLine
+                rates['LambdaLyA'] = LambdaLyA
                 if PsiUser != None:
                     rates['PsiUserGas'] = PsiUserVal[0]
             if gasOnly == False:
@@ -904,11 +915,13 @@ class cloud(object):
         else:
             if dustOnly == False and dustCoolOnly == False:
                 rates['dEdtGas'] = GammaPE + GammaGrav + GammaCR - \
-                    sum(LambdaLine.values()) + PsiGD + PsiUserVal[0]
+                    sum(LambdaLine.values()) - LambdaLyA \
+                    + PsiGD + PsiUserVal[0]
                 rates['maxAbsdEdtGas'] = \
-                    max(abs(GammaPE), abs(GammaGrav), abs(GammaCR), \
-                            abs(sum(LambdaLine.values())), \
-                            abs(PsiGD), abs(PsiUserVal[0]))
+                    max(abs(GammaPE), abs(GammaGrav), abs(GammaCR),
+                        abs(sum(LambdaLine.values())),
+                        abs(LambdaLyA),
+                        abs(PsiGD), abs(PsiUserVal[0]))
             if gasOnly == False:
                 rates['dEdtDust'] = - LambdaD - PsiGD + PsiUserVal[1]
                 rates['maxAbsdEdtDust'] = \
@@ -917,8 +930,8 @@ class cloud(object):
                     rates['dEdtDust'] += GammaISRF + GammaDCMB + \
                         GammaDIR
                     rates['maxAbsdEdtDust'] = \
-                        max(rates['maxAbsdEdtDust'], abs(GammaISRF), \
-                                abs(GammaDCMB), abs(GammaDIR))
+                        max(rates['maxAbsdEdtDust'], abs(GammaISRF),
+                            abs(GammaDCMB), abs(GammaDIR))
                     if dustOnly == False:
                         rates['dEdtDust'] += GammaDLine
                         rates['maxAbsdEdtDust'] = \
