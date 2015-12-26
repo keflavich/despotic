@@ -581,7 +581,7 @@ class NL99_GC(chemNetwork):
         cfac = self.cfac
         n = self.nH * cfac
         rcoef = _twobody_ratecoef(
-            self.temp, self.Td, n, abd1['H2']*n, abd1['e-']*n, 
+            self.temp, self.cloud.Td, n, abd1['H2']*n, abd1['e-']*n, 
             np.exp(-self.AV)*self.chi)
 
         # Set initial He+ to equilibrium value between creation by
@@ -679,12 +679,7 @@ class NL99_GC(chemNetwork):
 
         # If we're here, compute mu and use that to get the sound
         # speed
-        xgrow = self.extendAbundances(self.x)
-        mu = (xgrow[0]+xgrow[13] + 2*(xgrow[1]+xgrow[2]) +
-              3*xgrow[3] + 4*(xgrow[4]+xgrow[14])) / \
-            (xgrow[0] + xgrow[1] + xgrow[2] + xgrow[3] + xgrow[4] +
-             xgrow[13] + xgrow[14] + xgrow[16])
-        cs2 = kB * self.cloud.Tg / (mu * mH)
+        cs2 = kB * self.cloud.Tg / (self.mu() * mH)
         return np.sqrt(1.0 + 0.75*self.cloud.sigmaNT**2/cs2)
 
     @cfac.setter
@@ -983,7 +978,7 @@ class NL99_GC(chemNetwork):
         # Get rates for two-body reactions and add their contribution
         # to xdot
         ratecoef = _twobody_ratecoef(
-            self.temp, self.Td, n, abd['H2']*n, abd['e-']*n, 
+            self.temp, self.cloud.Td, n, abd['H2']*n, abd['e-']*n, 
             np.exp(-self.AV)*self.chi)
         xdot += _twobody.dxdt(abd.x, n, ratecoef, self.Zd)
 
@@ -1025,7 +1020,7 @@ class NL99_GC(chemNetwork):
 
         # Hydrogen; leave the ortho-to-para ratio unchanged, or set it
         # to 0.25 if the initial value is undefined
-        if self.comp.xH2 != 0:
+        if self.cloud.comp.xH2 != 0:
             fortho = self.cloud.comp.xoH2 / self.cloud.comp.xH2
         else:
             fortho = 1./3.
