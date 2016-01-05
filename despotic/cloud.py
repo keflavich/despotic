@@ -43,6 +43,9 @@ h = physcons.h*1e7
 sigma=physcons.sigma*1e3
 a = 4*sigma/c
 G = physcons.G*1e3
+Ryd = h*c*physcons.Rydberg/100.
+TLyA = 3*Ryd/(4*kB)
+TLyB = 8*Ryd/(9*kB)
 
 # Small numerical value
 small = 1e-50
@@ -714,6 +717,10 @@ class cloud(object):
               rate for that species
            LambdaLyA : float
               cooling rate via Lyman alpha emission
+           LambdaLyB : float
+              cooling rate via Lyman beta emission
+           Lambda2p : float
+              cooling rate via 2 photon emission
            PsiGD : float
               dust-gas energy exchange rate
            GammaDustISRF : float
@@ -760,11 +767,49 @@ class cloud(object):
             # Cosmic ray heating rate
             GammaCR = self.rad.ionRate * self.comp.qIon
 
-            # Lyman alpha cooling rate; for now we use the very
-            # approximate cooling rate Koyama & Inutsuka (2002). This
-            # will be fixed when I get my books back!
-            LambdaLyA = 1.0e7*np.exp(-1.184e5 / (self.Tg+1000)) * \
-                        self.comp.xHI**2 * cfac * self.nH
+            # Cooling rate via collisional excitation of neutral
+            # hydrogen by electrons; these rate coefficients come from
+            # Osterbrock & Ferland, table 3.16
+            if self.Tg < 1e3:
+                upsilon2s = 0.29
+                upsilon2p = 0.51
+                upsilon3s = 0.066
+                upsilon3p = 0.12
+                upsilon3d = 0.063
+            elif self.Tg < 1.5e3:
+                wgt = np.log(self.Tg/1e3)/np.log(1.5)
+                upsilon2s = 0.29*(1.0-wgt) + 0.32*wgt
+                upsilon2p = 0.51*(1.0-wgt) + 0.60*wgt
+                upsilon3s = 0.066*(1.0-wgt) + 0.071*wgt
+                upsilon3p = 0.12*(1.0-wgt) + 0.13*wgt
+                upsilon3d = 0.063*(1.0-wgt) + 0.068*wgt
+            elif self.Tg < 2e3:
+                wgt = np.log(self.Tg/1.5e3)/np.log(2.0/1.5)
+                upsilon2s = 0.32*(1.0-wgt) + 0.35*wgt
+                upsilon2p = 0.60*(1.0-wgt) + 0.69*wgt
+                upsilon3s = 0.071*(1.0-wgt) + 0.077*wgt
+                upsilon3p = 0.13*(1.0-wgt) + 0.14*wgt
+                upsilon3d = 0.068*(1.0-wgt) + 0.073*wgt
+            else:
+                upsilon2s = 0.35
+                upsilon2p = 0.69
+                upsilon3s = 0.077
+                upsilon3p = 0.14
+                upsilon3d = 0.073
+            # Cooling rates; note the factor of 2 in the denominator
+            # is the statistical weight of the 1s state of neutral
+            # hydrogen
+            fac = 8.629e-6/(2*np.sqrt(self.Tg))
+            exfacLyA = np.exp(-TLyA/self.Tg)
+            exfacLyB = np.exp(-TLyB/self.Tg)
+            Lambda2p = fac * exfacLyA * upsilon2s * self.comp.xHI * \
+                       self.comp.xe * self.nH * kB * TLyA
+            LambdaLyA = fac * exfacLyA * upsilon2p * self.comp.xHI * \
+                       self.comp.xe * self.nH * kB * TLyA
+            LambdaLyB = fac * exfacLyB * \
+                        (upsilon3s + upsilon3p + upsilon3d) * \
+                        self.comp.xHI * self.comp.xe * self.nH * \
+                        kB * TLyB
 
             # Line cooling rate, and heating rate of dust by lines
             LambdaLine = {}
@@ -898,6 +943,8 @@ class cloud(object):
                 rates['GammaCR'] = GammaCR
                 rates['LambdaLine'] = LambdaLine
                 rates['LambdaLyA'] = LambdaLyA
+                rates['LambdaLyB'] = LambdaLyB
+                rates['Lambda2p'] = Lambda2p
                 if PsiUser != None:
                     rates['PsiUserGas'] = PsiUserVal[0]
             if gasOnly == False:
@@ -916,11 +963,11 @@ class cloud(object):
             if dustOnly == False and dustCoolOnly == False:
                 rates['dEdtGas'] = GammaPE + GammaGrav + GammaCR - \
                     sum(LambdaLine.values()) - LambdaLyA \
-                    + PsiGD + PsiUserVal[0]
+                    - LambdaLyB - Lambda2p + PsiGD + PsiUserVal[0]
                 rates['maxAbsdEdtGas'] = \
                     max(abs(GammaPE), abs(GammaGrav), abs(GammaCR),
                         abs(sum(LambdaLine.values())),
-                        abs(LambdaLyA),
+                        abs(LambdaLyA), abs(LambdaLyB), abs(Lambda2p),
                         abs(PsiGD), abs(PsiUserVal[0]))
             if gasOnly == False:
                 rates['dEdtDust'] = - LambdaD - PsiGD + PsiUserVal[1]
