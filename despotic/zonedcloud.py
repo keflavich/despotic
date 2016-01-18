@@ -798,7 +798,7 @@ class zonedcloud(object):
             # For luminosity per H, we need to mass-weight
             lumPerH = np.array(zoneLum)
             mass = self.mass()
-            return np.sum(mass*np.transpose(lumPerH), axis=0) \
+            return np.sum(mass*np.transpose(lumPerH), axis=1) \
                 / np.sum(mass)
 
         else:
@@ -827,7 +827,7 @@ class zonedcloud(object):
             lumPerH = np.array(
                 [[x['lumPerH'] for x in z] for z in zoneLum])
             mass = self.mass()
-            lumPerH = np.sum(mass*np.transpose(lumPerH), axis=0) \
+            lumPerH = np.sum(mass*np.transpose(lumPerH), axis=1) \
                       / np.sum(mass)
             for l, t in zip(lineLum, lumPerH):
                 l['lumPerH'] = t
