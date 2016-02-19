@@ -27,7 +27,26 @@ class chemNetwork(object):
     """
     This is a purely abstract class that defines the methods that all
     chemistry networks are required to implement. Chemistry networks
-    should be derived from it, and should override its methods.
+    should be derived from it, and should override its
+    methods. Attempting to instantiate this directly will lead to an
+    error.
+
+    Parameters
+       cloud : class cloud
+          a cloud object to which this network should be attached
+       info : dict
+          a dict of additional information to be passed to the network
+          on instantiation
+
+    Class attributes
+       specList : list
+          list of strings giving the names of the species being
+          treated in the chemical network
+       x : array
+          array of abundances of the species in specList
+       cloud : class cloud
+          a cloud object to which this chemical network is attached;
+          can be None
     """
 
     # specList is a list of strings, with the ith element giving the
@@ -58,6 +77,20 @@ class chemNetwork(object):
     # number of elements as xin, giving the time derivative of the
     # abundances of the species in CGS units.
     def dxdt(self, xin, time):
+        """
+        This routine returns the time rate of change of the abundances
+        for all species in the network.
+
+        Parameters
+           xin : array
+              array of starting abundances
+           time : float
+              current time in sec
+
+        Returns
+           dxdt : array
+              the time derivative of all species abundances
+        """
         raise despoticError, "chemNetwork is an abstract class, " + \
             "and should never be instantiated directly. Only " + \
             "instantiate classes derived from it."
@@ -69,6 +102,23 @@ class chemNetwork(object):
     # the network but not part of the emitter list for the cloud
     # should be added.
     def applyAbundances(self, addEmitters=False):
+        """
+        This method writes abundances from the chemical network back
+        to the cloud to which this network is attached.
+
+        Parameters
+           addEmitters : bool
+              if True, and the network contains emitters that are not
+              part of the parent cloud, then the network will attempt
+              to add them using cloud.addEmitter. Otherwise this
+              routine will change the abundances of whatever emitters
+              are already attached to the cloud, but will not add new
+              ones.
+
+        Returns:
+           Nothing
+        """
+
         raise despoticError, "chemNetwork is an abstract class, " + \
             "and should never be instantiated directly. Only " + \
             "instantiate classes derived from it."
@@ -77,14 +127,19 @@ class chemNetwork(object):
     # provides a convenient way of getting the abundances in a nice,
     # user-readable form using abundanceDict. Derived classes
     # generally will not need to override this definition, but they
-    # are free to do so, as none of the chemical netowrk driver
+    # are free to do so, as none of the chemical network driver
     # classes rely on these definitions.
     @property
     def abundances(self):
+        """
+        The current abundances of every species in the chemical
+        network, stored as an abundanceDict.
+        """
         self._abundances = abundanceDict(self.specList, self.x)
         return self._abundances
 
     @abundances.setter
-    def abundances(self, value):
-        self.x = value.x
-        self._abundances = value
+    def abundances(self, other):
+        self._abundances = abundanceDict(self.specList, self.x)
+        self._abundances.update(other)
+        self.applyAbundances()

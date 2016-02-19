@@ -20,21 +20,39 @@ This module defines the abundanceDict class.
 
 import numpy as np
 import collections
-from despotic.despoticError import despoticError
+from copy import deepcopy
+from ..despoticError import despoticError
 
 class abundanceDict(collections.MutableMapping,dict):
     """
-    An abundanceDict object is a wrapper around an array of
+    An abundanceDict object is a wrapper around a numpy array of
     abundances, and maps between human-readable chemical names
-    (e.g. CO) and numeric indices in the array. This mapping is
-    created when the dict is first initialized, and is immutable
-    thereafter. However, the underlying array to which the mapping
-    applies can be altered.
+    (e.g. CO) and numeric indices in the array. Elements can be
+    queried and addressed using a dict-like interface (e.g. if abd is
+    an abundanceDict object, one could do abd['CO'] = 1.0e-4), but the
+    underlying data structure can be manipulated with the speed and
+    flexibility of a numpy array. In particular, one can perform
+    arithmetic operations such as addition on abundance dicts, and they
+    are simply applied to the underyling numpy array using the usual
+    numpy operator rules.
+
+    This mapping between species names and array indices is created
+    when the dict is first initialized, and is immutable
+    thereafter. Thus operations that modify the keys in a dict are
+    disallowed for abundanceDict objects.
+
+    Parameters
+       specList : list
+          list of species names for this abundanceDict; each list
+          element must be a string
+       x : array of rank 1 or 2
+          array of abundances; the length of the first dimension of
+          x must be equal to the length of specList
     """
 
-########################################################################
-# Initialization method
-########################################################################
+    ########################################################################
+    # Initialization method
+    ########################################################################
     def __init__(self, specList, x):
         """
         This method initializes the species list for this abundance
@@ -42,35 +60,32 @@ class abundanceDict(collections.MutableMapping,dict):
         around.
 
         Parameters
-        ----------
-        specList : list of strings
-             list of species names for this abundanceDict
-        x : array of rank 1 or 2
-             array of abundances; the length of the first dimension of
-             x must be equal to the length of specList
-
-        Returns
-        -------
-        Nothing
+           specList : list
+              list of species names for this abundanceDict; each list
+              element must be a string
+           x : array of rank 1 or 2
+              array of abundances; the length of the first dimension of
+              x must be equal to the length of specList
         """
 
         # Make sure input specList and x are properly formatted
-        if np.rank(x) < 1:
-            raise despoticError, "x must be " + \
-                "a numpy array of rank >= 1"
+        if np.ndim(x) < 1:
+            raise despoticError("x must be "+
+                "a numpy array of rank >= 1")
         elif x.shape[0] != len(specList):
-            raise despoticError, "first dimension of " + \
-                "x must be same length as specList"
+            raise despoticError("first dimension of " +
+                "x must be same length as specList")
 
         self.x = x
-        self.__specDict = {}
-        for i, s in enumerate(specList):
-            self.__specDict[s] = i
+        self.__specDict = collections.OrderedDict(
+            zip(specList, range(len(specList))))
+        #for i, s in enumerate(specList):
+        #    self.__specDict[s] = i
 
 
-########################################################################
-# getitem, setitem methods operate on the associated numpy array
-########################################################################
+    ########################################################################
+    # getitem, setitem methods operate on the associated numpy array
+    ########################################################################
     def __getitem__(self, key):
         """
         __getitem__ works just as for an ordinary dict
@@ -89,9 +104,119 @@ class abundanceDict(collections.MutableMapping,dict):
                 "abundanceDict"
         self.x[self.__specDict[key]] = value
 
-########################################################################
-# disallow deletions from the __specDict key
-########################################################################
+    ########################################################################
+    # Arithmetic methods operate directly on the numpy array, with
+    # some extra safety checking to make sure that, if both objects
+    # are abundanceDicts, the species match up
+    ########################################################################
+    def __add__(self, other):
+        if type(other) == type(self):
+            if self.keys() != other.keys():
+                raise despoticError, "cannot add abundanceDict " + \
+                    "objects containing different species"
+            return abundanceDict(self.keys(), self.x + other.x)
+        else:
+            return abundanceDict(self.keys(), self.x + other)
+
+    def __radd__(self, other):
+        return abundanceDict(self.keys(), self.x + other)
+
+    def __sub__(self, other):
+        if type(other) == type(self):
+            if self.keys() != other.keys():
+                raise despoticError, "cannot add abundanceDict " + \
+                    "objects containing different species"
+            return abundanceDict(self.keys(), self.x - other.x)
+        else:
+            return abundanceDict(self.keys(), self.x - other)
+
+    def __rsub__(self, other):
+        return abundanceDict(self.keys(), other - self.x)
+
+    def __mul__(self, other):
+        if type(other) == type(self):
+            if self.keys() != other.keys():
+                raise despoticError, "cannot add abundanceDict " + \
+                    "objects containing different species"
+            return abundanceDict(self.keys(), self.x * other.x)
+        else:
+            return abundanceDict(self.keys(), self.x * other)
+
+    def __rmul__(self, other):
+        return abundanceDict(self.keys(), self.x * other)
+
+    def __matmul__(self, other):
+        return NotImplemented
+
+    def __div__(self, other):
+        if type(other) == type(self):
+            if self.keys() != other.keys():
+                raise despoticError, "cannot add abundanceDict " + \
+                    "objects containing different species"
+            return abundanceDict(self.keys(), self.x / other.x)
+        else:
+            return abundanceDict(self.keys(), self.x / other)
+
+    def __rdiv__(self, other):
+        return abundanceDict(self.keys(), other / self.x)
+
+    def __floordiv__(self, other):
+        if type(other) == type(self):
+            if self.keys() != other.keys():
+                raise despoticError, "cannot add abundanceDict " + \
+                    "objects containing different species"
+            return abundanceDict(self.keys(), self.x // other.x)
+        else:
+            return abundanceDict(self.keys(), self.x // other)
+
+    def __rfloordiv__(self, other):
+        return abundanceDict(self.keys(), other // self.x)
+
+    def __mod__(self, other):
+        return NotImplemented
+
+    def __divmod__(self, other):
+        return NotImplemented
+
+    def __pow__(self, other):
+        if type(other) == type(self):
+            if self.keys() != other.keys():
+                raise despoticError, "cannot add abundanceDict " + \
+                    "objects containing different species"
+            return abundanceDict(self.keys(), self.x ** other.x)
+        else:
+            return abundanceDict(self.keys(), self.x ** other)
+
+    def __rpow__(self, other):
+        return abundanceDict(self.keys(), other ** self.x)
+
+    def __lshift__(self, other):
+        return NotImplemented
+
+    def __rshift__(self, other):
+        return NotImplemented
+
+    def __and__(self, other):
+        return NotImplemented
+
+    def __xor__(self, other):
+        return NotImplemented
+
+    def __or__(self, other):
+        return NotImplemented
+
+    def __neg__(self):
+        return abundanceDict(self.keys(), -self.x)
+
+    def __pos__(self):
+        return abundanceDict(self.keys(), +self.x)
+
+    def __abs__(self):
+        return abundanceDict(self.keys(), abs(self.x))
+
+    ########################################################################
+    # disallow deletions from the __specDict key
+    ########################################################################
     def __delitem__(self, key):
         """
         raises an error, since abundanceDicts are
@@ -124,17 +249,9 @@ class abundanceDict(collections.MutableMapping,dict):
         raise despoticError, "cannot delete species from " + \
             "abundanceDict"
 
-    def update(self):
-        """
-        raises an error, since abundanceDicts are
-        immutable
-        """
-        raise despoticError, "cannot delete species from " + \
-            "abundanceDict"
-
-########################################################################
-# define how to print abundanceDict objects
-########################################################################
+    ########################################################################
+    # define how to print abundanceDict objects
+    ########################################################################
     def __repr__(self):
         """
         define how to print abundanceDict objects
@@ -148,10 +265,10 @@ class abundanceDict(collections.MutableMapping,dict):
         stringRep += "}"
         return stringRep
 
-########################################################################
-# the methods below act just like they do on an ordinary dict
-# whose keys are __specDict and whose values are the elements of x
-########################################################################
+    ########################################################################
+    # the methods below act just like they do on an ordinary dict
+    # whose keys are __specDict and whose values are the elements of x
+    ########################################################################
     def __iter__(self):
         """
         __iter__ works just as for an ordinary dict
@@ -198,3 +315,37 @@ class abundanceDict(collections.MutableMapping,dict):
             specList[self.__specDict[k]] = k
         newAD = abundanceDict(specList, self.x)
         return newAD
+
+    ########################################################################
+    # define an index method that allows users to get the indicates for
+    # one or more species
+    ########################################################################
+
+    def index(self, spec):
+        """
+        Parameters
+           spec : string | iterable
+              if this is a string, the method returns the index of
+              that chemical species; if it is an iterable, the
+              iterable must contain strings, and  the method
+              returns an array containing the indices of all species in
+              the iterable
+
+        Returns
+           index : int | array
+              indices of the input species; if spec is a string, this is
+              an int; otherwise it is an array of ints
+
+        Raises
+           KeyError, if spec or any of its elements is not in the species
+           list
+        """
+
+        if hasattr(spec, '__iter__'):
+            idx = np.zeros(len(spec), dtype='int')
+            for i, s in enumerate(spec):
+                idx[i] = self.__specDict[s]
+        else:
+            idx = self.__specDict[spec]
+        return idx
+

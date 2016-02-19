@@ -24,102 +24,90 @@ computations on that cloud.
 
 import numpy as np
 from scipy.optimize import root
-from scipy.optimize import newton
+from scipy.optimize import brentq
 from scipy.integrate import odeint
 from emitter import emitter
 from composition import composition
 from radiation import radiation
 from dustProp import dustProp
-from despotic.chemistry.chemEvol import chemEvol
-from despotic.chemistry.setChemEq import setChemEq
+from chemistry import abundanceDict, chemEvol, setChemEq
 from despoticError import despoticError
 from copy import deepcopy
 
 # Define some global physical constants in cgs units
 import scipy.constants as physcons
-kB = physcons.k/physcons.erg
-c = physcons.c/physcons.centi
-mH = physcons.m_p/physcons.gram
+kB = physcons.k*1e7
+c = physcons.c*1e2
+mH = physcons.m_p*1e3
 h = physcons.h*1e7
-sigma=physcons.sigma/physcons.erg*physcons.centi**2
+sigma=physcons.sigma*1e3
 a = 4*sigma/c
 G = physcons.G*1e3
+Ryd = h*c*physcons.Rydberg/100.
+TLyA = 3*Ryd/(4*kB)
+TLyB = 8*Ryd/(9*kB)
 
 # Small numerical value
 small = 1e-50
+
+# Hardwired temperature limits for solvers
+Tlo = 1.0
+Thi = 1.0e4
 
 class cloud(object):
     """
     A class describing the properties of an interstellar cloud, and
     providing methods to perform calculations using those properties.
 
-    Attributes
-    ----------
-    nH : float
-         number density of H nuclei, in cm^-3
-    colDen : float
-         center-to-edge column density of H nuclei, in cm^-2
-    sigmaNT : float
-         non-thermal velocity dispersion, in cm s^-1
-    dVdr : float
-         radial velocity gradient, in s^-1 (or cm s^-1 cm^-1)
-    Tg : float
-         gas kinetic temperature, in K
-    Td : float
-         dust temperature, in K
-    comp : class composition
-         a class that stores information about the chemical
-         composition of the cloud
-    dust : class dustProp
-         a class that stores information about the properties of the
-         dust in a cloud
-    rad : class radiation
-         the radiation field impinging on the cloud
-    emitters : dict
-         keys of the dict are names of emitting species, and values
-         are objects of class emitter
-    chemnetwork : chemical network class (optional)
-         a chemical network that is to be used to perform
-         time-dependent chemical evolution calcualtions for this cloud
+    Parameters
+       fileName : string
+          name of file from which to read cloud description
+       verbose : Boolean
+          print out information about the cloud as we read it
 
-    Methods
-    -------
-    __init__ -- initialization
-    read -- read the properties of a cloud from a file
-    addEmitter -- add an emitting species to the cloud
-    sigmaVirial -- compute the virial velocity dispersion
-    dEdt -- return values of heating and cooling terms
-    setTempEq -- calculate equilibrium gas and dust temperatures and
-                 set gas and dust temperatures to these values
-    setDustTempEq -- set the dust to its equilibrium temperature,
-                     treating the gas temperature as fixed
-    setGasTempEq -- set the gas to its equilibrium temperature,
-                    treating the dust temperature as fixed
-    tempEvol -- calculate the time evolutio of the gas temperature
-    lineLum -- return the CMB-subtracted line luminosity / intensity /
-         brightness temperature of transitions from the specified
-         emitter
-    setChemEq -- set the abundances of species to their chemical
-         equilibrium values
-    chemEvol -- calculate time-dependent chemical evolution
+    Class attributes
+       nH : float
+          number density of H nuclei, in cm^-3
+       colDen : float
+          center-to-edge column density of H nuclei, in cm^-2
+       sigmaNT : float
+          non-thermal velocity dispersion, in cm s^-1
+       dVdr : float
+          radial velocity gradient, in s^-1 (or cm s^-1 cm^-1)
+       Tg : float
+          gas kinetic temperature, in K
+       Td : float
+          dust temperature, in K
+       comp : class composition
+          a class that stores information about the chemical
+          composition of the cloud
+       dust : class dustProp
+          a class that stores information about the properties of the
+          dust in a cloud
+       rad : class radiation
+          the radiation field impinging on the cloud
+       emitters : dict
+          keys of the dict are names of emitting species, and values
+          are objects of class emitter
+       chemnetwork : chemical network class (optional)
+          a chemical network that is to be used to perform
+          time-dependent chemical evolution calcualtions for this cloud
     """
 
 
-########################################################################
-# Method to initialize
-########################################################################
+    ####################################################################
+    # Method to initialize
+    ####################################################################
     def __init__(self, fileName=None, verbose=False):
         """
-        Paramters
-        ---------
-        fileName : string
-            name of file from which to read cloud description
-        verbose : Boolean
-            print out information about the cloud as we read it
+        Parameters
+           fileName : string
+              name of file from which to read cloud description
+           verbose : Boolean
+              print out information about the cloud as we read it
 
         Returns
-        -------
-        Nothing
+           Nothing
         """
 
         # Initial values when class is created
@@ -139,15 +127,77 @@ class cloud(object):
             self.read(fileName, verbose=verbose)
 
 
-########################################################################
-# Method to return the list of emitters for a cloud
-########################################################################
+    ####################################################################
+    # Method to return the list of emitters for a cloud
+    ####################################################################
     def emitterList(self):
         return self.emitters.keys()
 
-########################################################################
-# Method to set velocity dispersion to virial value
-########################################################################
+    ####################################################################
+    # Method to get and set abundances in a cloud
+    ####################################################################
+
+    @property
+    def abundances(self):
+        """
+        This property contains the abundances of all emitting species,
+        stored as an abundanceDict
+        """
+        specList = self.emitters.keys()
+        x = np.array([self.emitters[s].abundance for s in
+                      specList])
+        return abundanceDict(specList, x)
+
+    @abundances.setter
+    def abundances(self, abd):
+        """
+        Set abundances of all emitting species; if these species exist
+        in the chemical network, they will be updated too
+
+        Parameters
+           abd : dict or abundanceDict
+              dict containing species names as keys, and abundances of
+              those species as values; species in abd that are not
+              already in the emitter list will be added
+        """
+        for k in abd.keys():
+            if k in self.emitters.keys():
+                self.emitters[k].abundance = abd[k]
+            else:
+                self.addEmitter(k, abd[k])
+
+    @property
+    def chemabundances(self):
+        """
+        The property contains the abundances of all species in the
+        chemical network, stored as an abundanceDict
+        """
+        if self.chemnetwork is None:
+            raise despoticError, "cloud: cannot get " + \
+                "chemabundances when chemnetwork is None"
+        return self.chemnetwork.abundances
+
+    @chemabundances.setter
+    def chemabundances(self, abd):
+        """
+        Set abundances of all species in the chemical network, and
+        update the emitter abundances to match
+
+        Parameters
+           abd : dict or abundanceDict
+              dict containing species names as keys, and abundances of
+              those species as values; species in abd that are not
+              already in the emitter list will be added
+        """
+        if self.chemnetwork is None:
+            raise despoticError, "cloud: cannot set " + \
+                "chemabundances when chemnetwork is None"
+        self.chemnetwork.abundances = abd
+        self.chemnetwork.applyAbundances()
+
+    ####################################################################
+    # Method to set velocity dispersion to virial value
+    ####################################################################
     def setVirial(self, alphaVir=1.0, setColDen=False, setnH=False, \
                       NTonly=False):
         """
@@ -155,29 +205,26 @@ class cloud(object):
         virial ratio of unity
 
         Parameters
-        ----------
-        alphaVir : float
-            virial ratio to be used in computation; defaults to 1
-        setColDen : Boolean
-            if True, sigmaNT and nH are fixed, and colDen is
-            altered to give the desired virial ratio
-        setnH : Boolean
-            if True, sigmaNT and colDen are fixed, and nH is altered
-            to give the desired virial ratio
-        NTonly : Boolean
-            if True, the virial ratio is computed considering only the
-            non-thermal component of the velocity dispersion
+           alphaVir : float
+              virial ratio to be used in computation; defaults to 1
+           setColDen : Boolean
+              if True, sigmaNT and nH are fixed, and colDen is
+              altered to give the desired virial ratio
+           setnH : Boolean
+              if True, sigmaNT and colDen are fixed, and nH is altered
+              to give the desired virial ratio
+           NTonly : Boolean
+              if True, the virial ratio is computed considering only the
+              non-thermal component of the velocity dispersion
 
         Returns
-        -------
-        Nothing
+           Nothing
 
         Remarks
-        -------
-        By default the routine fixed nH and colDen and computes
-        sigmaNT, but this can be overridden by specifying either
-        setColDen or setnH. It is an error to set both of these to
-        true.
+           By default the routine fixes nH and colDen and computes
+           sigmaNT, but this can be overridden by specifying either
+           setColDen or setnH. It is an error to set both of these to
+           True.
         """
 
         # Safety check
@@ -217,27 +264,24 @@ class cloud(object):
                     (self.comp.muH*mH) )
                                     
 
-########################################################################
-# Method to read cloud properties from a file
-########################################################################
+    ####################################################################
+    # Method to read cloud properties from a file
+    ####################################################################
     def read(self, fileName, verbose=False):
         """
         Read the composition from a file
 
         Pamameters
-        ----------
-        fileName : string
-            string giving the name of the composition file
-        verbose : Boolean
-            print out information about the cloud as it is read
+           fileName : string
+              string giving the name of the composition file
+           verbose : Boolean
+              print out information about the cloud as it is read
         
         Returns
-        -------
-        Nothing
+           Nothing
 
         Remarks
-        -------
-        For the format of cloud files, see the user guide
+           For the format of cloud files, see the documentation
         """
 
         # Read file
@@ -415,6 +459,13 @@ class cloud(object):
                     print "Setting T_radDust = " + \
                         str(self.rad.TradDust)+" K"
 
+            elif linesplit[0].upper().strip() == 'RADDUTDILUTION':
+
+                self.rad.fdDilute = float(linesplit2[0])
+                if verbose:
+                    print "Setting radDust dilution factor = " + \
+                        str(self.rad.fdDilute)
+
             elif linesplit[0].upper().strip() == 'IONRATE':
 
                 self.rad.ionRate = float(linesplit2[0])
@@ -434,7 +485,7 @@ class cloud(object):
                 # Emitter lines are complicated. There are two
                 # required elements, a name and an abundance, that
                 # must come first. There are also four optional
-                # elements: energySkip, extrapolate, file:FileName,
+                # elements: energySkip, noExtrap, file:FileName,
                 # and URL:url
 
                 # Split up the tokens after the equal sign
@@ -460,14 +511,17 @@ class cloud(object):
                     # options to their defaults, then alter them based
                     # on the tokens we've been given
                     energySkip=False
-                    extrap=False
+                    extrap=True
                     emitterFile=None
                     emitterURL=None
                     for token in linesplit3[2:]:
                         if token.upper().strip() == 'ENERGYSKIP':
                             energySkip=True
                         elif token.upper().strip() == 'EXTRAPOLATE':
-                            extrap=True
+                            # Allowed to maintain backward compatibility
+                            pass
+                        elif token.upper().strip() == 'NOEXTRAP':
+                            extrap=False
                         elif token.upper().strip()[0:5] == 'FILE:':
                             emitterFile=token[5:].strip()
                         elif token.upper().strip()[0:4] == 'URL:':
@@ -484,19 +538,19 @@ class cloud(object):
                                   " with abundance "+linesplit3[1]
                         if energySkip:
                             msg += "; setting energySkip"
-                        if extrap:
-                            msg += "; allowing extrapolation"
+                        if not extrap:
+                            msg += "; disallowing extrapolation"
                         if emitterFile != None:
                             msg += "; using file name "+emitterFile
                         if emitterURL != None:
                             msg += "; using URL "+emitterURL
                         print msg
-                    self.addEmitter(linesplit3[0], \
-                                        float(linesplit3[1]), \
-                                        energySkip=energySkip, \
-                                        extrap=extrap, \
-                                        emitterFile=emitterFile, \
-                                        emitterURL=emitterURL)
+                    self.addEmitter(linesplit3[0],
+                                    float(linesplit3[1]),
+                                    energySkip=energySkip,
+                                    extrap=extrap,
+                                    emitterFile=emitterFile,
+                                    emitterURL=emitterURL)
 
             else:
                 # Line does not correspond to any known keyword, so
@@ -532,167 +586,171 @@ class cloud(object):
                     str(self.comp.cv)
 
 
-########################################################################
-# Method to add an emitter
-########################################################################
-    def addEmitter(self, emitName, emitAbundance, emitterFile=None, \
-                       emitterURL=None, energySkip=False, \
-                       extrap=False):
+    ####################################################################
+    # Method to add an emitter
+    ####################################################################
+    def addEmitter(self, emitName, emitAbundance, emitterFile=None,
+                   emitterURL=None, energySkip=False, extrap=True):
         """
-        Add an emitting species
+        Method to add an emitting species
 
         Pamameters
-        ----------
-        emitName : string
-            name of the emitting species
-        emitAbundance : float
-            abundance of the emitting species relative to H
+           emitName : string
+              name of the emitting species
+           emitAbundance : float
+              abundance of the emitting species relative to H
+           emitterFile : string
+              name of LAMDA file containing data on this species; this
+              option overrides the default
+           emitterURL : string
+              URL of LAMDA file containing data on this species; this
+              option overrides the default
+           energySkip : Boolean
+              if set to True, this species is ignored when calculating
+              line cooling rates
+           extrap : Boolean
+              If set to True, collision rate coefficients for this species
+              will be extrapolated to temperatures outside the range given
+              in the LAMDA table. If False, no extrapolation is perfomed,
+              and providing temperatures outside the range in the table
+              produces an error
 
         Returns
-        -------
-        Nothing
-
-        Additional parameters
-        ---------------------
-        emitterFile : string
-            name of LAMDA file containing data on this species; this
-            option overrides the default
-        emitterURL : string
-            URL of LAMDA file containing data on this species; this
-            option overrides the default
-        energySkip : Boolean
-            if set to True, this species is ignored when calculating
-            line cooling rates
-        extrap : Boolean
-            if set to True, collision rate coefficients for this species
-            will be extrapolated to temperatures outside the range given
-            in the LAMDA table. By default, no extrapolation is perfomed,
-            and providing temperatures outside the range in the table
-            produces an error
+           Nothing
         """
-        self.emitters[emitName] = \
-            emitter(emitName, emitAbundance, 
-                        emitterFile=emitterFile, 
-                        emitterURL=emitterURL, 
-                        extrap=extrap, energySkip=energySkip)
+        self.emitters[emitName] \
+            = emitter(emitName, emitAbundance, 
+                      emitterFile=emitterFile, 
+                      emitterURL=emitterURL, 
+                      extrap=extrap, energySkip=energySkip)
 
 
-########################################################################
-# Method to calculate instantaneous values of all heating, cooling terms
-########################################################################
-    def dEdt(self, c1Grav=0.0, thin=False, LTE=False, \
-                 fixedLevPop=False, noClump=False, \
-                 escapeProbGeom='sphere', PsiUser=None, \
-                 sumOnly=False, dustOnly=False, gasOnly=False, \
-                 dustCoolOnly=False, dampFactor=0.5, \
-                 verbose=False, overrideSkip=False):
+    ####################################################################
+    # Method to calculate instantaneous values of all heating, cooling
+    # terms
+    ####################################################################
+    def dEdt(self, c1Grav=0.0, thin=False, LTE=False, 
+             fixedLevPop=False, noClump=False, 
+             escapeProbGeom='sphere', PsiUser=None, 
+             sumOnly=False, dustOnly=False, gasOnly=False, 
+             dustCoolOnly=False, dampFactor=0.5, 
+             verbose=False, overrideSkip=False):
         """
         Return instantaneous values of heating / cooling terms
 
         Parameters
-        ----------
-        c1Grav : float
-            if this is non-zero, the cloud is assumed to be
-            collapsing, and energy is added at a rate
-            Gamma_grav = c1 mu_H m_H cs^2 sqrt(4 pi G rho)
-        thin : Boolean
-            if set to True, cloud is assumed to be opticall thin
-        LTE : Boolean
-           if set to True, gas is assumed to be in LTE
-        fixedLevPop : Boolean
-           if set to True, level populations and escape
-           probabilities are not recomputed, so the cooling rate is
-           based on whatever values are stored
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-           specifies the geometry to be assumed in calculating
-           escape probabilities
-        noClump : Boolean
-           if set to True, the clumping factor used in estimating
-           rates for n^2 processes is set to unity
+           c1Grav : float
+              if this is non-zero, the cloud is assumed to be
+              collapsing, and energy is added at a rate
+              Gamma_grav = c1 mu_H m_H cs^2 sqrt(4 pi G rho)
+           thin : Boolean
+              if set to True, cloud is assumed to be opticall thin
+           LTE : Boolean
+             if set to True, gas is assumed to be in LTE
+           fixedLevPop : Boolean
+             if set to True, level populations and escape
+             probabilities are not recomputed, so the cooling rate is
+             based on whatever values are stored
+           escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
+             specifies the geometry to be assumed in calculating
+             escape probabilities
+           noClump : Boolean
+             if set to True, the clumping factor used in estimating
+             rates for n^2 processes is set to unity
+           dampFactor : float
+              damping factor to use in level population calculations;
+              see emitter.setLevPopEscapeProb
+           PsiUser : callable
+              A user-specified function to add additional heating /
+              cooling terms to the calculation. The function takes the
+              cloud object as an argument, and must return a two-element
+              array Psi, where Psi[0] = gas heating / cooling rate,
+              Psi[1] = dust heating / cooling rate. Positive values
+              indicate heating, negative values cooling, and units are
+              assumed to be erg s^-1 H^-1.
+           sumOnly : Boolean
+              if true, rates contains only four entries: dEdtGas and
+              dEdtDust give the heating / cooling rates for the
+              gas and dust summed over all terms, and maxAbsdEdtGas and
+              maxAbsdEdtDust give the largest of the absolute values of
+              any of the contributing terms for dust and gas
+           gasOnly : Boolean
+              if true, the terms GammaISRF, GammaDustLine, LambdaDust, \
+              and PsiUserDust are omitted from rates. If both gasOnly
+              and sumOnly are true, the dict contains only dEdtGas
+           dustOnly : Boolean
+              if true, the terms GammaPE, GammaCR, LambdaLine,
+              GamamDLine, and PsiUserGas are omitted from rates. If both
+              dustOnly and sumOnly are true, the dict contains only
+              dEdtDust. Important caveat: the value of dEdtDust returned
+              in this case will not exactly match that returned if
+              dustOnly is false, because it will not contain the
+              contribution from gas line cooling radiation that is
+              absorbed by the dust
+           dustCoolOnly : Boolean
+              as dustOnly, but except that now only the terms
+              LambdaDust, PsiGD, and PsiUserDust are computed
+           overrideSkip : Boolean
+              if True, energySkip directives are ignored, and cooling
+              rates are calculated for all species
 
         Returns
-        -------
-        rates : dict
-           A dict containing the values of the various heating and
-           cooling rate terms; all quantities are in units of erg s^-1
-           H^-1, and by convention positive = heating, negative =
-           cooling; for dust-gas exchange, positive indicates heating
-           of gas, cooling of dust
+           rates : dict
+             A dict containing the values of the various heating and
+             cooling rate terms; all quantities are in units of erg s^-1
+             H^-1, and by convention positive = heating, negative =
+             cooling; for dust-gas exchange, positive indicates heating
+             of gas, cooling of dust
 
            Elements of the dict are as follows by default, but can be
-           altered by the additional keywords listed below
-           GammaPE : float
-               photoelectric heating rate
-           GammaCR : float
-               cosmic ray heating rate
-           GammaGrav : float
-               gravitational contraction heating rate
-           LambdaLine : dict
-               cooling rate from lines; dictionary keys correspond to
-               species in the emitter list, values give line cooling
-               rate for that species
-           PsiGD : float
-               dust-gas energy exchange rate
-           GammaDustISRF : float
-               dust heating rate due to the ISRF
-           GammaDustCMB : float
-               dust heating rate due to CMB
-           GammaDustIR : float
-               dust heating rate due to IR field
-           GammaDustLine : float
-               dust heating rate due to absorption of line radiation
-           LambdaDust : float
-               dust cooling rate due to thermal emission
-           PsiUserGas : float
-               gas heating / cooling rate from user-specified
-               function; only included if PsiUser != None
-           PsiUserDust : float
-               gas heating / cooling rate from user-specified
-               function; only included is PsiUser != None
+           altered by the additional keywords listed below:
 
-        Additional parameters
-        ---------------------
-        dampFactor : float
-            Damping factor to use in level population calculations;
-            see emitter.setLevPopEscapeProb
-        PsiUser : function
-            A user-specified function to add additional heating /
-            cooling terms to the calculation. The function takes the
-            cloud object as an argument, and must return a two-element
-            array Psi, where Psi[0] = gas heating / cooling rate,
-            Psi[1] = dust heating / cooling rate. Positive values
-            indicate heating, negative values cooling, and units are
-            assumed to be erg s^-1 H^-1.
-        sumOnly : Boolean
-            if true, rates contains only four entries: dEdtGas and
-            dEdtDust give the heating / cooling rates for the
-            gas and dust summed over all terms, and maxAbsdEdtGas and
-            maxAbsdEdtDust give the largest of the absolute values of
-            any of the contributing terms for dust and gas
-        gasOnly : Boolean
-            if true, the terms GammaISRF, GammaDustLine, LambdaDust, \
-            and PsiUserDust are omitted from rates. If both gasOnly
-            and sumOnly are true, the dict contains only dEdtGas
-        dustOnly : Boolean
-            if true, the terms GammaPE, GammaCR, LambdaLine,
-            GamamDLine, and PsiUserGas are omitted from rates. If both
-            dustOnly and sumOnly are true, the dict contains only
-            dEdtDust. Important caveat: the value of dEdtDust returned
-            in this case will not exactly match that returned if
-            dustOnly is false, because it will not contain the
-            contribution from gas line cooling radiation that is
-            absorbed by the dust
-        dustCoolOnly : Boolean
-            as dustOnly, but except that now only the terms
-            LambdaDust, PsiGD, and PsiUserDust are computed
-        overrideSkip : Boolean
-            if True, energySkip directives are ignored, and cooling
-            rates are calculated for all species
+           GammaPE : float
+              photoelectric heating rate
+           GammaCR : float
+              cosmic ray heating rate
+           GammaGrav : float
+              gravitational contraction heating rate
+           LambdaLine : dict
+              cooling rate from lines; dictionary keys correspond to
+              species in the emitter list, values give line cooling
+              rate for that species
+           LambdaLyA : float
+              cooling rate via Lyman alpha emission
+           LambdaLyB : float
+              cooling rate via Lyman beta emission
+           Lambda2p : float
+              cooling rate via 2 photon emission
+           PsiGD : float
+              dust-gas energy exchange rate
+           GammaDustISRF : float
+              dust heating rate due to the ISRF
+           GammaDustCMB : float
+              dust heating rate due to CMB
+           GammaDustIR : float
+              dust heating rate due to IR field
+           GammaDustLine : float
+              dust heating rate due to absorption of line radiation
+           LambdaDust : float
+              dust cooling rate due to thermal emission
+           PsiUserGas : float
+              gas heating / cooling rate from user-specified
+              function; only included if PsiUser != None
+           PsiUserDust : float
+              gas heating / cooling rate from user-specified
+              function; only included is PsiUser != None
         """
 
         # Make sure composition-derived quantities are initialized
         if self.comp.mu == 0.0:
             self.comp.computeDerived(self.nH)
+
+        # Get clumping factor
+        if noClump == False:
+            cs2 = kB * self.Tg / (self.comp.mu * mH)
+            cfac = np.sqrt(1.0 + 0.75*self.sigmaNT**2/cs2)
+        else:
+            cfac = 1.0
 
         # Gas terms
         if dustOnly == False and dustCoolOnly == False:
@@ -709,6 +767,50 @@ class cloud(object):
             # Cosmic ray heating rate
             GammaCR = self.rad.ionRate * self.comp.qIon
 
+            # Cooling rate via collisional excitation of neutral
+            # hydrogen by electrons; these rate coefficients come from
+            # Osterbrock & Ferland, table 3.16
+            if self.Tg < 1e3:
+                upsilon2s = 0.29
+                upsilon2p = 0.51
+                upsilon3s = 0.066
+                upsilon3p = 0.12
+                upsilon3d = 0.063
+            elif self.Tg < 1.5e3:
+                wgt = np.log(self.Tg/1e3)/np.log(1.5)
+                upsilon2s = 0.29*(1.0-wgt) + 0.32*wgt
+                upsilon2p = 0.51*(1.0-wgt) + 0.60*wgt
+                upsilon3s = 0.066*(1.0-wgt) + 0.071*wgt
+                upsilon3p = 0.12*(1.0-wgt) + 0.13*wgt
+                upsilon3d = 0.063*(1.0-wgt) + 0.068*wgt
+            elif self.Tg < 2e3:
+                wgt = np.log(self.Tg/1.5e3)/np.log(2.0/1.5)
+                upsilon2s = 0.32*(1.0-wgt) + 0.35*wgt
+                upsilon2p = 0.60*(1.0-wgt) + 0.69*wgt
+                upsilon3s = 0.071*(1.0-wgt) + 0.077*wgt
+                upsilon3p = 0.13*(1.0-wgt) + 0.14*wgt
+                upsilon3d = 0.068*(1.0-wgt) + 0.073*wgt
+            else:
+                upsilon2s = 0.35
+                upsilon2p = 0.69
+                upsilon3s = 0.077
+                upsilon3p = 0.14
+                upsilon3d = 0.073
+            # Cooling rates; note the factor of 2 in the denominator
+            # is the statistical weight of the 1s state of neutral
+            # hydrogen
+            fac = 8.629e-6/(2*np.sqrt(self.Tg))
+            exfacLyA = np.exp(-TLyA/self.Tg)
+            exfacLyB = np.exp(-TLyB/self.Tg)
+            Lambda2p = fac * exfacLyA * upsilon2s * self.comp.xHI * \
+                       self.comp.xe * self.nH * kB * TLyA
+            LambdaLyA = fac * exfacLyA * upsilon2p * self.comp.xHI * \
+                       self.comp.xe * self.nH * kB * TLyA
+            LambdaLyB = fac * exfacLyB * \
+                        (upsilon3s + upsilon3p + upsilon3d) * \
+                        self.comp.xHI * self.comp.xe * self.nH * \
+                        kB * TLyB
+
             # Line cooling rate, and heating rate of dust by lines
             LambdaLine = {}
             GammaDLine = 0.0
@@ -724,7 +826,7 @@ class cloud(object):
                 # specified assumptions
                 if fixedLevPop == False:
                     if LTE==True:   # LTE
-                        em.setLevPopLTE(self) 
+                        em.setLevPopLTE(self.Tg) 
                         if thin==False:  # LTE, not optically thin
                             em.setEscapeProb(self)
                     elif thin==True:
@@ -823,11 +925,6 @@ class cloud(object):
         # End dust terms
 
         # Grain-gas energy exchange rate
-        if noClump == False:
-            cs2 = kB * self.Tg / (self.comp.mu * mH)
-            cfac = np.sqrt(1.0 + 0.75*self.sigmaNT**2/cs2)
-        else:
-            cfac = 1.0
         PsiGD = self.dust.alphaGD * cfac * self.nH * \
             np.sqrt(self.Tg) * (self.Td - self.Tg)
 
@@ -845,6 +942,9 @@ class cloud(object):
                 rates['GammaGrav'] = GammaGrav
                 rates['GammaCR'] = GammaCR
                 rates['LambdaLine'] = LambdaLine
+                rates['LambdaLyA'] = LambdaLyA
+                rates['LambdaLyB'] = LambdaLyB
+                rates['Lambda2p'] = Lambda2p
                 if PsiUser != None:
                     rates['PsiUserGas'] = PsiUserVal[0]
             if gasOnly == False:
@@ -862,11 +962,13 @@ class cloud(object):
         else:
             if dustOnly == False and dustCoolOnly == False:
                 rates['dEdtGas'] = GammaPE + GammaGrav + GammaCR - \
-                    sum(LambdaLine.values()) + PsiGD + PsiUserVal[0]
+                    sum(LambdaLine.values()) - LambdaLyA \
+                    - LambdaLyB - Lambda2p + PsiGD + PsiUserVal[0]
                 rates['maxAbsdEdtGas'] = \
-                    max(abs(GammaPE), abs(GammaGrav), abs(GammaCR), \
-                            abs(sum(LambdaLine.values())), \
-                            abs(PsiGD), abs(PsiUserVal[0]))
+                    max(abs(GammaPE), abs(GammaGrav), abs(GammaCR),
+                        abs(sum(LambdaLine.values())),
+                        abs(LambdaLyA), abs(LambdaLyB), abs(Lambda2p),
+                        abs(PsiGD), abs(PsiUserVal[0]))
             if gasOnly == False:
                 rates['dEdtDust'] = - LambdaD - PsiGD + PsiUserVal[1]
                 rates['maxAbsdEdtDust'] = \
@@ -875,8 +977,8 @@ class cloud(object):
                     rates['dEdtDust'] += GammaISRF + GammaDCMB + \
                         GammaDIR
                     rates['maxAbsdEdtDust'] = \
-                        max(rates['maxAbsdEdtDust'], abs(GammaISRF), \
-                                abs(GammaDCMB), abs(GammaDIR))
+                        max(rates['maxAbsdEdtDust'], abs(GammaISRF),
+                            abs(GammaDCMB), abs(GammaDIR))
                     if dustOnly == False:
                         rates['dEdtDust'] += GammaDLine
                         rates['maxAbsdEdtDust'] = \
@@ -887,45 +989,43 @@ class cloud(object):
         return rates
 
 
-########################################################################
-# Method to calculate equilibrium dust temperature for fixed gas
-# temperature
-########################################################################
-    def setDustTempEq(self, PsiUser=None, Tdinit=None, \
-                          noLines=False, noClump=False, \
-                          verbose=False, dampFactor=0.5):
+    ####################################################################
+    # Method to calculate equilibrium dust temperature for fixed gas
+    # temperature
+    ####################################################################
+    def setDustTempEq(self, PsiUser=None, Tdinit=None,
+                      noLines=False, noClump=False,
+                      verbose=False, dampFactor=0.5):
         """
         Set Td to equilibrium dust temperature at fixed Tg
 
         Parameters
-        ----------
-        Tdinit : float
-               initial guess for gas temperature
-        PsiUser : function
-            A user-specified function to add additional heating /
-            cooling terms to the calculation. The function takes the
-            cloud object as an argument, and must return a two-element
-            array Psi, where Psi[0] = gas heating / cooling rate,
-            Psi[1] = dust heating / cooling rate. Positive values
-            indicate heating, negative values cooling, and units are
-            assumed to be erg s^-1 H^-1.
-        noLines : Boolean
-            If true, line heating of the dust is ignored. This can
-            make the calculation significantly faster.
-        noClump : Boolean
-           if set to True, the clumping factor used in estimating
-           rates for n^2 processes is set to unity
-        dampFactor : float
-            Damping factor to use in level population calculations;
-            see emitter.setLevPopEscapeProb
-        verbose : Boolean
-            if true, diagnostic information is printed
-                                         
+           Tdinit : float
+              initial guess for gas temperature
+           PsiUser : callable
+              A user-specified function to add additional heating /
+              cooling terms to the calculation. The function takes the
+              cloud object as an argument, and must return a two-element
+              array Psi, where Psi[0] = gas heating / cooling rate,
+              Psi[1] = dust heating / cooling rate. Positive values
+              indicate heating, negative values cooling, and units are
+              assumed to be erg s^-1 H^-1.
+           noLines : Boolean
+              If True, line heating of the dust is ignored. This can
+              make the calculation significantly faster.
+           noClump : Boolean
+             if set to True, the clumping factor used in estimating
+             rates for n^2 processes is set to unity
+           dampFactor : float
+             damping factor to use in level population calculations;
+             see emitter.setLevPopEscapeProb
+           verbose : Boolean
+             if True, diagnostic information is printed
 
         Returns
-        -------
-        success : Boolean
-            True if dust temperature calculation converged, False if not
+           success : Boolean
+              True if dust temperature calculation converged, False if
+              not
         """
 
         # Make sure composition-derived quantities are initialized
@@ -940,14 +1040,14 @@ class cloud(object):
         # useful so that we can compute the terms that don't depend on
         # the dust temperature just once and store them for the rest
         # of the calculation
-        rates = self.dEdt(PsiUser=PsiUser, dustOnly=noLines, \
-                              noClump=noClump, verbose=verbose, \
-                              dampFactor=dampFactor)
+        rates = self.dEdt(PsiUser=PsiUser, dustOnly=noLines,
+                          noClump=noClump, verbose=verbose,
+                          dampFactor=dampFactor)
         GammaSum = rates['GammaDustISRF'] + rates['GammaDustIR'] + \
             rates['GammaDustCMB']
-        GammaSumMax = max(rates['GammaDustISRF'], \
-                              rates['GammaDustIR'], \
-                              rates['GammaDustCMB'])
+        GammaSumMax = max(rates['GammaDustISRF'],
+                          rates['GammaDustIR'],
+                          rates['GammaDustCMB'])
         if noLines == False:
             GammaSum += rates['GammaDustLine']
             GammaSumMax = max(GammaSumMax, rates['GammaDustLine'])
@@ -956,102 +1056,103 @@ class cloud(object):
         # assuming that dust-gas coupling is negligible, and that the
         # cloud is not optically thick, which are often the case
         if self.Td == 0.0:
-            self.Td = \
-                (GammaSum / \
-                     (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
-                     (1.0/(4.0+self.dust.beta))
+            self.Td = (GammaSum /
+                       (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
+                (1.0/(4.0+self.dust.beta))
 
         # Step 4: get initial scaling
-        rates = self.dEdt(dustOnly=True, sumOnly=True, \
-                               PsiUser=PsiUser, \
-                               fixedLevPop=True, \
-                               verbose=verbose)
+        rates = self.dEdt(dustOnly=True, sumOnly=True,
+                          PsiUser=PsiUser,
+                          fixedLevPop=True,
+                          verbose=verbose)
         lumScale = rates['maxAbsdEdtDust']
 
-        # Step 5: solve for T_d using Newton's method
+        # Step 5: solve for T_d using Brent's method
         try:
-            self.Td = newton(_dustTempResid, self.Td, \
-                                 maxiter=200, \
-                                 args=(self, PsiUser, \
-                                           GammaSum, GammaSumMax, \
-                                           lumScale, verbose))
+            self.Td = np.exp(
+                brentq(_dustTempResid, np.log(Tlo), 
+                       np.log(Thi), maxiter=200,
+                       args=(self, PsiUser,
+                             GammaSum, GammaSumMax,
+                             lumScale, verbose)))
         except (despoticError, RuntimeError):
             pass
 
         # Check that we're really converged; if not, try again
         # starting from guessed starting position
-        if abs(_dustTempResid(self.Td, self, PsiUser, GammaSum, \
-                                  GammaSumMax, lumScale, False)) > 1.0e-3:
+        if abs(_dustTempResid(
+                np.log(self.Td), self, PsiUser, GammaSum,
+                GammaSumMax, lumScale, False)) > 1.0e-3:
             self.Td = \
-                (GammaSum / \
-                     (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
-                     (1.0/(4.0+self.dust.beta))
+                (GammaSum /
+                 (c*a*self.dust.sigma10*0.1**self.dust.beta)) ** \
+                (1.0/(4.0+self.dust.beta))
             try:
-                self.Td = newton(_dustTempResid, self.Td, \
-                                     maxiter=200, \
-                                     args=(self, PsiUser, \
-                                               GammaSum, GammaSumMax, \
-                                               lumScale, verbose))
+                self.Td = np.exp(
+                    brentq(_dustTempResid, 0, np.log(1e5),
+                           maxiter=200,
+                           args=(self, PsiUser,
+                                 GammaSum, GammaSumMax,
+                                 lumScale, verbose)))
             except (despoticError, RuntimeError):
                 # If we're here, we failed to converge
                 return False
 
         # Test for success and return appropriate value
-        if abs(_dustTempResid(self.Td, self, PsiUser, GammaSum, \
-                                  GammaSumMax, lumScale, False)) > 1.0e-3:
+        if abs(_dustTempResid(
+                np.log(self.Td), self, PsiUser, GammaSum,
+                GammaSumMax, lumScale, False)) > 1.0e-3:
             return False
         else:
             return True
 
 
-########################################################################
-# Method to calculate equilibrium gas temperature for dust gas
-# temperature
-########################################################################
-    def setGasTempEq(self, c1Grav=0.0, thin=False, noClump=False, \
-                         LTE=False, Tginit=None, fixedLevPop=False, \
-                         escapeProbGeom='sphere', PsiUser=None, \
-                         verbose=False):
+    ####################################################################
+    # Method to calculate equilibrium gas temperature for dust gas
+    # temperature
+    ####################################################################
+    def setGasTempEq(self, c1Grav=0.0, thin=False, noClump=False,
+                     LTE=False, Tginit=None, fixedLevPop=False,
+                     escapeProbGeom='sphere', PsiUser=None,
+                     verbose=False):
         """
         Set Tg to equilibrium gas temperature at fixed Td
 
         Parameters
-        ----------
-        c1Grav : float
-            if this is non-zero, the cloud is assumed to be
-            collapsing, and energy is added at a rate
-            Gamma_grav = c1 mu_H m_H cs^2 sqrt(4 pi G rho)
-        thin : Boolean
-               if set to True, cloud is assumed to be opticall thin
-        LTE : Boolean
+           c1Grav : float
+              if this is non-zero, the cloud is assumed to be
+              collapsing, and energy is added at a rate
+              Gamma_grav = c1 mu_H m_H cs^2 sqrt(4 pi G rho)
+           thin : Boolean
+              if set to True, cloud is assumed to be opticall thin
+           LTE : Boolean
               if set to True, gas is assumed to be in LTE
-        Tginit : float
-               initial guess for gas temperature
-        fixedLevPop : Boolean
-                      if set to true, level populations are held fixed
-                      at the starting value, rather than caclculated
-                      self-consistently from the temperature
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-            specifies the geometry to be assumed in computing escape
-            probabilities
-        noClump : Boolean
-           if set to True, the clumping factor used in estimating
-           rates for n^2 processes is set to unity
-        PsiUser : function
-            A user-specified function to add additional heating /
-            cooling terms to the calculation. The function takes the
-            cloud object as an argument, and must return a two-element
-            array Psi, where Psi[0] = gas heating / cooling rate,
-            Psi[1] = dust heating / cooling rate. Positive values
-            indicate heating, negative values cooling, and units are
-            assumed to be erg s^-1 H^-1.
-        verbose : Boolean
-            if True, print status messages while running
+           Tginit : float
+              initial guess for gas temperature
+           fixedLevPop : Boolean
+              if set to True, level populations are held fixed
+              at the starting value, rather than caclculated
+              self-consistently from the temperature
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              specifies the geometry to be assumed in computing escape
+              probabilities
+           noClump : Boolean
+              if set to True, the clumping factor used in estimating
+              rates for n^2 processes is set to unity
+           PsiUser : callable
+              A user-specified function to add additional heating /
+              cooling terms to the calculation. The function takes the
+              cloud object as an argument, and must return a two-element
+              array Psi, where Psi[0] = gas heating / cooling rate,
+              Psi[1] = dust heating / cooling rate. Positive values
+              indicate heating, negative values cooling, and units are
+              assumed to be erg s^-1 H^-1.
+           verbose : Boolean
+              if True, print status messages while running
 
         Returns
-        -------
-        success : Boolean
-            True if the calculation converges, False if it does not
+           success : Boolean
+              True if the calculation converges, False if it does not
         """
 
         # Make sure composition-derived quantities are initialized
@@ -1066,112 +1167,142 @@ class cloud(object):
                 self.Tg = 10.0
 
         # Get initial scaling
-        rates = self.dEdt(c1Grav=c1Grav, \
-                               thin=thin, LTE=LTE, \
-                               escapeProbGeom=escapeProbGeom, \
-                               gasOnly=True, noClump=noClump, \
-                               sumOnly=True, PsiUser=PsiUser)
+        rates = self.dEdt(c1Grav=c1Grav,
+                          thin=thin, LTE=LTE,
+                          escapeProbGeom=escapeProbGeom,
+                          gasOnly=True, noClump=noClump,
+                          sumOnly=True, PsiUser=PsiUser)
         lumScale = rates['maxAbsdEdtGas']
 
         # Solve for Tg
         try:
-            self.Tg = newton(_gasTempResid, self.Tg, \
-                                 args=(self, c1Grav, \
-                                           thin, LTE, \
-                                           escapeProbGeom, PsiUser, \
-                                           noClump, lumScale, verbose))
+            resid1 = _gasTempResid(
+                np.log(Tlo), self, c1Grav, thin, LTE,
+                escapeProbGeom, PsiUser, noClump,
+                lumScale, verbose)
+            Thi_in = Thi
+            while True:
+                resid2 = _gasTempResid(
+                    np.log(Thi_in), self, c1Grav, thin, LTE,
+                    escapeProbGeom, PsiUser, noClump,
+                    lumScale, verbose)
+                if resid1 * resid2 > 0:
+                    Thi_in *= 10.0
+                else:
+                    break
+            self.Tg = np.exp(
+                brentq(_gasTempResid, np.log(Tlo), 
+                       np.log(Thi_in),
+                       args=(self, c1Grav, thin, LTE,
+                             escapeProbGeom, PsiUser,
+                             noClump, lumScale, verbose)))
         except (despoticError, RuntimeError):
             # If we're here, we failed to converge
             return False
 
         # Check for success and return appropriate value
-        if abs(_gasTempResid(self.Tg, self, c1Grav, thin, LTE, \
-                                 escapeProbGeom, PsiUser, \
-                                 noClump, lumScale, verbose)) > 1.0e-3:
+        if abs(_gasTempResid(
+                np.log(self.Tg), self, c1Grav, thin, LTE,
+                escapeProbGeom, PsiUser,
+                noClump, lumScale, verbose)) > 1.0e-3:
             return False
         else:
             return True
 
 
-########################################################################
-# Method to calculate equilibrium gas and dust temperatures
-# simultaneously
-########################################################################
-    def setTempEq(self, c1Grav=0.0, thin=False, noClump=False, \
-                      LTE=False, Tinit=None, fixedLevPop=False, \
-                      escapeProbGeom='sphere', PsiUser=None, \
-                      verbose=False, tol=1e-4):
+    ####################################################################
+    # Method to calculate equilibrium gas and dust temperatures
+    # simultaneously
+    ####################################################################
+    def setTempEq(self, c1Grav=0.0, thin=False, noClump=False,
+                  LTE=False, Tinit=None, fixedLevPop=False,
+                  escapeProbGeom='sphere', PsiUser=None,
+                  verbose=False, tol=1e-4):
         """
         Set Tg and Td to equilibrium gas and dust temperatures
 
         Parameters
-        ----------
-        c1Grav : float
-               coefficient for rate of gas gravitational heating
-        thin : Boolean
-               if set to True, cloud is assumed to be opticall thin
-        LTE : Boolean
+           c1Grav : float
+              coefficient for rate of gas gravitational heating
+           thin : Boolean
+              if set to True, cloud is assumed to be opticall thin
+           LTE : Boolean
               if set to True, gas is assumed to be in LTE
-        Tinit : array(2)
-               initial guess for gas and dust temperature
-        noClump : Boolean
-           if set to True, the clumping factor used in estimating
-           rates for n^2 processes is set to unity
-        fixedLevPop : Boolean
-                      if set to true, level populations are held fixed
-                      at the starting value, rather than caclculated
-                      self-consistently from the temperature
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-            specifies the geometry to be assumed in computing escape
-            probabilities
-        PsiUser : function
-            A user-specified function to add additional heating /
-            cooling terms to the calculation. The function takes the
-            cloud object as an argument, and must return a two-element
-            array Psi, where Psi[0] = gas heating / cooling rate,
-            Psi[1] = dust heating / cooling rate. Positive values
-            indicate heating, negative values cooling, and units are
-            assumed to be erg s^-1 H^-1.
-        verbose : Boolean
-            if True, the code prints diagnostic information as it runs
+           Tinit : array(2)
+              initial guess for gas and dust temperature
+           noClump : Boolean
+              if set to True, the clumping factor used in estimating
+              rates for n^2 processes is set to unity
+           fixedLevPop : Boolean
+              if set to true, level populations are held fixed
+              at the starting value, rather than caclculated
+              self-consistently from the temperature
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              specifies the geometry to be assumed in computing escape
+              probabilities
+           PsiUser : callable
+              A user-specified function to add additional heating /
+              cooling terms to the calculation. The function takes the
+              cloud object as an argument, and must return a two-element
+              array Psi, where Psi[0] = gas heating / cooling rate,
+              Psi[1] = dust heating / cooling rate. Positive values
+              indicate heating, negative values cooling, and units are
+              assumed to be erg s^-1 H^-1.
+           verbose : Boolean
+              if True, the code prints diagnostic information as it runs
 
         Returns
-        -------
-        success : Boolean
-            True if the iteration converges, False if it does not
+           success : Boolean
+              True if the iteration converges, False if it does not
         """
 
         # Make sure composition-derived quantities are initialized
         if self.comp.mu == 0.0:
             self.comp.computeDerived(self.nH)
 
-        # Initialize gas and dust temperatures if necessary
-        if Tinit != None:
-            self.Tg = Tinit[0]
-            self.Td = Tinit[1]
-        else:
-            if self.Tg==0.0:
-                self.Tg = 10.0
-            if self.Td==0.0:
-                self.Td = 10.0
+        # As an initial guess, set the dust temperature to equilibrium
+        # at fixed gas temperature, then set the gas temperature to
+        # equilibrium at fixed dust temperature
+        if Tinit is None:
+            Tinit = [None, None]
+        self.setDustTempEq(noClump=noClump, Tdinit=Tinit[1], 
+                           PsiUser=PsiUser, verbose=verbose)
+        self.setGasTempEq(
+            c1Grav=c1Grav, thin=thin, noClump=noClump,
+            LTE=LTE, Tginit=Tinit[0], fixedLevPop=fixedLevPop,
+            escapeProbGeom=escapeProbGeom, PsiUser=PsiUser,
+            verbose=verbose)
         Tinit = np.array([self.Tg, self.Td])
 
         # Get luminosity scaling
-        rates = self.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE, \
-                               escapeProbGeom=escapeProbGeom, \
-                               sumOnly=True, PsiUser=PsiUser, \
-                               noClump=noClump, \
-                               verbose=verbose)
+        rates = self.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE, 
+                          escapeProbGeom=escapeProbGeom, 
+                          sumOnly=True, PsiUser=PsiUser, 
+                          noClump=noClump, 
+                          verbose=verbose)
         lumScale = np.zeros(2)
         lumScale[0] = rates['maxAbsdEdtGas']
         lumScale[1] = rates['maxAbsdEdtDust']
 
         # Iterate to get equilibrium temperatures
-        res = root(_gdTempResid, Tinit, \
-                           args=(self, c1Grav, thin, \
-                                     LTE, escapeProbGeom, \
-                                     PsiUser, noClump, lumScale, \
-                                     verbose), \
+        res = root(_gdTempResid, np.log(Tinit),
+                   args=(self, c1Grav, thin,
+                         LTE, escapeProbGeom, 
+                         PsiUser, noClump, lumScale, 
+                         verbose), 
+                   method='hybr', options = { 'xtol' : tol })
+
+        # If we failed to converge, make one more try from a
+        # significantly larger starting temperature; larger starting
+        # temperatures seem to provide easier convergence sometimes
+        if not res.success:
+            Tnew = Tinit * 5.0
+            Tnew[Tnew < 50.] = 50.
+            res = root(_gdTempResid, np.log(Tnew), 
+                       args=(self, c1Grav, thin, 
+                             LTE, escapeProbGeom, 
+                             PsiUser, noClump, lumScale, 
+                             verbose), 
                        method='hybr', options = { 'xtol' : tol })
 
         # Make sure we've converged.
@@ -1179,101 +1310,100 @@ class cloud(object):
             return False
 
         # Store final result
-        self.Tg = res.x[0]
-        self.Td = res.x[1]
+        self.Tg = np.exp(res.x[0])
+        self.Td = np.exp(res.x[1])
         return True
 
 
-
-########################################################################
-# Method to calculate time-dependent evolution of gas temperature for
-# given starting conditions; note that we assume that the dust is
-# always in thermal equilibrium, since its equilibration time is small
-# compared to that of the gas.
-########################################################################
-    def tempEvol(self, tFin, tInit=0.0, c1Grav=0.0, noClump=False, \
-                     thin=False, LTE=False, fixedLevPop=False, \
-                     escapeProbGeom='sphere', nOut=100, dt=None, \
-                     tOut=None, PsiUser=None, isobaric=False, \
-                     fullOutput=False, dampFactor=0.5, \
-                     verbose=False):
+    ####################################################################
+    # Method to calculate time-dependent evolution of gas temperature
+    # for given starting conditions; note that we assume that the dust
+    # is always in thermal equilibrium, since its equilibration time
+    # is small compared to that of the gas.
+    ####################################################################
+    def tempEvol(self, tFin, tInit=0.0, c1Grav=0.0, noClump=False,
+                 thin=False, LTE=False, fixedLevPop=False,
+                 escapeProbGeom='sphere', nOut=100, dt=None,
+                 tOut=None, PsiUser=None, isobaric=False,
+                 fullOutput=False, dampFactor=0.5,
+                 verbose=False):
         """
         Calculate the evolution of the gas temperature in time
 
         Parameters
-        ----------
-        tFin : float
-            end time of integration, in sec
-        tInit : float
-            start time of integration, in sec
-        c1Grav : float
-            coefficient for rate of gas gravitational heating
-        thin : Boolean
-            if set to True, cloud is assumed to be opticall thin
-        LTE : Boolean
-            if set to True, gas is assumed to be in LTE
-        isobaric : Boolean
-            if set to True, cooling is calculated isobarically;
-            otherwise (default behavior) it is computed
-            isochorically
-        fixedLevPop : Boolean
-            if set to true, level populations are held fixed
-            at the starting value, rather than caclculated
-            self-consistently from the temperature
-        noClump : Boolean
-            if set to True, the clumping factor used in estimating
-            rates for n^2 processes is set to unity
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-            specifies the geometry to be assumed in computing escape
-            probabilities
-        nOut : int
-            number of times at which to report the temperature; this
-            is ignored if dt or tOut are set
-        dt : float
-            time interval between outputs, in s; this is ignored if
-            tOut is set
-        tOut : array
-            list of times at which to output the temperature, in s;
-            must be sorted in increasing order
-        PsiUser : function
-            A user-specified function to add additional heating /
-            cooling terms to the calculation. The function takes the
-            cloud object as an argument, and must return a two-element
-            array Psi, where Psi[0] = gas heating / cooling rate,
-            Psi[1] = dust heating / cooling rate. Positive values
-            indicate heating, negative values cooling, and units are
-            assumed to be erg s^-1 H^-1.
-        fullOutput : Boolean
-            if True, the full cloud state is returned at every time,
-            as opposed to simply the gas temperature
-        dampFactor : float
-            Damping factor to use in level population calculations;
-            see emitter.setLevPopEscapeProb
+           tFin : float
+              end time of integration, in sec
+           tInit : float
+              start time of integration, in sec
+           c1Grav : float
+              coefficient for rate of gas gravitational heating
+           thin : Boolean
+              if set to True, cloud is assumed to be opticall thin
+           LTE : Boolean
+              if set to True, gas is assumed to be in LTE
+           isobaric : Boolean
+              if set to True, cooling is calculated isobarically;
+              otherwise (default behavior) it is computed
+              isochorically
+           fixedLevPop : Boolean
+              if set to true, level populations are held fixed
+              at the starting value, rather than caclculated
+              self-consistently from the temperature
+           noClump : Boolean
+              if set to True, the clumping factor used in estimating
+              rates for n^2 processes is set to unity
+           escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
+              specifies the geometry to be assumed in computing escape
+              probabilities
+           nOut : int
+              number of times at which to report the temperature; this
+              is ignored if dt or tOut are set
+           dt : float
+              time interval between outputs, in s; this is ignored if
+              tOut is set
+           tOut : array
+              list of times at which to output the temperature, in s;
+              must be sorted in increasing order
+           PsiUser : callable
+              A user-specified function to add additional heating /
+              cooling terms to the calculation. The function takes the
+              cloud object as an argument, and must return a two-element
+              array Psi, where Psi[0] = gas heating / cooling rate,
+              Psi[1] = dust heating / cooling rate. Positive values
+              indicate heating, negative values cooling, and units are
+              assumed to be erg s^-1 H^-1.
+           fullOutput : Boolean
+              if True, the full cloud state is returned at every time,
+              as opposed to simply the gas temperature
+           dampFactor : float
+              damping factor to use in calculating level populations
+              (see emitter for details)
+
 
         Returns
-        -------
-        if fullOutput == False:
-            Tg : array of floats
-                array of gas temperatures at specified times, in K
-            time : array of floats
-                array of output times, in sec
-        if fullOutput == True:
-            cloudState : list of clouds
-                each element of the list is a deepcopy of the cloud
-                state at the corresponding time; there is one list
-                element per output time
-            time : array of floats
-                array of output times, in sec
+           if fullOutput == False:
+
+           Tg : array
+              array of gas temperatures at specified times, in K
+           time : array
+              array of output times, in sec
+
+           if fullOutput == True:
+
+           cloudState : list
+              each element of the list is a deepcopy of the cloud
+              state at the corresponding time; there is one list
+              element per output time
+           time : array of floats
+              array of output times, in sec
 
         Remarks
-        -------
-        If the settings for nOut, dt, or tOut are such that some of
-        the output times requested are past tEvol, the cloud will only
-        be evolved up to time tEvol. Similarly, if the last output
-        time is less than tEvol, the cloud will still be evolved up to
-        time tEvol, and the gas temperature Tg will be set to its
-        value at that time.
-        
+           If the settings for nOut, dt, or tOut are such that some of
+           the output times requested are past tEvol, the cloud will only
+           be evolved up to time tEvol. Similarly, if the last output
+           time is less than tEvol, the cloud will still be evolved up to
+           time tEvol, and the gas temperature Tg will be set to its
+           value at that time.   
         """
 
         # Make sure composition-derived quantities are initialized
@@ -1338,99 +1468,99 @@ class cloud(object):
             return cloudList, tOut
 
 
-########################################################################
-# Method to return the continuum-subtrated luminosity / intensity /
-# brightness temperature of lines from the specified emitter
-########################################################################
-    def lineLum(self, emitName, LTE=False, noClump=False, \
-                    transition=None, thin=False, intOnly=False, \
-                    TBOnly=False, lumOnly=False, \
-                    escapeProbGeom='sphere', dampFactor=0.5, \
-                    noRecompute=False, abstol=1.0e-8, \
-                    verbose=False):
+    ####################################################################
+    # Method to return the continuum-subtrated luminosity / intensity /
+    # brightness temperature of lines from the specified emitter
+    ####################################################################
+    def lineLum(self, emitName, LTE=False, noClump=False,
+                transition=None, thin=False, intOnly=False,
+                TBOnly=False, lumOnly=False,
+                escapeProbGeom='sphere', dampFactor=0.5,
+                noRecompute=False, abstol=1.0e-8,
+                verbose=False):
         """
         Return the frequency-integrated intensity of various lines
 
         Parameters
-        ----------
-        emitName : string
-            name of the emitter for which the calculation is to be
-            performed
-        transition : list of two arrays of shape (M)
-            transition[0] = array of upper states
-            transition[1] = array of lower states
+           emitName : string
+              name of the emitter for which the calculation is to be
+              performed
+           LTE : Boolean
+              if True, and level populations are unitialized, they will
+              be initialized to their LTE values; if they are
+              initialized, this option is ignored
+           noClump : Boolean
+              if set to True, the clumping factor used in estimating
+              rates for n^2 processes is set to unity
+           transition : list of two arrays
+              if left as None, luminosity is computed for all
+              transitions; otherwise only selected transitions are
+              computed, with transition[0] = array of upper states
+              transition[1] = array of lower states
+           thin : Boolean
+              if True, the calculation is done assuming the cloud is
+              optically thin; if level populations are uninitialized,
+              and LTE is not set, they will be computed assuming the
+              cloud is optically thin
+           intOnly : Boolean
+              if true, the output is simply an array containing the
+              frequency-integrated intensity of the specified lines;
+              mutually exclusive with TBOnly and lumOnly
+           TBOnly : Boolean
+              if True, the output is simply an array containing the
+              velocity-integrated brightness temperatures of the
+              specified lines; mutually exclusive with intOnly and
+              lumOnly
+           lumOnly : Boolean
+              if True, the output is simply an array containing the
+              luminosity per H nucleus in each of the specified lines;
+              mutually eclusive with intOnly and TBOonly
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              sets problem geometry that will be assumed in calculating
+              escape probabilities; ignored if the escape probabilities
+              are already initialized
+           dampFactor : float
+              damping factor to use in level population calculations;
+              see emitter.setLevPopEscapeProb
+           noRecompute : False
+              if True, level populations and escape probabilities are
+              not recomputed; instead, stored values are used
 
         Returns
-        -------
-        if intOnly, TBOnly, and lumOnly are all False:
-        res : list of length (M)
-              by default M = the number of transitions for this
-              species with non-zero Einstein A
-              each element of res is a dict containing the following
-              key - value pairs:
-              'freq' : float, frequency of the line in Hz
-              'upper' : int, index of upper state, with ground state
-                        = 0 and states ordered by energy
-              'lower' : int, index of lower state
-              'Tupper' : float, energy of the upper state, in K
-                         (i.e. energy over kB)
-              'Tex' : excitation temperature relating the upper and
-                      lower levels
-              'intIntensity' : frequency-integrated intensity of the
-                     line, with the CMB contribution subtracted off;
-                     units are erg cm^-2 s^-1 sr^-1 
-              'intTB' : velocity-integrated brightness temperature of
-                     the line, with the CMB contribution subtracted off;
-                     units are K km s^-1
-              'lumPerH' : luminosity of the line per H nucleus; units
-                     are erg s^-1 H^-1
-              'tau' : float
-                  optical depth in the line, not including dust
-              'tauDust' : float
-                  dust optical depth in the line
-        if intOnly, TBOnly, or lumOnly are True:
-        res: array, shape(M)
-             array giving intIntensity, TB, or lumPerH for each line,
-             corresponding to the values in the dict above
+           res : list or array
 
-        Additional Parameters
-        ---------------------
-        TBOnly: Boolean
-            if true, the output is simply an array containing the
-            velocity-integrated brightness temperatures of the
-            specified lines; mutually exclusive with intOnly and
-            lumOnly
-        intOnly: Boolean
-            if true, the output is simply an array containing the
-            frequency-integrated intensity of the specified lines;
-            mutually exclusive with TBOnly and lumOnly
-        lumOnly: Boolean
-            if true, the output is simply an array containing the
-            luminosity per H nucleus in each of the specified lines;
-            mutually eclusive with intOnly and TBOonly
-        noRecompute : False
-             if True, level populations and escape probabilities are
-             not recomputed; instead, stored values are used
-        noClump : Boolean
-             if set to True, the clumping factor used in estimating
-             rates for n^2 processes is set to unity
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-             sets problem geometry that will be assumed in calculating
-             escape probabilities; ignored if the escape probabilities
-             are already initialized
-        dampFactor : float
-            Damping factor to use in level population calculations;
-            see emitter.setLevPopEscapeProb
-        thin : Boolean
-            if True, the calculation is done assuming the cloud is
-            optically thin; if level populations are uninitialized,
-            and LTE is not set, they will be computed assuming the
-            cloud is optically thin
-        LTE : Boolean
-            if True, and level populations are unitialized, they will
-            be initialized to their LTE values; if they are
-            initialized, this option is ignored
+           if intOnly, TBOnly, and lumOnly are all False, each element
+           of the list is a dict containing the following fields:
 
+           'freq' : float
+              frequency of the line in Hz
+           'upper' : int
+              index of upper state, with ground state = 0 and states
+              ordered by energy
+           'lower' : int
+              index of lower state
+           'Tupper' : float
+              energy of the upper state in K (i.e. energy over kB)
+           'Tex' : float
+              excitation temperature relating the upper and lower levels
+           'intIntensity' : float
+              frequency-integrated intensity of the line, with the CMB
+              contribution subtracted off; units are erg cm^-2 s^-1 sr^-1 
+           'intTB' : float
+              velocity-integrated brightness temperature of the line,
+              with the CMB contribution subtracted off; units are K km
+              s^-1
+           'lumPerH' : float
+              luminosity of the line per H nucleus; units are erg s^-1
+              H^-1
+           'tau' : float
+              optical depth in the line, not including dust
+           'tauDust' : float
+              dust optical depth in the line
+
+        if intOnly, TBOnly, or lumOnly are True: res is an array
+        containing the intIntensity, TB, or lumPerH fields of the dict
+        described above
         """
 
         # Make sure composition-derived quantities are initialized
@@ -1458,10 +1588,10 @@ class cloud(object):
             elif thin==True:
                 em.setLevPop(self, thin=True, noClump=noClump)
             else:
-                em.setLevPopEscapeProb(\
-                    self, noClump=noClump, dampFactor=dampFactor, \
-                        escapeProbGeom=escapeProbGeom, \
-                        abstol=abstol, verbose=verbose)
+                em.setLevPopEscapeProb(
+                    self, noClump=noClump, dampFactor=dampFactor, 
+                    escapeProbGeom=escapeProbGeom, 
+                    abstol=abstol, verbose=verbose)
         # Safety check: make sure we're initialized
         if em.levPopInitialized == False:
             raise despoticError, 'cannot use noRecompute if level' + \
@@ -1472,8 +1602,8 @@ class cloud(object):
 
         # Step 3. Compute luminosity per H
         lumPerH = self.emitters[emitName]. \
-            luminosityPerH(self.rad, transition=transition, \
-                               thin=thin)
+            luminosityPerH(self.rad, transition=transition,
+                           thin=thin)
         if lumOnly == True:
             return lumPerH
 
@@ -1536,74 +1666,106 @@ class cloud(object):
         return outDict
 
 
-
-########################################################################
-# Method to calculate time-dependent evolution of chemical abundances;
-# note that this is just a wrapper routine for
-# despotic.chemistry.setChemEq.setChemEq
-########################################################################
+    #####################################################################
+    # Method to calculate time-dependent evolution of chemical
+    # abundances; note that this is just a wrapper routine for
+    # despotic.chemistry.setChemEq.setChemEq
+    #####################################################################
     def setChemEq(self, tEqGuess=None, network=None, info=None,
-              addEmitters=False, tol=1e-6, maxTime=1e16,
-              verbose=False, smallabd=1e-15, convList=None):
+                  addEmitters=False, tol=1e-6, maxTime=1e16,
+                  verbose=False, smallabd=1e-15, convList=None, 
+                  evolveTemp='fixed', isobaric=False,
+                  tempEqParam=None, dEdtParam=None, maxTempIter=50):
         """
         Set the chemical abundances for a cloud to their equilibrium
-        values, computed using a specified chemical netowrk.
+        values, computed using a specified chemical network.
 
         Parameters
-        ----------
-        tEqGuess : float
-            a guess at the timescale over which equilibrium will be
-            achieved; if left unspecified, the code will attempt to
-            estimate this time scale on its own
-        network : chemical network class
-            a valid chemical network class; this class must define the
-            methods __init__, dxdt, and applyAbundances; if None, the
-            existing chemical network for the cloud is used
-        info : dict
-            a dict of additional initialization information to be passed
-            to the chemical network class when it is instantiated
-        addEmitters : Boolean
-            if True, emitters that are included in the chemical
-            network but not in the cloud's existing emitter list will
-            be added; if False, abundances of emitters already in the
-            emitter list will be updated, but new emiters will not be
-            added to the cloud
-        tol : float
-            tolerance requirement on the equilibrium solution
-        convList : list
-            list of species to include when calculating tolerances to
-            decide if network is converged; species not listed are not
-            considered. If this is None, then all species are considered
-            in deciding if the calculation is converged.
-        smallabd : float
-            abundances below smallabd are not considered when checking for
-            convergence; set to 0 or a negative value to consider all
-            abundances, but beware that this may result in false
-            non-convergence due to roundoff error in very small abundances
-        verbose : Boolean
-            if True, diagnostic information is printed as the calculation
-            proceeds
+           tEqGuess : float
+              a guess at the timescale over which equilibrium will be
+              achieved; if left unspecified, the code will attempt to
+              estimate this time scale on its own
+           network : chemNetwork object
+              the chemNetwork object to use; if None, the existing
+              chemnetwork member of the class (if it exists) is used
+           info : dict
+              a dict of additional initialization information to be passed
+              to the chemical network class when it is instantiated
+           addEmitters : Boolean
+              if True, emitters that are included in the chemical
+              network but not in the cloud's existing emitter list will
+              be added; if False, abundances of emitters already in the
+              emitter list will be updated, but new emiters will not be
+              added to the cloud
+           evolveTemp : 'fixed' | 'iterate' | 'iterateDust' | 'gasEq' | 'fullEq' | 'evol'
+              how to treat the temperature evolution during the chemical
+              evolution; 'fixed' = treat tempeature as fixed; 'iterate' =
+              iterate between setting the gas temperature and chemistry to
+              equilibrium; 'iterateDust' = iterate between setting the gas
+              and dust temperatures and the chemistry to equilibrium;
+              'gasEq' = hold dust temperature fixed, set gas temperature to
+              instantaneous equilibrium value as the chemistry evolves;
+              'fullEq' = set gas and dust temperatures to instantaneous
+              equilibrium values while evolving the chemistry network;
+              'evol' = evolve gas temperature in time along with the
+              chemistry, assuming the dust is always in instantaneous
+              equilibrium
+           isobaric : Boolean
+              if set to True, the gas is assumed to be isobaric during
+              the evolution (constant pressure); otherwise it is assumed
+              to be isochoric; note that (since chemistry networks at
+              present are not allowed to change the mean molecular
+              weight), this option has no effect if evolveTemp is 'fixed'
+           tempEqParam : None | dict
+              if this is not None, then it must be a dict of values that
+              will be passed as keyword arguments to the cloud.setTempEq,
+              cloud.setGasTempEq, or cloud.setDustTempEq routines; only
+              used if evolveTemp is not 'fixed'
+           dEdtParam : None | dict
+              if this is not None, then it must be a dict of values that
+              will be passed as keyword arguments to the cloud.dEdt
+              routine; only used if evolveTemp is 'evol'
+           tol : float
+              tolerance requirement on the equilibrium solution
+           convList : list
+              list of species to include when calculating tolerances to
+              decide if network is converged; species not listed are not
+              considered. If this is None, then all species are considered
+              in deciding if the calculation is converged.
+           smallabd : float
+              abundances below smallabd are not considered when checking for
+              convergence; set to 0 or a negative value to consider all
+              abundances, but beware that this may result in false
+              non-convergence due to roundoff error in very small abundances
+           maxTempIter : int
+              maximum number of iterations when iterating between chemistry
+              and temperature; only used if evolveTemp is 'iterate' or
+              'iterateDust'
+           verbose : Boolean
+              if True, diagnostic information is printed as the calculation
+              proceeds
 
         Returns
-        -------
-        converged : Boolean
-            True if the calculation converged, False if not
+           converged : Boolean
+              True if the calculation converged, False if not
 
         Raises
-        ------
-        despoticError, if network is None and the cloud does not already
-        have a defined chemical network associated with it
+           despoticError, if network is None and the cloud does not
+           already have a defined chemical network associated with it
 
         Remarks
-        -------
-        The final abundances are written to the cloud whether or not the
-        calculation converges.
+           The final abundances are written to the cloud whether or
+           not the calculation converges.
         """
 
         return setChemEq(self, tEqGuess=tEqGuess, network=network,
                          info=info, tol=tol, maxTime=maxTime,
                          verbose=verbose, smallabd=smallabd, 
-                         convList=convList, addEmitters=addEmitters)
+                         convList=convList, addEmitters=addEmitters,
+                         evolveTemp=evolveTemp,
+                         isobaric=isobaric, tempEqParam=tempEqParam,
+                         dEdtParam=dEdtParam,
+                         maxTempIter=maxTempIter)
 
 ########################################################################
 # Method to calculate time-dependent evolution of chemical abundances;
@@ -1612,55 +1774,87 @@ class cloud(object):
 ########################################################################
     def chemEvol(self, tFin, tInit=0.0, nOut=100, dt=None,
                  tOut=None, network=None, info=None,
-                 addEmitters=False):
+                 addEmitters=False, evolveTemp='fixed',
+                 isobaric=False, tempEqParam=None,
+                 dEdtParam=None):
         """
         Evolve the chemical abundances of this cloud in time.
 
         Parameters
-        ----------
-        tFin : float
-             end time of integration, in sec
-        tInit : float
-             start time of integration, in sec
-        nOut : int
-             number of times at which to report the temperature; this
-             is ignored if dt or tOut are set
-        dt : float
-             time interval between outputs, in sec; this is ignored if
-             tOut is set
-        tOut : array
-             list of times at which to output the temperature, in sec;
-             must be sorted in increasing order
-        network : chemical network class
-             a valid chemical network class; this class must define the
-             methods __init__, dxdt, and applyAbundances; if None, the
-             existing chemical network for the cloud is used
-        info : dict
-             a dict of additional initialization information to be passed
-             to the chemical network class when it is instantiated
-        addEmitters : Boolean
-             if True, emitters that are included in the chemical
-             network but not in the cloud's existing emitter list will
-             be added; if False, abundances of emitters already in the
-             emitter list will be updated, but new emiters will not be
-             added to the cloud
+           tFin : float
+               end time of integration, in sec
+           tInit : float
+               start time of integration, in sec
+           nOut : int
+               number of times at which to report the temperature; this
+               is ignored if dt or tOut are set
+           dt : float
+               time interval between outputs, in sec; this is ignored if
+               tOut is set
+           tOut : array
+               list of times at which to output the temperature, in sec;
+               must be sorted in increasing order
+           network : chemical network class
+               a valid chemical network class; this class must define the
+               methods __init__, dxdt, and applyAbundances; if None, the
+               existing chemical network for the cloud is used
+           info : dict
+               a dict of additional initialization information to be passed
+               to the chemical network class when it is instantiated
+           addEmitters : Boolean
+               if True, emitters that are included in the chemical
+               network but not in the cloud's existing emitter list will
+               be added; if False, abundances of emitters already in the
+               emitter list will be updated, but new emiters will not be
+               added to the cloud
+           evolveTemp : 'fixed' | 'gasEq' | 'fullEq' | 'evol'
+              how to treat the temperature evolution during the
+              chemical evolution; 'fixed' = treat tempeature as fixed;
+              'gasEq' = hold dust temperature fixed, set gas temperature
+              to instantaneous equilibrium value; 'fullEq' = set gas and
+              dust temperatures to instantaneous equilibrium values;
+              'evol' = evolve gas temperature in time along with the
+              chemistry, assuming the dust is always in instantaneous
+              equilibrium
+           isobaric : Boolean
+              if set to True, the gas is assumed to be isobaric during
+              the evolution (constant pressure); otherwise it is assumed
+              to be isochoric; note that (since chemistry networks at
+              present are not allowed to change the mean molecular
+              weight), this option has no effect if evolveTemp is 'fixed'
+           tempEqParam : None | dict
+              if this is not None, then it must be a dict of values that
+              will be passed as keyword arguments to the cloud.setTempEq,
+              cloud.setGasTempEq, or cloud.setDustTempEq routines; only
+              used if evolveTemp is not 'fixed'
+           dEdtParam : None | dict
+              if this is not None, then it must be a dict of values that
+              will be passed as keyword arguments to the cloud.dEdt
+              routine; only used if evolveTemp is 'evol'
 
         Returns
-        -------
-        abundances : class abundanceDict
-             an abundanceDict giving the abundances as a function of time
-        time : array of floats
-             array of output times, in sec
+           time : array of floats
+               array of output times, in sec
+           abundances : class abundanceDict
+               an abundanceDict giving the abundances as a function of time
+           Tg : array
+              gas temperature as a function of time; returned only if
+              evolveTemp is not 'fixed'
+           Td : array
+              dust temperature as a function of time; returned only if
+              evolveTemp is not 'fixed' or 'gasEq'
 
         Raises
-        ------
-        despoticError, if network is None and the cloud does not already
-        have a defined chemical network associated with it
+           despoticError, if network is None and the cloud does not already
+           have a defined chemical network associated with it
         """
 
         return chemEvol(self, tFin, tInit=tInit, nOut=nOut,
                         dt=dt, tOut=tOut, network=network, info=info,
-                        addEmitters=addEmitters)
+                        addEmitters=addEmitters,
+                        evolveTemp=evolveTemp,
+                        isobaric=isobaric, tempEqParam=tempEqParam,
+                        dEdtParam=dEdtParam)
 
 
 ########################################################################
@@ -1987,15 +2181,15 @@ except Exception as E:
 #        heating and cooling
 #    noClump -- Boolean; if true, clumping factors are turned off
 ########################################################################
-def _gdTempResid(Tgd, cloud, c1Grav, thin, LTE, \
-                     escapeProbGeom, PsiUser, noClump, lumScale, \
-                     verbose):
+def _gdTempResid(logTgd, cloud, c1Grav, thin, LTE,
+                 escapeProbGeom, PsiUser, noClump, lumScale,
+                 verbose):
 
     # Insert current dust and gas temperatures into cloud structure;
     # floor to CMB temperature to prevent numerical badness in case
     # the iterative solver has wantered off to negative values
-    cloud.Tg = max(Tgd[0], cloud.rad.TCMB)
-    cloud.Td = max(Tgd[1], cloud.rad.TCMB)
+    cloud.Tg = max(np.exp(logTgd[0]), cloud.rad.TCMB)
+    cloud.Td = max(np.exp(logTgd[1]), cloud.rad.TCMB)
     if verbose:
         print ""
         print "***"
@@ -2003,19 +2197,14 @@ def _gdTempResid(Tgd, cloud, c1Grav, thin, LTE, \
             str(cloud.Tg) + " K, Td = " + str(cloud.Td) + " K..."
 
     # Get net heating / cooling rates
-    rates = cloud.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE, \
-                           escapeProbGeom=escapeProbGeom, \
-                           sumOnly=True, PsiUser=PsiUser, \
-                           noClump=noClump, \
-                           verbose=verbose)
+    rates = cloud.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE,
+                       escapeProbGeom=escapeProbGeom,
+                       sumOnly=True, PsiUser=PsiUser,
+                       noClump=noClump,
+                       verbose=verbose)
 
     # Print status
     if verbose:
-        #print "setTempEq: dE_gas/dt = " + str(rates['dEdtGas']) + \
-        #    " erg s^-1 H^-1, dE_dust/dt = " + \
-        #    str(rates['dEdtDust']) + " erg s^-1 H^-1, " + \
-        #    "residuals = " + str(rates['dEdtGas']/rates['maxAbsdEdtGas']) + \
-        #    " " + str(rates['dEdtDust']/rates['maxAbsdEdtDust'])
         print "setTempEq: dE_gas/dt = " + str(rates['dEdtGas']) + \
             " erg s^-1 H^-1, dE_dust/dt = " + \
             str(rates['dEdtDust']) + " erg s^-1 H^-1, " + \
@@ -2040,20 +2229,19 @@ def _gdTempResid(Tgd, cloud, c1Grav, thin, LTE, \
 #        that go into GammaSum, needed for normalization
 #    verbose -- verbose or not
 ########################################################################
-def _dustTempResid(Td, cloud, PsiUser, GammaSum, GammaSumMax, lumScale, \
-                       verbose):
+def _dustTempResid(logTd, cloud, PsiUser, GammaSum, GammaSumMax, 
+                   lumScale, verbose):
 
     # Insert current dust temperature into gas structure, with a floor
     # equal to the CMB floor to prevent numerical problems if the
     # rootfinder wanders into negative values
-    cloud.Td = max(Td, small)
+    cloud.Td = max(np.exp(logTd), small)
 
     # Get net heating / cooling rates
-    rates = cloud.dEdt(dustCoolOnly=True, sumOnly=True, \
-                           PsiUser=PsiUser, \
-                           fixedLevPop=True, \
-                           verbose=verbose)
-
+    rates = cloud.dEdt(dustCoolOnly=True, sumOnly=True,
+                       PsiUser=PsiUser,
+                       fixedLevPop=True,
+                       verbose=verbose)
 
     # Print status if verbose
     if verbose:
@@ -2083,34 +2271,29 @@ def _dustTempResid(Td, cloud, PsiUser, GammaSum, GammaSumMax, lumScale, \
 #    noClump -- Boolean; if true, clumping factors are turned off
 #    verbose -- verbose or not
 ########################################################################
-def _gasTempResid(Tg, cloud, c1Grav, thin, LTE, \
-                      escapeProbGeom, PsiUser, noClump, lumScale, \
-                      verbose):
+def _gasTempResid(logTg, cloud, c1Grav, thin, LTE,
+                  escapeProbGeom, PsiUser, noClump, lumScale,
+                  verbose):
 
     # Insert current dust temperature into gas structure, using CMB
     # temperature as a floor
-    cloud.Tg = max(Tg, cloud.rad.TCMB)
+    cloud.Tg = max(np.exp(logTg), cloud.rad.TCMB)
 
     # Get net heating / cooling rates
-    rates = cloud.dEdt(c1Grav=c1Grav, \
-                           thin=thin, LTE=LTE, \
-                           escapeProbGeom=escapeProbGeom, \
-                           gasOnly=True, noClump=noClump, \
-                           sumOnly=True, PsiUser=PsiUser)
+    rates = cloud.dEdt(c1Grav=c1Grav,
+                       thin=thin, LTE=LTE,
+                       escapeProbGeom=escapeProbGeom,
+                       gasOnly=True, noClump=noClump,
+                       sumOnly=True, PsiUser=PsiUser)
 
     # If verbose, print status
     if verbose:
-        #print "_gasTempResid called with Tg = "+str(cloud.Tg) + \
-        #    ", dEdt = " + str(rates['dEdtGas']) + \
-        #    ", residual = " + \
-        #    str(rates['dEdtGas']/rates['maxAbsdEdtGas'])
         print "_gasTempResid called with Tg = "+str(cloud.Tg) + \
             ", dEdt = " + str(rates['dEdtGas']) + \
             ", residual = " + \
             str(rates['dEdtGas']/lumScale)
 
     # Return dE/dt with correct normalization
-    #return rates['dEdtGas']/rates['maxAbsdEdtGas']
     return rates['dEdtGas']/lumScale
 
 
@@ -2150,19 +2333,19 @@ def _gasTempDeriv(Tg, time, cloud, c1Grav, thin, LTE, \
             ", nH = "+str(cloud.nH)
 
     # Compute new dust temperature
-    cloud.setDustTempEq(PsiUser=PsiUser, verbose=verbose, \
-                            dampFactor=dampFactor)
+    cloud.setDustTempEq(PsiUser=PsiUser, verbose=verbose,
+                        dampFactor=dampFactor)
 
     # Call dEdt to get time rate of change of energy for gas; note
     # that the level populations do not need to be recomputed here,
     # because they were already computed in solving for the dust
-    # temperature value, whcih depends on the line heating rate
-    rates = cloud.dEdt(c1Grav=c1Grav, \
-                           thin=thin, LTE=LTE, \
-                           escapeProbGeom=escapeProbGeom, \
-                           gasOnly=True, noClump=noClump, \
-                           sumOnly=True, PsiUser=PsiUser, \
-                           fixedLevPop=True)
+    # temperature value, which depends on the line heating rate
+    rates = cloud.dEdt(c1Grav=c1Grav,
+                       thin=thin, LTE=LTE,
+                       escapeProbGeom=escapeProbGeom,
+                       gasOnly=True, noClump=noClump,
+                       sumOnly=True, PsiUser=PsiUser,
+                       fixedLevPop=True)
     dEdtGas = rates['dEdtGas']
 
     # Compute specific heat c_v at current temperature

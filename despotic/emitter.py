@@ -35,9 +35,9 @@ from emitterData import emitterData
 
 # Define some global physical constants in cgs units
 import scipy.constants as physcons
-kB = physcons.k/physcons.erg
-c = physcons.c/physcons.centi
-mH = (physcons.m_p+physcons.m_e)/physcons.gram
+kB = physcons.k*1e7
+c = physcons.c*1e2
+mH = (physcons.m_p+physcons.m_e)*1e3
 h = physcons.h*1e7
 hc = h*c
 
@@ -55,92 +55,86 @@ knownEmitterData = {}
 ########################################################################
 # class emitter definition
 ########################################################################
-class emitter:
+class emitter(object):
     """
     Class to store the properties of a single emitting species, and
     preform computations on those properties. Note that all quantities
     are stored in cgs units.
 
-    Attributes
-    ----------
-    name : string
-        name of emitting species
-    abundance : float
-        abundance of emitting species relative to H nuclei
-    data : class emitterData
-        physical data for this emitter
-    levPop : array(nlev)
-        array giving populations of each level
-    levPopInitialized : Boolean
-        flag for whether levPop is initialized or uninitialized
-    escapeProb : array(nlev, nlev)
-        2d array giving escape probability for photons emitted in a
-        line connecting the given level pair 
-    escapeProbInitialized : Boolean
-        flag for whether escapeProb is initialized or uninitialized
-    energySkip : Boolean
-        flag that this species should be skipped when computing line
-        cooling rates
+        Parameters
+           emitName : string
+              name of this species
+           emitAbundance : float
+              abundance of species relative to H
+           emitterFile : string
+              name of LAMDA file containing data on this species; this
+              option overrides the default
+           emitterURL : string
+              URL of LAMDA file containing data on this species; this
+              option overrides the default
+           energySkip : Boolean
+              if True, this species is skipped when computing line
+              cooling rates
+           extrap : Boolean
+              if True, collision rate coefficients for this species will
+              be extrapolated to temperatures outside the range given in
+              the LAMDA tables
 
-    Methods
-    -------------
-    __init__ -- initialize
-    __deepcopy__ -- override the default deepcopy operation
-    __getstate__ -- routine to provide pickling support
-    __setstate__ -- routine to provide pickling support
-    setLevPopLTE -- set level populations to their LTE values at the
-        given temperature
-    setThin -- reset all escape probabilities to unity, the value for
-        an optically thin gas
-    setLevPop -- calculate the level populations from the currently
-        stored escape probabilities, together with the input gas
-        physical conditions and composition
-    setEscapeProb -- calculate the escape probabilties from the
-        currently-stored level populations and the specified gas
-        properties.
-    setLevPopEscapeProb -- compute the level populations and escape
-        probabilities simultaneously for the specified gas physical
-        properties and composition
-    opticalDepth -- return the optical depth associated with the
-        currently-stored escape probabilities
-    luminosityPerH -- compute the luminosity per H nucleus due to line
-        emission
-    setExtrap -- turns extrapolation on or off for this emitter
+        Returns
+           Nothing
+
+    Class attributes
+       name : string
+          name of emitting species
+       abundance : float
+          abundance of emitting species relative to H nuclei
+       data : class emitterData
+          physical data for this emitter
+       levPop : array, shape(nlev)
+          array giving populations of each level
+       levPopInitialized : Boolean
+          flag for whether levPop is initialized or uninitialized
+       escapeProb : array, shape (nlev, nlev)
+          2d array giving escape probability for photons emitted in a
+          line connecting the given level pair 
+       escapeProbInitialized : Boolean
+          flag for whether escapeProb is initialized or uninitialized
+       energySkip : Boolean
+          flag that this species should be skipped when computing line
+          cooling rates
     """
 
-########################################################################
-# Class initialization method
-########################################################################
-    def __init__(self, emitName, emitAbundance, extrap=False, \
-                     energySkip=False, emitterFile=None, \
-                     emitterURL=None):
+    ####################################################################
+    # Class initialization method
+    ####################################################################
+    def __init__(self, emitName, emitAbundance, extrap=True,
+                 energySkip=False, emitterFile=None,
+                 emitterURL=None):
 
         """
         Initialization routine
 
         Parameters
-        ----------
-        emitName : string
-            name of this species
-        emitAbundance : float
-            abundance of species relative to H
-        emitterFile : string
-            name of LAMDA file containing data on this species; this
-            option overrides the default
-        emitterURL : string
-            URL of LAMDA file containing data on this species; this
-            option overrides the default
-        energySkip : Boolean
-            if True, this species is skipped when computing line
-            cooling rates
-        extrap : Boolean
-            if True, collision rate coefficients for this species will
-            be extrapolated to temperatures outside the range given in
-            the LAMDA tables
+           emitName : string
+              name of this species
+           emitAbundance : float
+              abundance of species relative to H
+           emitterFile : string
+              name of LAMDA file containing data on this species; this
+              option overrides the default
+           emitterURL : string
+              URL of LAMDA file containing data on this species; this
+              option overrides the default
+           energySkip : Boolean
+              if True, this species is skipped when computing line
+              cooling rates
+           extrap : Boolean
+              if True, collision rate coefficients for this species will
+              be extrapolated to temperatures outside the range given in
+              the LAMDA tables
 
         Returns
-        -------
-        Nothing
+           Nothing
         """
 
         # Basic data
@@ -168,30 +162,44 @@ class emitter:
         self.escapeProb = np.zeros((self.data.nlev, self.data.nlev)) \
             + 1.0
 
+        # Record if we're using extrapolation
+        self.__extrap = extrap
 
-########################################################################
-# Override deepcopy method
-# We override the default deepcopy because we don't want to deepcopy
-# emitterData or collPartner objects that store physical constants,
-# and should be shared by all instances of an emitter class that
-# represent the same atom or molecule. This maintains the generic
-# behavior of this module, i.e. there is a centrally-maintained list
-# of emitter data, and individual emitter instances only contain
-# pointers to it, they don't each replicate it.
-########################################################################
+    ####################################################################
+    # Extrapolation decorator
+    ####################################################################
+    @property
+    def extrap(self):
+        return self.__extrap
+
+    @extrap.setter
+    def extrap(self, ext):
+        # Change value for emitter data; this will affect all
+        # collision partners
+        self.data.extrap = ext
+        self.__extrap = ext
+
+    ####################################################################
+    # Override deepcopy method
+    # We override the default deepcopy because we don't want to deepcopy
+    # emitterData or collPartner objects that store physical constants,
+    # and should be shared by all instances of an emitter class that
+    # represent the same atom or molecule. This maintains the generic
+    # behavior of this module, i.e. there is a centrally-maintained list
+    # of emitter data, and individual emitter instances only contain
+    # pointers to it, they don't each replicate it.
+    ####################################################################
     def __deepcopy__(self, memo={}):
         """
         This defines the deepcopy method for emitting species; a
         custom deepcopy is required to handle the emitterData.
 
         Parameters
-        ----------
-        memo : dict
-            The dict of objects that have been copied
+           memo : dict
+              The dict of objects that have been copied
 
         Returns
-        -------
-        Nothing
+           Nothing
         """
 
         # Create a new emitter with the same name, abundance, and
@@ -213,19 +221,19 @@ class emitter:
         return newcopy
 
 
-########################################################################
-# getstate and setstate methods
-# We need custom getstate and setstate methods to handle pickling of
-# emitters, because the emitterData requires special handling. These
-# data should not be pickled, as they are centrally stored and shared
-# by all instances of the same emitter. When pickle dump is called, the
-# data are removed from the list of attributes to be written, and when
-# load is called they are re-read if necessary. However, there are
-# certain attributes of the emitterData that we do need to store: the
-# extrapolation state and the file name, since these cannot be
-# determined just from re-reading the LAMDA file. These are added to the
-# dictionary before pickling, and removed after pickling.
-########################################################################
+    ####################################################################
+    # getstate and setstate methods
+    # We need custom getstate and setstate methods to handle pickling of
+    # emitters, because the emitterData requires special handling. These
+    # data should not be pickled, as they are centrally stored and shared
+    # by all instances of the same emitter. When pickle dump is called, the
+    # data are removed from the list of attributes to be written, and when
+    # load is called they are re-read if necessary. However, there are
+    # certain attributes of the emitterData that we do need to store: the
+    # extrapolation state and the file name, since these cannot be
+    # determined just from re-reading the LAMDA file. These are added to the
+    # dictionary before pickling, and removed after pickling.
+    ####################################################################
     def __getstate__(self):
         """
         This method provides custom pickling behavior for this class;
@@ -235,14 +243,12 @@ class emitter:
         needed to re-read this data when the class is unpickled.
 
         Parameters
-        ----------
-        None
+           None
 
         Returns
-        -------
-        odict : dict
-           a dict for this object that is suitable for pickling, with
-           certain information added and some removed
+           odict : dict
+              a dict for this object that is suitable for pickling, with
+              certain information added and some removed
         """
         odict = self.__dict__.copy() # copy the dict since we change it
         odict['extrap'] = self.data.extrap
@@ -259,13 +265,11 @@ class emitter:
         used to describe it from the dict for the class.
 
         Parameters
-        ----------
-        idict : dict
-            dict describing the class as read from the pickle
+           idict : dict
+              dict describing the class as read from the pickle
 
         Returns
-        -------
-        Nothing
+           Nothing
         """
 
         # First extract the extraneous parts from the dict
@@ -300,69 +304,32 @@ class emitter:
 
             try:
                 # Look for data file in stored location
-                self.data = emitterData(self.name, \
-                                            emitterFile=lamdaFile, \
-                                            extrap=extrap)
+                self.data = emitterData(self.name,
+                                        emitterFile=lamdaFile,
+                                        extrap=extrap)
             except despoticError:
                 # We didn't find the file in the stored location, so
                 # try looking for it as we would any other data file,
                 # without specifying a location
-                self.data = emitterData(self.name, \
-                                            extrap=extrap)
+                self.data = emitterData(self.name, extrap=extrap)
 
             # Store emitter in list
             knownEmitterData[self.name] = self.data
 
 
-########################################################################
-# Method to turn extrapolation on or off
-########################################################################
-    def setExtrap(self, extrap):
-        """
-        Turn extrapolation on or off for this emitter
-
-        Parameters
-        ----------
-        extrap : Boolean
-           true = extrapolation on, false = extrapolation off
-
-        Returns
-        -------
-        Nothing
-
-        Remarks
-        -------
-        Since emitter data is shared by all emitters of the same
-        species, turning extrapolation on or off affects all instances
-        of emitters of this species, not just this instance.
-        """
-
-        # Check if new setting is different from current one; if not,
-        # do nothing
-        if extrap == self.data.extrap:
-            return
-
-        # Rebuild interpolation functions and store new settings
-        for p in self.data.partners.values():
-            p._buildInterp(extrap)
-        self.data.extrap = extrap
-
-
-########################################################################
-# Method to set level populations to LTE values
-########################################################################
+    ####################################################################
+    # Method to set level populations to LTE values
+    ####################################################################
     def setLevPopLTE(self, temp):
         """
         Set the level populations of this species to their LTE values
 
         Parameters
-        ----------
-        temp : float
-            temperature in K
+           temp : float
+              temperature in K
 
         Returns
-        -------
-        Nothing
+           Nothing
         """
 
         # Partition function
@@ -376,71 +343,64 @@ class emitter:
         self.levPopInitialized = True
 
 
-########################################################################
-# Method to set escape probabilities to unity
-########################################################################
+    ####################################################################
+    # Method to set escape probabilities to unity
+    ####################################################################
     def setThin(self):
         """
         Set the escape probabilities for this species to unity
 
         Parameters
-        ----------
-        None
+           None
 
         Returns
-        -------
-        Nothing
+          Nothing
         """
         self.escapeProb[:,:] = 1.0
         self.escapeProbInitialized = True
 
 
-########################################################################
-# Method to set level populations in statistical equilibrium from the
-# stored escape probabilities. An optional flag tells the code to
-# assume that the gas is optically thin, treat all escape
-# probabilities as unity.
-########################################################################
-    def setLevPop(self, thisCloud, thin=False, noClump=False, \
-                      diagOnly=False):
+    ####################################################################
+    # Method to set level populations in statistical equilibrium from the
+    # stored escape probabilities. An optional flag tells the code to
+    # assume that the gas is optically thin, treat all escape
+    # probabilities as unity.
+    ####################################################################
+    def setLevPop(self, thisCloud, thin=False, noClump=False,
+                  diagOnly=False):
         """
         Compute the level populations for this species using the
         stored escape probabilities
 
         Parameters
-        ----------
-        thisCloud : class cloud
-            a cloud object containing the physical and chemical
-            properties of this cloud
-        thin : Boolean
-            if True, the stored escape probabilities are ignored, and
-            the cloud is assumed to be optically thin (equivalent to
-            assuming all escape probabilities are 1)
-        noClump : Boolean
-           if set to True, the clumping factor used in estimating
-           rates for n^2 processes is set to unity
+           thisCloud : class cloud
+              a cloud object containing the physical and chemical
+              properties of this cloud
+           thin : Boolean
+              if True, the stored escape probabilities are ignored, and
+              the cloud is assumed to be optically thin (equivalent to
+              assuming all escape probabilities are 1)
+           noClump : Boolean
+             if set to True, the clumping factor used in estimating
+             rates for n^2 processes is set to unity
+           diagOnly : Boolean
+              if true, diagnostic information is returned, but no
+              attempt is made to solve the equations or calculate the
+              level popuplations (useful for debugging)
 
         Returns
-        -------
-        infoDict : dict
-            A dictionary containing a variety of diagnostic
-            information. See user manual for details.
-
-        Other parameters
-        ----------------
-        diagOnly : Boolean
-            if true, diagnostic information is returned, but no
-            attempt is made to solve the equations or calculate the
-            level popuplations (useful for debugging)
+           infoDict : dict
+              A dictionary containing a variety of diagnostic
+              information
         """
 
         # Initialize dict of diagnostic information
         infoDict = {}
 
         # Get collision rate matrix
-        q = self.data.collRateMatrix(thisCloud.nH, \
-                                         thisCloud.comp, \
-                                         thisCloud.Tg)
+        q = self.data.collRateMatrix(thisCloud.nH,
+                                     thisCloud.comp,
+                                     thisCloud.Tg)
         infoDict['qNoClump'] = q
 
         # Apply clumping factor
@@ -631,38 +591,31 @@ class emitter:
         return infoDict
 
 
-########################################################################
-# Method to compute the escape probabilities from the stored level
-# populations. By default this computation happens for all
-# transitions, but optional keywords can specify a specific [upper,
-# lower] combination.
-########################################################################
-    def setEscapeProb(self, thisCloud, transition=None, \
-                          escapeProbGeom='sphere'):
+    ####################################################################
+    # Method to compute the escape probabilities from the stored level
+    # populations. By default this computation happens for all
+    # transitions, but optional keywords can specify a specific [upper,
+    # lower] combination.
+    ####################################################################
+    def setEscapeProb(self, thisCloud, transition=None,
+                      escapeProbGeom='sphere'):
         """
         Compute escape probabilities from stored level populations
 
         Parameters
-        ----------
-        thisCloud : class cloud
-            a cloud object containing the physical and chemical
-            properties of this cloud
-        transition : sequence of two sequences of int
-                     transition[0] = array of upper states
-                     transition[1] = array of lower states
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-             sets problem geometry that will be assumed in calculating
-             escape probabilities
+           thisCloud : class cloud
+              a cloud object containing the physical and chemical
+              properties of this cloud
+           transition : list
+              list of transition for which to set escape probability;
+              transition[0] = array of upper states, transition[1] =
+              array of lower states
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              sets problem geometry that will be assumed in calculating
+              escape probabilities
 
         Returns
-        -------
-        Nothing
-
-        Raises
-        ------
-        despoticError, if the level populations are not initialized or
-        the escape probability geometry is not 'sphere', 'slab', or
-        'LVG'
+           Nothing
         """
 
         if self.levPopInitialized == False:
@@ -730,62 +683,56 @@ class emitter:
         self.escapeProbInitialized = True
 
 
-########################################################################
-# Method to compute the escape probabilities and level populations
-# simultaneously.
-########################################################################
-    def setLevPopEscapeProb(self, thisCloud, escapeProbGeom='sphere', \
-                                noClump=False, verbose=False, \
-                                reltol=1e-6, abstol=1e-8, \
-                                maxiter=200, veryverbose=False, \
-                                dampFactor=0.5):
+    ####################################################################
+    # Method to compute the escape probabilities and level populations
+    # simultaneously.
+    ####################################################################
+    def setLevPopEscapeProb(self, thisCloud, escapeProbGeom='sphere',
+                            noClump=False, verbose=False,
+                            reltol=1e-6, abstol=1e-8,
+                            maxiter=200, veryverbose=False,
+                            dampFactor=0.5):
         """
         Compute escape probabilities and level populations
         simultaneously.
 
         Parameters
-        ----------
-        thisCloud : class cloud
-            a cloud object containing the physical and chemical
-            properties of this cloud
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-           sets problem geometry that will be assumed in calculating
-           escape probabilities
-        noClump : Boolean
-           if set to True, the clumping factor used in estimating
-           rates for n^2 processes is set to unity
+           thisCloud : class cloud
+              a cloud object containing the physical and chemical
+              properties of this cloud
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              sets problem geometry that will be assumed in calculating
+              escape probabilities
+           noClump : Boolean
+              if set to True, the clumping factor used in estimating
+              rates for n^2 processes is set to unity
 
         Returns
-        -------
-        success: Boolean
-           true if iteration converges, false if it does not
+           success: Boolean
+              True if iteration converges, False if it does not
 
         Additional Parameters
-        ---------------------
-        verbose : Boolean
-           if true, diagnostic information is printed
-        veryverbose : Boolean
-           if true, a very large amount of diagnostic information is
-           printed; probably useful only for debugging
-        reltol : float
-           relative tolerance; convergence is considered to have
-           occured when |f_i(n+1) - f_i(n)| / 
-           max(f_i(n+1), f_i(n)) < reltol
-        abstol : float
-           absolute tolerance; convergence is considered to have
-           occured when |f_i(n)+1 - f_i(n)| < abstol
-        maxiter : int
-           maximum number of iterations to allow
-        dampFactor : float
-           a number in the range (0, 1] that damps out changes in level
-           populations at each iteration. A value of 1 means no
-           damping, while a value of 0 means the level populations
-           never change.
-
-        Raises
-        ------
-        despoticError, if the escape probability geometry is not
-        'sphere', 'slab', or 'LVG'
+           verbose : Boolean
+              if True, diagnostic information is printed
+           veryverbose : Boolean
+              if True, a very large amount of diagnostic information is
+              printed; probably useful only for debugging
+           reltol : float
+              relative tolerance; convergence is considered to have
+              occured when the absolute value of the difference
+              between two iterations, divided by the larger of the two
+              results being differences, is less than reltol
+           abstol : float
+              absolute tolerance; convergence is considered to have
+              occured when the absolute value of the difference
+              between two iterations is less than abstol
+           maxiter : int
+              maximum number of iterations to allow
+           dampFactor : float
+              a number in the range (0, 1] that damps out changes in level
+              populations at each iteration. A value of 1 means no
+              damping, while a value of 0 means the level populations
+              never change.
 
         Remarks
         -------
@@ -800,13 +747,17 @@ class emitter:
         substantially.
         """
 
+        # Sanitize inputs
+        nH = np.maximum(thisCloud.nH, small)
+        Tg = np.maximum(thisCloud.Tg, small)
+        sigmaNT = np.maximum(thisCloud.sigmaNT, 0.0)
+
         # Get collision rate matrix with clumping factor correction
-        qcoltrans = self.data.collRateMatrix(thisCloud.nH, \
-                                                 thisCloud.comp, \
-                                                 thisCloud.Tg)
+        qcoltrans = self.data.collRateMatrix(
+            nH, thisCloud.comp, Tg)
         if noClump == False:
             cs2 = kB * thisCloud.Tg / (thisCloud.comp.mu * mH)
-            cfac = np.sqrt(1.0 + 0.75*thisCloud.sigmaNT**2/cs2)
+            cfac = np.sqrt(1.0 + 0.75*sigmaNT**2/cs2)
             qcoltrans *= cfac
         qcol = np.transpose(qcoltrans)
 
@@ -826,8 +777,7 @@ class emitter:
         # If current level populations are unitialized, set them to
         # their LTE values as an initial guess
         if self.levPopInitialized == False:
-            self.setLevPopLTE(thisCloud.Tg)
-            #self.setLevPop(thisCloud, thin=True, noClump=noClump)
+            self.setLevPopLTE(Tg)
 
         # Create workspace matrices, and initialize the last rows
         # M and b, which hold the summation constraint
@@ -858,12 +808,12 @@ class emitter:
             levPopOld = self.levPop.copy()
 
             # compute new escape probabilities
-            self.setEscapeProb(thisCloud, \
-                                   escapeProbGeom=escapeProbGeom)
+            self.setEscapeProb(thisCloud, escapeProbGeom=escapeProbGeom)
 
             # calculate new transition rate matrix
             m1 = qcol + self.escapeProb*qrad
-            m[:-1,:] = np.transpose(np.transpose(m1)/(np.sum(m1,axis=0)+small)) - \
+            m[:-1,:] = np.transpose(np.transpose(m1) / 
+                                    (np.sum(m1,axis=0)+small)) - \
                 np.identity(self.data.nlev)
 
             # check condition number
@@ -874,7 +824,7 @@ class emitter:
 
             else:
 
-                # Condition numberis not ok, so we need to eliminate
+                # Condition number is not ok, so we need to eliminate
                 # some levels
 
                 # Track levels we're keeping; initially this is all
@@ -882,8 +832,8 @@ class emitter:
                 
                 # Calculate populations in LTE with gas and radiation
                 levPopLTEGas = self.data.levWgt * \
-                    np.exp(-self.data.levTemp/thisCloud.Tg) / \
-                    self.data.partFunc(thisCloud.Tg)
+                    np.exp(-self.data.levTemp/Tg) / \
+                    self.data.partFunc(Tg)
                 levPopLTERad = self.data.levWgt * \
                     np.exp(-self.data.levTemp/thisCloud.rad.TCMB) / \
                     self.data.partFunc(thisCloud.rad.TCMB)
@@ -891,15 +841,17 @@ class emitter:
                 # Kill levels that are below the minimum for both
                 levPopMax = np.maximum(levPopLTEGas, levPopLTERad)
                 levKeep = np.delete(levKeep, np.where(levPopMax < machineeps))
-                levDel = np.setdiff1d(np.arange(self.data.nlev, dtype='int'), levKeep)
+                levDel = np.setdiff1d(np.arange(self.data.nlev, dtype='int'),
+                                      levKeep)
 
                 # Build reduced m
                 mred1=np.delete(m1, levDel, axis=0)
                 mred1=np.delete(mred1, levDel, axis=1)
                 mred = np.zeros((len(levKeep)+1, len(levKeep)))
-                mred[:-1,:] = np.transpose(np.transpose(mred1) / \
-                                            (np.sum(mred1,axis=0)+small)) - \
-                                            np.identity(len(levKeep))
+                mred[:-1,:] = np.transpose(
+                    np.transpose(mred1) / 
+                    (np.sum(mred1,axis=0)+small)) - \
+                    np.identity(len(levKeep))
                 mred[-1,:] = 1.0
 
                 # Check condition number again
@@ -959,9 +911,9 @@ class emitter:
             if veryverbose:
                 print 'setLevPopEscapeProb for ' + self.name + \
                     ': iter ' + str(ctr) + ': abs resid = ' + \
-                    str(absnorm) + ', state; ' + str(argmax(resid)) + \
+                    str(absnorm) + ', state; ' + str(np.argmax(resid)) + \
                     ', rel resid = ' + str(relnorm) + \
-                    ', state = ' + str(argmax(relResid))
+                    ', state = ' + str(np.argmax(relResid))
             # update counter
             ctr = ctr+1
 
@@ -992,36 +944,28 @@ class emitter:
         return True
 
 
-########################################################################
-# Method to return the optical depth associated with all transitions
-# (or with the specified transitions if the transition keyword is
-# specified) based on the stored escape probabilities.
-########################################################################
+    ####################################################################
+    # Method to return the optical depth associated with all transitions
+    # (or with the specified transitions if the transition keyword is
+    # specified) based on the stored escape probabilities.
+    ####################################################################
     def opticalDepth(self, transition=None, escapeProbGeom='sphere'):
         """
         Return the optical depths of various lines, computed from the
         stored escape probabilities.
 
         Parameters
-        ----------
-        transition : list of two arrays of shape (M)
-                     transition[0] = array of upper states
-                     transition[1] = array of lower states
-        escapeProbGeom : string, 'sphere' or 'LVG' or 'slab'
-             sets problem geometry that will be assumed in calculating
-             escape probabilities
+           transition : list
+              A list containing two 1D arrays of integer type;
+              transition[0] = array of upper states, transition[1] =
+              array of lower states
+           escapeProbGeom : 'sphere' | 'LVG' | 'slab'
+              sets problem geometry that will be assumed in calculating
+              escape probabilities
 
         Returns
-        -------
-        tau : array, shape (M)
+           tau : array
               optical depths in specified lines; by default
-              M = len(radUpper)
-
-        Raises
-        ------
-        despoticError, if escape probabilities are not initialized or
-        the escape probability geometry is not 'sphere', 'slab', or
-        'LVG'
         """
 
         if self.escapeProbInitialized == False:
@@ -1037,57 +981,54 @@ class emitter:
         elif escapeProbGeom == 'LVG':
             tau=np.zeros(len(u))
             for i, beta in enumerate(self.escapeProb[u,l]):
-                tau[i] = brentq(_betaTauLVG, 1e-10, 1.0/beta, \
-                                    args=(beta,))
+                tau[i] = brentq(_betaTauLVG, 1e-10, 1.0/beta,
+                                args=(beta,))
             return tau
         elif escapeProbGeom == 'slab':
             tau=np.zeros(len(u))
             for i, beta in enumerate(self.escapeProb[u,l]):
-                tau[i] = brentq(_betaTauSlab, 1e-10, 3.0/beta, \
-                                    args=(beta,))
+                tau[i] = brentq(_betaTauSlab, 1e-10, 3.0/beta,
+                                args=(beta,))
             return tau
         else:
             raise despoticError, "unknown escapeProbGeom " + \
                 str(escapeProbGeom)
 
 
-########################################################################
-# Method to return the luminosity per H with all transitions
-# (or with the specified transition if the transition keyword is
-# specified) based on the stored escape probabilities. Note that the
-# value returned is net luminosity, i.e. emission minus CMB
-# absorption. Also note that this can be negative, indicating that the
-# gas absorbs more energy than the CMB than it emits.
-########################################################################
-    def luminosityPerH(self, rad, transition=None, total=False, \
-                           thin=False):
+    ####################################################################
+    # Method to return the luminosity per H with all transitions
+    # (or with the specified transition if the transition keyword is
+    # specified) based on the stored escape probabilities. Note that the
+    # value returned is net luminosity, i.e. emission minus CMB
+    # absorption. Also note that this can be negative, indicating that the
+    # gas absorbs more energy than the CMB than it emits.
+    ####################################################################
+    def luminosityPerH(self, rad, transition=None, total=False,
+                       thin=False):
         """
         Return the luminosities of various lines, computed from the
         stored level populations and escape probabilities.
 
         Parameters
-        ----------
-        rad : class radiation
-            radiation field impinging on the cloud
-        transition : list of two arrays of shape (M)
-            transition[0] = array of upper states
-            transition[1] = array of lower states
-        total : Boolean
-            if True, the routine returns a single float rather than an
-            array; this float is the sum of the luminosities per H
-            nucleus of all lines
+           rad : class radiation
+              radiation field impinging on the cloud
+           transition : list
+              A list containing two 1D arrays of integer type;
+              transition[0] = array of upper states, transition[1] =
+              array of lower states
+           total : Boolean
+              if True, the routine returns a single float rather than an
+              array; this float is the sum of the luminosities per H
+              nucleus of all lines
 
         Returns
-        -------
-        lum : array, shape (M), or float
+           lum : array
               luminosities per H in specified lines; by default
-              M = len(radUpper)
 
         Raises
-        ------
-        despoticError, if the level populations are not initialized,
-        or if the escape probabilities are not initialized and thin is
-        not True
+           despoticError, if the level populations are not initialized,
+           or if the escape probabilities are not initialized and thin is
+           not True
         """
 
         # Safety check
@@ -1103,7 +1044,7 @@ class emitter:
             l = transition[1]
 
         # Get photon occupation number
-        if rad.TCMB > 0.0:
+        if rad.TCMB > 0.0 or (rad.TradDust > 0 and rad.fdDilute > 0):
             Tnu = self.data.freq[u,l]*h/kB
             Tnu[Tnu == 0.0] = rad.TCMB*1e20
             ngamma = rad.ngamma(Tnu)
@@ -1111,7 +1052,7 @@ class emitter:
             ngamma = 0.0
 
         # Get net luminosity
-        lum = ((1.0+ngamma)*self.levPop[u] - \
+        lum = ((1.0+ngamma)*self.levPop[u] -
                    self.data.wgtRatio[u,l]*ngamma*self.levPop[l]) * \
                    self.data.EinsteinA[u,l] * h*self.data.freq[u,l] * \
                    self.abundance

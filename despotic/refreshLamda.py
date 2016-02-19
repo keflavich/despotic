@@ -28,36 +28,33 @@ from despoticError import despoticError
 from fetchLamda import fetchLamda
 from urlparse import urljoin
 
-def refreshLamda(path=None, cutoffDate=None, cutoffAge=None, \
-                     LamdaURL=None):
+def refreshLamda(path=None, cutoffDate=None, cutoffAge=None,
+                 LamdaURL=None):
     """
     Refreshes LAMDA files by fetching new ones from the web
 
     Parameters
-    ----------
-    path : string
-        path to the local LAMDA database; defaults to getting this
-        information from the environment variable DESPOTIC_HOME
-    cutoffDate : class datetime.date or class datetime.datetime
-        a date or datetime specifying the age cutoff for updating
-        files; files older than cutoffDate are updated, newer ones are
-        not
-    cutoffAge : class datetime.timedelta
-        a duration between the present instant and the point in the
-        past separating files that will be updated from files that
-        will not be
-    LamdaURL : string
-        URL where LAMDA is located; defaults to the default value in
-        fetchLamda
+       path : string
+          path to the local LAMDA database; defaults to getting this
+          information from the environment variable DESPOTIC_HOME
+       cutoffDate : class datetime.date or class datetime.datetime
+          a date or datetime specifying the age cutoff for updating
+          files; files older than cutoffDate are updated, newer ones are
+          not
+       cutoffAge : class datetime.timedelta
+          a duration between the present instant and the point in the
+          past separating files that will be updated from files that
+          will not be
+       LamdaURL : string
+         URL where LAMDA is located; defaults to the default value in
+         fetchLamda
 
     Returns
-    -------
-    Nothing
+       Nothing
 
     Remarks
-    -------
-    If the user sets both a cutoff age and a cutoff date, the date is
-    used. If neither is set, the default cutoff age is 6 months.
+       If the user sets both a cutoff age and a cutoff date, the date is
+       used. If neither is set, the default cutoff age is 6 months.
     """
 
     # First check if we were given a cutoff date or age; if neither,

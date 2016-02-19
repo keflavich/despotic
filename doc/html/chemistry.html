@@ -1,0 +1,632 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Chemistry and Chemical Networks &mdash; DESPOTIC 2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <link rel="next" title="Full Documentation of All DESPOTIC Classes and Functions" href="fulldoc.html" />
+    <link rel="prev" title="Atomic and Molecular Data" href="data.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="chemistry-and-chemical-networks">
+<span id="sec-chemistry"></span><h1>Chemistry and Chemical Networks<a class="headerlink" href="#chemistry-and-chemical-networks" title="Permalink to this headline">¶</a></h1>
+<p>The chemistry capabilities in DESPOTIC are located in the
+<code class="docutils literal"><span class="pre">despotic.chemistry</span></code> module.</p>
+<div class="section" id="operations-on-chemical-networks">
+<span id="ssec-operations"></span><h2>Operations on Chemical Networks<a class="headerlink" href="#operations-on-chemical-networks" title="Permalink to this headline">¶</a></h2>
+<p>The central object in a chemical calculation is a chemical network,
+which consists of a set of chemical species and a set of reactions
+that change the concentrations of each of them. Formally, a network is
+defined by a set of <span class="math">\(N\)</span> species with abundances
+<span class="math">\(\mathbf{x}\)</span> (defined as number density of each species per H
+nucleus), and a function <span class="math">\(d\mathbf{x}/dt = \mathbf{f}(\mathbf{x},
+\mathbf{p})\)</span> that gives the time rate of change of the abundances. The
+vector <span class="math">\(\mathbf{p}\)</span> specifies a set of parameters on which the
+reaction rates depend, and it may include quantities such as the
+ambient radiation field (for photoreactions), the density, the
+temperature, etc. The numerical implementation of chemical networks is
+described in <a class="reference internal" href="#ssec-chemnetworks"><span>Defining New Chemical Networks: the chemNetwork Class</span></a>. Given any chemical network,
+DESPOTIC is capable of two operations:</p>
+<ul class="simple">
+<li>Given an initial set of abundances at <span class="math">\(\mathbf{x}(t_0)\)</span> at
+time <span class="math">\(t_0\)</span>, compute the abundances at some later time
+<span class="math">\(t_1\)</span>. This is simply a matter of numerically integrating the
+ordinary differential equation <span class="math">\(d\mathbf{x}/dt =
+\mathbf{f}(\mathbf{x},\mathbf{p})\)</span> from <span class="math">\(t_0\)</span> to <span class="math">\(t_1\)</span>,
+where <span class="math">\(\mathbf{f}\)</span> is a known function. In DESPOTIC, this
+capability is implemented by the routine <code class="docutils literal"><span class="pre">chemEvol</span></code> in the
+<code class="docutils literal"><span class="pre">despotic.chemistry.chemEvol</span></code> module. The <code class="docutils literal"><span class="pre">cloud</span></code> class
+contains a wrapper around this routine, which allows it to be
+called to operate on a specific instance of <code class="docutils literal"><span class="pre">cloud</span></code> or
+<code class="docutils literal"><span class="pre">zonedcloud</span></code>.</li>
+<li>Find an equilibrium set of abundances
+<span class="math">\(\mathbf{x}_{\mathrm{eq}}\)</span> such that <span class="math">\(d\mathbf{x}/dt =
+\mathbf{f}(\mathbf{x}_{\mathrm{eq}}, \mathbf{p}) = 0\)</span>. Note that
+these is in general no guarantee that such an equilibrium exists, or
+that it is unique, and there are no general techniques for
+identifying such equilibria for arbitrary vector functions
+<span class="math">\(\mathbf{f}\)</span>. DESPOTIC handles this problem by explicitly
+integrating the ODE <span class="math">\(d\mathbf{x}/dt =
+\mathbf{f}(\mathbf{x},\mathbf{p})\)</span> until <span class="math">\(\mathbf{x}\)</span> reaches
+constant values (within some tolerance) or until a specified maximum
+time is reached. In DESPOTIC, this capability is implemented by
+the routine <code class="docutils literal"><span class="pre">setChemEq</span></code> in the <code class="docutils literal"><span class="pre">despotic.chemistry.setChemEq</span></code>
+module. The <code class="docutils literal"><span class="pre">cloud</span></code> and <code class="docutils literal"><span class="pre">zonedcloud</span></code> classed contains a wrapper
+around this routine, which allows it to be called to operate on a
+specific instance of <code class="docutils literal"><span class="pre">cloud</span></code> or <code class="docutils literal"><span class="pre">zonedcloud</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="predefined-chemical-networks">
+<span id="ssec-predefined-networks"></span><h2>Predefined Chemical Networks<a class="headerlink" href="#predefined-chemical-networks" title="Permalink to this headline">¶</a></h2>
+<p>DESPOTIC ships with two predefined chemical networks, described below.</p>
+<div class="section" id="nl99">
+<span id="sssec-nl99"></span><h3><code class="docutils literal"><span class="pre">NL99</span></code><a class="headerlink" href="#nl99" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">NL99</span></code> network implements the reduced C-O network introduced by
+<a class="reference external" href="http://adsabs.harvard.edu/abs/1999ApJ...524..923N">Nelson &amp; Langer (1999, Astrophysical Journal, 524, 923; hereafter
+NL99)</a>. Readers
+are refereed to that paper for a full description of the network and
+the physical approximations on which it relies. To summarize briefly
+here, the network is intended to capture the chemistry of carbon and
+oxygen as it occurs at moderate densities and low temperatures in
+<span class="math">\(\mathrm{H}_2\)</span> dominated clouds. It includes the species C,
+<span class="math">\(\mathrm{C}^+\)</span>, CHx, CO, <span class="math">\(\mathrm{HCO}^+\)</span>,
+<span class="math">\(\mathrm{H}^+_3\)</span>, <span class="math">\(\mathrm{He}^+\)</span>, O, OHx, M, and
+<span class="math">\(\mathrm{M}^+\)</span>. Several of these are &#8220;super-species&#8221; that
+agglomerate several distinct species with similar reaction rates and
+pathways, including CHx (where <span class="math">\(x = 1-4\)</span>), OHx (where <span class="math">\(x =
+1-2\)</span>), and M and <span class="math">\(\mathrm{M}^+\)</span> (which are stand-ins for metals
+such as iron and nickel). The network involves two-body reactions
+among these species, as well as photochemical reactions induces by UV
+from the ISRF and reactions initiated by cosmic ray ionizations. In
+addition to the initial abundances of the various species, the network
+depends on the ISRF, the ionization rate, and the total abundances of
+C and O nuclei.</p>
+<p>In implementing the NL99 network in DESPOTIC there are a three design
+choices to be made. First, photochemical and ionization reactions
+depend on the UV radiation field strength and the ionization
+rate. When performing computations on a cloud, DESPOTIC takes these
+from the parameters <code class="docutils literal"><span class="pre">chi</span></code> and <code class="docutils literal"><span class="pre">ionRate</span></code> that are part of the radiation
+class attached to the cloud.</p>
+<p>Second, photochemical reactions depend on the amount of shielding
+against the ISRF provided by dust, and, in the case of the reaction
+<span class="math">\(\mathrm{CO}\rightarrow\mathrm{C}+\mathrm{O}\)</span>, line shielding by
+CO and <span class="math">\(\mathrm{H}_2\)</span>. Following its usual approximation for
+implementing such shielding in a one-zone model, DESPOTIC takes the
+relevant column density to be <span class="math">\(N_{\mathrm{H}}/2\)</span>, where
+<span class="math">\(N_\mathrm{H}\)</span> is the column density colDen of the cloud, so
+that the typical amount of shielding is assumed to correspond to
+half the area-averaged column density. For the dust shielding,
+NL99 express the shielding in terms of the V-band extinction
+<span class="math">\(A_V\)</span>; unless instructed otherwise, DESPOTIC computes this via</p>
+<div class="math">
+\[A_V = 0.4 \sigma_{\mathrm{PE}}(N_{\mathrm{H}}/2).\]</div>
+<p>This ratio of V-band to 100 nm extinction is intermediate
+between the values expected for Milky Way and SMC dust opacity curves,
+as discussed in <a class="reference external" href="http://adsabs.harvard.edu/abs/2011ApJ...731...25K">Krumholz, Leroy, &amp; McKee (2011, Astrophysical
+Journal, 731, 25)</a>. However, the
+user may override this choice. For line shielding, DESPOTIC computes
+the <span class="math">\(\mathrm{H}_2\)</span> and CO column densities</p>
+<div class="math">
+\[N_{\mathrm{H}_2} = x_{\mathrm{H}_2} N_{\mathrm{H}}/2\]\[N_\mathrm{CO} = x_\mathrm{CO} N_\mathrm{H} /2,\]</div>
+<p>which amounts to assuming that the CO and <span class="math">\(\mathrm{H}_2\)</span> are
+uniformly distributed. Note that the NL99 network explicitly assumes
+<span class="math">\(x_{\mathrm{H}_2} = 0.5\)</span>, as no reactions involving atomic H are
+included &#8211; see <a class="reference internal" href="#sssec-nl99-gc"><span>NL99_GC</span></a> for a network that does include
+hydrogen chemistry. These column densities are then used to find a
+shielding factor by interpolating the tabulated values of <a class="reference external" href="http://adsabs.harvard.edu/abs/1988ApJ...334..771V">van Dishoeck
+&amp; Black (1988, Astrophysical Journal, 334, 771)</a>.</p>
+<p>The third choice is how to map between the species included in the
+chemistry network and the actual emitting species that are required
+to compute line emission, cooling, etc. This is non-trivial both
+because the chemical network includes super-species, because the
+chemical network does not distinguish between ortho- and para-
+sub-species while the rest of DESPOTIC does, and because the network
+does not distinguish between different isotopomers of the same
+species, while the rest of DESPOTIC does. This does not create
+problems in mapping from cloud emitter abundances to the chemical
+network, since the abundances can simply be summed, but it does create
+a question about how to map output chemical abun- dances computed by
+the network into the abundances of emitters that can be operated on by
+the remainder of DESPOTIC. In order to handle this issue, DESPOTIC
+makes the following assumptions:</p>
+<ol class="arabic simple">
+<li>OHx is divided evenly between OH and <span class="math">\(\mathrm{OH}_2\)</span></li>
+<li>The ratio of ortho- to para- for all species is the same as that of
+<span class="math">\(\mathrm{H}_2\)</span></li>
+<li>The abundances ratios of all isotopomers of a species remain fixed
+as reactions occur, so, for example, the final abundance ratio of
+<span class="math">\(\mathrm{C}^{18}\mathrm{O}\)</span> to
+<span class="math">\(\mathrm{C}^{16}\mathrm{O}\)</span> as computed by the chemical
+network is always the same as the initial one.</li>
+</ol>
+</div>
+<div class="section" id="nl99-gc">
+<span id="sssec-nl99-gc"></span><h3><code class="docutils literal"><span class="pre">NL99_GC</span></code><a class="headerlink" href="#nl99-gc" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">NL99_GC</span></code> network is an extension of the <code class="docutils literal"><span class="pre">NL99</span></code> network to
+handle hydrogen chemistry as well as carbon and oxygen chemistry,
+following the recipe described in <a class="reference external" href="http://adsabs.harvard.edu/abs/2012MNRAS.421..116G">Glover &amp; Clark (2012, MNRAS,
+421, 116)</a>. This
+network effectively uses <code class="docutils literal"><span class="pre">NL99</span></code> for carbon and oxygen (with some
+updates to the rate coefficients) and the network of <a class="reference external" href="http://adsabs.harvard.edu/abs/2007ApJS..169..239G">Glover &amp; Mac Low
+(2007, ApJS, 169, 239)</a>
+for the hydrogen chemistry. Self-shielding of hydrogen is handled via
+the approximate analytic shielding functon of <a class="reference external" href="http://adsabs.harvard.edu/abs/1996ApJ...468..269D">Draine &amp; Bertoldi
+(1996, ApJ, 468, 269)</a>. Effective
+column densities for shielding are computed as in <code class="docutils literal"><span class="pre">NL99</span></code>.
+Calculations of hydrogen chemistry are assumed to leave the ratio of
+ortho- to para- <span class="math">\(\mathrm{H}_2\)</span> unchanged from the initial value,
+or set it to 0.25 if the initial value is undefined (e.g., because the
+calculation started with a composition that was all H and no
+<span class="math">\(\mathrm{H}_2\)</span>). All other assumptions are completely analogous
+to <code class="docutils literal"><span class="pre">NL99</span></code>.</p>
+</div>
+</div>
+<div class="section" id="defining-new-chemical-networks-the-chemnetwork-class">
+<span id="ssec-chemnetworks"></span><h2>Defining New Chemical Networks: the <code class="docutils literal"><span class="pre">chemNetwork</span></code> Class<a class="headerlink" href="#defining-new-chemical-networks-the-chemnetwork-class" title="Permalink to this headline">¶</a></h2>
+<p>DESPOTIC implements chemical networks through the abstract base class
+<code class="docutils literal"><span class="pre">chemNetwork</span></code>, which is defined by module
+<code class="docutils literal"><span class="pre">despotic.chemistry.chemNetwork</span></code> &#8211; see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a> for full
+details. This class defines the required elements that all chemistry
+networks must contain; users who wish to implement their own chemistry
+networks must derive them from this class, and must override the class
+methods listed below. Users are encouraged to examine the two
+<a class="reference internal" href="#ssec-predefined-networks"><span>Predefined Chemical Networks</span></a> for examples of how to derive a
+chemical network class from <code class="docutils literal"><span class="pre">chemNetwork</span></code>.</p>
+<p>For any class <code class="docutils literal"><span class="pre">cn</span></code> derived from <code class="docutils literal"><span class="pre">chemNetwork</span></code>, the user is
+required to define the following non-callable traits:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">cn.specList</span></code>: a list of strings that describes the chemical
+species included in the network. The names in <code class="docutils literal"><span class="pre">cn.specList</span></code> can be
+arbitrary, and are not used for any purpose other than providing
+human-readable labels on outputs. However, it is often convenient to
+match the names to the names of emitters, as this makes it
+convenient to add the emitters back to the cloud later.</li>
+<li><code class="docutils literal"><span class="pre">cn.x</span></code>: a numpy array of rank 1, with each element specifying the
+abundance of a particular species in the network. The number of
+elements in the array must match the length of <code class="docutils literal"><span class="pre">cn.specList</span></code>. As
+with all abundances in DESPOTIC, abundances must be specified
+relative to H nuclei, so that if, for example, <code class="docutils literal"><span class="pre">x[3]</span></code> is <code class="docutils literal"><span class="pre">0.1</span></code>,
+this means that there is 1 particle of species 3 per 10 H nuclei.</li>
+<li><code class="docutils literal"><span class="pre">cn.cloud</span></code>: an instance of the <code class="docutils literal"><span class="pre">cloud</span></code> class to which the
+chemical network is attached. This can be <code class="docutils literal"><span class="pre">None</span></code>, as chemical
+networks can be free-standing at not attached to specified instances
+of <code class="docutils literal"><span class="pre">cloud</span></code>. However, much of the functionality of chemical
+networks is based around integration with the <code class="docutils literal"><span class="pre">cloud</span></code> class.</li>
+</ul>
+<p>In addition, a class <code class="docutils literal"><span class="pre">cn</span></code> derived from <code class="docutils literal"><span class="pre">chemNetwork</span></code> must define
+the following callable attributes:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">cn.__init__(self,</span> <span class="pre">cloud=None,</span> <span class="pre">info=None)</span></code>: this is the
+initialization method. It must accept two keyword arguments. The
+first, <code class="docutils literal"><span class="pre">cloud</span></code>, is an instanced of the <code class="docutils literal"><span class="pre">cloud</span></code> class to which
+this chemical network will be attached. This routine should set
+<code class="docutils literal"><span class="pre">cn.cloud</span></code> equal to the input <code class="docutils literal"><span class="pre">cloud</span></code> instance, and it may also
+extract information from the input <code class="docutils literal"><span class="pre">cloud</span></code> instances in order to
+initialize <code class="docutils literal"><span class="pre">cn.x</span></code> or any other required quantities. The second
+keyword argument, <code class="docutils literal"><span class="pre">info</span></code>, is a dict containing any additional
+initialization parameters that the chemical network can be or must
+be passed upon instantiation.</li>
+<li><code class="docutils literal"><span class="pre">cn.dxdt(self,</span> <span class="pre">xin,</span> <span class="pre">time)</span></code>: this is a method that computes the
+time derivative of the abundances. Given an input numpy array of
+abundances <code class="docutils literal"><span class="pre">xin</span></code> (which is the same shape as <code class="docutils literal"><span class="pre">cn.x</span></code>) and a time
+<code class="docutils literal"><span class="pre">time</span></code>, it must return a numpy array giving the time derivative of
+all abundances in units of <span class="math">\(\mathrm{s}^{-1}.\)</span></li>
+<li><code class="docutils literal"><span class="pre">cn.applyAbundances(self,</span> <span class="pre">addEmitters=False)</span></code>: this is a method to
+take the abundances stored in the chemical network and use them to
+update the abundances of the corresponding emitters in the <code class="docutils literal"><span class="pre">cloud</span></code>
+instance associated with this chemical network. This method is
+called at the end of every chemical calculation, and is responsible
+for copying information from the chemical network back into the
+cloud. The optional Boolean argument <code class="docutils literal"><span class="pre">addEmitters</span></code>, if <code class="docutils literal"><span class="pre">True</span></code>,
+specifies that the method should attempt to not only alter the
+abundances of any emitters associated with the cloud, it should also
+attempt to add new emitters that are included in the chemical
+network, and whose abundances are to be determined from it. It is up
+to the user whether or not to honor this request and implement this
+behavior. Failure to do so will not prevent the chemical network
+from operating, but should at least be warned so that other users
+are not surprised.</li>
+</ul>
+<p>Finally, the following is an optional attribute of the derived class
+<code class="docutils literal"><span class="pre">cn</span></code>:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">cn.abundances</span></code>: this is a property that returns the abundance
+information defined in <code class="docutils literal"><span class="pre">cn.x</span></code> as a object of class
+<a class="reference internal" href="#sssec-abundancedict"><span>abundanceDict</span></a>. This class is a utility class that
+provides an interface to the chemical abundances in a network
+that operates like a Python dict. The property abundances is defined
+in the base <code class="docutils literal"><span class="pre">chemNetwork</span></code> class, so it is available by inheritance
+regardless of whether the user defines <code class="docutils literal"><span class="pre">cn.abundances</span></code>. However,
+the user may find it convenient to override
+<code class="docutils literal"><span class="pre">chemNetwork.abundances</span></code> to provide more information, e.g., to
+provide abundances of species that are not explicitly evolved in the
+network, and are instead derived via conservation relations. Both
+the <a class="reference internal" href="#sssec-nl99"><span>NL99</span></a> and <a class="reference internal" href="#sssec-nl99-gc"><span>NL99_GC</span></a> classes do this.</li>
+</ul>
+<p>Once a chemical network class that defines the above methods has been
+defined, that class can be passed as an argument associated with the
+<code class="docutils literal"><span class="pre">network</span></code> keyword to the <code class="docutils literal"><span class="pre">cloud.setChemEq</span></code> and <code class="docutils literal"><span class="pre">cloud.chemEvol</span></code>
+methods (and their equivalents in <code class="docutils literal"><span class="pre">zonedcloud</span></code>), and these methods
+will automatically perform chemical calculations using the input
+network.</p>
+<p>In setting up chemical networks, it often convenient to make use of
+the <a class="reference internal" href="#ssec-chemhelpers"><span>Helper Modules for Chemical Networks</span></a> that are provided.</p>
+</div>
+<div class="section" id="helper-modules-for-chemical-networks">
+<span id="ssec-chemhelpers"></span><h2>Helper Modules for Chemical Networks<a class="headerlink" href="#helper-modules-for-chemical-networks" title="Permalink to this headline">¶</a></h2>
+<p>The modules below, implemented in <code class="docutils literal"><span class="pre">despotic.chemistry</span></code>, are intended
+as helpers for defining and working with chemical networks.</p>
+<div class="section" id="abundancedict">
+<span id="sssec-abundancedict"></span><h3><code class="docutils literal"><span class="pre">abundanceDict</span></code><a class="headerlink" href="#abundancedict" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">abundanceDict</span></code> class provides a dict-like interface to numpy
+arrays containing species abundances. The motivation for its existence
+is that it is desirable to keep lists of chemical species abundances
+in a numpy array for speed of computation, but for humans it is much
+more convenient to be able to query and print chemical species by
+name, with a dict-like interface. The <code class="docutils literal"><span class="pre">abundanceDict</span></code> class overlays
+a dict-like structure on a numpy array, making it possible to combine
+the speed of a numpy array with the convenience of a dict.</p>
+<p>Usage is simple. To define an <code class="docutils literal"><span class="pre">abundanceDict</span></code> one simply provides a
+set of chemical species names and a numpy array containing abundances
+of those speces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry</span> <span class="kn">import</span> <span class="n">abundanceDict</span>
+
+<span class="c"># specList = list of strings containing species names</span>
+<span class="c"># x = numpy array containing species abundances</span>
+<span class="n">abd</span> <span class="o">=</span> <span class="n">abundanceDict</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Once created, an <code class="docutils literal"><span class="pre">abundanceDict</span></code> can be handled much like a dict, in
+which the species names in <code class="docutils literal"><span class="pre">specList</span></code> are the keys:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Print abundance of the species CO</span>
+<span class="k">print</span> <span class="n">abd</span><span class="o">.</span><span class="n">abundances</span><span class="p">[</span><span class="s">&quot;CO&quot;</span><span class="p">]</span>
+
+<span class="c"># Set the C+ abundance to 1e-10</span>
+<span class="n">abd</span><span class="p">[</span><span class="s">&quot;C+&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-10</span>
+</pre></div>
+</div>
+<p>These operations will alter the underlying numpy array appropriately;
+the array may also be accessed directly, as
+<code class="docutils literal"><span class="pre">abundanceDict.x</span></code>. However, the performance penalty for referring to
+objects by name rather than by index in <code class="docutils literal"><span class="pre">abundanceDict.x</span></code> is
+negligibly small in almost all cases, so it is recommended to use
+keys, as this makes for much more human-readable code.</p>
+<p>Mathematical operations on the abundances will pass through and be
+applied to the underlying numpy array:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Double the abundance of every species</span>
+<span class="n">abd</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">abd</span>
+
+<span class="c"># Add the abundances of two different abundanceDict&#39;s, abd1 and abd2</span>
+<span class="n">abd3</span> <span class="o">=</span> <span class="n">abd1</span> <span class="o">+</span> <span class="n">abd2</span>
+</pre></div>
+</div>
+<p>Finally, <code class="docutils literal"><span class="pre">abundanceDict</span></code> instances differ from regular dict objects
+in that, once they are created, their species lists are immutable;
+species abundances can be changed, but species cannot be added or
+removed.</p>
+<p>For full details on <code class="docutils literal"><span class="pre">abundanceDict</span></code>, see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a>.</p>
+</div>
+<div class="section" id="reactions">
+<span id="sssec-reactions"></span><h3><code class="docutils literal"><span class="pre">reactions</span></code><a class="headerlink" href="#reactions" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">reactions</span></code> module provides a generic way to describe chemical
+reactions and compute their rates. It contains one basic class and
+several specialized derived classes to compute particualr types of
+reactions. The goal of all the classes in <code class="docutils literal"><span class="pre">reactions</span></code> is to allow
+users to describe the reactions in a chemical network in
+human-readable forms, but then compute their rates using efficient
+numpy operations at high speed.</p>
+<div class="section" id="reaction-matrix">
+<span id="ssssec-reaction-matrix"></span><h4><code class="docutils literal"><span class="pre">reaction_matrix</span></code><a class="headerlink" href="#reaction-matrix" title="Permalink to this headline">¶</a></h4>
+<p>The most general class in <code class="docutils literal"><span class="pre">reactions</span></code> is called
+<code class="docutils literal"><span class="pre">reaction_matrix</span></code>. To instantiate it, one provides a list of species
+and a list of reactions between them:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="kn">import</span> <span class="n">reaction_matrix</span>
+<span class="n">rm</span> <span class="o">=</span> <span class="n">reaction_matrix</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal"><span class="pre">specList</span></code> is a list of strings giving the names of the
+chemical species, while <code class="docutils literal"><span class="pre">reactions</span></code> is a list of dict&#8217;s, one dict
+per reaction, describing each reaction. Each dict in <code class="docutils literal"><span class="pre">reactions</span></code>
+contains two keys: <code class="docutils literal"><span class="pre">reactions[&quot;spec&quot;]</span></code> gives the list of species
+involved in the reaction, and <code class="docutils literal"><span class="pre">reactions[&quot;stoich&quot;]</span></code> gives the
+correspnding stoichiometric factors, with reactants on the left hand
+side having negative factors (indicating that they are destroyed by
+the reaction) and those on the right having positive factors
+(indicating that they are created). Thus for example to include the
+reactions</p>
+<div class="math">
+\[\begin{split}\mathrm{C} + \mathrm{O} &amp; \rightarrow \mathrm{CO} \\
+\mathrm{H} + \mathrm{H} &amp; \rightarrow \mathrm{H}_2\end{split}\]</div>
+<p>in a network, one could define the reactions as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">reactions</span> \
+   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;O&quot;</span><span class="p">,</span> <span class="s">&quot;CO&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;H&quot;</span><span class="p">,</span> <span class="s">&quot;H2&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">}</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>Once a <code class="docutils literal"><span class="pre">reaction_matrix</span></code> has been defined, one can compute the rates
+of change of all species using the method <code class="docutils literal"><span class="pre">reaction_matrix.dxdt</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dxdt</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ratecoef</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal"><span class="pre">x</span></code> is a numpy array giving the instantaneous abundances of all
+species, <code class="docutils literal"><span class="pre">n</span></code> is the number density of H nuclei, and <code class="docutils literal"><span class="pre">ratecoeff</span></code> is
+a numpy array giving the rate coefficient for all reactions. The
+quantity returned is the instantaneous rate of change of all
+abundances <code class="docutils literal"><span class="pre">x</span></code>. The density-dependence of the reaction rates implied
+by the stoichiometric factors in the reaction list is computed
+automatically.</p>
+</div>
+<div class="section" id="cr-reactions">
+<h4><code class="docutils literal"><span class="pre">cr_reactions</span></code><a class="headerlink" href="#cr-reactions" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal"><span class="pre">cr_reactions</span></code> class is a specialized class derived from
+<a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a> that is intended to handle cosmic
+ray-induced reactions &#8211; those where the rate is proportional to
+the cosmic ray ionization rate.</p>
+<p>Instantiation of a <code class="docutils literal"><span class="pre">cr_reactions</span></code> object takes the same two
+arguments as <a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a>, but <code class="docutils literal"><span class="pre">reactions</span></code>, the
+list of reactions to be passed, is altered in that each reaction takes
+an additional key, <code class="docutils literal"><span class="pre">rate</span></code>, that gives the proportionality between
+the reaction rate and the cosmic ray ionization rate. Thus for example
+if we wished to include the reactions</p>
+<div class="math">
+\[\begin{split}\mathrm{CR} + \mathrm{H} &amp; \rightarrow \mathrm{H}^+ +
+\mathrm{e}^- \\
+\mathrm{CR} + \mathrm{H}_2 &amp; \rightarrow \mathrm{H}_2^+ +
+\mathrm{e}^-\end{split}\]</div>
+<p>in a network, with the former occuring at a rate per particle equal to
+the rate of primary cosmic ray ionizations, and the other at a rate
+per particle that is twice the rate of primary ionizations, we would
+define:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="kn">import</span> <span class="n">cr_reactions</span>
+<span class="n">specList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;H&quot;</span><span class="p">,</span> <span class="s">&quot;H2&quot;</span><span class="p">,</span> <span class="s">&quot;H+&quot;</span><span class="p">,</span> <span class="s">&quot;H2+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">]</span>
+<span class="n">reactions</span> \
+   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;H&quot;</span><span class="p">,</span> <span class="s">&quot;H+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">1.0</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;H2&quot;</span><span class="p">,</span> <span class="s">&quot;H2+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">2.0</span> <span class="p">}</span> <span class="p">]</span>
+<span class="n">cr</span> <span class="o">=</span> <span class="n">cr_reactions</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Once a <code class="docutils literal"><span class="pre">cr_reactions</span></code> object is instantiated, it can be used to
+compute the rates of change all species using the
+<code class="docutils literal"><span class="pre">cr_reactions.dxdt</span></code> routine:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dxdt</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ionrate</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal"><span class="pre">x</span></code> is a numpy array giving the current abundances, <code class="docutils literal"><span class="pre">n</span></code> is
+the number density of H nuclei, and <code class="docutils literal"><span class="pre">ionrate</span></code> is the cosmic ray
+primary ionization rate.</p>
+<p>Note that, in most cases, the variable <code class="docutils literal"><span class="pre">n</span></code> will not be used, because
+it is needed only if there is more than one reactant on the left hand
+side of a reaction. It is provided to enable the case where a cosmic
+ray ionization is followed immediately by another reaction, and the
+network combines the two steps for speed. For example, the
+<a class="reference internal" href="#sssec-nl99"><span>NL99</span></a> network combines the two reactions</p>
+<div class="math">
+\[\begin{split}\mathrm{CR} + \mathrm{H}_2 &amp; \rightarrow \mathrm{H}_2^+ +
+\mathrm{e}^- \\
+\mathrm{H}_2^+ + \mathrm{H}_2 &amp; \rightarrow \mathrm{H}_3^+ +
+\mathrm{H} + \mathrm{e}^-\end{split}\]</div>
+<p>into the single super-reaction</p>
+<div class="math">
+\[\mathrm{CR} + 2\mathrm{H}_2 \rightarrow \mathrm{H}_3^+ +
+\mathrm{H} + \mathrm{e}^-\]</div>
+<p>and the rate of this super-reaction does depend on density.</p>
+</div>
+<div class="section" id="photoreactions">
+<h4><code class="docutils literal"><span class="pre">photoreactions</span></code><a class="headerlink" href="#photoreactions" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal"><span class="pre">photoreactions</span></code> class is a specialized class derived from
+<a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a> that is intended to handle reactions
+that are driven by FUV photons, and thus have rates proportional to
+the interstellar radiation field (ISRF) strength, modified by dust and
+gas shielding, and possibly also by line shielding.</p>
+<p>Instantiation of <code class="docutils literal"><span class="pre">photoreactions</span></code> takes the same two arguments as
+<a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a>: a list of species, and a list of
+reactions, each element of which is a dict giving the reactants and
+stoichiometric factors. The dict also contains three additional keys
+that are specific to photoreactions: <code class="docutils literal"><span class="pre">rate</span></code> gives the reaction rate
+per reactant per second in an ISRF equal to the unshielded Solar
+neighborhood value (formally, with strength chracterized by
+<span class="math">\(\chi = 1\)</span> &#8211; see <a class="reference internal" href="cloudfiles.html#tab-cloudfiles"><span>Cloud file keys and their meanings</span></a>). The key <code class="docutils literal"><span class="pre">av_fac</span></code>
+describes the optical depth per unit visual extinction provided by
+dust for the photons driving the reaction. That is, reaction rates
+will be reduced by a factor <span class="math">\(\exp(-\mathrm{av\_fac}\times
+A_V)\)</span>. Finally, the key <code class="docutils literal"><span class="pre">shield_fac</span></code>, which is optional, can be set
+equal to a callable that describes the rate by which the reaction rate
+is reduced due to line shielding. This function can take any number of
+argument &#8211; see below. Thus the final reaction rate per reactant will
+be equal to</p>
+<div class="math">
+\[\mathrm{reaction\, rate} = \chi \times \mathrm{rate} \times
+\mathrm{shield\_fac} \times \exp(-\mathrm{av\_fac}\times A_V)\]</div>
+<p>As an example, suppose we wished to include the reactions</p>
+<div class="math">
+\[\begin{split}\gamma + \mathrm{C} &amp; \rightarrow \mathrm{C}^+ + \mathrm{e}^- \\
+\gamma + \mathrm{CO} &amp; \rightarrow \mathrm{C} + \mathrm{O} \\\end{split}\]</div>
+<p>The first reaction occurs at a rate per C atom <span class="math">\(5.1\times
+10^{-10}\,\mathrm{s}^{-1}\)</span> in unshielded space, and the optical depth
+to the photons producing the reaction is <span class="math">\(3.0\times A_V\)</span>. There
+is no significant self-shielding. The second reaction occurs at a rate
+per CO molecule <span class="math">\(1.7\times 10^{-10}\,\mathrm{s}^{-1}\)</span> in
+unshielded space, with a dust optical depth equal to <span class="math">\(1.7\times
+A_V\)</span>, and with an additional function describing line shielding called
+<code class="docutils literal"><span class="pre">fShield_CO</span></code>. We could create a <code class="docutils literal"><span class="pre">photoeactions</span></code> object containing
+this reaction by doing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="kn">import</span> <span class="n">photoreactions</span>
+<span class="n">specList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;C+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">,</span> <span class="s">&quot;O&quot;</span><span class="p">,</span> <span class="s">&quot;CO&quot;</span><span class="p">]</span>
+<span class="n">reactions</span> \
+   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;C+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">5.1e-10</span><span class="p">,</span> <span class="s">&quot;av_fac&quot;</span> <span class="p">:</span> <span class="mf">3.0</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;CO&quot;</span><span class="p">,</span> <span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;O&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">1.7e-10</span><span class="p">,</span> <span class="s">&quot;av_fac&quot;</span> <span class="p">:</span> <span class="mf">1.7</span><span class="p">,</span>
+         <span class="s">&quot;shield_fac&quot;</span> <span class="p">:</span> <span class="n">fShield_CO</span> <span class="p">}</span> <span class="p">]</span>
+<span class="n">phr</span> <span class="o">=</span> <span class="n">photoreactions</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Once a photoreactions object exists, the rates of change of all
+species due to the included photoreactions can be computed using the
+<code class="docutils literal"><span class="pre">photoreactions.dxdt</span></code> routine. Usage is as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>dxdt = phr.dxdt(x, n, chi, AV,
+                shield_args=[[f1_arg1, f1_arg2, ...],
+                             [f2_arg1, f2_arg2, ...],
+                             ... ],
+                shield_kw_args = [ { &quot;f1_kw1&quot; : val1,
+                                     &quot;f1_kw2&quot; : val2, ... },
+                                   { &quot;f2_kw1&quot; : val1,
+                                     &quot;f2_kw2&quot; : val2, ... },
+                                   ... ])
+</pre></div>
+</div>
+<p>Here <code class="docutils literal"><span class="pre">x</span></code> is a numpy array giving the current abundances, <code class="docutils literal"><span class="pre">n</span></code> is
+the number density of H nuclei, <code class="docutils literal"><span class="pre">chi</span></code> is the unshielded ISRF
+strength, and <code class="docutils literal"><span class="pre">AV</span></code> is the dust visual extinction. The optional
+arguments <code class="docutils literal"><span class="pre">shield_args</span></code> and <code class="docutils literal"><span class="pre">shield_kw_args</span></code> are used to pass
+positional arguments and keyword arguments, respectively, to the
+shielding functions. Each one is a list. The first entry in the list
+for <code class="docutils literal"><span class="pre">shield_args</span></code> is a list containing the positional arguments to
+be passed to the first shielding function provided in the
+<code class="docutils literal"><span class="pre">reactions</span></code> dict passed to the constructor. The second entry in
+<code class="docutils literal"><span class="pre">shield_args</span></code> is a list containing positional arguments to be passed
+to the second shielding function, and so forth. Similarly, the
+first entry in the <code class="docutils literal"><span class="pre">shield_kw_args</span></code> list is a dict containing the
+keywords and their values to be passed to the first shielding
+function, etc. The length of the <code class="docutils literal"><span class="pre">shield_args</span></code> and
+<code class="docutils literal"><span class="pre">shield_kw_args</span></code> must be equal to the number of shielding functions
+provided in <code class="docutils literal"><span class="pre">reactions</span></code>, but elements of the lists can be set to
+<code class="docutils literal"><span class="pre">None</span></code> if a particular shielding function does not take positional
+or keyword arguments. Moreover, both <code class="docutils literal"><span class="pre">shield_args</span></code> and
+<code class="docutils literal"><span class="pre">shield_kw_args</span></code> are optional. If they are omitted, then all
+shielding functions are invoked with no positional or keyword
+arguments, respectively.</p>
+<p>Thus in the above example, suppose that the function <code class="docutils literal"><span class="pre">fShield_CO</span></code>
+returns the factor by which the reaction rate is reduced by CO line
+shielding. It takes two arguments: <code class="docutils literal"><span class="pre">NH2</span></code> and <code class="docutils literal"><span class="pre">NCO</span></code>, giving the
+column densities of <span class="math">\(\mathrm{H}_2\)</span> and <span class="math">\(\mathrm{CO}\)</span>,
+respectively. It also accepts a keyword argument <code class="docutils literal"><span class="pre">order</span></code> that
+specifies the order of interpolation to be used in computing the
+shielding function from a table. In this case one could compute the
+rates of change of the abundances via:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dxdt</span> <span class="o">=</span> <span class="n">phr</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">AV</span><span class="p">,</span>
+                <span class="n">shield_args</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NH2</span><span class="p">,</span> <span class="n">NCO</span><span class="p">]],</span>
+                <span class="n">shield_kw_args</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span><span class="s">&quot;order&quot;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">}</span> <span class="p">])</span>
+</pre></div>
+</div>
+<p>This would call <code class="docutils literal"><span class="pre">fShield_CO</span></code> as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fShield_CO</span><span class="p">(</span><span class="n">NH2</span><span class="p">,</span> <span class="n">NCO</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Chemistry and Chemical Networks</a><ul>
+<li><a class="reference internal" href="#operations-on-chemical-networks">Operations on Chemical Networks</a></li>
+<li><a class="reference internal" href="#predefined-chemical-networks">Predefined Chemical Networks</a><ul>
+<li><a class="reference internal" href="#nl99"><code class="docutils literal"><span class="pre">NL99</span></code></a></li>
+<li><a class="reference internal" href="#nl99-gc"><code class="docutils literal"><span class="pre">NL99_GC</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-new-chemical-networks-the-chemnetwork-class">Defining New Chemical Networks: the <code class="docutils literal"><span class="pre">chemNetwork</span></code> Class</a></li>
+<li><a class="reference internal" href="#helper-modules-for-chemical-networks">Helper Modules for Chemical Networks</a><ul>
+<li><a class="reference internal" href="#abundancedict"><code class="docutils literal"><span class="pre">abundanceDict</span></code></a></li>
+<li><a class="reference internal" href="#reactions"><code class="docutils literal"><span class="pre">reactions</span></code></a><ul>
+<li><a class="reference internal" href="#reaction-matrix"><code class="docutils literal"><span class="pre">reaction_matrix</span></code></a></li>
+<li><a class="reference internal" href="#cr-reactions"><code class="docutils literal"><span class="pre">cr_reactions</span></code></a></li>
+<li><a class="reference internal" href="#photoreactions"><code class="docutils literal"><span class="pre">photoreactions</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="data.html" title="previous chapter">Atomic and Molecular Data</a></li>
+      <li>Next: <a href="fulldoc.html" title="next chapter">Full Documentation of All DESPOTIC Classes and Functions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chemistry.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Mark R. Krumholz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/chemistry.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -32,29 +32,23 @@ def fetchLamda(inputURL, path=None, fileName=None):
     Routine to download LAMDA files from the web.
 
     Parameters
-    ----------
-    inputURL : string
-        URL of LAMDA file containing data on this species; if this
-        does not begin with "http://", indicating it is a URL, then
-        this is assumed to be a filename within LAMDA, and a default
-        URL is appended
-    path : string
-        relative or absolute path at which to store the file; if not
-        set, the current directory is used; if the specified path does
-        not exist, it is created
-    fileName : string
-        name to give to file; if not set, defaults to the same as the
-        name in LAMDA
+       inputURL : string
+          URL of LAMDA file containing data on this species; if this
+          does not begin with "http://", indicating it is a URL, then
+          this is assumed to be a filename within LAMDA, and a default
+          URL is appended
+       path : string
+          relative or absolute path at which to store the file; if not
+          set, the current directory is used; if the specified path does
+          not exist, it is created
+       fileName : string
+          name to give to file; if not set, defaults to the same as the
+          name in LAMDA
 
     Returns
-    -------
-    fname : string
-        local file name to which downloaded file was written; if URL
-        cannot be opened, None is returned instead
-
-    Raises
-    ------
-    despoticError if output file cannot be written
+       fname : string
+          local file name to which downloaded file was written; if URL
+          cannot be opened, None is returned instead
     """
 
     # Check if the URL we've been passed starts with http://. If not,

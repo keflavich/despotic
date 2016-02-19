@@ -1,0 +1,3287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Full Documentation of All DESPOTIC Classes and Functions &mdash; DESPOTIC 2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <link rel="next" title="Acknowledgements" href="acknowledgements.html" />
+    <link rel="prev" title="Chemistry and Chemical Networks" href="chemistry.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="full-documentation-of-all-despotic-classes-and-functions">
+<span id="sec-fulldoc"></span><h1>Full Documentation of All DESPOTIC Classes and Functions<a class="headerlink" href="#full-documentation-of-all-despotic-classes-and-functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="despotic-classes">
+<h2>despotic classes<a class="headerlink" href="#despotic-classes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cloud">
+<span id="sssec-full-cloud"></span><h3><code class="docutils literal"><span class="pre">cloud</span></code><a class="headerlink" href="#cloud" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.cloud">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">cloud</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class describing the properties of an interstellar cloud, and
+providing methods to perform calculations using those properties.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of file from which to read cloud description</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>print out information about the cloud as we read it</dd>
+</dl>
+</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>nH <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>number density of H nuclei, in cm^-3</dd>
+<dt>colDen <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>center-to-edge column density of H nuclei, in cm^-2</dd>
+<dt>sigmaNT <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>non-thermal velocity dispersion, in cm s^-1</dd>
+<dt>dVdr <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>radial velocity gradient, in s^-1 (or cm s^-1 cm^-1)</dd>
+<dt>Tg <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>gas kinetic temperature, in K</dd>
+<dt>Td <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust temperature, in K</dd>
+<dt>comp <span class="classifier-delimiter">:</span> <span class="classifier">class composition</span></dt>
+<dd>a class that stores information about the chemical
+composition of the cloud</dd>
+<dt>dust <span class="classifier-delimiter">:</span> <span class="classifier">class dustProp</span></dt>
+<dd>a class that stores information about the properties of the
+dust in a cloud</dd>
+<dt>rad <span class="classifier-delimiter">:</span> <span class="classifier">class radiation</span></dt>
+<dd>the radiation field impinging on the cloud</dd>
+<dt>emitters <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>keys of the dict are names of emitting species, and values
+are objects of class emitter</dd>
+<dt>chemnetwork <span class="classifier-delimiter">:</span> <span class="classifier">chemical network class (optional)</span></dt>
+<dd>a chemical network that is to be used to perform
+time-dependent chemical evolution calcualtions for this cloud</dd>
+</dl>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="despotic.cloud.abundances">
+<code class="descname">abundances</code><a class="headerlink" href="#despotic.cloud.abundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property contains the abundances of all emitting species,
+stored as an abundanceDict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.addEmitter">
+<code class="descname">addEmitter</code><span class="sig-paren">(</span><em>emitName</em>, <em>emitAbundance</em>, <em>emitterFile=None</em>, <em>emitterURL=None</em>, <em>energySkip=False</em>, <em>extrap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.addEmitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.addEmitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to add an emitting species</p>
+<dl class="docutils">
+<dt>Pamameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of the emitting species</dd>
+<dt>emitAbundance <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of the emitting species relative to H</dd>
+<dt>emitterFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>emitterURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>energySkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, this species is ignored when calculating
+line cooling rates</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>If set to True, collision rate coefficients for this species
+will be extrapolated to temperatures outside the range given
+in the LAMDA table. If False, no extrapolation is perfomed,
+and providing temperatures outside the range in the table
+produces an error</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.chemEvol">
+<code class="descname">chemEvol</code><span class="sig-paren">(</span><em>tFin</em>, <em>tInit=0.0</em>, <em>nOut=100</em>, <em>dt=None</em>, <em>tOut=None</em>, <em>network=None</em>, <em>info=None</em>, <em>addEmitters=False</em>, <em>evolveTemp='fixed'</em>, <em>isobaric=False</em>, <em>tempEqParam=None</em>, <em>dEdtParam=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.chemEvol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.chemEvol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evolve the chemical abundances of this cloud in time.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>tFin <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>end time of integration, in sec</dd>
+<dt>tInit <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>start time of integration, in sec</dd>
+<dt>nOut <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of times at which to report the temperature; this
+is ignored if dt or tOut are set</dd>
+<dt>dt <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>time interval between outputs, in sec; this is ignored if
+tOut is set</dd>
+<dt>tOut <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>list of times at which to output the temperature, in sec;
+must be sorted in increasing order</dd>
+<dt>network <span class="classifier-delimiter">:</span> <span class="classifier">chemical network class</span></dt>
+<dd>a valid chemical network class; this class must define the
+methods __init__, dxdt, and applyAbundances; if None, the
+existing chemical network for the cloud is used</dd>
+<dt>info <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>a dict of additional initialization information to be passed
+to the chemical network class when it is instantiated</dd>
+<dt>addEmitters <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, emitters that are included in the chemical
+network but not in the cloud&#8217;s existing emitter list will
+be added; if False, abundances of emitters already in the
+emitter list will be updated, but new emiters will not be
+added to the cloud</dd>
+<dt>evolveTemp <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;fixed&#8217; | &#8216;gasEq&#8217; | &#8216;fullEq&#8217; | &#8216;evol&#8217;</span></dt>
+<dd>how to treat the temperature evolution during the
+chemical evolution; &#8216;fixed&#8217; = treat tempeature as fixed;
+&#8216;gasEq&#8217; = hold dust temperature fixed, set gas temperature
+to instantaneous equilibrium value; &#8216;fullEq&#8217; = set gas and
+dust temperatures to instantaneous equilibrium values;
+&#8216;evol&#8217; = evolve gas temperature in time along with the
+chemistry, assuming the dust is always in instantaneous
+equilibrium</dd>
+<dt>isobaric <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the gas is assumed to be isobaric during
+the evolution (constant pressure); otherwise it is assumed
+to be isochoric; note that (since chemistry networks at
+present are not allowed to change the mean molecular
+weight), this option has no effect if evolveTemp is &#8216;fixed&#8217;</dd>
+<dt>tempEqParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.setTempEq,
+cloud.setGasTempEq, or cloud.setDustTempEq routines; only
+used if evolveTemp is not &#8216;fixed&#8217;</dd>
+<dt>dEdtParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.dEdt
+routine; only used if evolveTemp is &#8216;evol&#8217;</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">array of floats</span></dt>
+<dd>array of output times, in sec</dd>
+<dt>abundances <span class="classifier-delimiter">:</span> <span class="classifier">class abundanceDict</span></dt>
+<dd>an abundanceDict giving the abundances as a function of time</dd>
+<dt>Tg <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>gas temperature as a function of time; returned only if
+evolveTemp is not &#8216;fixed&#8217;</dd>
+<dt>Td <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>dust temperature as a function of time; returned only if
+evolveTemp is not &#8216;fixed&#8217; or &#8216;gasEq&#8217;</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError, if network is None and the cloud does not already
+have a defined chemical network associated with it</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.cloud.chemabundances">
+<code class="descname">chemabundances</code><a class="headerlink" href="#despotic.cloud.chemabundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>The property contains the abundances of all species in the
+chemical network, stored as an abundanceDict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.dEdt">
+<code class="descname">dEdt</code><span class="sig-paren">(</span><em>c1Grav=0.0</em>, <em>thin=False</em>, <em>LTE=False</em>, <em>fixedLevPop=False</em>, <em>noClump=False</em>, <em>escapeProbGeom='sphere'</em>, <em>PsiUser=None</em>, <em>sumOnly=False</em>, <em>dustOnly=False</em>, <em>gasOnly=False</em>, <em>dustCoolOnly=False</em>, <em>dampFactor=0.5</em>, <em>verbose=False</em>, <em>overrideSkip=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.dEdt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.dEdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return instantaneous values of heating / cooling terms</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>c1Grav <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>if this is non-zero, the cloud is assumed to be
+collapsing, and energy is added at a rate
+Gamma_grav = c1 mu_H m_H cs^2 sqrt(4 pi G rho)</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, cloud is assumed to be opticall thin</dd>
+<dt>LTE <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, gas is assumed to be in LTE</dd>
+<dt>fixedLevPop <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, level populations and escape
+probabilities are not recomputed, so the cooling rate is
+based on whatever values are stored</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">string, &#8216;sphere&#8217; or &#8216;LVG&#8217; or &#8216;slab&#8217;</span></dt>
+<dd>specifies the geometry to be assumed in calculating
+escape probabilities</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>damping factor to use in level population calculations;
+see emitter.setLevPopEscapeProb</dd>
+<dt>PsiUser <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd>A user-specified function to add additional heating /
+cooling terms to the calculation. The function takes the
+cloud object as an argument, and must return a two-element
+array Psi, where Psi[0] = gas heating / cooling rate,
+Psi[1] = dust heating / cooling rate. Positive values
+indicate heating, negative values cooling, and units are
+assumed to be erg s^-1 H^-1.</dd>
+<dt>sumOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, rates contains only four entries: dEdtGas and
+dEdtDust give the heating / cooling rates for the
+gas and dust summed over all terms, and maxAbsdEdtGas and
+maxAbsdEdtDust give the largest of the absolute values of
+any of the contributing terms for dust and gas</dd>
+<dt>gasOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, the terms GammaISRF, GammaDustLine, LambdaDust,               and PsiUserDust are omitted from rates. If both gasOnly
+and sumOnly are true, the dict contains only dEdtGas</dd>
+<dt>dustOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, the terms GammaPE, GammaCR, LambdaLine,
+GamamDLine, and PsiUserGas are omitted from rates. If both
+dustOnly and sumOnly are true, the dict contains only
+dEdtDust. Important caveat: the value of dEdtDust returned
+in this case will not exactly match that returned if
+dustOnly is false, because it will not contain the
+contribution from gas line cooling radiation that is
+absorbed by the dust</dd>
+<dt>dustCoolOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>as dustOnly, but except that now only the terms
+LambdaDust, PsiGD, and PsiUserDust are computed</dd>
+<dt>overrideSkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, energySkip directives are ignored, and cooling
+rates are calculated for all species</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first docutils">
+<dt>rates <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>A dict containing the values of the various heating and
+cooling rate terms; all quantities are in units of erg s^-1
+H^-1, and by convention positive = heating, negative =
+cooling; for dust-gas exchange, positive indicates heating
+of gas, cooling of dust</dd>
+</dl>
+<p>Elements of the dict are as follows by default, but can be
+altered by the additional keywords listed below:</p>
+<dl class="last docutils">
+<dt>GammaPE <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>photoelectric heating rate</dd>
+<dt>GammaCR <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>cosmic ray heating rate</dd>
+<dt>GammaGrav <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>gravitational contraction heating rate</dd>
+<dt>LambdaLine <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>cooling rate from lines; dictionary keys correspond to
+species in the emitter list, values give line cooling
+rate for that species</dd>
+<dt>PsiGD <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust-gas energy exchange rate</dd>
+<dt>GammaDustISRF <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust heating rate due to the ISRF</dd>
+<dt>GammaDustCMB <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust heating rate due to CMB</dd>
+<dt>GammaDustIR <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust heating rate due to IR field</dd>
+<dt>GammaDustLine <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust heating rate due to absorption of line radiation</dd>
+<dt>LambdaDust <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust cooling rate due to thermal emission</dd>
+<dt>PsiUserGas <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>gas heating / cooling rate from user-specified
+function; only included if PsiUser != None</dd>
+<dt>PsiUserDust <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>gas heating / cooling rate from user-specified
+function; only included is PsiUser != None</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.lineLum">
+<code class="descname">lineLum</code><span class="sig-paren">(</span><em>emitName</em>, <em>LTE=False</em>, <em>noClump=False</em>, <em>transition=None</em>, <em>thin=False</em>, <em>intOnly=False</em>, <em>TBOnly=False</em>, <em>lumOnly=False</em>, <em>escapeProbGeom='sphere'</em>, <em>dampFactor=0.5</em>, <em>noRecompute=False</em>, <em>abstol=1e-08</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.lineLum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.lineLum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the frequency-integrated intensity of various lines</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of the emitter for which the calculation is to be
+performed</dd>
+<dt>LTE <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, and level populations are unitialized, they will
+be initialized to their LTE values; if they are
+initialized, this option is ignored</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list of two arrays</span></dt>
+<dd>if left as None, luminosity is computed for all
+transitions; otherwise only selected transitions are
+computed, with transition[0] = array of upper states
+transition[1] = array of lower states</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the calculation is done assuming the cloud is
+optically thin; if level populations are uninitialized,
+and LTE is not set, they will be computed assuming the
+cloud is optically thin</dd>
+<dt>intOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, the output is simply an array containing the
+frequency-integrated intensity of the specified lines;
+mutually exclusive with TBOnly and lumOnly</dd>
+<dt>TBOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the output is simply an array containing the
+velocity-integrated brightness temperatures of the
+specified lines; mutually exclusive with intOnly and
+lumOnly</dd>
+<dt>lumOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the output is simply an array containing the
+luminosity per H nucleus in each of the specified lines;
+mutually eclusive with intOnly and TBOonly</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities; ignored if the escape probabilities
+are already initialized</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>damping factor to use in level population calculations;
+see emitter.setLevPopEscapeProb</dd>
+<dt>noRecompute <span class="classifier-delimiter">:</span> <span class="classifier">False</span></dt>
+<dd>if True, level populations and escape probabilities are
+not recomputed; instead, stored values are used</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><p class="first">res : list or array</p>
+<p>if intOnly, TBOnly, and lumOnly are all False, each element
+of the list is a dict containing the following fields:</p>
+<dl class="last docutils">
+<dt>&#8216;freq&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>frequency of the line in Hz</dd>
+<dt>&#8216;upper&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>index of upper state, with ground state = 0 and states
+ordered by energy</dd>
+<dt>&#8216;lower&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>index of lower state</dd>
+<dt>&#8216;Tupper&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>energy of the upper state in K (i.e. energy over kB)</dd>
+<dt>&#8216;Tex&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>excitation temperature relating the upper and lower levels</dd>
+<dt>&#8216;intIntensity&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>frequency-integrated intensity of the line, with the CMB
+contribution subtracted off; units are erg cm^-2 s^-1 sr^-1</dd>
+<dt>&#8216;intTB&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>velocity-integrated brightness temperature of the line,
+with the CMB contribution subtracted off; units are K km
+s^-1</dd>
+<dt>&#8216;lumPerH&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>luminosity of the line per H nucleus; units are erg s^-1
+H^-1</dd>
+<dt>&#8216;tau&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>optical depth in the line, not including dust</dd>
+<dt>&#8216;tauDust&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust optical depth in the line</dd>
+</dl>
+</dd>
+</dl>
+<p>if intOnly, TBOnly, or lumOnly are True: res is an array
+containing the intIntensity, TB, or lumPerH fields of the dict
+described above</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>fileName</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the composition from a file</p>
+<dl class="docutils">
+<dt>Pamameters</dt>
+<dd><dl class="first last docutils">
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>string giving the name of the composition file</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>print out information about the cloud as it is read</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+<dt>Remarks</dt>
+<dd>For the format of cloud files, see the documentation</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.setChemEq">
+<code class="descname">setChemEq</code><span class="sig-paren">(</span><em>tEqGuess=None</em>, <em>network=None</em>, <em>info=None</em>, <em>addEmitters=False</em>, <em>tol=1e-06</em>, <em>maxTime=1e+16</em>, <em>verbose=False</em>, <em>smallabd=1e-15</em>, <em>convList=None</em>, <em>evolveTemp='fixed'</em>, <em>isobaric=False</em>, <em>tempEqParam=None</em>, <em>dEdtParam=None</em>, <em>maxTempIter=50</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.setChemEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.setChemEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the chemical abundances for a cloud to their equilibrium
+values, computed using a specified chemical network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>tEqGuess <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>a guess at the timescale over which equilibrium will be
+achieved; if left unspecified, the code will attempt to
+estimate this time scale on its own</dd>
+<dt>network <span class="classifier-delimiter">:</span> <span class="classifier">chemNetwork object</span></dt>
+<dd>the chemNetwork object to use; if None, the existing
+chemnetwork member of the class (if it exists) is used</dd>
+<dt>info <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>a dict of additional initialization information to be passed
+to the chemical network class when it is instantiated</dd>
+<dt>addEmitters <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, emitters that are included in the chemical
+network but not in the cloud&#8217;s existing emitter list will
+be added; if False, abundances of emitters already in the
+emitter list will be updated, but new emiters will not be
+added to the cloud</dd>
+<dt>evolveTemp <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;fixed&#8217; | &#8216;iterate&#8217; | &#8216;iterateDust&#8217; | &#8216;gasEq&#8217; | &#8216;fullEq&#8217; | &#8216;evol&#8217;</span></dt>
+<dd>how to treat the temperature evolution during the chemical
+evolution; &#8216;fixed&#8217; = treat tempeature as fixed; &#8216;iterate&#8217; =
+iterate between setting the gas temperature and chemistry to
+equilibrium; &#8216;iterateDust&#8217; = iterate between setting the gas
+and dust temperatures and the chemistry to equilibrium;
+&#8216;gasEq&#8217; = hold dust temperature fixed, set gas temperature to
+instantaneous equilibrium value as the chemistry evolves;
+&#8216;fullEq&#8217; = set gas and dust temperatures to instantaneous
+equilibrium values while evolving the chemistry network;
+&#8216;evol&#8217; = evolve gas temperature in time along with the
+chemistry, assuming the dust is always in instantaneous
+equilibrium</dd>
+<dt>isobaric <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the gas is assumed to be isobaric during
+the evolution (constant pressure); otherwise it is assumed
+to be isochoric; note that (since chemistry networks at
+present are not allowed to change the mean molecular
+weight), this option has no effect if evolveTemp is &#8216;fixed&#8217;</dd>
+<dt>tempEqParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.setTempEq,
+cloud.setGasTempEq, or cloud.setDustTempEq routines; only
+used if evolveTemp is not &#8216;fixed&#8217;</dd>
+<dt>dEdtParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.dEdt
+routine; only used if evolveTemp is &#8216;evol&#8217;</dd>
+<dt>tol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>tolerance requirement on the equilibrium solution</dd>
+<dt>convList <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of species to include when calculating tolerances to
+decide if network is converged; species not listed are not
+considered. If this is None, then all species are considered
+in deciding if the calculation is converged.</dd>
+<dt>smallabd <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundances below smallabd are not considered when checking for
+convergence; set to 0 or a negative value to consider all
+abundances, but beware that this may result in false
+non-convergence due to roundoff error in very small abundances</dd>
+<dt>maxTempIter <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum number of iterations when iterating between chemistry
+and temperature; only used if evolveTemp is &#8216;iterate&#8217; or
+&#8216;iterateDust&#8217;</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, diagnostic information is printed as the calculation
+proceeds</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>converged <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if the calculation converged, False if not</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError, if network is None and the cloud does not
+already have a defined chemical network associated with it</dd>
+<dt>Remarks</dt>
+<dd>The final abundances are written to the cloud whether or
+not the calculation converges.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.setDustTempEq">
+<code class="descname">setDustTempEq</code><span class="sig-paren">(</span><em>PsiUser=None</em>, <em>Tdinit=None</em>, <em>noLines=False</em>, <em>noClump=False</em>, <em>verbose=False</em>, <em>dampFactor=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.setDustTempEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.setDustTempEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Td to equilibrium dust temperature at fixed Tg</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>Tdinit <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>initial guess for gas temperature</dd>
+<dt>PsiUser <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd>A user-specified function to add additional heating /
+cooling terms to the calculation. The function takes the
+cloud object as an argument, and must return a two-element
+array Psi, where Psi[0] = gas heating / cooling rate,
+Psi[1] = dust heating / cooling rate. Positive values
+indicate heating, negative values cooling, and units are
+assumed to be erg s^-1 H^-1.</dd>
+<dt>noLines <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>If True, line heating of the dust is ignored. This can
+make the calculation significantly faster.</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>damping factor to use in level population calculations;
+see emitter.setLevPopEscapeProb</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, diagnostic information is printed</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if dust temperature calculation converged, False if
+not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.setGasTempEq">
+<code class="descname">setGasTempEq</code><span class="sig-paren">(</span><em>c1Grav=0.0</em>, <em>thin=False</em>, <em>noClump=False</em>, <em>LTE=False</em>, <em>Tginit=None</em>, <em>fixedLevPop=False</em>, <em>escapeProbGeom='sphere'</em>, <em>PsiUser=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.setGasTempEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.setGasTempEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Tg to equilibrium gas temperature at fixed Td</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>c1Grav <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>if this is non-zero, the cloud is assumed to be
+collapsing, and energy is added at a rate
+Gamma_grav = c1 mu_H m_H cs^2 sqrt(4 pi G rho)</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, cloud is assumed to be opticall thin</dd>
+<dt>LTE <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, gas is assumed to be in LTE</dd>
+<dt>Tginit <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>initial guess for gas temperature</dd>
+<dt>fixedLevPop <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, level populations are held fixed
+at the starting value, rather than caclculated
+self-consistently from the temperature</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>specifies the geometry to be assumed in computing escape
+probabilities</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>PsiUser <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd>A user-specified function to add additional heating /
+cooling terms to the calculation. The function takes the
+cloud object as an argument, and must return a two-element
+array Psi, where Psi[0] = gas heating / cooling rate,
+Psi[1] = dust heating / cooling rate. Positive values
+indicate heating, negative values cooling, and units are
+assumed to be erg s^-1 H^-1.</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, print status messages while running</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if the calculation converges, False if it does not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.setTempEq">
+<code class="descname">setTempEq</code><span class="sig-paren">(</span><em>c1Grav=0.0</em>, <em>thin=False</em>, <em>noClump=False</em>, <em>LTE=False</em>, <em>Tinit=None</em>, <em>fixedLevPop=False</em>, <em>escapeProbGeom='sphere'</em>, <em>PsiUser=None</em>, <em>verbose=False</em>, <em>tol=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.setTempEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.setTempEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Tg and Td to equilibrium gas and dust temperatures</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>c1Grav <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>coefficient for rate of gas gravitational heating</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, cloud is assumed to be opticall thin</dd>
+<dt>LTE <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, gas is assumed to be in LTE</dd>
+<dt>Tinit <span class="classifier-delimiter">:</span> <span class="classifier">array(2)</span></dt>
+<dd>initial guess for gas and dust temperature</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>fixedLevPop <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to true, level populations are held fixed
+at the starting value, rather than caclculated
+self-consistently from the temperature</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>specifies the geometry to be assumed in computing escape
+probabilities</dd>
+<dt>PsiUser <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd>A user-specified function to add additional heating /
+cooling terms to the calculation. The function takes the
+cloud object as an argument, and must return a two-element
+array Psi, where Psi[0] = gas heating / cooling rate,
+Psi[1] = dust heating / cooling rate. Positive values
+indicate heating, negative values cooling, and units are
+assumed to be erg s^-1 H^-1.</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the code prints diagnostic information as it runs</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if the iteration converges, False if it does not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.setVirial">
+<code class="descname">setVirial</code><span class="sig-paren">(</span><em>alphaVir=1.0</em>, <em>setColDen=False</em>, <em>setnH=False</em>, <em>NTonly=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.setVirial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.setVirial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set sigmaNT, colDen, or nH to the value required to give a
+virial ratio of unity</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>alphaVir <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>virial ratio to be used in computation; defaults to 1</dd>
+<dt>setColDen <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, sigmaNT and nH are fixed, and colDen is
+altered to give the desired virial ratio</dd>
+<dt>setnH <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, sigmaNT and colDen are fixed, and nH is altered
+to give the desired virial ratio</dd>
+<dt>NTonly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the virial ratio is computed considering only the
+non-thermal component of the velocity dispersion</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+<dt>Remarks</dt>
+<dd>By default the routine fixes nH and colDen and computes
+sigmaNT, but this can be overridden by specifying either
+setColDen or setnH. It is an error to set both of these to
+True.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.cloud.tempEvol">
+<code class="descname">tempEvol</code><span class="sig-paren">(</span><em>tFin</em>, <em>tInit=0.0</em>, <em>c1Grav=0.0</em>, <em>noClump=False</em>, <em>thin=False</em>, <em>LTE=False</em>, <em>fixedLevPop=False</em>, <em>escapeProbGeom='sphere'</em>, <em>nOut=100</em>, <em>dt=None</em>, <em>tOut=None</em>, <em>PsiUser=None</em>, <em>isobaric=False</em>, <em>fullOutput=False</em>, <em>dampFactor=0.5</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/cloud.html#cloud.tempEvol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.cloud.tempEvol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the evolution of the gas temperature in time</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>tFin <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>end time of integration, in sec</dd>
+<dt>tInit <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>start time of integration, in sec</dd>
+<dt>c1Grav <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>coefficient for rate of gas gravitational heating</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, cloud is assumed to be opticall thin</dd>
+<dt>LTE <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, gas is assumed to be in LTE</dd>
+<dt>isobaric <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, cooling is calculated isobarically;
+otherwise (default behavior) it is computed
+isochorically</dd>
+<dt>fixedLevPop <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to true, level populations are held fixed
+at the starting value, rather than caclculated
+self-consistently from the temperature</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">string, &#8216;sphere&#8217; or &#8216;LVG&#8217; or &#8216;slab&#8217;</span></dt>
+<dd>specifies the geometry to be assumed in computing escape
+probabilities</dd>
+<dt>nOut <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of times at which to report the temperature; this
+is ignored if dt or tOut are set</dd>
+<dt>dt <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>time interval between outputs, in s; this is ignored if
+tOut is set</dd>
+<dt>tOut <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>list of times at which to output the temperature, in s;
+must be sorted in increasing order</dd>
+<dt>PsiUser <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd>A user-specified function to add additional heating /
+cooling terms to the calculation. The function takes the
+cloud object as an argument, and must return a two-element
+array Psi, where Psi[0] = gas heating / cooling rate,
+Psi[1] = dust heating / cooling rate. Positive values
+indicate heating, negative values cooling, and units are
+assumed to be erg s^-1 H^-1.</dd>
+<dt>fullOutput <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the full cloud state is returned at every time,
+as opposed to simply the gas temperature</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>damping factor to use in calculating level populations
+(see emitter for details)</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><p class="first">if fullOutput == False:</p>
+<dl class="docutils">
+<dt>Tg <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>array of gas temperatures at specified times, in K</dd>
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>array of output times, in sec</dd>
+</dl>
+<p>if fullOutput == True:</p>
+<dl class="last docutils">
+<dt>cloudState <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>each element of the list is a deepcopy of the cloud
+state at the corresponding time; there is one list
+element per output time</dd>
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">array of floats</span></dt>
+<dd>array of output times, in sec</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>If the settings for nOut, dt, or tOut are such that some of
+the output times requested are past tEvol, the cloud will only
+be evolved up to time tEvol. Similarly, if the last output
+time is less than tEvol, the cloud will still be evolved up to
+time tEvol, and the gas temperature Tg will be set to its
+value at that time.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="collpartner">
+<h3><code class="docutils literal"><span class="pre">collPartner</span></code><a class="headerlink" href="#collpartner" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.collPartner">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">collPartner</code><span class="sig-paren">(</span><em>fp</em>, <em>nlev</em>, <em>extrap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/collPartner.html#collPartner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.collPartner" title="Permalink to this definition">¶</a></dt>
+<dd><p>A utility class to store information about a particular collision
+partner for a given species, and to interpolate collision rates
+from those data</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>fp <span class="classifier-delimiter">:</span> <span class="classifier">file</span></dt>
+<dd>a file object that points to the start of the collision
+rate data for one species in a LAMDA file</dd>
+<dt>nlev <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of levels for the emitting species</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, then computing the collision rate with a
+temperature that is outside the table will result in the
+maximum or minimum value in the table being returned; if
+False, it will raise an error</dd>
+</dl>
+</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>nlev <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of energy levels for the emitting species</dd>
+<dt>ntrans <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of collisional transitions in the data table</dd>
+<dt>ntemp <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of temperatures in the data table</dd>
+<dt>tempTable <span class="classifier-delimiter">:</span> <span class="classifier">array(ntemp)</span></dt>
+<dd>list of temperatues at which collision rate coefficients are
+given</dd>
+<dt>colUpper <span class="classifier-delimiter">:</span> <span class="classifier">int array(ntrans)</span></dt>
+<dd>list of upper states for collisions</dd>
+<dt>colLower <span class="classifier-delimiter">:</span> <span class="classifier">int array(ntrans)</span></dt>
+<dd>list of lower states for collisions</dd>
+<dt>colRate <span class="classifier-delimiter">:</span> <span class="classifier">array(ntrans, ntemp)</span></dt>
+<dd>table of downward collision rate coefficients, in cm^3 s^-1</dd>
+<dt>colRateInterp <span class="classifier-delimiter">:</span> <span class="classifier">list(ntrans) of functions</span></dt>
+<dd>each function in the list takes one variable, the temperature,
+as an argument, and returns the collision rate coefficient for
+the corresponding transition at the given temperature; only
+downard transitions are included</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.collPartner.colRateMatrix">
+<code class="descname">colRateMatrix</code><span class="sig-paren">(</span><em>temp</em>, <em>levWgt</em>, <em>levTemp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/collPartner.html#collPartner.colRateMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.collPartner.colRateMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return interpolated collision rates for all transitions at a
+given temperature, stored as an nlev x nlev matrix.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>temperature at which collision rates are computed, in K</dd>
+<dt>levWgt <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>array of statistical weights for each level</dd>
+<dt>levTemp <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>array of level energies, measured in K</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>k <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>collision rates at the specified temperature; element i,j
+of the matrix gives the collision rate from state i to
+state j</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.collPartner.colRates">
+<code class="descname">colRates</code><span class="sig-paren">(</span><em>temp</em>, <em>transition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/collPartner.html#collPartner.colRates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.collPartner.colRates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return interpolated collision rates for all transitions at a
+given temperature or list of temperatures</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>temperature(s) at which collision rates are computed, in K</dd>
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">array of int, shape (2, N)</span></dt>
+<dd>list of upper and lower states for which collision rates
+are to be computed; default behavior is to computer for
+all known transitions</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>rates <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (ntrans) | array, shape (ntrans, ntemp)</span></dt>
+<dd>collision rates at the specified temperature(s)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="composition">
+<h3><code class="docutils literal"><span class="pre">composition</span></code><a class="headerlink" href="#composition" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.composition">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">composition</code><a class="reference internal" href="_modules/despotic/composition.html#composition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.composition" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class describing the chemical composition of the dominant
+components (hydrogen, helium, electrons) of an interstellar cloud,
+and for computing various quantities from them.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd>None</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>xHI <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of HI per H nucleus</dd>
+<dt>xoH2 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of ortho-H2 per H nucleus (note that the maximum
+possible value of xoH2 is 0.5, since it is per H nucleus)</dd>
+<dt>xpH2 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of para-H2 per H nucleus  (note that the maximum
+possible value of xoH2 is 0.5, since it is per H nucleus)</dd>
+<dt>xH2 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>sum of xoH2 and xpH2</dd>
+<dt>xHe <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of He per H nucleus</dd>
+<dt>xe <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of free electrons per H nucleus</dd>
+<dt>xHplus <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of H+ per H nucleus</dd>
+<dt>mu <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>mean mass per free particle, in units of H mass</dd>
+<dt>muH <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>mean mass per H nucleus, in units of H mass</dd>
+<dt>qIon <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>energy added to the gas per primary CR / x-ray ionization</dd>
+<dt>cv <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dimensionless specific heat per H nucleus at constant volume;
+the usual specific heat per unit volume may be obtained by
+multiplying this by nH * kB, and the specific heat per unit
+mass may be obtained by multiplying by nH * muH * kB</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.composition.computeCv">
+<code class="descname">computeCv</code><span class="sig-paren">(</span><em>T</em>, <em>noSet=False</em>, <em>Jmax=40</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/composition.html#composition.computeCv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.composition.computeCv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the dimensionless specific heat per H nucleus; the
+dimensional specific heat per H nucleus is this value
+multiplied by kB, the dimensional specific heat per unit
+volume is this value multiplied by kB * nH, and the
+dimensional specific heat per unit mass is this value
+multiplied by kB * nH * muH</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>T <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>temperature in K</dd>
+<dt>noSet <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the value of cv stored in the class is not
+altered, but the calculated cv is still returned</dd>
+<dt>Jmax <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum J to be used in evaluating the rotational
+partition function; should be set to a value such that T
+&lt;&lt; J(J+1) * thetaRot, there thetaRot = 85.3 K. Defaults to
+40.</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>cv <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>value of cv</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.composition.computeDerived">
+<code class="descname">computeDerived</code><span class="sig-paren">(</span><em>nH</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/composition.html#composition.computeDerived"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.composition.computeDerived" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the derived quantities mu, muH, qIon</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>nH <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>volume density in H cm^-3</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+<dt>Remarks</dt>
+<dd>For the purposes of this procedure, we treat electrons as
+massless.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.composition.computeEint">
+<code class="descname">computeEint</code><span class="sig-paren">(</span><em>T</em>, <em>Jmax=40</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/composition.html#composition.computeEint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.composition.computeEint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the dimensionless internal energy per H nucleus; the internal
+energy per H nucleus in K is this value multiplied by T, and
+the internal energy per H nucleus in erg is this value
+multiplied by kB * T</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>T <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>temperature in K</dd>
+<dt>Jmax <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum J to be used in evaluating the rotational
+partition function; should be set to a value such that T
+&lt;&lt; J(J+1) * thetaRot, there thetaRot = 85.3 K. Defaults to
+40.</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>Eint <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>value of Eint</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="despoticerror">
+<h3><code class="docutils literal"><span class="pre">despoticError</span></code><a class="headerlink" href="#despoticerror" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.despoticError">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">despoticError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/despoticError.html#despoticError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.despoticError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class derived from Exception to handle exceptions raised by
+DESPOTIC-specific errors.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>message <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>the error message</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="dustprop">
+<h3><code class="docutils literal"><span class="pre">dustProp</span></code><a class="headerlink" href="#dustprop" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.dustProp">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">dustProp</code><a class="reference internal" href="_modules/despotic/dustProp.html#dustProp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.dustProp" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to hold paremeters describing the properties of dust grains.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd>None</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>sigma10 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust opacity to thermal radiation at 10 K, in cm^2 H^-1</dd>
+<dt>sigmaPE <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust opacity averaged over 8 - 13.6 eV, the range that
+dominates grain photoelectric heatin</dd>
+<dt>sigmaISRF <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust opacity averaged the range that dominates grain starlight
+heating</dd>
+<dt>Zd <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust abundance normalized to solar neighborhood value</dd>
+<dt>beta <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust spectral index in the mm, sigma ~ nu^beta</dd>
+<dt>alphaGD <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>grain-gas coupling coefficient</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="emitter">
+<span id="sssec-full-emitter"></span><h3><code class="docutils literal"><span class="pre">emitter</span></code><a class="headerlink" href="#emitter" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.emitter">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">emitter</code><span class="sig-paren">(</span><em>emitName</em>, <em>emitAbundance</em>, <em>extrap=True</em>, <em>energySkip=False</em>, <em>emitterFile=None</em>, <em>emitterURL=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to store the properties of a single emitting species, and
+preform computations on those properties. Note that all quantities
+are stored in cgs units.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of this species</dd>
+<dt>emitAbundance <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of species relative to H</dd>
+<dt>emitterFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>emitterURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>energySkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, this species is skipped when computing line
+cooling rates</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this species will
+be extrapolated to temperatures outside the range given in
+the LAMDA tables</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of emitting species</dd>
+<dt>abundance <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundance of emitting species relative to H nuclei</dd>
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">class emitterData</span></dt>
+<dd>physical data for this emitter</dd>
+<dt>levPop <span class="classifier-delimiter">:</span> <span class="classifier">array, shape(nlev)</span></dt>
+<dd>array giving populations of each level</dd>
+<dt>levPopInitialized <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>flag for whether levPop is initialized or uninitialized</dd>
+<dt>escapeProb <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array giving escape probability for photons emitted in a
+line connecting the given level pair</dd>
+<dt>escapeProbInitialized <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>flag for whether escapeProb is initialized or uninitialized</dd>
+<dt>energySkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>flag that this species should be skipped when computing line
+cooling rates</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.emitter.luminosityPerH">
+<code class="descname">luminosityPerH</code><span class="sig-paren">(</span><em>rad</em>, <em>transition=None</em>, <em>total=False</em>, <em>thin=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.luminosityPerH"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.luminosityPerH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the luminosities of various lines, computed from the
+stored level populations and escape probabilities.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>rad <span class="classifier-delimiter">:</span> <span class="classifier">class radiation</span></dt>
+<dd>radiation field impinging on the cloud</dd>
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>A list containing two 1D arrays of integer type;
+transition[0] = array of upper states, transition[1] =
+array of lower states</dd>
+<dt>total <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the routine returns a single float rather than an
+array; this float is the sum of the luminosities per H
+nucleus of all lines</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>lum <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>luminosities per H in specified lines; by default</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError, if the level populations are not initialized,
+or if the escape probabilities are not initialized and thin is
+not True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.opticalDepth">
+<code class="descname">opticalDepth</code><span class="sig-paren">(</span><em>transition=None</em>, <em>escapeProbGeom='sphere'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.opticalDepth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.opticalDepth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the optical depths of various lines, computed from the
+stored escape probabilities.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>A list containing two 1D arrays of integer type;
+transition[0] = array of upper states, transition[1] =
+array of lower states</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>tau <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>optical depths in specified lines; by default</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setEscapeProb">
+<code class="descname">setEscapeProb</code><span class="sig-paren">(</span><em>thisCloud</em>, <em>transition=None</em>, <em>escapeProbGeom='sphere'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setEscapeProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setEscapeProb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute escape probabilities from stored level populations</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>thisCloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object containing the physical and chemical
+properties of this cloud</dd>
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of transition for which to set escape probability;
+transition[0] = array of upper states, transition[1] =
+array of lower states</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setLevPop">
+<code class="descname">setLevPop</code><span class="sig-paren">(</span><em>thisCloud</em>, <em>thin=False</em>, <em>noClump=False</em>, <em>diagOnly=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setLevPop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setLevPop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the level populations for this species using the
+stored escape probabilities</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>thisCloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object containing the physical and chemical
+properties of this cloud</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the stored escape probabilities are ignored, and
+the cloud is assumed to be optically thin (equivalent to
+assuming all escape probabilities are 1)</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>diagOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, diagnostic information is returned, but no
+attempt is made to solve the equations or calculate the
+level popuplations (useful for debugging)</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>infoDict <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>A dictionary containing a variety of diagnostic
+information</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setLevPopEscapeProb">
+<code class="descname">setLevPopEscapeProb</code><span class="sig-paren">(</span><em>thisCloud</em>, <em>escapeProbGeom='sphere'</em>, <em>noClump=False</em>, <em>verbose=False</em>, <em>reltol=1e-06</em>, <em>abstol=1e-08</em>, <em>maxiter=200</em>, <em>veryverbose=False</em>, <em>dampFactor=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setLevPopEscapeProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setLevPopEscapeProb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute escape probabilities and level populations
+simultaneously.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>thisCloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object containing the physical and chemical
+properties of this cloud</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;LVG&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success: Boolean</dt>
+<dd>True if iteration converges, False if it does not</dd>
+</dl>
+</dd>
+<dt>Additional Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, diagnostic information is printed</dd>
+<dt>veryverbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, a very large amount of diagnostic information is
+printed; probably useful only for debugging</dd>
+<dt>reltol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>relative tolerance; convergence is considered to have
+occured when the absolute value of the difference
+between two iterations, divided by the larger of the two
+results being differences, is less than reltol</dd>
+<dt>abstol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>absolute tolerance; convergence is considered to have
+occured when the absolute value of the difference
+between two iterations is less than abstol</dd>
+<dt>maxiter <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum number of iterations to allow</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>a number in the range (0, 1] that damps out changes in level
+populations at each iteration. A value of 1 means no
+damping, while a value of 0 means the level populations
+never change.</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>Convergence occurs when either the relative or the absolute
+tolerance condition is satisfied. To disable either relative
+or absolute tolerance checking, just set the appropriate
+tolerance &lt;= 0. However, be warned that in many circumstances
+disabling absolute tolerances will gaurantee non-convergence,
+because truncation errors tend to produce large relative
+residuals for high energy states whose populations are very
+low, and no amount of iterating will reduce these errors
+substantially.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setLevPopLTE">
+<code class="descname">setLevPopLTE</code><span class="sig-paren">(</span><em>temp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setLevPopLTE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setLevPopLTE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the level populations of this species to their LTE values</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>temperature in K</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitter.setThin">
+<code class="descname">setThin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitter.html#emitter.setThin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitter.setThin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the escape probabilities for this species to unity</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd>None</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="emitterdata">
+<span id="sssec-full-emitterdata"></span><h3><code class="docutils literal"><span class="pre">emitterData</span></code><a class="headerlink" href="#emitterdata" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.emitterData">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">emitterData</code><span class="sig-paren">(</span><em>emitName</em>, <em>emitterFile=None</em>, <em>emitterURL=None</em>, <em>extrap=True</em>, <em>noRefresh=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to store the physical properties of a single emitting
+species, and preform computations on those properties. Note that
+all quantities are stored in cgs units.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of this species</dd>
+<dt>emitterFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>emitterURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this species will
+be extrapolated to temperatures outside the range given in
+the LAMDA tables</dd>
+<dt>noRefresh <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the routine will not attempt to automatically
+fetch updated versions of files from the web</dd>
+</dl>
+</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of emitting species</dd>
+<dt>lamdaFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of file from which species was read</dd>
+<dt>molWgt <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>molecular weight of species, in units of H masses</dd>
+<dt>nlev <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of energy levels of the species</dd>
+<dt>levEnergy <span class="classifier-delimiter">:</span> <span class="classifier">array, shape(nlev)</span></dt>
+<dd>energies of levels</dd>
+<dt>levTemp <span class="classifier-delimiter">:</span> <span class="classifier">array, shape(nlev)</span></dt>
+<dd>energies of levels in K (i.e. levEnergy / kB)</dd>
+<dt>levWgt <span class="classifier-delimiter">:</span> <span class="classifier">array shape(nlev)</span></dt>
+<dd>degeneracies (statistical weights) of levels</dd>
+<dt>nrad <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of radiative transition this species has</dd>
+<dt>radUpper <span class="classifier-delimiter">:</span> <span class="classifier">integer array, shape (nrad)</span></dt>
+<dd>array containing upper states for radiative transitions</dd>
+<dt>radLower <span class="classifier-delimiter">:</span> <span class="classifier">integer array, shape (nrad)</span></dt>
+<dd>array containing lower states for radiative transitions</dd>
+<dt>radFreq <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>array of frequencies of radiative transitions</dd>
+<dt>radTemp <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>same as radFreq, but multiplied by h/kB to give units of K</dd>
+<dt>radTUpper <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>array of temperatures (E/kB) of upper radiative states</dd>
+<dt>radA <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nrad)</span></dt>
+<dd>array of Einstin A coefficients of radiative transitions</dd>
+<dt>partners <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>listing collision partners; keys are partner names, values are
+objects of class collPartner</dd>
+<dt>EinsteinA <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array of nlev x nlev giving Einstein A&#8217;s for radiative
+transitions connecting each level pair</dd>
+<dt>freq <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array of nlev x nlev giving frequency of radiative
+transitions connecting each level pair</dd>
+<dt>dT <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array of nlev x nlev giving energy difference between each
+level pair in K; it is positive for i &gt; j, and negative for i
+&lt; j</dd>
+<dt>wgtRatio <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>2d array giving ratio of statistical weights of each level
+pair</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this emitter are
+allowed to be extrapolated off the data table</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.emitterData.collRateMatrix">
+<code class="descname">collRateMatrix</code><span class="sig-paren">(</span><em>nH</em>, <em>comp</em>, <em>temp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData.collRateMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData.collRateMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>This routine computes the matrix of collision rates (not rate
+coefficients) between every pair of levels.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>nH <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>number density of H nuclei</dd>
+<dt>comp <span class="classifier-delimiter">:</span> <span class="classifier">class composition</span></dt>
+<dd>bulk composition of the gas</dd>
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>gas kinetic temperature</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>q <span class="classifier-delimiter">:</span> <span class="classifier">array, shape (nlev, nlev)</span></dt>
+<dd>array in which element ij is the rate of collisional
+transitions from state i to state j, in s^-1</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitterData.partFunc">
+<code class="descname">partFunc</code><span class="sig-paren">(</span><em>temp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData.partFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData.partFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the partition function for this species at the given
+temperature.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>gas kinetic temperature</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>Z <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>the partition function Z(T) for this species</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.emitterData.readLamda">
+<code class="descname">readLamda</code><span class="sig-paren">(</span><em>fp</em>, <em>extrap=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/emitterData.html#emitterData.readLamda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.emitterData.readLamda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a LAMDA-formatted file</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>fp <span class="classifier-delimiter">:</span> <span class="classifier">file</span></dt>
+<dd>pointer to the start of a LAMDA-formatted file</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, collision rate coefficients for this species will
+be extrapolated to temperatures outside the range given in
+the LAMDA tables</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="radiation">
+<h3><code class="docutils literal"><span class="pre">radiation</span></code><a class="headerlink" href="#radiation" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.radiation">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">radiation</code><a class="reference internal" href="_modules/despotic/radiation.html#radiation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.radiation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class describing the radiation field affecting a cloud.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd>None</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>TCMB <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the temperature of the CMB, in K</dd>
+<dt>TradDust <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the temperature of the dust IR background field, in K</dd>
+<dt>ionRate <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the primary ionization rate due to cosmic rays and x-rays, in
+s^-1 H^-1</dd>
+<dt>chi <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>strength of the ISRF, normalized to the solar neighborhood
+value</dd>
+<dt>fdDilute <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dilution factor for the dust radiation field; a value of 0
+means infinite dilution, so the dust does not contribute to the
+photon occupation number, while 1 means zero dilution, so
+the dust contributes as a full blackbody radiation field at
+temperature TradDust</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.radiation.ngamma">
+<code class="descname">ngamma</code><span class="sig-paren">(</span><em>Tnu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/radiation.html#radiation.ngamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.radiation.ngamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the photon occupation number from the CMB and dust
+radiation fields, equal to 
+1 / [exp(-h nu / k T_CMB) - 1] + 
+fdDilute * 1 / [exp(-h nu / k T_radDust) - 1]</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>Tnu <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>frequency translated into K, i.e. frequency times h/kB</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>ngamma <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>photon occupation number</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="zonedcloud">
+<span id="sssec-full-zonedcloud"></span><h3><code class="docutils literal"><span class="pre">zonedcloud</span></code><a class="headerlink" href="#zonedcloud" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.zonedcloud">
+<em class="property">class </em><code class="descclassname">despotic.</code><code class="descname">zonedcloud</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>colDen=None</em>, <em>AV=None</em>, <em>nZone=16</em>, <em>geometry='sphere'</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class consisting of an interstellar cloud divided into different
+column density / extinction zones.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of file from which to read cloud description</dd>
+<dt>colDen <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Array of column densities marking zone centers</dd>
+<dt>AV <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Array of visual extinction values (in mag) marking zone
+centers; AV is converted to column density using a V-band
+cross section equal to 0.4 * sigmaPE; this argument
+ignored if colDen is not None</dd>
+<dt>nZone <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>Number of zones into which to divide the cloud, from 0
+to the maximum column density found in the cloud
+description file fileName; ignored if colDen or AV is
+not None</dd>
+<dt>geometry <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;slab&#8217;</span></dt>
+<dd>geometry to assume for the cloud, either &#8216;sphere&#8217;
+(onion-like) or &#8216;slab&#8217; (layer cake-like)</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>print out information about the cloud as we read it</dd>
+</dl>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="despotic.zonedcloud.abundances">
+<code class="descname">abundances</code><a class="headerlink" href="#despotic.zonedcloud.abundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns abundances of all emitting species, mass-weighted over
+cloud</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.zonedcloud.abundances_zone">
+<code class="descname">abundances_zone</code><a class="headerlink" href="#despotic.zonedcloud.abundances_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return abundances of all emitting species in all zones</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.addEmitter">
+<code class="descname">addEmitter</code><span class="sig-paren">(</span><em>emitName</em>, <em>emitAbundance</em>, <em>emitterFile=None</em>, <em>emitterURL=None</em>, <em>energySkip=False</em>, <em>extrap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.addEmitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.addEmitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an emitting species</p>
+<dl class="docutils">
+<dt>Pamameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of the emitting species</dd>
+<dt>emitAbundance <span class="classifier-delimiter">:</span> <span class="classifier">float or listlike</span></dt>
+<dd>abundance of the emitting species relative to H; if this
+is listlike, it must have the same number of elements as
+the number of zones</dd>
+<dt>emitterFile <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>emitterURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; this
+option overrides the default</dd>
+<dt>energySkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, this species is ignored when calculating
+line cooling rates</dd>
+<dt>extrap <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, collision rate coefficients for this species
+will be extrapolated to temperatures outside the range given
+in the LAMDA table. If False, no extrapolation is perfomed,
+and providing temperatures outside the range in the table
+produces an error</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.zonedcloud.chemabundances">
+<code class="descname">chemabundances</code><a class="headerlink" href="#despotic.zonedcloud.chemabundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns abundances of all species in the chemical network,
+mass-weighted over the zonedcloud</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.zonedcloud.chemabundances_zone">
+<code class="descname">chemabundances_zone</code><a class="headerlink" href="#despotic.zonedcloud.chemabundances_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return abundances of all emitting species in all zones</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.dEdt">
+<code class="descname">dEdt</code><span class="sig-paren">(</span><em>c1Grav=0.0</em>, <em>thin=False</em>, <em>LTE=False</em>, <em>fixedLevPop=False</em>, <em>noClump=False</em>, <em>escapeProbGeom=None</em>, <em>PsiUser=None</em>, <em>sumOnly=False</em>, <em>dustOnly=False</em>, <em>gasOnly=False</em>, <em>dustCoolOnly=False</em>, <em>dampFactor=0.5</em>, <em>verbose=False</em>, <em>overrideSkip=False</em>, <em>zones=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.dEdt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.dEdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return instantaneous values of heating / cooling terms</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>c1Grav <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>if this is non-zero, the cloud is assumed to be
+collapsing, and energy is added at a rate
+Gamma_grav = c1 mu_H m_H cs^2 sqrt(4 pi G rho)</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, cloud is assumed to be opticall thin</dd>
+<dt>LTE <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, gas is assumed to be in LTE</dd>
+<dt>fixedLevPop <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, level populations and escape
+probabilities are not recomputed, so the cooling rate is
+based on whatever values are stored</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;slab&#8217; | &#8216;LVG&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities; ignored if the escape probabilities
+are already initialized; if left as None, escapeProbGeom
+= self.geometry</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>damping factor to use in level population calculations;
+see emitter.setLevPopEscapeProb</dd>
+<dt>PsiUser <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd>A user-specified function to add additional heating /
+cooling terms to the calculation. The function takes the
+cloud object as an argument, and must return a two-element
+array Psi, where Psi[0] = gas heating / cooling rate,
+Psi[1] = dust heating / cooling rate. Positive values
+indicate heating, negative values cooling, and units are
+assumed to be erg s^-1 H^-1.</dd>
+<dt>sumOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, rates contains only four entries: dEdtGas and
+dEdtDust give the heating / cooling rates for the
+gas and dust summed over all terms, and maxAbsdEdtGas and
+maxAbsdEdtDust give the largest of the absolute values of
+any of the contributing terms for dust and gas</dd>
+<dt>gasOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, the terms GammaISRF, GammaDustLine, LambdaDust,               and PsiUserDust are omitted from rates. If both gasOnly
+and sumOnly are true, the dict contains only dEdtGas</dd>
+<dt>dustOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if true, the terms GammaPE, GammaCR, LambdaLine,
+GamamDLine, and PsiUserGas are omitted from rates. If both
+dustOnly and sumOnly are true, the dict contains only
+dEdtDust. Important caveat: the value of dEdtDust returned
+in this case will not exactly match that returned if
+dustOnly is false, because it will not contain the
+contribution from gas line cooling radiation that is
+absorbed by the dust</dd>
+<dt>dustCoolOnly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>as dustOnly, but except that now only the terms
+LambdaDust, PsiGD, and PsiUserDust are computed</dd>
+<dt>overrideSkip <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, energySkip directives are ignored, and cooling
+rates are calculated for all species</dd>
+<dt>zones <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, heating and cooling rates are returned for each
+zone; if False, the values returned are mass-weighted over
+the entire cloud</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first docutils">
+<dt>rates <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>A dict containing the values of the various heating and
+cooling rate terms; all quantities are in units of erg s^-1
+H^-1, and by convention positive = heating, negative =
+cooling; for dust-gas exchange, positive indicates heating
+of gas, cooling of dust. By default these quantities are
+mass-weighted over the entire cloud, but if zones is True
+then they are returned as arrays for each zone</dd>
+</dl>
+<p>Elements of the dict are as follows by default, but can be
+altered by the additional keywords listed below:</p>
+<dl class="last docutils">
+<dt>GammaPE <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>photoelectric heating rate</dd>
+<dt>GammaCR <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>cosmic ray heating rate</dd>
+<dt>GammaGrav <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>gravitational contraction heating rate</dd>
+<dt>LambdaLine <span class="classifier-delimiter">:</span> <span class="classifier">dict or array</span></dt>
+<dd>cooling rate from lines; dictionary keys correspond to
+species in the emitter list, values give line cooling
+rate for that species</dd>
+<dt>PsiGD <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>dust-gas energy exchange rate</dd>
+<dt>GammaDustISRF <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>dust heating rate due to the ISRF</dd>
+<dt>GammaDustCMB <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>dust heating rate due to CMB</dd>
+<dt>GammaDustIR <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>dust heating rate due to IR field</dd>
+<dt>GammaDustLine <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>dust heating rate due to absorption of line radiation</dd>
+<dt>LambdaDust <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>dust cooling rate due to thermal emission</dd>
+<dt>PsiUserGas <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>gas heating / cooling rate from user-specified
+function; only included if PsiUser != None</dd>
+<dt>PsiUserDust <span class="classifier-delimiter">:</span> <span class="classifier">float or array</span></dt>
+<dd>gas heating / cooling rate from user-specified
+function; only included is PsiUser != None</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.lineLum">
+<code class="descname">lineLum</code><span class="sig-paren">(</span><em>emitName</em>, <em>LTE=False</em>, <em>noClump=False</em>, <em>transition=None</em>, <em>thin=False</em>, <em>intOnly=False</em>, <em>TBOnly=False</em>, <em>lumOnly=False</em>, <em>escapeProbGeom=None</em>, <em>dampFactor=0.5</em>, <em>noRecompute=False</em>, <em>abstol=1e-08</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.lineLum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.lineLum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the frequency-integrated intensity of various lines,
+summed over all zones</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>emitName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name of the emitter for which the calculation is to be
+performed</dd>
+<dt>LTE <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, and level populations are unitialized, they will
+be initialized to their LTE values; if they are
+initialized, this option is ignored</dd>
+<dt>noClump <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the clumping factor used in estimating
+rates for n^2 processes is set to unity</dd>
+<dt>transition <span class="classifier-delimiter">:</span> <span class="classifier">list of two arrays</span></dt>
+<dd>if left as None, luminosity is computed for all
+transitions; otherwise only selected transitions are
+computed, with transition[0] = array of upper states
+transition[1] = array of lower states</dd>
+<dt>thin <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the calculation is done assuming the cloud is
+optically thin; if level populations are uninitialized,
+and LTE is not set, they will be computed assuming the
+cloud is optically thin</dd>
+<dt>intOnly: Boolean</dt>
+<dd>if true, the output is simply an array containing the
+frequency-integrated intensity of the specified lines;
+mutually exclusive with TBOnly and lumOnly</dd>
+<dt>TBOnly: Boolean</dt>
+<dd>if True, the output is simply an array containing the
+velocity-integrated brightness temperatures of the
+specified lines; mutually exclusive with intOnly and
+lumOnly</dd>
+<dt>lumOnly: Boolean</dt>
+<dd>if True, the output is simply an array containing the
+luminosity per H nucleus in each of the specified lines;
+mutually eclusive with intOnly and TBOonly</dd>
+<dt>escapeProbGeom <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;sphere&#8217; | &#8216;slab&#8217; | &#8216;LVG&#8217;</span></dt>
+<dd>sets problem geometry that will be assumed in calculating
+escape probabilities; ignored if the escape probabilities
+are already initialized; if left as None, escapeProbGeom
+= self.geometry</dd>
+<dt>dampFactor <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>damping factor to use in level population calculations;
+see emitter.setLevPopEscapeProb</dd>
+<dt>noRecompute <span class="classifier-delimiter">:</span> <span class="classifier">False</span></dt>
+<dd>if True, level populations and escape probabilities are
+not recomputed; instead, stored values are used</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><p class="first">res : list or array</p>
+<p>if intOnly, TBOnly, and lumOnly are all False, each element
+of the list is a dict containing the following fields:</p>
+<dl class="last docutils">
+<dt>&#8216;freq&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>frequency of the line in Hz</dd>
+<dt>&#8216;upper&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>index of upper state, with ground state = 0 and states
+ordered by energy</dd>
+<dt>&#8216;lower&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>index of lower state</dd>
+<dt>&#8216;Tupper&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>energy of the upper state in K (i.e. energy over kB)</dd>
+<dt>&#8216;Tex&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>excitation temperature relating the upper and lower levels</dd>
+<dt>&#8216;intIntensity&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>frequency-integrated intensity of the line, with the CMB
+contribution subtracted off; units are erg cm^-2 s^-1 sr^-1</dd>
+<dt>&#8216;intTB&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>velocity-integrated brightness temperature of the line,
+with the CMB contribution subtracted off; units are K km
+s^-1</dd>
+<dt>&#8216;lumPerH&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>luminosity of the line per H nucleus; units are erg s^-1
+H^-1</dd>
+<dt>&#8216;tau&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>optical depth in the line, not including dust</dd>
+<dt>&#8216;tauDust&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust optical depth in the line</dd>
+</dl>
+</dd>
+</dl>
+<p>if intOnly, TBOnly, or lumOnly are True: res is an array
+containing the intIntensity, TB, or lumPerH fields of the dict
+described above</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.mass">
+<code class="descname">mass</code><span class="sig-paren">(</span><em>edge=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mass in each zone.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>edge <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the value returned gives the cumulative mass at
+each zone edge, starting from the outer edge; otherwise
+the value returned is the mass of each zone</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>mass <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>mass of each zone (if edge is False), or cumulative mass
+to each zone edge (if edge is True)</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>if the geometry is &#8216;slab&#8217;, the masses are undefined, and
+this return returns None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.radius">
+<code class="descname">radius</code><span class="sig-paren">(</span><em>edge=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.radius"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the radius of each zone.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>edge <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the value returned is the radii of the zone
+edges; otherwise it is the radii of the zone centers</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>rad <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>radii of zone centers (default) or edges (if edge is
+True)</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>if the geometry is &#8216;slab&#8217;, the values returned are the
+depths into the slab rather than the radii</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.setChemEq">
+<code class="descname">setChemEq</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.setChemEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.setChemEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the chemical abundances for a cloud to their equilibrium
+values, computed using a specified chemical network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>kwargs <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>these arguments are passed through to the corresponding
+function for each zone</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if the calculation converges, False if it does not</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>if the key escapeProbGeom is not in kwargs, then
+escapeProbGeom will be set to self.geometry</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.setDustTempEq">
+<code class="descname">setDustTempEq</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.setDustTempEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.setDustTempEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Td to equilibrium dust temperature at fixed Tg</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>kwargs <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>these arguments are passed through to the corresponding
+function for each zone</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if dust temperature calculation converged, False if
+not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.setGasTempEq">
+<code class="descname">setGasTempEq</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.setGasTempEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.setGasTempEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Tg to equilibrium gas temperature at fixed Td</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>kwargs <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>these arguments are passed through to the corresponding
+function for each zone</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if the calculation converges, False if it does not</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>if the key escapeProbGeom is not in kwargs, then
+escapeProbGeom will be set to self.geometry</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.setTempEq">
+<code class="descname">setTempEq</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.setTempEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.setTempEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Tg and Td to equilibrium gas and dust temperatures</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>kwargs <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>these arguments are passed through to the corresponding
+function for each zone</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if the calculation converges, False if it does not</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd>if the key escapeProbGeom is not in kwargs, then
+escapeProbGeom will be set to self.geometry</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.zonedcloud.setVirial">
+<code class="descname">setVirial</code><span class="sig-paren">(</span><em>alphaVir=1.0</em>, <em>NTonly=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/zonedcloud.html#zonedcloud.setVirial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.zonedcloud.setVirial" title="Permalink to this definition">¶</a></dt>
+<dd><p>This routine sets the velocity dispersion in all zones to the
+virial value</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>alphaVir <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>virial ratio to be used in computation; defaults to 1</dd>
+<dt>NTonly <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, the virial ratio is computed considering only the
+non-thermal component of the velocity dispersion</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="despotic-functions">
+<h2>despotic functions<a class="headerlink" href="#despotic-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fetchlamda">
+<h3><code class="docutils literal"><span class="pre">fetchLamda</span></code><a class="headerlink" href="#fetchlamda" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.fetchLamda">
+<code class="descclassname">despotic.</code><code class="descname">fetchLamda</code><span class="sig-paren">(</span><em>inputURL</em>, <em>path=None</em>, <em>fileName=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/fetchLamda.html#fetchLamda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.fetchLamda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Routine to download LAMDA files from the web.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>inputURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL of LAMDA file containing data on this species; if this
+does not begin with &#8220;<a class="reference external" href="http://">http://</a>&#8221;, indicating it is a URL, then
+this is assumed to be a filename within LAMDA, and a default
+URL is appended</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>relative or absolute path at which to store the file; if not
+set, the current directory is used; if the specified path does
+not exist, it is created</dd>
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>name to give to file; if not set, defaults to the same as the
+name in LAMDA</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>fname <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>local file name to which downloaded file was written; if URL
+cannot be opened, None is returned instead</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="lineproflte">
+<span id="sssec-full-lineproflte"></span><h3><code class="docutils literal"><span class="pre">lineProfLTE</span></code><a class="headerlink" href="#lineproflte" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.lineProfLTE">
+<code class="descclassname">despotic.</code><code class="descname">lineProfLTE</code><span class="sig-paren">(</span><em>emdat</em>, <em>u</em>, <em>l</em>, <em>R</em>, <em>denProf</em>, <em>TProf</em>, <em>vProf=0.0</em>, <em>sigmaProf=0.0</em>, <em>offset=0.0</em>, <em>TCMB=2.73</em>, <em>vOut=None</em>, <em>vLim=None</em>, <em>nOut=100</em>, <em>dv=None</em>, <em>mxstep=10000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/lineProfLTE.html#lineProfLTE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.lineProfLTE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the brightness temperature versus velocity for a
+specified line, assuming the level populations are in LTE. The
+calculation is done along an infinitely thin pencil beam.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>em <span class="classifier-delimiter">:</span> <span class="classifier">class emitterData</span></dt>
+<dd>emitterData object describing the emitting species for
+which the computation is to be made</dd>
+<dt>u <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>upper state of line to be computed</dd>
+<dt>l <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>lower state of line to be computed</dd>
+<dt>R <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>cloud radius in cm</dd>
+<dt>denProf <span class="classifier-delimiter">:</span> <span class="classifier">float or callable</span></dt>
+<dd>If denProf is a float, this give the density in particles
+cm^-3 of the emitting species, which is taken to be
+uniform. denProf can also be a function giving the density
+as a function of radius; see remarks below for details.</dd>
+<dt>TProf <span class="classifier-delimiter">:</span> <span class="classifier">float | callable</span></dt>
+<dd>same as denProf, but giving the temperature in K</dd>
+<dt>vProf <span class="classifier-delimiter">:</span> <span class="classifier">float | callable</span></dt>
+<dd>same as vProf, but giving the bulk radial
+velocity in cm/s; if omitted, bulk velocity is set to 0</dd>
+<dt>sigmaProf <span class="classifier-delimiter">:</span> <span class="classifier">float | callable</span></dt>
+<dd>same as denProf, but giving the non-thermal
+velocity dispersion in cm/s; if omitted, non-thermal
+velocity dispersion is set to 0</dd>
+<dt>offset <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>fractional distance from cloud center at which
+measurement is made; 0 = at cloud center, 1 = at
+cloud edge; valid values are 0 - 1</dd>
+<dt>vOut <span class="classifier-delimiter">:</span> <span class="classifier">sequence</span></dt>
+<dd>sequence of velocities (relative to line center at 0) at
+which the output is to be returned</dd>
+<dt>vLim <span class="classifier-delimiter">:</span> <span class="classifier">sequence (2)</span></dt>
+<dd>maximum and minimum velocities relative to line center at
+which to compute TB</dd>
+<dt>nOut <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of velocities at which to output</dd>
+<dt>dv <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
+<dd>velocity spacing at which to produce output</dd>
+<dt>TCMB <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>CMB temperature used as a background to the cloud, in
+K. Defaults to 2.73.</dd>
+<dt>mxstep <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum number of steps in the ODE solver; default is
+10,000</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>TB <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>brightness temperature as a function of velocity (in K)</dd>
+<dt>vOut <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>velocities at which TB is computed (in cm s^-1)</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError is the specified upper and lower state have no
+radiative transition between them, or if offset is not in the
+range 0 - 1</dd>
+<dt>Remarks</dt>
+<dd>The functions denProf, TProf, vProf, and sigmaProf, if
+specified, should accept one floating argument, and return one
+floating value. The argument r is the radial position within
+the cloud in normalized units, so that the center is at r = 0
+and the edge at r = 1. The return value should be the density,
+temperature, velocity, or non-thermal velocity dispesion at
+that position, in cgs units.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="refreshlamda">
+<span id="sssec-full-refreshlamda"></span><h3><code class="docutils literal"><span class="pre">refreshLamda</span></code><a class="headerlink" href="#refreshlamda" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.refreshLamda">
+<code class="descclassname">despotic.</code><code class="descname">refreshLamda</code><span class="sig-paren">(</span><em>path=None</em>, <em>cutoffDate=None</em>, <em>cutoffAge=None</em>, <em>LamdaURL=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/refreshLamda.html#refreshLamda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.refreshLamda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refreshes LAMDA files by fetching new ones from the web</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>path to the local LAMDA database; defaults to getting this
+information from the environment variable DESPOTIC_HOME</dd>
+<dt>cutoffDate <span class="classifier-delimiter">:</span> <span class="classifier">class datetime.date or class datetime.datetime</span></dt>
+<dd>a date or datetime specifying the age cutoff for updating
+files; files older than cutoffDate are updated, newer ones are
+not</dd>
+<dt>cutoffAge <span class="classifier-delimiter">:</span> <span class="classifier">class datetime.timedelta</span></dt>
+<dd>a duration between the present instant and the point in the
+past separating files that will be updated from files that
+will not be</dd>
+<dt>LamdaURL <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>URL where LAMDA is located; defaults to the default value in
+fetchLamda</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+<dt>Remarks</dt>
+<dd>If the user sets both a cutoff age and a cutoff date, the date is
+used. If neither is set, the default cutoff age is 6 months.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="despotic-chemistry-classes">
+<h2>despotic.chemistry classes<a class="headerlink" href="#despotic-chemistry-classes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="abundancedict">
+<span id="sssec-full-abundancedict"></span><h3><code class="docutils literal"><span class="pre">abundanceDict</span></code><a class="headerlink" href="#abundancedict" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.chemistry.abundanceDict">
+<em class="property">class </em><code class="descclassname">despotic.chemistry.</code><code class="descname">abundanceDict</code><span class="sig-paren">(</span><em>specList</em>, <em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>An abundanceDict object is a wrapper around a numpy array of
+abundances, and maps between human-readable chemical names
+(e.g. CO) and numeric indices in the array. Elements can be
+queried and addressed using a dict-like interface (e.g. if abd is
+an abundanceDict object, one could do abd[&#8216;CO&#8217;] = 1.0e-4), but the
+underlying data structure can be manipulated with the speed and
+flexibility of a numpy array. In particular, one can perform
+arithmetic operations such as addition on abundance dicts, and they
+are simply applied to the underyling numpy array using the usual
+numpy operator rules.</p>
+<p>This mapping between species names and array indices is created
+when the dict is first initialized, and is immutable
+thereafter. Thus operations that modify the keys in a dict are
+disallowed for abundanceDict objects.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>specList <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of species names for this abundanceDict; each list
+element must be a string</dd>
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">array of rank 1 or 2</span></dt>
+<dd>array of abundances; the length of the first dimension of
+x must be equal to the length of specList</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>raises an error, since abundanceDicts are
+immutable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>copy works just as for an ordinary dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.has_key">
+<code class="descname">has_key</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.has_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.has_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>has_key works just as for an ordinary dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>spec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.index" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>spec <span class="classifier-delimiter">:</span> <span class="classifier">string | iterable</span></dt>
+<dd>if this is a string, the method returns the index of
+that chemical species; if it is an iterable, the
+iterable must contain strings, and  the method
+returns an array containing the indices of all species in
+the iterable</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>index <span class="classifier-delimiter">:</span> <span class="classifier">int | array</span></dt>
+<dd>indices of the input species; if spec is a string, this is
+an int; otherwise it is an array of ints</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>KeyError, if spec or any of its elements is not in the species
+list</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.keys">
+<code class="descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>keys works just as for an ordinary dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>raises an error, since abundanceDicts are
+immutable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.popitem">
+<code class="descname">popitem</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.popitem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.popitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>raises an error, since abundanceDicts are
+immutable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.abundanceDict.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/abundanceDict.html#abundanceDict.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.abundanceDict.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>values returns a list of numpy arrays corresponding to the
+rows of x</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="chemnetwork">
+<h3><code class="docutils literal"><span class="pre">chemNetwork</span></code><a class="headerlink" href="#chemnetwork" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.chemistry.chemNetwork">
+<em class="property">class </em><code class="descclassname">despotic.chemistry.</code><code class="descname">chemNetwork</code><span class="sig-paren">(</span><em>cloud=None</em>, <em>info=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/chemNetwork.html#chemNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.chemNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a purely abstract class that defines the methods that all
+chemistry networks are required to implement. Chemistry networks
+should be derived from it, and should override its
+methods. Attempting to instantiate this directly will lead to an
+error.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>cloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object to which this network should be attached</dd>
+<dt>info <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>a dict of additional information to be passed to the network
+on instantiation</dd>
+</dl>
+</dd>
+<dt>Class attributes</dt>
+<dd><dl class="first last docutils">
+<dt>specList <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of strings giving the names of the species being
+treated in the chemical network</dd>
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>array of abundances of the species in specList</dd>
+<dt>cloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a cloud object to which this chemical network is attached;
+can be None</dd>
+</dl>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="despotic.chemistry.chemNetwork.abundances">
+<code class="descname">abundances</code><a class="headerlink" href="#despotic.chemistry.chemNetwork.abundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>The current abundances of every species in the chemical
+network, stored as an abundanceDict.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.chemNetwork.applyAbundances">
+<code class="descname">applyAbundances</code><span class="sig-paren">(</span><em>addEmitters=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/chemNetwork.html#chemNetwork.applyAbundances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.chemNetwork.applyAbundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method writes abundances from the chemical network back
+to the cloud to which this network is attached.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>addEmitters <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True, and the network contains emitters that are not
+part of the parent cloud, then the network will attempt
+to add them using cloud.addEmitter. Otherwise this
+routine will change the abundances of whatever emitters
+are already attached to the cloud, but will not add new
+ones.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>Nothing</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.chemNetwork.dxdt">
+<code class="descname">dxdt</code><span class="sig-paren">(</span><em>xin</em>, <em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/chemNetwork.html#chemNetwork.dxdt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.chemNetwork.dxdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>This routine returns the time rate of change of the abundances
+for all species in the network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>xin <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>array of starting abundances</dd>
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>current time in sec</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>dxdt <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>the time derivative of all species abundances</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="cr-reactions">
+<h3><code class="docutils literal"><span class="pre">cr_reactions</span></code><a class="headerlink" href="#cr-reactions" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.chemistry.cr_reactions">
+<em class="property">class </em><code class="descclassname">despotic.chemistry.</code><code class="descname">cr_reactions</code><span class="sig-paren">(</span><em>specList</em>, <em>reactions</em>, <em>sparse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/reactions.html#cr_reactions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.cr_reactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>The cr_reactions class is used to handle computation of
+cosmic ray-induced reaction rates. In addition to the constructor,
+the class has only a single method: dxdt, which returns the
+reaction rates.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>specList: listlike of string</dt>
+<dd>List of all chemical species in the full reaction network,
+including those that are derived from conservation laws
+instead of being computed directly</dd>
+<dt>reactions <span class="classifier-delimiter">:</span> <span class="classifier">list of dict</span></dt>
+<dd>A list listing all the reactions to be registered; each
+entry in the list must be a dict containing the keys &#8216;spec&#8217;
+&#8216;stoich&#8217;, and &#8216;rate&#8217;, which list the species involved in the
+reaction, the stoichiometric factors for each species, and
+the reaction rate per primary CR ionization,
+respectively. Sign convention is that reactants on the left 
+hand side have negative stoichiometric factors, those on the
+right hand side have positive factors.</dd>
+<dt>sparse <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>If True, the reaction rate matrix is represented as a
+sparse matrix; otherwise it is a dense matrix. This has no
+effect on results, but depending on the chemical network it
+may lead to improved execution speed and/or reduced memory
+usage.</dd>
+</dl>
+</dd>
+<dt>Examples</dt>
+<dd><p class="first">To list the reaction cr + H -&gt; H+ + e-, the dict entry should be:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&#39;spec&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="s">&#39;H+&#39;</span><span class="p">,</span> <span class="s">&#39;e-&#39;</span><span class="p">],</span> <span class="s">&#39;stoich&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+  <span class="s">&#39;rate&#39;</span> <span class="p">:</span> <span class="mf">1.0</span> <span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.chemistry.cr_reactions.dxdt">
+<code class="descname">dxdt</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>ionrate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/reactions.html#cr_reactions.dxdt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.cr_reactions.dxdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the time derivative of the abundances x
+for a given cosmic ray ionization rate.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">array(N)</span></dt>
+<dd>array of current species abundances</dd>
+<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>number density of H nuclei; only used if some reactions
+have multiple species on the LHS, otherwise can be set to
+any positive value</dd>
+<dt>ionrate <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>cosmic ray primary ionization rate</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>dxdt: array(N)</dt>
+<dd>rate of change of all species abundances</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="nl99">
+<h3><code class="docutils literal"><span class="pre">NL99</span></code><a class="headerlink" href="#nl99" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.chemistry.NL99">
+<em class="property">class </em><code class="descclassname">despotic.chemistry.</code><code class="descname">NL99</code><span class="sig-paren">(</span><em>cloud=None</em>, <em>info=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99.html#NL99"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class the implements the chemistry network of Nelson &amp; Langer
+(1999, ApJ, 524, 923).</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>cloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a DESPOTIC cloud object from which initial data are to be
+taken</dd>
+<dt>info <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>a dict containing additional parameters</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd><p class="first">The dict info may contain the following key - value pairs:</p>
+<dl class="last docutils">
+<dt>&#8216;xC&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the total C abundance per H nucleus; defaults to 2.0e-4</dd>
+<dt>&#8216;xO&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the total H abundance per H nucleus; defaults to 4.0e-4</dd>
+<dt>&#8216;xM&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the total refractory metal abundance per H
+nucleus; defaults to 2.0e-7</dd>
+<dt>&#8216;sigmaDustV&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>V band dust extinction cross
+section per H nucleus; if not set, the default behavior
+is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE</dd>
+<dt>&#8216;AV&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>total visual extinction; ignored if sigmaDustV is set</dd>
+<dt>&#8216;noClump&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True, the clumping factor is set to 1.0; defaults to False</dd>
+</dl>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.AV">
+<code class="descname">AV</code><a class="headerlink" href="#despotic.chemistry.NL99.AV" title="Permalink to this definition">¶</a></dt>
+<dd><p>visual extinction in mag</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.NH">
+<code class="descname">NH</code><a class="headerlink" href="#despotic.chemistry.NL99.NH" title="Permalink to this definition">¶</a></dt>
+<dd><p>column density of H nuclei</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.abundances">
+<code class="descname">abundances</code><a class="headerlink" href="#despotic.chemistry.NL99.abundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>abundances of all species in the chemical network</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.NL99.applyAbundances">
+<code class="descname">applyAbundances</code><span class="sig-paren">(</span><em>addEmitters=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99.html#NL99.applyAbundances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99.applyAbundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method writes the abundances produced by the chemical
+network to the cloud&#8217;s emitter list.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>addEmitters <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, emitters that are included in the chemical
+network but not in the cloud&#8217;s existing emitter list will
+be added; if False, abundances of emitters already in the
+emitter list will be updated, but new emiters will not be
+added to the cloud</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+<dt>Remarks</dt>
+<dd>If there is no cloud associated with this chemical network,
+this routine does nothing and silently returns.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.cfac">
+<code class="descname">cfac</code><a class="headerlink" href="#despotic.chemistry.NL99.cfac" title="Permalink to this definition">¶</a></dt>
+<dd><p>clumping factor; cannot be set directly, calculated from temp
+and sigmaNT</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.chi">
+<code class="descname">chi</code><a class="headerlink" href="#despotic.chemistry.NL99.chi" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISRF strength, normalized to solar neighborhood value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.NL99.dxdt">
+<code class="descname">dxdt</code><span class="sig-paren">(</span><em>xin</em>, <em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99.html#NL99.dxdt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99.dxdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the time derivative of all abundances for
+this chemical network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>xin <span class="classifier-delimiter">:</span> <span class="classifier">array(10)</span></dt>
+<dd>current abundances of all species</dd>
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>current time; not actually used, but included as an
+argument for compatibility with odeint</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>dxdt <span class="classifier-delimiter">:</span> <span class="classifier">array(10)</span></dt>
+<dd>time derivative of x</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.NL99.extendAbundances">
+<code class="descname">extendAbundances</code><span class="sig-paren">(</span><em>xin=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99.html#NL99.extendAbundances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99.extendAbundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute abundances of derived species not directly followed in
+the network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>xin <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>abundances of species directly tracked in the network;
+if left as None, the abundances stored internally to the
+network are used</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>abundances, including those of derived species</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.ionRate">
+<code class="descname">ionRate</code><a class="headerlink" href="#despotic.chemistry.NL99.ionRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>primary ionization rate from cosmic rays and x-rays</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.nH">
+<code class="descname">nH</code><a class="headerlink" href="#despotic.chemistry.NL99.nH" title="Permalink to this definition">¶</a></dt>
+<dd><p>volume density of H nuclei</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.sigmaNT">
+<code class="descname">sigmaNT</code><a class="headerlink" href="#despotic.chemistry.NL99.sigmaNT" title="Permalink to this definition">¶</a></dt>
+<dd><p>non-thermal velocity dispersion</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.temp">
+<code class="descname">temp</code><a class="headerlink" href="#despotic.chemistry.NL99.temp" title="Permalink to this definition">¶</a></dt>
+<dd><p>gas kinetic temperature</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99.xHe">
+<code class="descname">xHe</code><a class="headerlink" href="#despotic.chemistry.NL99.xHe" title="Permalink to this definition">¶</a></dt>
+<dd><p>He abundance</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="nl99-gc">
+<h3><code class="docutils literal"><span class="pre">NL99_GC</span></code><a class="headerlink" href="#nl99-gc" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.chemistry.NL99_GC">
+<em class="property">class </em><code class="descclassname">despotic.chemistry.</code><code class="descname">NL99_GC</code><span class="sig-paren">(</span><em>cloud=None</em>, <em>info=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99_GC.html#NL99_GC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99_GC" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class the implements the CO chemistry network of Nelson &amp; Langer
+(1999, ApJ, 524, 923) coupled to the H2 chemistry network of
+Glover &amp; MacLow (2007, ApJS, 169, 239), as combined by Glover &amp;
+Clark (2012, MNRAS, 421, 9).</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>cloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>a DESPOTIC cloud object from which initial data are to be
+taken</dd>
+<dt>info <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>a dict containing additional parameters</dd>
+</dl>
+</dd>
+<dt>Remarks</dt>
+<dd><p class="first">The dict info may contain the following key - value pairs:</p>
+<dl class="last docutils">
+<dt>&#8216;xC&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the total C abundance per H nucleus; defaults to 2.0e-4</dd>
+<dt>&#8216;xO&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the total H abundance per H nucleus; defaults to 4.0e-4</dd>
+<dt>&#8216;xM&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>the total refractory metal abundance per H
+nucleus; defaults to 2.0e-7</dd>
+<dt>&#8216;Zd&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>dust abundance in solar units; defaults to 1.0</dd>
+<dt>&#8216;sigmaDustV&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>V band dust extinction cross
+section per H nucleus; if not set, the default behavior
+is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE</dd>
+<dt>&#8216;AV&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>total visual extinction; ignored if sigmaDustV is set</dd>
+<dt>&#8216;noClump&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True, the clumping factor is set to 1.0; defaults to False</dd>
+<dt>&#8216;sigmaNT&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>non-thermal velocity dispersion</dd>
+<dt>&#8216;temp&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>gas kinetic temperature</dd>
+</dl>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.AV">
+<code class="descname">AV</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.AV" title="Permalink to this definition">¶</a></dt>
+<dd><p>visual extinction in mag</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.NH">
+<code class="descname">NH</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.NH" title="Permalink to this definition">¶</a></dt>
+<dd><p>column density of H nuclei</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.Zd">
+<code class="descname">Zd</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.Zd" title="Permalink to this definition">¶</a></dt>
+<dd><p>dust abundance normalized to the solar neighborhood value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.abundances">
+<code class="descname">abundances</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.abundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>abundances of all species in the chemical network</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.NL99_GC.applyAbundances">
+<code class="descname">applyAbundances</code><span class="sig-paren">(</span><em>addEmitters=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99_GC.html#NL99_GC.applyAbundances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99_GC.applyAbundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method writes the abundances produced by the chemical
+network to the cloud&#8217;s emitter list.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>addEmitters <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, emitters that are included in the chemical
+network but not in the cloud&#8217;s existing emitter list will
+be added; if False, abundances of emitters already in the
+emitter list will be updated, but new emiters will not be
+added to the cloud</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd>Nothing</dd>
+<dt>Remarks</dt>
+<dd>If there is no cloud associated with this chemical network,
+this routine does nothing and silently returns.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.cfac">
+<code class="descname">cfac</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.cfac" title="Permalink to this definition">¶</a></dt>
+<dd><p>clumping factor; cannot be set directly, calculated from temp
+and sigmaNT</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.chi">
+<code class="descname">chi</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.chi" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISRF strength, normalized to solar neighborhood value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.NL99_GC.dxdt">
+<code class="descname">dxdt</code><span class="sig-paren">(</span><em>xin</em>, <em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99_GC.html#NL99_GC.dxdt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99_GC.dxdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the time derivative of all abundances for
+this chemical network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>xin <span class="classifier-delimiter">:</span> <span class="classifier">array(12)</span></dt>
+<dd>current abundances of all species</dd>
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>current time; not actually used, but included as an
+argument for compatibility with odeint</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>dxdt <span class="classifier-delimiter">:</span> <span class="classifier">array(12)</span></dt>
+<dd>time derivative of x</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.NL99_GC.extendAbundances">
+<code class="descname">extendAbundances</code><span class="sig-paren">(</span><em>xin=None</em>, <em>outdict=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99_GC.html#NL99_GC.extendAbundances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99_GC.extendAbundances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute abundances of derived species not directly followed in
+the network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>xin <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>abundances of species directly tracked in the network;
+if left as None, the abundances stored internally to the
+network are used</dd>
+<dt>outdict <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True, the values are returned as an abundanceDict; if
+False, they are returned as a pure numpy array</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">array | abundanceDict</span></dt>
+<dd>abundances, including those of derived species</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.ionRate">
+<code class="descname">ionRate</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.ionRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>primary ionization rate from cosmic rays and x-rays</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="despotic.chemistry.NL99_GC.mu">
+<code class="descname">mu</code><span class="sig-paren">(</span><em>xin=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/NL99_GC.html#NL99_GC.mu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.NL99_GC.mu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return mean particle mass in units of H mass</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>xin <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Chemical composition for which computation is to be
+done; if left as None, current chemical composition is
+used</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>mu <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Mean mass per free particle, in units of H mass</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.nH">
+<code class="descname">nH</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.nH" title="Permalink to this definition">¶</a></dt>
+<dd><p>volume density of H nuclei</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.sigmaNT">
+<code class="descname">sigmaNT</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.sigmaNT" title="Permalink to this definition">¶</a></dt>
+<dd><p>non-thermal velocity dispersion</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="despotic.chemistry.NL99_GC.xHe">
+<code class="descname">xHe</code><a class="headerlink" href="#despotic.chemistry.NL99_GC.xHe" title="Permalink to this definition">¶</a></dt>
+<dd><p>He abundance</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="photoreactions">
+<h3><code class="docutils literal"><span class="pre">photoreactions</span></code><a class="headerlink" href="#photoreactions" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.chemistry.photoreactions">
+<em class="property">class </em><code class="descclassname">despotic.chemistry.</code><code class="descname">photoreactions</code><span class="sig-paren">(</span><em>specList</em>, <em>reactions</em>, <em>sparse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/reactions.html#photoreactions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.photoreactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>The photoreactions class is used to handle computation of
+photon-induced reaction rates. Generally, it returns reaction
+rates for any reaction of the form
+gamma + ... -&gt; ...
+with a rate that scales as the ISRF strength, parameterized in
+units of the Habing (1968) field, multiplied by dust and gas
+shielding factors. In addition to the constructor, the class has
+only a single method: dxdt, which returns the reaction rates.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>specList: listlike of string</dt>
+<dd>List of all chemical species in the full reaction network,
+including those that are derived from conservation laws
+instead of being computed directly</dd>
+<dt>reactions <span class="classifier-delimiter">:</span> <span class="classifier">list of dict</span></dt>
+<dd><p class="first">A list listing all the reactions to be registered; each
+entry in the list must be a dict containing the keys:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>&#8216;spec&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">list </span></dt>
+<dd><p class="first last">list of strings giving the species involved in the reaction</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;stoich&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">list of int stoichiometric factor for each species</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;rate&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">reaction rate per target in a chi = 1 radiation field</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;av_fac&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">optical depth per unit A_V</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;shield_fac&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">(optional) callable </span></dt>
+<dd><p class="first last">callable to compute the
+shielding factor; see the dxdt method for an
+explanation of how to specify its arguments</p>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="last docutils">
+<dt>Reaction rates per target are given by </dt>
+<dd>chi * rate * shield_fac * exp(-av_fac * A_V)</dd>
+</dl>
+</dd>
+<dt>sparse <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>If True, the reaction rate matrix is represented as a
+sparse matrix; otherwise it is a dense matrix. This has no
+effect on results, but depending on the chemical network it
+may lead to improved execution speed and/or reduced memory
+usage.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="reaction-matrix">
+<h3><code class="docutils literal"><span class="pre">reaction_matrix</span></code><a class="headerlink" href="#reaction-matrix" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="despotic.chemistry.reaction_matrix">
+<em class="property">class </em><code class="descclassname">despotic.chemistry.</code><code class="descname">reaction_matrix</code><span class="sig-paren">(</span><em>specList</em>, <em>reactions</em>, <em>sparse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/reactions.html#reaction_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.reaction_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class provides a generic driver for computing rates of change
+of chemical species from chemical reactions. This class does the
+work of mapping from the reaction rates to rates of change in
+species abundances.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>specList: listlike of string</dt>
+<dd>List of all chemical species in the full reaction network,
+including those that are derived from conservation laws
+instead of being computed directly</dd>
+<dt>reactions <span class="classifier-delimiter">:</span> <span class="classifier">list of dict</span></dt>
+<dd>A list listing all the reactions to be registered; each
+entry in the list must be a dict containing the keys &#8216;spec&#8217;
+and &#8216;stoich&#8217;, which list the species involved in the
+reaction and the stoichiometric factors for each species,
+respectively. Sign convention is that reactants on the left
+hand side have negative stoichiometric factors, those on the
+right hand side have positive factors.</dd>
+<dt>sparse <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>If True, the reaction rate matrix is represented as a
+sparse matrix; otherwise it is a dense matrix. This has no
+effect on results, but depending on the chemical network it
+may lead to improved execution speed and/or reduced memory
+usage.</dd>
+</dl>
+</dd>
+<dt>Examples</dt>
+<dd><p class="first">To describe the reaction C + O -&gt; CO, the correct dict entry is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&#39;spec&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="s">&#39;O&#39;</span><span class="p">,</span> <span class="s">&#39;CO&#39;</span><span class="p">],</span> <span class="s">&#39;stoich&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>To describe the reaction H + H -&gt; H2, the dict is:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&#39;spec&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="s">&#39;H2&#39;</span><span class="p">],</span> <span class="s">&#39;stoich&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="method">
+<dt id="despotic.chemistry.reaction_matrix.dxdt">
+<code class="descname">dxdt</code><span class="sig-paren">(</span><em>x</em>, <em>n</em>, <em>ratecoef</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/reactions.html#reaction_matrix.dxdt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.reaction_matrix.dxdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>This returns the rate of change of species abundances given a
+set of rate coefficients.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">array(N_species)</span></dt>
+<dd>array of current species abundances</dd>
+<dt>n <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>number density of H nuclei</dd>
+<dt>ratecoef <span class="classifier-delimiter">:</span> <span class="classifier">array(N_reactions)</span></dt>
+<dd>rate coefficients for each reaction; reaction rate per unit
+volume = ratecoef * product of densities of reactants;
+dxdt = reaction rate / unit volume / n</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>dxdt <span class="classifier-delimiter">:</span> <span class="classifier">array(N)</span></dt>
+<dd>rate of change of all species abundances</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="despotic-chemistry-functions">
+<h2>despotic.chemistry functions<a class="headerlink" href="#despotic-chemistry-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="chemevol">
+<h3><code class="docutils literal"><span class="pre">chemEvol</span></code><a class="headerlink" href="#chemevol" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.chemistry.chemEvol">
+<code class="descclassname">despotic.chemistry.</code><code class="descname">chemEvol</code><span class="sig-paren">(</span><em>cloud</em>, <em>tFin</em>, <em>tInit=0.0</em>, <em>nOut=100</em>, <em>dt=None</em>, <em>tOut=None</em>, <em>network=None</em>, <em>info=None</em>, <em>addEmitters=False</em>, <em>evolveTemp='fixed'</em>, <em>isobaric=False</em>, <em>tempEqParam=None</em>, <em>dEdtParam=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/chemEvol.html#chemEvol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.chemEvol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evolve the abundances of a cloud using the specified chemical
+network.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>cloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>cloud on which computation is to be performed</dd>
+<dt>tFin <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>end time of integration, in sec</dd>
+<dt>tInit <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>start time of integration, in sec</dd>
+<dt>nOut <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of times at which to report the temperature; this
+is ignored if dt or tOut are set</dd>
+<dt>dt <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>time interval between outputs, in sec; this is ignored if
+tOut is set</dd>
+<dt>tOut <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>list of times at which to output the temperature, in s;
+must be sorted in increasing order</dd>
+<dt>network <span class="classifier-delimiter">:</span> <span class="classifier">chemical network class</span></dt>
+<dd>a valid chemical network class; this class must define the
+methods __init__, dxdt, and applyAbundances; if None, the
+existing chemical network for the cloud is used</dd>
+<dt>info <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>a dict of additional initialization information to be passed
+to the chemical network class when it is instantiated</dd>
+<dt>addEmitters <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, emitters that are included in the chemical
+network but not in the cloud&#8217;s existing emitter list will
+be added; if False, abundances of emitters already in the
+emitter list will be updated, but new emiters will not be
+added to the cloud</dd>
+<dt>evolveTemp <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;fixed&#8217; | &#8216;gasEq&#8217; | &#8216;fullEq&#8217; | &#8216;evol&#8217;</span></dt>
+<dd>how to treat the temperature evolution during the chemical
+evolution; &#8216;fixed&#8217; = treat tempeature as fixed; &#8216;gasEq&#8217; = hold
+dust temperature fixed, set gas temperature to instantaneous
+equilibrium value; &#8216;fullEq&#8217; = set gas and dust temperatures to
+instantaneous equilibrium values; &#8216;evol&#8217; = evolve gas
+temperature in time along with the chemistry, assuming the
+dust is always in instantaneous equilibrium</dd>
+<dt>isobaric <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the gas is assumed to be isobaric during the
+evolution (constant pressure); otherwise it is assumed to be
+isochoric; note that (since chemistry networks at present are
+not allowed to change the mean molecular weight), this option
+has no effect if evolveTemp is &#8216;fixed&#8217;</dd>
+<dt>tempEqParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.setTempEq,
+cloud.setGasTempEq, or cloud.setDustTempEq routines; only used
+if evolveTemp is not &#8216;fixed&#8217;</dd>
+<dt>dEdtParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.dEdt
+routine; only used if evolveTemp is &#8216;evol&#8217;</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>array of output times, in sec</dd>
+<dt>abundances <span class="classifier-delimiter">:</span> <span class="classifier">class abundanceDict</span></dt>
+<dd>an abundanceDict giving the abundances as a function of time</dd>
+<dt>Tg <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>gas temperature as a function of time; returned only if
+evolveTemp is not &#8216;fixed&#8217;</dd>
+<dt>Td <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>dust temperature as a function of time; returned only if
+evolveTemp is not &#8216;fixed&#8217; or &#8216;gasEq&#8217;</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError, if network is None and the cloud does not already
+have a defined chemical network associated with it</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="setchemeq">
+<h3><code class="docutils literal"><span class="pre">setChemEq</span></code><a class="headerlink" href="#setchemeq" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.chemistry.setChemEq">
+<code class="descclassname">despotic.chemistry.</code><code class="descname">setChemEq</code><span class="sig-paren">(</span><em>cloud</em>, <em>tEqGuess=None</em>, <em>network=None</em>, <em>info=None</em>, <em>addEmitters=False</em>, <em>tol=1e-06</em>, <em>maxTime=1e+16</em>, <em>verbose=False</em>, <em>smallabd=1e-15</em>, <em>convList=None</em>, <em>evolveTemp='fixed'</em>, <em>isobaric=False</em>, <em>tempEqParam=None</em>, <em>dEdtParam=None</em>, <em>maxTempIter=50</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/setChemEq.html#setChemEq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.setChemEq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the chemical abundances for a cloud to their equilibrium
+values, computed using a specified chemical netowrk.</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>cloud <span class="classifier-delimiter">:</span> <span class="classifier">class cloud</span></dt>
+<dd>cloud on which computation is to be performed</dd>
+<dt>tEqGuess <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>a guess at the timescale over which equilibrium will be
+achieved; if left unspecified, the code will attempt to
+estimate this time scale on its own</dd>
+<dt>network <span class="classifier-delimiter">:</span> <span class="classifier">chemNetwork class</span></dt>
+<dd>a valid chemNetwork class; this class must define the
+methods __init__, dxdt, and applyAbundances; if None, the
+existing chemical network for the cloud is used</dd>
+<dt>info <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>a dict of additional initialization information to be passed
+to the chemical network class when it is instantiated</dd>
+<dt>addEmitters <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, emitters that are included in the chemical
+network but not in the cloud&#8217;s existing emitter list will
+be added; if False, abundances of emitters already in the
+emitter list will be updated, but new emiters will not be
+added to the cloud</dd>
+<dt>evolveTemp <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;fixed&#8217; | &#8216;iterate&#8217; | &#8216;iterateDust&#8217; | &#8216;gasEq&#8217; | &#8216;fullEq&#8217; | &#8216;evol&#8217;</span></dt>
+<dd><p class="first">how to treat the temperature evolution during the chemical
+evolution:</p>
+<ul class="last simple">
+<li>&#8216;fixed&#8217; = treat tempeature as fixed</li>
+<li>&#8216;iterate&#8217; = iterate between setting the gas temperature and
+chemistry to equilibrium</li>
+<li>&#8216;iterateDust&#8217; = iterate between setting the gas and dust
+temperatures and the chemistry to equilibrium</li>
+<li>&#8216;gasEq&#8217; = hold dust temperature fixed, set gas temperature to
+instantaneous equilibrium value as the chemistry evolves</li>
+<li>&#8216;fullEq&#8217; = set gas and dust temperatures to instantaneous
+equilibrium values while evolving the chemistry network</li>
+<li>&#8216;evol&#8217; = evolve gas temperature in time along with the
+chemistry, assuming the dust is always in instantaneous
+equilibrium</li>
+</ul>
+</dd>
+<dt>isobaric <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if set to True, the gas is assumed to be isobaric during the
+evolution (constant pressure); otherwise it is assumed to be
+isochoric; note that (since chemistry networks at present are
+not allowed to change the mean molecular weight), this option
+has no effect if evolveTemp is &#8216;fixed&#8217;</dd>
+<dt>tempEqParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.setTempEq,
+cloud.setGasTempEq, or cloud.setDustTempEq routines; only used
+if evolveTemp is not &#8216;fixed&#8217;</dd>
+<dt>dEdtParam <span class="classifier-delimiter">:</span> <span class="classifier">None | dict</span></dt>
+<dd>if this is not None, then it must be a dict of values that
+will be passed as keyword arguments to the cloud.dEdt
+routine; only used if evolveTemp is &#8216;evol&#8217;</dd>
+<dt>tol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>tolerance requirement on the equilibrium solution</dd>
+<dt>convList <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of species to include when calculating tolerances to
+decide if network is converged; species not listed are not
+considered. If this is None, then all species are considered
+in deciding if the calculation is converged.</dd>
+<dt>smallabd <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>abundances below smallabd are not considered when checking for
+convergence; set to 0 or a negative value to consider all
+abundances, but beware that this may result in false
+non-convergence due to roundoff error in very small abundances</dd>
+<dt>maxTempIter <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>maximum number of iterations when iterating between chemistry
+and temperature; only used if evolveTemp is &#8216;iterate&#8217; or
+&#8216;iterateDust&#8217;</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>if True, diagnostic information is printed as the calculation
+proceeds</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>converged <span class="classifier-delimiter">:</span> <span class="classifier">Boolean</span></dt>
+<dd>True if the calculation converged, False if not</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>despoticError, if network is None and the cloud does not already
+have a defined chemical network associated with it</dd>
+<dt>Remarks</dt>
+<dd>The final abundances are written to the cloud whether or not the
+calculation converges.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="shielding-functions">
+<h3>Shielding functions<a class="headerlink" href="#shielding-functions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="despotic.chemistry.shielding.fShield_H2_DB">
+<code class="descclassname">despotic.chemistry.shielding.</code><code class="descname">fShield_H2_DB</code><span class="sig-paren">(</span><em>NH2</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/shielding.html#fShield_H2_DB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.shielding.fShield_H2_DB" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the shielding factor for H2
+photodissociation as a function of the H2 column density and
+velocity dispersion, based on the approximation formula of Draine
+&amp; Bertoldi (1996)</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>NH2 <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>H2 column density in cm^-2</dd>
+<dt>sigma <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>velocity dispersion in cm s^-1</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>fShield <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>the shielding factor for the input NH2 and sigma</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="despotic.chemistry.shielding.fShield_CO_vDB">
+<code class="descclassname">despotic.chemistry.shielding.</code><code class="descname">fShield_CO_vDB</code><span class="sig-paren">(</span><em>NCO</em>, <em>NH2</em>, <em>order=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/despotic/chemistry/shielding.html#fShield_CO_vDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#despotic.chemistry.shielding.fShield_CO_vDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the shielding factor for CO
+photodissociation as a function of CO and H2 column densities,
+based on the model of van Dishoeck &amp; Black (1987)</p>
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>NCO <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>CO column density in cm^-2</dd>
+<dt>NH2 <span class="classifier-delimiter">:</span> <span class="classifier">float | array</span></dt>
+<dd>H2 column density in cm^-2</dd>
+<dt>order <span class="classifier-delimiter">:</span> <span class="classifier">1 | 2 | 3</span></dt>
+<dd>order of spline interpolation on van Dishoeck &amp; Black&#8217;s table;
+1 is the safest choice, but 2 and 3 are also provided, and may
+be more accurate in some ranges</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>fShield <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>the shielding factor for the input NCO and NH2 values</dd>
+</dl>
+</dd>
+<dt>Raises</dt>
+<dd>ValueError if order is not 1, 2, or 3</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Full Documentation of All DESPOTIC Classes and Functions</a><ul>
+<li><a class="reference internal" href="#despotic-classes">despotic classes</a><ul>
+<li><a class="reference internal" href="#cloud"><code class="docutils literal"><span class="pre">cloud</span></code></a></li>
+<li><a class="reference internal" href="#collpartner"><code class="docutils literal"><span class="pre">collPartner</span></code></a></li>
+<li><a class="reference internal" href="#composition"><code class="docutils literal"><span class="pre">composition</span></code></a></li>
+<li><a class="reference internal" href="#despoticerror"><code class="docutils literal"><span class="pre">despoticError</span></code></a></li>
+<li><a class="reference internal" href="#dustprop"><code class="docutils literal"><span class="pre">dustProp</span></code></a></li>
+<li><a class="reference internal" href="#emitter"><code class="docutils literal"><span class="pre">emitter</span></code></a></li>
+<li><a class="reference internal" href="#emitterdata"><code class="docutils literal"><span class="pre">emitterData</span></code></a></li>
+<li><a class="reference internal" href="#radiation"><code class="docutils literal"><span class="pre">radiation</span></code></a></li>
+<li><a class="reference internal" href="#zonedcloud"><code class="docutils literal"><span class="pre">zonedcloud</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#despotic-functions">despotic functions</a><ul>
+<li><a class="reference internal" href="#fetchlamda"><code class="docutils literal"><span class="pre">fetchLamda</span></code></a></li>
+<li><a class="reference internal" href="#lineproflte"><code class="docutils literal"><span class="pre">lineProfLTE</span></code></a></li>
+<li><a class="reference internal" href="#refreshlamda"><code class="docutils literal"><span class="pre">refreshLamda</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#despotic-chemistry-classes">despotic.chemistry classes</a><ul>
+<li><a class="reference internal" href="#abundancedict"><code class="docutils literal"><span class="pre">abundanceDict</span></code></a></li>
+<li><a class="reference internal" href="#chemnetwork"><code class="docutils literal"><span class="pre">chemNetwork</span></code></a></li>
+<li><a class="reference internal" href="#cr-reactions"><code class="docutils literal"><span class="pre">cr_reactions</span></code></a></li>
+<li><a class="reference internal" href="#nl99"><code class="docutils literal"><span class="pre">NL99</span></code></a></li>
+<li><a class="reference internal" href="#nl99-gc"><code class="docutils literal"><span class="pre">NL99_GC</span></code></a></li>
+<li><a class="reference internal" href="#photoreactions"><code class="docutils literal"><span class="pre">photoreactions</span></code></a></li>
+<li><a class="reference internal" href="#reaction-matrix"><code class="docutils literal"><span class="pre">reaction_matrix</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#despotic-chemistry-functions">despotic.chemistry functions</a><ul>
+<li><a class="reference internal" href="#chemevol"><code class="docutils literal"><span class="pre">chemEvol</span></code></a></li>
+<li><a class="reference internal" href="#setchemeq"><code class="docutils literal"><span class="pre">setChemEq</span></code></a></li>
+<li><a class="reference internal" href="#shielding-functions">Shielding functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="chemistry.html" title="previous chapter">Chemistry and Chemical Networks</a></li>
+      <li>Next: <a href="acknowledgements.html" title="next chapter">Acknowledgements</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fulldoc.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Mark R. Krumholz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/fulldoc.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

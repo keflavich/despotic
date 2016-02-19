@@ -1,0 +1,627 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Functional Guide to DESPOTIC Capabilities &mdash; DESPOTIC 2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <link rel="next" title="Cloud Files" href="cloudfiles.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="functional-guide-to-despotic-capabilities">
+<h1>Functional Guide to DESPOTIC Capabilities<a class="headerlink" href="#functional-guide-to-despotic-capabilities" title="Permalink to this headline">¶</a></h1>
+<p>This section covers the most common tasks for which DESPOTIC can be
+used. They are not intended to provide a comprehensive overview of the
+library&#8217;s capabilities, and users who wish to understand every
+available option should refer to <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a>. The routines used in
+this section are all described in full detail there. For all of these
+operations, the user should first have imported the basic DESPOTIC
+class <code class="docutils literal"><span class="pre">cloud</span></code> by doing:</p>
+<div class="highlight-rest"><div class="highlight"><pre>from despotic import cloud
+</pre></div>
+</div>
+<p>In the examples below we will also assume that <code class="docutils literal"><span class="pre">matplotlib</span></code> and
+<code class="docutils literal"><span class="pre">numpy</span></code> have both been imported, via:</p>
+<div class="highlight-rest"><div class="highlight"><pre>import matplotlib.pyplot as plt
+import numpy as np
+</pre></div>
+</div>
+<div class="section" id="unit-conventions">
+<h2>Unit Conventions<a class="headerlink" href="#unit-conventions" title="Permalink to this headline">¶</a></h2>
+<p>In this section, and in general when using DESPOTIC, there are two
+important conventions to keep in mind.</p>
+<ol class="arabic simple">
+<li>All quantities are in CGS units unless otherwise specified. The
+main exceptions are quantites that are normalized to Solar or Solar
+neighborhood values (e.g. metallicity and interstellar radiation
+field strength) and quantities where the conventional unit is
+non-CGS (e.g. integrated brightness temperatures are expressed in
+the usual units of K km/s).</li>
+<li>All rates are expressed per H nucleus, rather than per unit mass or
+per unit volume. This includes chemical abundances. Thus for
+example a heating rate of <span class="math">\(\Gamma=10^{-26}\)</span> should be
+understood as <span class="math">\(10^{-26}\)</span> erg/s/H nucleus. An abundance
+<span class="math">\(x_{\mathrm{He}}=0.1\)</span> should be understood as 1 He atom per
+10 H nuclei.</li>
+</ol>
+</div>
+<div class="section" id="line-emission">
+<span id="ssec-line-emission"></span><h2>Line Emission<a class="headerlink" href="#line-emission" title="Permalink to this headline">¶</a></h2>
+<p>The most basic task in DESPOTIC is computing the line emission
+emerging from a cloud of specified physical properties. The first step
+in any computation of line emission is to create a cloud object with
+the desired properties. This is often most easily done by creating a
+DESPOTIC cloud file (see <a class="reference internal" href="cloudfiles.html#sec-cloudfiles"><span>Cloud Files</span></a>), but the user can also
+create a cloud with the desired properties manually. The properties
+that are important for line emission are the gas volume density,
+column density, temperature, velocity dispersion, and chemical
+composition; these are stored in the cloud class and the composition
+class within it. For example, the following code snippet:</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud = cloud()
+mycloud.nH = 1.0e2
+mycloud.colDen = 1.0e22
+mycloud.sigmaNT = 2.0e5
+mycloud.Tg = 10.0
+mycloud.comp.xoH2 = 0.1
+mycloud.comp.xpH2 = 0.4
+mycloud.comp.xHe = 0.1
+</pre></div>
+</div>
+<p>creates a cloud with all its parameters set to default values, a
+volume density of H nuclei <span class="math">\(n_{\mathrm{H}} =
+10^2\,\mathrm{cm}^{-3}\)</span>, a column density of H nuclei
+<span class="math">\(N_{\mathrm{H}} = 10^{22}\,\mathrm{cm}^{-2}\)</span>, a non-thermal
+velocity dispersion of <span class="math">\(\sigma_{\mathrm{NT}} = 2.0 \times
+10^5\,\mathrm{cm}\,\mathrm{s}^{-1}\)</span>, a gas temperature of <span class="math">\(T_g =
+10\,\mathrm{K}\)</span>, and a composition that is 0.1
+ortho-<span class="math">\(\mathrm{H}_2\)</span> molecules per H nucleus, 0.4
+para-<span class="math">\(\mathrm{H}_2\)</span> molecules, and 0.1 He atoms per H nucleus.</p>
+<p>The next step is to specify the emitting species whose line emission
+is to be computed. As with the physical properties of the cloud, this
+is often most easily done by creating a cloud file. However, it can
+also be done manually by using the cloud.addEmitter method, which
+allows users to add emitting species to clouds. The following code
+snippet adds CO as an emitting species, at an abundance of
+<span class="math">\(10^{-4}\)</span> CO molecules per H nucleus:</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.addEmitter(&quot;CO&quot;, 1.0e-4)
+</pre></div>
+</div>
+<p>The first argument is the name of the emitting species, and the second
+is the abundance. The requisite molecular data file will be read from
+disk if it is available, or automatically downloaded from the Leiden
+Atomic and Molecular Database if it is not (see <a class="reference internal" href="data.html#sec-data"><span>Atomic and Molecular Data</span></a>).</p>
+<p>Once an emitter has been added, only a single call is required to
+calculate the luminosity of its lines:</p>
+<div class="highlight-rest"><div class="highlight"><pre>lines = mycloud.lineLum(&quot;CO&quot;)
+</pre></div>
+</div>
+<p>The argument is just the name of the species whose line emission
+should be computed. Note that it must match the name of an existing
+emitter, and that emitter names are case-sensitive. The value returned
+by this procedure, which is stored in the variable <code class="docutils literal"><span class="pre">lines</span></code>, is a
+<code class="docutils literal"><span class="pre">list</span></code> of <code class="docutils literal"><span class="pre">dict</span></code>, with each <code class="docutils literal"><span class="pre">dict</span></code> describing the properties of
+a single line. Lines are ordered by frequency, from lowest to
+highest. Each <code class="docutils literal"><span class="pre">dict</span></code> contains the following keys-value pairs</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">freq</span></code> is the line frequency in Hz</li>
+<li><code class="docutils literal"><span class="pre">intIntensity</span></code> is the frequency-integrated intensity of the line
+after subtracting off the CMB contribution, in
+<span class="math">\(\mathrm{erg}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}\,\mathrm{sr}^{-1}\)</span></li>
+<li><code class="docutils literal"><span class="pre">intTB</span></code> is the velocity-integrated brightness temperature (again
+subtracting off the CMB) in
+<span class="math">\(\mathrm{K}\,\mathrm{km}\,\mathrm{s}^{-1}\)</span></li>
+<li><code class="docutils literal"><span class="pre">lumPerH</span></code> is the rate of energy emission in the line per H nucleus
+in the cloud, in <span class="math">\(\mathrm{erg}\,\mathrm{s}^{-1}\)</span>.</li>
+</ul>
+<p>This is a partial list of what the <code class="docutils literal"><span class="pre">dict</span></code> contains; see
+<a class="reference internal" href="fulldoc.html#sssec-full-cloud"><span>cloud</span></a> for a complete listing.</p>
+<p>Once the data been obtained, the user can do what he or she wishes
+with them. For example, to plot velocity-integrated brightness
+temperature versus line frequency, the user might do:</p>
+<div class="highlight-rest"><div class="highlight"><pre>freq = [l[&quot;freq&quot;] for l in lines]
+TB = [l[&quot;intTB&quot;] for l in lines]
+plt.plot(freq, TB, &quot;o&quot;)
+</pre></div>
+</div>
+</div>
+<div class="section" id="heating-and-cooling-rates">
+<h2>Heating and Cooling Rates<a class="headerlink" href="#heating-and-cooling-rates" title="Permalink to this headline">¶</a></h2>
+<p>To use DESPOTIC&#8217;s capability to calculate heating and cooling rates,
+in addition to the quantities specified for a calculation of line
+emission one must also add the quantities describing the dust and the
+radiation field. As before, this is most easily accomplished by
+creating a DESPOTIC cloud file (see <a class="reference internal" href="cloudfiles.html#sec-cloudfiles"><span>Cloud Files</span></a>), but the
+data can also be input manually. The code snippet below does so:</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.dust.alphaGD   = 3.2e-34    # Dust-gas coupling coefficient
+mycloud.dust.sigma10   = 2.0e-25    # Cross section for 10K thermal radiation
+mycloud.dust.sigmaPE   = 1.0e-21    # Cross section for photoelectric heating
+mycloud.dust.sigmaISRF = 3.0e-22    # Cross section to the ISRF
+mycloud.dust.beta      = 2.0        # Dust spectral index
+mycloud.dust.Zd        = 1.0        # Abundance relative to Milky Way
+mycloud.Td             = 10.0       # Dust temperature
+mycloud.rad.TCMB       = 2.73       # CMB temperature
+mycloud.rad.TradDust   = 0.0        # IR radiation field seen by the dust
+mycloud.rad.ionRate    = 2.0e-17    # Primary ionization rate
+mycloud.rad.chi        = 1.0        # ISRF normalized to Solar neighborhood
+</pre></div>
+</div>
+<p>These quantities specify the dust-gas coupling constant, the dust
+cross section to 10 K thermal radiation, the dust cross section to the
+8 - 13.6 eV photons the dominate photoelectric heating, the dust cross
+section to the broader interstellar radiation field responsible for
+heating the dust, the dust spectral index, the dust abundance relative
+to the Milky Way value, the dust temperature, the cosmic microwave
+background temperature, the infrared radiation field that heats the
+dust, the primary ionization rate due to cosmic rays and x-rays, and
+the ISRF strength normalized to the Solar neighborhood value. All of
+the numerical values shown in the code snippet above are in fact the
+defaults, and so none of the above commands are strictly
+necessary. However, it is generally wise to set quantities explicitly
+rather than relying on default values.</p>
+<p>Once these data have been input, one may compute all the heating and
+cooling terms that DESPOTIC includes using the <code class="docutils literal"><span class="pre">cloud.dEdt</span></code> routine:</p>
+<div class="highlight-rest"><div class="highlight"><pre>rates = mycloud.dEdt()
+</pre></div>
+</div>
+<p>This call returns a dict which contains the instantaneous rates of
+heating and cooling. The entries in the dict are: <code class="docutils literal"><span class="pre">GammaPE</span></code>, the gas
+photoelectric heating rate, <code class="docutils literal"><span class="pre">GammaCR</span></code>, the gas heating rate due to
+cosmic ray and X-ray ionization, <code class="docutils literal"><span class="pre">GammaGrav</span></code>, the gas heating rate due
+to gravitational compression, <code class="docutils literal"><span class="pre">GammaDustISRF</span></code>, the dust heating rate
+due to the ISRF, <code class="docutils literal"><span class="pre">GammaDustCMB</span></code>, the dust heating rate due to the CMB,
+<code class="docutils literal"><span class="pre">GammaDustIR</span></code>, the dust heating rate due to the IR field,
+<code class="docutils literal"><span class="pre">GammaDustLine</span></code>, the dust heating rate due to absorption of line
+photons, <code class="docutils literal"><span class="pre">PsiGD</span></code>, the gas-dust energy exchange rate (positive means
+gas heating, dust cooling), <code class="docutils literal"><span class="pre">LambdaDust</span></code>, the dust cooling rate via
+thermal emission, and <code class="docutils literal"><span class="pre">LambdaLine</span></code>, the gas cooling rate via line
+emission. This last quantity is itself a dict, with one entry per
+emitting species and the dictionary keys corresponding to the emitter
+names. Thus in the above example, one could see the cooling rate via
+CO emission by doing:</p>
+<div class="highlight-rest"><div class="highlight"><pre>print rates[&quot;LambdaLine&quot;][&quot;CO&quot;]
+</pre></div>
+</div>
+</div>
+<div class="section" id="temperature-equilibria">
+<span id="ssec-temp-eq"></span><h2>Temperature Equilibria<a class="headerlink" href="#temperature-equilibria" title="Permalink to this headline">¶</a></h2>
+<p>Computing the equilibrium temperature requires exactly the same
+quantities as computing the heating and cooling rates; indeed, the
+process of computing the equilibrium temperature simply amounts to
+searching for values of <span class="math">\(T_g\)</span> and <span class="math">\(T_d\)</span> such that the sum
+of the heating and cooling rates returned by <code class="docutils literal"><span class="pre">cloud.dEdt</span></code> are zero. One
+may perform this calculation using the <code class="docutils literal"><span class="pre">cloud.setTempEq</span></code> method:</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.setTempEq()
+</pre></div>
+</div>
+<p>This routine iterates to find the equilibrium gas and dust
+temperatures, and returns True if the iteration converges. After this
+call, the computed dust and gas temperatures may simply be read off:</p>
+<div class="highlight-rest"><div class="highlight"><pre>print mycloud.Td, mycloud.Tg
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">cloud.setTempEq</span></code> routine determines the dust and gas
+temperatures simultaneously. However, there are many situations where
+it is preferable to solve for only one of these two, while leaving the
+other fixed. This may be accomplished by the calls:</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.setDustTempEq()
+mycloud.setGasTempEq()
+</pre></div>
+</div>
+<p>These routines, respectively, set <code class="docutils literal"><span class="pre">mycloud.Td</span></code> while leaving
+<code class="docutils literal"><span class="pre">mycloud.Tg</span></code> fixed, or vice-versa. Solving for one temperature at a
+time is often faster, and if dust-gas coupling is known to be
+negligible will produce nearly identical results as solving for the
+two together.</p>
+</div>
+<div class="section" id="time-dependent-temperature-evolution">
+<span id="ssec-temp-evol"></span><h2>Time-Dependent Temperature Evolution<a class="headerlink" href="#time-dependent-temperature-evolution" title="Permalink to this headline">¶</a></h2>
+<p>To perform computations of time-dependent temperature evolution,
+DESPOTIC provides the method <code class="docutils literal"><span class="pre">cloud.tempEvol</span></code>. In its most basic
+form, this routine simply accepts an argument specifying the amount of
+time for which the cloud is to be integrated, and returning the
+temperature as a function of time during this evolution (note that
+executing this command may take a few minutes, depending on your
+processor):</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.Tg = 50.0         # Start the cloud out of equilibrium
+tFinal = 20 * 3.16e10     # 20 kyr
+Tg, t = mycloud.tempEvol(tFinal)
+</pre></div>
+</div>
+<p>The two values returned are arrays, the second of which gives a series
+of 100 equally-spaced times between 0 and <code class="docutils literal"><span class="pre">tFinal</span></code>, and the first of
+which gives the temperatures at those times. The number of output
+times, the spacing between them, and their exact values may all be
+controlled by optional arguments &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-cloud"><span>cloud</span></a> for
+details. At
+the end of this evolution, the cloud temperature <code class="docutils literal"><span class="pre">mycloud.Tg</span></code>
+will be changed to its value at the end of 20 kyr of evolution, and
+the dust temperature <code class="docutils literal"><span class="pre">mycloud.Tg</span></code> will be set to its thermal
+equilibrium value at that cloud temperature.</p>
+<p>If one wishes to examine the intermediate states in more detail, one
+may also request that the full state of the cloud be saved at every
+time:</p>
+<div class="highlight-rest"><div class="highlight"><pre>clouds, t = mycloud.tempEvol(tFinal, fullOutput=True)
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">fullOutput</span></code> optional argument, if <code class="docutils literal"><span class="pre">True</span></code>, causes the routine
+to return a full copy of the state of the cloud at each output time,
+instead of just the gas temperature <code class="docutils literal"><span class="pre">Tg</span></code>. In this case, <code class="docutils literal"><span class="pre">clouds</span></code>
+is a sequence of 100 <code class="docutils literal"><span class="pre">cloud</span></code> objects, and one may interrogate their
+states (e.g. calculating their line emission) using the usual
+routines.</p>
+</div>
+<div class="section" id="chemical-equilibria">
+<span id="ssec-chem-eq"></span><h2>Chemical Equilibria<a class="headerlink" href="#chemical-equilibria" title="Permalink to this headline">¶</a></h2>
+<p>DESPOTIC can also compute the chemical state of clouds from a chemical
+network. Full details on chemical networks are given in
+<a class="reference internal" href="chemistry.html#sec-chemistry"><span>Chemistry and Chemical Networks</span></a>, but for this example we will use a simple network
+that DESPOTIC ships with, that of <a class="reference external" href="http://adsabs.harvard.edu/abs/1999ApJ...524..923N">Nelson &amp; Langer (1999, ApJ,
+524, 923)</a>. This
+network computes the chemistry of carbon and oxygen in a region where
+the hydrogen is fully molecular. For more details see
+<a class="reference internal" href="chemistry.html#sssec-nl99"><span>NL99</span></a>.</p>
+<p>To perform computations with this network, one must first import the
+class that defines it:</p>
+<div class="highlight-rest"><div class="highlight"><pre>from despotic.chemistry import NL99
+</pre></div>
+</div>
+<p>One can set the equilibrium abundances of a cloud to the equilibrium
+values determined by the network via the command:</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.setChemEq(network=NL99)
+</pre></div>
+</div>
+<p>The argument <code class="docutils literal"><span class="pre">network</span></code> specifies that the calculation should use the
+<code class="docutils literal"><span class="pre">NL99</span></code> class. This call sets the abundances of all the emitters that
+are included in the network to their equilibrium values. In this case,
+the network includes CO, and thus it sets the CO abundance to a new
+value:</p>
+<div class="highlight-rest"><div class="highlight"><pre>print mycloud.emitters[&quot;CO&quot;].abundance
+</pre></div>
+</div>
+<p>One can also see the abundances of all the species included in the
+network, including those that do not correspond to emitters in the
+cloud, by printing the chemical network property <code class="docutils literal"><span class="pre">abundances</span></code>:</p>
+<div class="highlight-rest"><div class="highlight"><pre>print mycloud.chemnetwork.abundances
+</pre></div>
+</div>
+<p>Once the chemical network is associated with the cloud, subsequent
+calls to <code class="docutils literal"><span class="pre">setChemEq</span></code> need not include the <code class="docutils literal"><span class="pre">network</span></code>
+keyword. DESPOTIC assumes that all subsequent chemical calculations
+are to be performed with the same chemical network unless it is
+explicitly told otherwise via a call to <code class="docutils literal"><span class="pre">setChemEq</span></code> or
+<code class="docutils literal"><span class="pre">chemEvol</span></code> (see <a class="reference internal" href="#ssec-chem-time"><span>Time-Dependent Chemical Evolution</span></a>) that specifies a different
+chemical network.</p>
+</div>
+<div class="section" id="simultaneous-chemical-and-thermal-equilibria">
+<h2>Simultaneous Chemical and Thermal Equilibria<a class="headerlink" href="#simultaneous-chemical-and-thermal-equilibria" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">setChemEq</span></code> routine (see <a class="reference internal" href="#ssec-chem-eq"><span>Chemical Equilibria</span></a>) called with no
+extra arguments leaves the gas temperature fixed. However, it is also
+possible to compute a simultaneous equilibrium for the temperature and
+the thermal state. To do so, we first import a chemical network to
+be used, in this case the Nelson &amp; Langer (1999) network (see
+<a class="reference internal" href="#ssec-chem-eq"><span>Chemical Equilibria</span></a>):</p>
+<div class="highlight-rest"><div class="highlight"><pre>from despotic.chemistry import NL99
+</pre></div>
+</div>
+<p>We then call <code class="docutils literal"><span class="pre">cloud.setChemEq</span></code> with an optional keyword
+<code class="docutils literal"><span class="pre">evolveTemp</span></code></p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.setChemEq(network=NL99, evolveTemp=<span class="s">``iterate``</span>)
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">network</span></code> keyword specifies that the computation should use the
+NL99 network, while <code class="docutils literal"><span class="pre">evolveTemp</span></code> specifies how to handle the
+simultaneous thermal and chemical equilibrium calculation. The options
+available are</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">fixed</span></code>: gas temperature is held fixed</li>
+<li><code class="docutils literal"><span class="pre">iterate</span></code>: calculation iterates between computing chemical and
+gas thermal equilibria, i.e., chemical equilibrium is computed at
+fixed temperature, equilibrium gas temperature (see
+<a class="reference internal" href="#ssec-temp-eq"><span>Temperature Equilibria</span></a>) is computed for fixed abundances, and the
+process is repeated until the temperature and abundances converge;
+dust temperature is held fixed</li>
+<li><code class="docutils literal"><span class="pre">iterateDust</span></code>: same as <code class="docutils literal"><span class="pre">iterate</span></code>, except the dust temperature is
+iterated as well</li>
+<li><code class="docutils literal"><span class="pre">gasEq</span></code>: gas temperature is always set to its instantaneous
+equilibrium value as the chemical state is evolved toward
+equilibrium; dust temperature is held fixed</li>
+<li><code class="docutils literal"><span class="pre">fullEq</span></code>: same as <code class="docutils literal"><span class="pre">gasEq</span></code>, except that both gas and dust
+temperatures are set to their instantaneous equilibrium values</li>
+<li><code class="docutils literal"><span class="pre">evol</span></code>: chemical state and gas temperature are evolved in time
+together, while dust temperature is always set to its instantaneous
+equilibrium value; evolution stops once gas temperature and
+abundances stop changing significantly</li>
+</ul>
+<p>Note that, while in general the different evolution methods will
+converge to the same answer, there is no guarantee that they will do
+in systems where multiple equilibria exist.</p>
+</div>
+<div class="section" id="time-dependent-chemical-evolution">
+<span id="ssec-chem-time"></span><h2>Time-Dependent Chemical Evolution<a class="headerlink" href="#time-dependent-chemical-evolution" title="Permalink to this headline">¶</a></h2>
+<p>DESPOTIC can also calculate time-dependent chemical evolution. This is
+accomplished through the method cloud.chemEvol. At with
+<code class="docutils literal"><span class="pre">cloud.tempEvol</span></code> (see <a class="reference internal" href="#ssec-temp-evol"><span>Time-Dependent Temperature Evolution</span></a>), this routine accepts
+an argument specifying the amount of time for which the cloud is to be
+integrated, and returning the chemical abundances as a function of
+time during this evolution:</p>
+<div class="highlight-rest"><div class="highlight"><pre>mycloud.rad.ionRate = 2.0e-16 # Raise the ionization rate a lot
+tFinal = 0.5 * 3.16e13 # 0.5 Myr
+abd, t = mycloud.chemEvol(tFinal, network=NL99)
+</pre></div>
+</div>
+<p>Note that the <code class="docutils literal"><span class="pre">network=NL99</span></code> option may be omitted if one has
+previously assigned that network to the cloud (for example by
+executing the examples in <a class="reference internal" href="#ssec-chem-eq"><span>Chemical Equilibria</span></a>).</p>
+<p>The output quantity abd here is an object of class <code class="docutils literal"><span class="pre">abundanceDict</span></code>,
+which is a specialized dict for handling chemical abundances &#8211; see
+<a class="reference internal" href="chemistry.html#sssec-abundancedict"><span>abundanceDict</span></a>. One can examine the abundances of specific
+species just by giving their chemical names. For example, to see
+the time-dependent evolution of the abundances of CO, C, and
+<span class="math">\(\mathrm{C}^+\)</span>, one could do:</p>
+<div class="highlight-rest"><div class="highlight"><pre>plt.plot(t, abd[&quot;CO&quot;])
+plt.plot(t, abd[&quot;C&quot;])
+plt.plot(t, abd[&quot;C+&quot;])
+</pre></div>
+</div>
+<p>As with <code class="docutils literal"><span class="pre">setChemEq</span></code>, this routine modifies the abundances of
+emitters in the cloud to the values they achieve at the end of the
+evolution, so to see the final CO abundance one could do:</p>
+<div class="highlight-rest"><div class="highlight"><pre>print mycloud.emitters[&quot;CO&quot;].abundance
+</pre></div>
+</div>
+</div>
+<div class="section" id="multi-zone-clouds">
+<h2>Multi-Zone Clouds<a class="headerlink" href="#multi-zone-clouds" title="Permalink to this headline">¶</a></h2>
+<p>While most DESPOTIC functionality is provided through the <code class="docutils literal"><span class="pre">cloud</span></code>
+class, which represents a single cloud, it is sometimes useful to have
+a cloud that contains zones of different optical depths. This
+functionality is provided through the <code class="docutils literal"><span class="pre">zonedcloud</span></code> class. A
+<code class="docutils literal"><span class="pre">zonedcloud</span></code> is just a collection of <code class="docutils literal"><span class="pre">cloud</span></code> objects that are
+characterized by having different column densities (and optionally
+volume densities), and on which all the operations listed above can be
+performed in a batch fashion.</p>
+<p>One can create a <code class="docutils literal"><span class="pre">zonedcloud</span></code> in much the same way as a <code class="docutils literal"><span class="pre">cloud</span></code>,
+but reading from an input file:</p>
+<div class="highlight-rest"><div class="highlight"><pre>from despotic import zonedcloud
+zc = zonedcloud(fileName=&quot;cloudfiles/MilkyWayGMC.desp&quot;)
+</pre></div>
+</div>
+<p>A <code class="docutils literal"><span class="pre">zonedcloud</span></code> is characterized by column densities for each of its
+zones, which can be accessed through the <code class="docutils literal"><span class="pre">colDen</span></code> property:</p>
+<div class="highlight-rest"><div class="highlight"><pre>print zc.colDen
+</pre></div>
+</div>
+<p>The column densities of all zones, and the number of zones, can be
+controlled when the <code class="docutils literal"><span class="pre">zonedcloud</span></code> is created using the keywords
+<code class="docutils literal"><span class="pre">nZone</span></code> and <code class="docutils literal"><span class="pre">colDen</span></code>; see <a class="reference internal" href="fulldoc.html#sssec-full-zonedcloud"><span>zonedcloud</span></a> for the
+full list of keywords.</p>
+<p>Once a <code class="docutils literal"><span class="pre">zonedcloud</span></code> exists, all of the functions described above in
+this section are available for it, and will be applied zone by
+zone. For example, one can do:</p>
+<div class="highlight-rest"><div class="highlight"><pre>zc.setTempEq()
+print zc.Tg
+</pre></div>
+</div>
+<p>to set and then print the temperature in each zone. Commands the
+report observable quantities or abundances will return
+appropriately-weighted sums over the entire cloud. For example:</p>
+<div class="highlight-rest"><div class="highlight"><pre>zc.lineLum(&#39;co&#39;)[0]
+</pre></div>
+</div>
+<p>returns a dict describing the <span class="math">\(J=1\rightarrow 0\)</span> line of CO. The
+quantities <code class="docutils literal"><span class="pre">intTB</span></code> and <code class="docutils literal"><span class="pre">intIntensity</span></code> that are part of the dict
+and contain the velocity-integrated brightness temperature and
+frequency-integrated intensity, respectively (see
+<a class="reference internal" href="#ssec-line-emission"><span>Line Emission</span></a>), are sums over all zones, while ones
+like <code class="docutils literal"><span class="pre">Tex</span></code> (the excitation temperature) that do not make sense to
+sum are returned as an array giving zone-by-zone values.</p>
+</div>
+<div class="section" id="computing-line-profiles">
+<h2>Computing Line Profiles<a class="headerlink" href="#computing-line-profiles" title="Permalink to this headline">¶</a></h2>
+<p>Line profile computation operates somewhat differently then the
+previous examples, because it is provided through a stand-alone
+procedure rather than through the cloud class. This procedure is
+called lineProfLTE, and may be imported directly from the DESPOTIC
+package. The routine also requires emitter data stored in an
+<code class="docutils literal"><span class="pre">emitterData</span></code> object. The first step in a line profile calculation is
+therefore to import these two objects into the python environment:</p>
+<div class="highlight-rest"><div class="highlight"><pre>from despotic import lineProfLTE
+from despotic import emitterData
+</pre></div>
+</div>
+<p>The second step is to read in the emitter data. The interface to read
+emitter data is essentially identical to the one used to add an
+emitter to a cloud. One simply declares an <code class="docutils literal"><span class="pre">emitterData</span></code> object,
+giving the name of the emitter as an argument:</p>
+<div class="highlight-rest"><div class="highlight"><pre>csData = emitterData(’CS’) # Reads emitter data for the CS molecule
+</pre></div>
+</div>
+<p>Alternately, emitter data may be obtained from a <code class="docutils literal"><span class="pre">cloud</span></code>, since clouds
+store emitter data for all their emitters. Using the examples from the
+previous sections:</p>
+<div class="highlight-rest"><div class="highlight"><pre>coData = mycloud.emitters[&quot;CO&quot;].data
+</pre></div>
+</div>
+<p>copies the emitter data for CO to the variable <code class="docutils literal"><span class="pre">coData</span></code>.</p>
+<p>The third step is to specify the radius of the cloud, and the profiles
+of any quantities within the cloud that are to change with radius,
+including density, temperature, radial velocity, and non-thermal
+velocity dispersion. Each of these can be constant, but the most
+interesting applications are when one or more of them are not, in
+which case they must be defined by functions. These function each take
+a single argument, the radius in units where the outer radius of the
+cloud is unity, and return a single floating point value, giving the
+quantity in question in CGS units. For example, to compute line
+profiles through a cloud of spatially-varying temperature and infall
+velocity, one might define the functions:</p>
+<div class="highlight-rest"><div class="highlight"><pre>R = 0.02 * 3.09e18 # 0.2 pc
+def TProf(r):
+    return 8.0 + 12.0<span class="ge">*np.exp(-r**2/(2.0*</span>0.5**2))
+def vProf(r):
+    return -4.0e4*r
+</pre></div>
+</div>
+<p>The first function sets a temperature that varies from 20 K in the
+center of close to 8 K at the outer edge, and the second defines a
+velocity that varies from 0 in the center to <span class="math">\(-0.4\)</span> km
+<span class="math">\(\mathrm{s}^{-1}\)</span> (where negative indicates infall) at the outer
+edge. Similar functions can be defined by density and non-thermal
+velocity dispersion if the user so desires. Alternately, the user can
+simply define them as constants:</p>
+<div class="highlight-rest"><div class="highlight"><pre>ncs = 0.1       # CS density 0.1 cm^-3
+sigmaNT = 2.0e4 # Non-thermal velocity dispersion 0.2 km s^-1
+</pre></div>
+</div>
+<p>The final step is to use the <code class="docutils literal"><span class="pre">lineProfLTE</span></code> routine to compute the
+brightness temperature versus velocity:</p>
+<div class="highlight-rest"><div class="highlight"><pre>TB, v = lineProfLTE(cs, 2, 1, R, ncs, TProf, vProf, sigmaNT).
+</pre></div>
+</div>
+<p>Here the first argument is the emitter data, the second and third are
+the upper and lower quantum states between which the line is to be
+computed (ordered by energy, with ground state = 0), followed by the
+cloud radius, the volume density, the temperature, the velocity, and
+the non-thermal velocity dispersion. Each of these quantities can be
+either a float or a callable function of one variable, as in the
+example above. If it is a float, that quantity is taken to be
+constant, independent of radius. This routine returns two arrays, the
+first of which is the brightness temperature and the second of which
+is the velocity at which that brightness temperature is computed,
+relative to line center. These can be examined in any of the usual
+numpy ways, for example by plotting them:</p>
+<div class="highlight-rest"><div class="highlight"><pre>plt.plot(v, TB)
+</pre></div>
+</div>
+<p>By default the velocity is sampled at 100 values. The routine attempts
+to guess a reasonable range of velocities based on the input values of
+radial velocity and velocity dispersion, but these defaults may be
+overridden by the optional argument <code class="docutils literal"><span class="pre">vLim</span></code>, which is a sequence of
+two values giving the lower and upper limits on the velocity:</p>
+<div class="highlight-rest"><div class="highlight"><pre>TB, v = lineProfLTE(cs, 2, 1, R, ncs, TProf, vProf, sigmaNT,
+                    vLim=[-2e5,2e5]).
+</pre></div>
+</div>
+<p>A variety of other optional arguments can be used to control the
+velocities at which the brightness temperature is computed. It is also
+possible to compute line profiles at positions offset from the
+geometric center of the cloud, using the optional argument offset &#8211;
+see <a class="reference internal" href="fulldoc.html#sssec-full-lineproflte"><span>lineProfLTE</span></a>.</p>
+</div>
+<div class="section" id="escape-probability-geometries">
+<h2>Escape Probability Geometries<a class="headerlink" href="#escape-probability-geometries" title="Permalink to this headline">¶</a></h2>
+<p>DESPOTIC supports three possible geometries that can be used when
+computing escape probabilities, and which are controlled by the
+<code class="docutils literal"><span class="pre">escapeProbGeom</span></code> optional argument. This argument is accepted by all
+DESPOTIC functions that use the escape probability formalism,
+including all those involving computation of line emission. This
+optional argument, if included, must be set equal to one of the three
+strings <code class="docutils literal"><span class="pre">sphere</span></code> (the default), <code class="docutils literal"><span class="pre">slab</span></code>, or <code class="docutils literal"><span class="pre">LVG</span></code>. These choices
+correspond to spherical geometry, slab geometry, and the large
+velocity gradient approximation, respectively.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Functional Guide to DESPOTIC Capabilities</a><ul>
+<li><a class="reference internal" href="#unit-conventions">Unit Conventions</a></li>
+<li><a class="reference internal" href="#line-emission">Line Emission</a></li>
+<li><a class="reference internal" href="#heating-and-cooling-rates">Heating and Cooling Rates</a></li>
+<li><a class="reference internal" href="#temperature-equilibria">Temperature Equilibria</a></li>
+<li><a class="reference internal" href="#time-dependent-temperature-evolution">Time-Dependent Temperature Evolution</a></li>
+<li><a class="reference internal" href="#chemical-equilibria">Chemical Equilibria</a></li>
+<li><a class="reference internal" href="#simultaneous-chemical-and-thermal-equilibria">Simultaneous Chemical and Thermal Equilibria</a></li>
+<li><a class="reference internal" href="#time-dependent-chemical-evolution">Time-Dependent Chemical Evolution</a></li>
+<li><a class="reference internal" href="#multi-zone-clouds">Multi-Zone Clouds</a></li>
+<li><a class="reference internal" href="#computing-line-profiles">Computing Line Profiles</a></li>
+<li><a class="reference internal" href="#escape-probability-geometries">Escape Probability Geometries</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="quickstart.html" title="previous chapter">Quickstart</a></li>
+      <li>Next: <a href="cloudfiles.html" title="next chapter">Cloud Files</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/functions.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Mark R. Krumholz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/functions.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

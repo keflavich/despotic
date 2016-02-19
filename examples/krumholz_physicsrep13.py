@@ -52,10 +52,10 @@ except NameError:
     gmc.Tg = 20.0
 
     # Turn on extrapolation
-    gmc.emitters['co'].setExtrap(True)
-    gmc.emitters['c+'].setExtrap(True)
-    gmc.emitters['13co'].setExtrap(True)
-    gmc.emitters['o'].setExtrap(True)
+    gmc.emitters['co'].extrap = True
+    gmc.emitters['c+'].extrap = True
+    gmc.emitters['13co'].extrap = True
+    gmc.emitters['o'].extrap = True
 
     # Loop over grid, calculating composition and gas and dust temperatures
     abd=[]

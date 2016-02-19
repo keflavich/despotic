@@ -32,12 +32,13 @@ from copy import deepcopy
 from despoticError import despoticError
 from collPartner import collPartner
 from fetchLamda import fetchLamda
+import warnings
 
 # Define some global physical constants in cgs units
 import scipy.constants as physcons
-kB = physcons.k/physcons.erg
-c = physcons.c/physcons.centi
-mH = (physcons.m_p+physcons.m_e)/physcons.gram
+kB = physcons.k*1e7
+c = physcons.c*1e2
+mH = (physcons.m_p+physcons.m_e)*1e3
 h = physcons.h*1e7
 hc = h*c
 
@@ -48,104 +49,107 @@ knownPart=['HI', 'pH2', 'oH2', 'He', 'e', 'H+']
 ########################################################################
 # class emitterData
 ########################################################################
-class emitterData:
+class emitterData(object):
     """
     Class to store the physical properties of a single emitting
     species, and preform computations on those properties. Note that
     all quantities are stored in cgs units.
 
-    Attributes
-    ----------
-    name : string
-        name of emitting species
-    lamdaFile : string
-        name of file from which species was read
-    molWgt : float
-        molecular weight of species, in units of H masses
-    nlev : int
-        number of energy levels of the species
-    levEnergy : array(nlev)
-        energies of levels
-    levTemp : array(nlev)
-        energies of levels in K (i.e. levEnergy / kB)
-    levWgt : array(nlev)
-        degeneracies (statistical weights) of levels
-    nrad : int
-        number of radiative transition this species has
-    radUpper : int array(nrad)
-        array containing upper states for radiative transitions
-    radLower : int array(nrad)
-        array containing lower states for radiative transitions
-    radFreq : array(nrad)
-        array of frequencies of radiative transitions
-    radTemp : array(nrad)
-        same as radFreq, but multiplied by h/kB to give units of K
-    radTUpper : array(nrad)
-        array of temperatures (E/kB) of upper radiative states
-    radA : array(nrad)
-        array of Einstin A coefficients of radiative transitions
-    partners : dict
-        listing collision partners; keys are partner names, values are
-        objects of class collPartner
-    EinsteinA : array(nlev, nlev)
-        2d array of nlev x nlev giving Einstein A's for radiative
-        transitions connecting each level pair
-    freq : array(nlev, nlev)
-        2d array of nlev x nlev giving frequency of radiative
-        transitions connecting each level pair
-    dT : array(nlev, nlev)
-        2d array of nlev x nlev giving energy difference between each
-        level pair in K; it is positive for i > j, and negative for i
-        < j
-    wgtRatio : array(nlev, nlev)
-        2d array giving ratio of statistical weights of each level
-        pair
-    extrap : Boolean
-        if True, collision rate coefficients for this emitter are
-        allowed to be extrapolated off the data table
+    Parameters
+       emitName : string
+          name of this species
+       emitterFile : string
+          name of LAMDA file containing data on this species; this
+          option overrides the default
+       emitterURL : string
+          URL of LAMDA file containing data on this species; this
+          option overrides the default
+       extrap : Boolean
+          if True, collision rate coefficients for this species will
+          be extrapolated to temperatures outside the range given in
+          the LAMDA tables
+       noRefresh : Boolean
+          if True, the routine will not attempt to automatically
+          fetch updated versions of files from the web
 
-    Methods
-    -------
-    __init__ -- initialize
-    readLamda -- read emitter data from a file in the LAMDA format
-    partFunc -- return partition function at specified temperature
-    collRateMatrix -- return a matrix of collision rates as a function
-        of density and temperature
+    Class attributes
+       name : string
+          name of emitting species
+       lamdaFile : string
+          name of file from which species was read
+       molWgt : float
+          molecular weight of species, in units of H masses
+       nlev : int
+          number of energy levels of the species
+       levEnergy : array, shape(nlev)
+          energies of levels
+       levTemp : array, shape(nlev)
+          energies of levels in K (i.e. levEnergy / kB)
+       levWgt : array shape(nlev)
+          degeneracies (statistical weights) of levels
+       nrad : int
+          number of radiative transition this species has
+       radUpper : integer array, shape (nrad)
+          array containing upper states for radiative transitions
+       radLower : integer array, shape (nrad)
+          array containing lower states for radiative transitions
+       radFreq : array, shape (nrad)
+          array of frequencies of radiative transitions
+       radTemp : array, shape (nrad)
+          same as radFreq, but multiplied by h/kB to give units of K
+       radTUpper : array, shape (nrad)
+          array of temperatures (E/kB) of upper radiative states
+       radA : array, shape (nrad)
+          array of Einstin A coefficients of radiative transitions
+       partners : dict
+          listing collision partners; keys are partner names, values are
+          objects of class collPartner
+       EinsteinA : array, shape (nlev, nlev)
+          2d array of nlev x nlev giving Einstein A's for radiative
+          transitions connecting each level pair
+       freq : array, shape (nlev, nlev)
+          2d array of nlev x nlev giving frequency of radiative
+          transitions connecting each level pair
+       dT : array, shape (nlev, nlev)
+          2d array of nlev x nlev giving energy difference between each
+          level pair in K; it is positive for i > j, and negative for i
+          < j
+       wgtRatio : array, shape (nlev, nlev)
+          2d array giving ratio of statistical weights of each level
+          pair
+       extrap : Boolean
+          if True, collision rate coefficients for this emitter are
+          allowed to be extrapolated off the data table
     """
 
-########################################################################
-# Initialization routine
-########################################################################
-    def __init__(self, emitName, emitterFile=None, emitterURL=None, \
-                     extrap=False, noRefresh=False):
+    ####################################################################
+    # Initialization routine
+    ####################################################################
+    def __init__(self, emitName, emitterFile=None, emitterURL=None,
+                 extrap=True, noRefresh=False):
         """
         Initialization routine
 
         Parameters
-        ----------
-        emitName : string
-            name of this species
-        emitterFile : string
-            name of LAMDA file containing data on this species; this
-            option overrides the default
-        emitterURL : string
-            URL of LAMDA file containing data on this species; this
-            option overrides the default
-        extrap : Boolean
-            if True, collision rate coefficients for this species will
-            be extrapolated to temperatures outside the range given in
-            the LAMDA tables
-        noRefresh : Boolean
-            if True, the routine will not attempt to automatically
-            fetch updated versions of files from the web
-
-        Returns
-        -------
-        Nothing
+           emitName : string
+              name of this species
+           emitterFile : string
+              name of LAMDA file containing data on this species; this
+              option overrides the default
+           emitterURL : string
+              URL of LAMDA file containing data on this species; this
+              option overrides the default
+           extrap : Boolean
+              if True, collision rate coefficients for this species will
+              be extrapolated to temperatures outside the range given in
+              the LAMDA tables
+           noRefresh : Boolean
+              if True, the routine will not attempt to automatically
+              fetch updated versions of files from the web
         """
 
         # Save extrapolation state
-        self.extrap = extrap
+        self.__extrap = extrap
 
         # Check if we have been given a file name for this emitter. If
         # we have, try to read it, and raise an error if we fail.
@@ -278,25 +282,23 @@ class emitterData:
 
 
 
-########################################################################
-# Routine to read LAMDA data files
-########################################################################
+    ####################################################################
+    # Routine to read LAMDA data files
+    ####################################################################
     def readLamda(self, fp, extrap=False):
         """
         Read a LAMDA-formatted file
 
         Parameters
-        ----------
-        fp : file
-            pointer to the start of a LAMDA-formatted file
-        extrap : Boolean
-            if True, collision rate coefficients for this species will
-            be extrapolated to temperatures outside the range given in
-            the LAMDA tables
+           fp : file
+              pointer to the start of a LAMDA-formatted file
+           extrap : Boolean
+              if True, collision rate coefficients for this species will
+              be extrapolated to temperatures outside the range given in
+              the LAMDA tables
 
         Returns
-        -------
-        Nothing
+           Nothing
         """
 
         # Read header information: molecule name and weight
@@ -384,7 +386,7 @@ class emitterData:
             elif idstring=='4':
                 partName = 'e'
             elif idstring=='5':
-                partName = 'H'
+                partName = 'HI'
             elif idstring=='6':
                 partName = 'He'
             elif idstring=='7':
@@ -425,23 +427,35 @@ class emitterData:
             self.wgtRatio[i,:] = self.levWgt[i]/self.levWgt
 
 
-########################################################################
-# Method to compute partition function
-########################################################################
+    ####################################################################
+    # Extrapolation decorator
+    ####################################################################
+    @property
+    def extrap(self):
+        return self.__extrap
+
+    @extrap.setter
+    def extrap(self, ext):
+        # Change value for all collision partners
+        for p in self.partners.values():
+            p.extrap = ext
+        self.__extrap = ext
+
+    ####################################################################
+    # Method to compute partition function
+    ####################################################################
     def partFunc(self, temp):
         """
         Compute the partition function for this species at the given
         temperature.
 
         Parameters
-        ----------
-        temp : float or array of floats
-            gas kinetic temperature
+           temp : float | array
+              gas kinetic temperature
 
         Returns
-        -------
-        Z : float or array of floats
-            the partition function Z(T) for this species
+           Z : float | array
+              the partition function Z(T) for this species
         """
 
         # If temp is an list, return an array. If it's a number, just
@@ -453,29 +467,27 @@ class emitterData:
             return sum(self.levWgt*np.exp(-self.levTemp/temp))
 
 
-########################################################################
-# Method to return the collision rate matrix for this emitter as a
-# function of density, composition, and temperature
-########################################################################
+    ####################################################################
+    # Method to return the collision rate matrix for this emitter as a
+    # function of density, composition, and temperature
+    ####################################################################
     def collRateMatrix(self, nH, comp, temp):
         """
         This routine computes the matrix of collision rates (not rate
         coefficients) between every pair of levels.
 
         Parameters
-        ----------
-        nH : float
-            number density of H nuclei
-        comp : class composition
-            bulk composition of the gas
-        temp : float
-            gas kinetic temperature
+           nH : float
+              number density of H nuclei
+           comp : class composition
+              bulk composition of the gas
+           temp : float
+              gas kinetic temperature
 
         Returns
-        -------
-        q : array(nlev, nlev)
-            array in which element ij is the rate of collisional
-            transitions from state i to state j, in s^-1
+           q : array, shape (nlev, nlev)
+              array in which element ij is the rate of collisional
+              transitions from state i to state j, in s^-1
         """
 
         # ensure that there are sane abundances defined for colliders, else the
@@ -495,34 +507,16 @@ class emitterData:
                     continue
                 else:
                     n = nH * comp.xHI
-                    if not 'HI' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xHI > 0:" + \
-                            " HI collision rates unavailable"
             elif p=='pH2':
                 if comp.xpH2==0:
                     continue
                 else:
                     n = nH * comp.xpH2
-                    if not 'pH2' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xpH2 > 0:" + \
-                            " pH2 collision rates unavailable"
             elif p=='oH2':
                 if comp.xoH2==0:
                     continue
                 else:
                     n = nH * comp.xoH2
-                    if not 'oH2' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xoH2 > 0:" + \
-                            " oH2 collision rates unavailable"
             elif p=='He':
                 if comp.xHe==0:
                     continue
@@ -537,34 +531,16 @@ class emitterData:
                         mredHe = self.molWgt*4.0 / (self.molWgt + 4.0)
                         mredH2 = self.molWgt*2.0 / (self.molWgt + 2.0)
                         n = n / np.sqrt(mredHe/mredH2)
-                        if not 'pH2' in self.partners:
-                            raise despoticError, \
-                                "cannot compute level " + \
-                                "popluations for " + \
-                                self.name + " with xHe > 0:" + \
-                                " He collision rates unavailable"
             elif p=='e':
                 if comp.xe==0:
                     continue
                 else:
                     n = nH * comp.xe
-                    if not 'e' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xe > 0:" + \
-                            " e collision rates unavailable"
             elif p=='H+':
                 if comp.xHplus==0:
                     continue
                 else:
                     n = nH * comp.xHplus
-                    if not 'e' in self.partners:
-                        raise despoticError, \
-                            "cannot compute level " + \
-                            "popluations for " + \
-                            self.name + " with xH+ > 0:" + \
-                            " H+ collision rates unavailable"
 
             # Compute downward transition rates, handling He as a
             # proxy for H2 as a special case
@@ -572,25 +548,39 @@ class emitterData:
                 try:
                     q += n * self.partners[p].\
                         colRateMatrix(temp, self.levWgt, self.levTemp)
-                except ValueError:
+                except ValueError, despoticError:
                     raise despoticError, "Temperature T = "+str(temp) + \
                         " K is outside tabulated range " + \
                         str(self.partners[p].tempTable[0])+" - " + \
                         str(self.partners[p].tempTable[-1]) + \
                         " K for species "+self.name+", partner " + \
                         p
+                except KeyError:
+                    warnings.warn("collision rates not "
+                                  "available for "+self.name+
+                                  " with species "
+                                  +p+" (fractional abundance "
+                                  "{:e}".format(n/nH)+") will be "
+                                  "omitted from calculation")
             else:
                 p1='pH2'
                 try:
                     q += n * self.partners[p1].\
                         colRateMatrix(temp, self.levWgt, self.levTemp)
-                except ValueError:
+                except ValueError, despoticError:
                     raise despoticError, "Temperature T = "+str(temp) + \
                         " K is outside tabulated range " + \
                         str(self.partners[p1].tempTable[0])+" - " + \
                         str(self.partners[p1].tempTable[-1]) + \
                         " K for species "+self.name+", partner " + \
                         p
+                except KeyError:
+                    warnings.warn("collision rates not "
+                                  "available for "+self.name+
+                                  " with species "
+                                  +p+" (fractional abundance "
+                                  "{:e}".format(n/nH)+") will be "
+                                  "omitted from calculation")
 
         # Return matrix
         return q

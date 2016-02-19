@@ -21,11 +21,13 @@
 ########################################################################
 
 class despoticError(Exception):
-    """Exception raised by DESPOTIC-specific errors.
+    """
+    Class derived from Exception to handle exceptions raised by
+    DESPOTIC-specific errors.
 
-    Attributes
-    ----------
-    __init__ -- initialize
+    Parameters
+       message : string
+          the error message
     """
 
     def __init__(self, message):

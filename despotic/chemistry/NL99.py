@@ -1,6 +1,6 @@
 """
 This module implements the reduced carbon-oxygen chemistry network of
-Nelson & Langer (1999, ApJ, 524, 923)
+Nelson & Langer (1999, ApJ, 524, 923).
 """
 
 ########################################################################
@@ -23,77 +23,140 @@ import numpy as np
 import string
 from despotic.despoticError import despoticError
 from shielding import fShield_CO_vDB
-from despotic.chemistry import abundanceDict
-from despotic.chemistry import chemNetwork
+from abundanceDict import abundanceDict
+from chemNetwork import chemNetwork
+from reactions import cr_reactions, photoreactions, reaction_matrix
 import scipy.constants as physcons
+import warnings
+
+import os
+
+# Check if we're trying to compile on readthedocs, in which case we
+# need to disable a ton of this stuff because otherwise we get into
+# problems with the lack of numpy and scipy
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 ########################################################################
 # Physical and numerical constants
 ########################################################################
-kB = physcons.k/physcons.erg
-mH = (physcons.m_p+physcons.m_e)/physcons.gram
-__small = 1e-100
+if not on_rtd:
+    kB = physcons.k*1e7
+    mH = (physcons.m_p+physcons.m_e)*1e3
+    _small = 1e-100
 
 ########################################################################
-# List of species used in this chemistry network
+# List of species used in this chemistry network; note that the
+# network does not track H or H+
 ########################################################################
-specList = ['He+', 'H3+', 'OHx', 'CHx', 'CO', 'C', 'C+', 'HCO+', 'O',
-            'M+']
+if not on_rtd:
+    specList = ['He+', 'H3+', 'OHx', 'CHx', 'CO', 'C', 'C+', 'HCO+', 'O',
+                'M+']
+    specListExtended = specList + ['H2', 'He', 'M', 'e-']
+
+
+########################################################################
+# Data on cosmic ray reactions
+# Reactions are, in order:
+# (1)       cr + H2      -> H3+  + e-
+# (2)       cr + He      -> He+  + e-
+########################################################################
+if not on_rtd:
+    _cr_react = [
+        { 'spec' : ['H2', 'H3+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 2.0 },
+        { 'spec' : ['He', 'He+', 'e-'], 'stoich' : [-1, 1, 1], 'rate': 1.1 }
+    ]
+    _cr = cr_reactions(specListExtended, _cr_react)
 
 ########################################################################
 # Data on photoreactions
 # Reactions are, in order:
-# h nu + CI -> C+ + e
-# h nu + CHx -> CI + H
-# h nu + CO -> CI + O
-# h nu + OHx -> OI + H
-# h nu + M -> M+ + e
-# h nu + HCO+ -> CO + H
+# (1) h nu + C -> C+ + e
+# (2) h nu + CHx -> C
+# (3) h nu + CO -> C + O
+# (4) h nu + OHx -> O
+# (5) h nu + M -> M+ + e
+# (6) h nu + HCO+ -> CO
 ########################################################################
-_kph = np.array([ 
-        3.0e-10, 1.0e-9, 1.0e-10, 5.0e-10, 
-        2.0e-10, 1.5e-10])
-_avfac = np.array([3.0, 1.5, 3.0, 1.7, 1.9, 2.5])
-_inph = np.array([5, 3, 4, 2, 12, 7], dtype='int')
-_outph1 = np.array([6, 5, 5, 8, 9, 4], dtype='int')
-_outph2 = np.array([10, 10, 8, 10, 10, 10], dtype='int')
-
+if not on_rtd:
+    _ph_react = [
+        { 'spec' : ['C', 'C+', 'e-'], 'stoich' : [-1, 1, 1],
+          'rate' : 3.0e-10*1.7, 'av_fac' : 3.0 },
+        { 'spec' : ['CHx', 'C'], 'stoich' : [-1, 1],
+          'rate' : 1.0e-9*1.7, 'av_fac' : 1.5 },
+        { 'spec' : ['CO', 'C', 'O'], 'stoich' : [-1, 1, 1],
+          'rate' : 1.0e-10*1.7, 'av_fac' : 1.7, 
+          'shield_fac' : fShield_CO_vDB },
+        { 'spec' : ['OHx', 'O'], 'stoich' : [-1, 1],
+          'rate' : 5.0e-10*1.7, 'av_fac' : 1.9 },
+        { 'spec' : ['HCO+', 'CO'], 'stoich' : [-1, 1],
+          'rate' : 1.5e-10*1.7, 'av_fac' : 2.5 }
+    ]
+    _ph = photoreactions(specListExtended, _ph_react)
 
 ########################################################################
 # Data on two-body reactions
 # Reactions are, in order:
-# (0) H3+ + CI -> CHx + H2
-# (1) H3+ + OI -> OHx + H2
-# (2) H3+ + CO -> HCO+ + H2
-# (3) He+ + H2 -> He + H + H+
-# (4) He+ + CO -> C+ + O + He
-# (5) C+ + H2 -> CHx + H
-# (6) C+ + OHx -> HCO+
-# (7) OI + CHx -> CO + H
-# (8) CI + OHx -> CO + H
-# (9) He+ + e -> He + h nu
-# (10) H3+ + e -> H2 + H
-# (11) C+ + e -> CI + h nu
-# (12) HCO+ + e -> CO + H
-# (13) M+ + e -> M + h nu
-# (14) H3+ + M -> M+ + H + H2
+# (1)  H3+  + C   -> CHx  + H2
+# (2)  H3+  + O   -> OHx  + H2
+# (3)  H3+  + CO  -> HCO+ + H2
+# (4)  He+  + H2  -> He
+# (5)  He+  + CO  -> C+   + O  + He
+# (6)  C+   + H2  -> CHx
+# (7)  C+   + OHx -> HCO+
+# (8)  O    + CHx -> CO
+# (9)  C    + OHx -> CO
+# (10) He+  + e-  -> He
+# (11) H3+  + e-  -> H2
+# (12) C+   + e-  -> C
+# (13) HCO+ + e-  -> CO
+# (14) M+   + e-  -> M
+# (15) H3+  + M   -> M+  + H2
 ########################################################################
-_k2 = np.array([ 
+if not on_rtd:
+    _twobody_react = [
+        { 'spec'   : [  'H3+',   'C',  'CHx', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+        { 'spec'   : [  'H3+',   'O',  'OHx', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+        { 'spec'   : [  'H3+',  'CO', 'HCO+', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] },
+        { 'spec'   : [  'He+',  'H2',   'He'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'He+',  'CO',   'C+',  'O', 'He' ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1 ,   1  ] },
+        { 'spec'   : [   'C+',  'H2',  'CHx'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [   'C+', 'OHx', 'HCO+'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [    'O', 'CHx',   'CO'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [    'C', 'OHx',   'CO'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'He+',  'e-',   'He'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'H3+',  'e-',   'H2'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [   'C+',  'e-',    'C'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [ 'HCO+',  'e-',   'CO'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [   'M+',  'e-',    'M'             ],
+          'stoich' : [    -1 ,   -1 ,     1              ] },
+        { 'spec'   : [  'H3+',   'M',   'M+', 'H2'       ],
+          'stoich' : [    -1 ,   -1 ,     1 ,   1        ] } ]
+    _twobody = reaction_matrix(specListExtended, _twobody_react)
+
+    # Two-body reaciton rate coefficients
+    _k2 = np.array([ 
         2.0e-9, 8.0e-10, 1.7e-9, 7.0e-15, 1.6e-9, 4.0e-16, 1.0e-9, 
         2.0e-10, 5.8e-12, 9.0e-11, 1.9e-6, 1.4e-10, 3.3e-5, 
         3.8e-10, 2.0e-9])
-_k2Texp = np.array([ 
+    _k2Texp = np.array([ 
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, -0.64, -0.54, 
         -0.61, -1.0, -0.65, 0.0])
-_in2bdy1 = np.array([1, 1, 1, 0, 0, 6, 6, 8, 5, 0, 1, 6, 7, 9, 1], 
-                    dtype='int') 
-_in2bdy2 = np.array([5, 8, 4, 10, 4, 10, 2, 3, 2, 13, 13, 13, 13, 
-                     13, 12], dtype='int')
-_out2bdy1 = np.array([3, 2, 7, 10, 6, 3, 7, 4, 4, 10, 10, 5, 4, 10, 
-                      9], dtype='int')
-_out2bdy2 = np.array([10, 10, 10, 10, 8, 10, 10, 10, 10, 10, 10, 
-                      10, 10, 10, 10], dtype='int')
 
+def _twobody_ratecoef(T):
+    return _k2 * T**_k2Texp
 
 
 ########################################################################
@@ -112,51 +175,73 @@ class NL99(chemNetwork):
     """
     This class the implements the chemistry network of Nelson & Langer
     (1999, ApJ, 524, 923).
+
+    Parameters
+       cloud : class cloud
+          a DESPOTIC cloud object from which initial data are to be
+          taken
+       info : dict
+          a dict containing additional parameters
+
+    Remarks
+       The dict info may contain the following key - value pairs:
+
+       'xC' : float
+          the total C abundance per H nucleus; defaults to 2.0e-4
+       'xO' : float
+          the total H abundance per H nucleus; defaults to 4.0e-4
+       'xM' : float
+          the total refractory metal abundance per H
+          nucleus; defaults to 2.0e-7
+       'sigmaDustV' : float
+          V band dust extinction cross
+          section per H nucleus; if not set, the default behavior
+          is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE
+       'AV' : float
+          total visual extinction; ignored if sigmaDustV is set
+       'noClump' : bool
+          if True, the clumping factor is set to 1.0; defaults to False
     """
 
-########################################################################
-# Method to initialize
-########################################################################
+    ####################################################################
+    # Method to initialize
+    ####################################################################
     def __init__(self, cloud=None, info=None):
         """
         Parameters
-        ----------
-        cloud : class cloud
-             a DESPOTIC cloud object from which initial data are to be
-             taken
-        info : dict
-             a dict containing additional parameters
-
-        Returns
-        -------
-        Nothing
-
-        Raises
-        ------
-        despoticError, if the dict info contains non-allowed entries
+           cloud : class cloud
+              a DESPOTIC cloud object from which initial data are to be
+              taken
+           info : dict
+              a dict containing additional parameters
 
         Remarks
-        -------
-        The dict info may contain the following key - value pairs:
+           The dict info may contain the following key - value pairs:
 
-        'xC' : float giving the total C abundance per H nucleus;
-             defaults to 2.0e-4
-        'xO' : float giving the total H abundance per H nucleus;
-             defaults to 4.0e-4
-        'xM' : float giving the total refractory metal abundance per H
-             nucleus; defaults to 2.0e-7
-        'sigmaDustV' : float giving the V band dust extinction cross
-             section per H nucleus; if not set, the default behavior
-             is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE
-        'AV' : float giving the total visual extinction; ignored if
-             sigmaDustV is set
-        'noClump' : a Boolean; if True, the clump factor is set to
-             1.0; defaults to False
+           'xC' : float
+              the total C abundance per H nucleus; defaults to 2.0e-4
+           'xO' : float
+              the total H abundance per H nucleus;
+              defaults to 4.0e-4
+           'xM' : float
+              the total refractory metal abundance per H
+              nucleus; defaults to 2.0e-7
+           'sigmaDustV' : float
+              V band dust extinction cross
+              section per H nucleus; if not set, the default behavior
+              is to assume that sigmaDustV = 0.4 * cloud.dust.sigmaPE
+           'AV' : float
+              total visual extinction; ignored if
+              sigmaDustV is set
+           'noClump' : bool
+              if True, the clump factor is set to
+              1.0; defaults to False
         """
 
         # List of species for this network; provide a pointer here so
         # that it can be accessed through the class
         self.specList = specList
+        self.specListExtended = specListExtended
 
         # Store the input info dict
         self.info = info
@@ -182,10 +267,10 @@ class NL99(chemNetwork):
             # Physical properties
             self._xHe = _xHedefault
             self._ionRate = 2.0e-17
-            self._NH = small
-            self._temp = small
+            self._NH = _small
+            self._temp = _small
             self._chi = 1.0
-            self._nH = small
+            self._nH = _small
             self._AV = 0.0
             if info is not None:
                 if 'AV' in info:
@@ -339,13 +424,15 @@ class NL99(chemNetwork):
         # Initial M+
         self.x[9] = self.xM
 
-
-########################################################################
-# Define some properties so that, if we have a cloud, quantities that
-# are stored in the cloud point back to it
-########################################################################
+    ####################################################################
+    # Define some properties so that, if we have a cloud, quantities
+    # that are stored in the cloud point back to it
+    ####################################################################
     @property
     def nH(self):
+        """
+        volume density of H nuclei
+        """
         if self.cloud is None:
             return self._nH
         else:
@@ -358,8 +445,11 @@ class NL99(chemNetwork):
         else:
             self.cloud.nH = value
 
-    @property
+    @property    
     def temp(self):
+        """
+        gas kinetic temperature
+        """
         if self.cloud is None:
             return self._temp
         else:
@@ -373,13 +463,27 @@ class NL99(chemNetwork):
             self.cloud.Tg = value
 
     @property
+    def sigmaNT(self):
+        """
+        non-thermal velocity dispersion
+        """
+        if self.cloud is None:
+            return 0.0
+        else:
+            return self.cloud.sigmaNT
+
+    @property
     def cfac(self):
+        """
+        clumping factor; cannot be set directly, calculated from temp
+        and sigmaNT
+        """
         if self.cloud is None:
             return 1.0
         else:
             if self.info is None:
                 cs2 = kB * self.cloud.Tg / (self.cloud.comp.mu * mH)
-                return np.sqrt(1.0 + 0.75*self.cloud.sigmaNT**2/cs2)
+                return np.sqrt(1.0 + 0.75*self.sigmaNT**2/cs2)
             elif 'noClump' in self.info:
                 if self.info['noClump'] == True:
                     return 1.0
@@ -392,10 +496,13 @@ class NL99(chemNetwork):
 
     @cfac.setter
     def cfac(self, value):
-        raise despoticError, "cannot set cfac directly"
+        raise despoticError, "cannot set cfac directly; set sigmaNT or temp instead"
 
     @property
     def xHe(self):
+        """
+        He abundance
+        """
         if self.cloud is None:
             return self._xHe
         else:
@@ -410,6 +517,9 @@ class NL99(chemNetwork):
 
     @property
     def ionRate(self):
+        """
+        primary ionization rate from cosmic rays and x-rays
+        """
         if self.cloud is None:
             return self._ionRate
         else:
@@ -424,6 +534,9 @@ class NL99(chemNetwork):
 
     @property
     def chi(self):
+        """
+        ISRF strength, normalized to solar neighborhood value
+        """
         if self.cloud is None:
             return self._chi
         else:
@@ -438,6 +551,9 @@ class NL99(chemNetwork):
 
     @property
     def NH(self):
+        """
+        column density of H nuclei
+        """
         if self.cloud is None:
             return self._NH
         else:
@@ -452,6 +568,9 @@ class NL99(chemNetwork):
 
     @property
     def AV(self):
+        """
+        visual extinction in mag
+        """
         if self.cloud is None:
             if self.info is None:
                 return self._AV
@@ -491,94 +610,152 @@ class NL99(chemNetwork):
             else:
                 self.info['AV'] = value
                 
+    ####################################################################
+    # Override the abundances property of the base chemNetwork class
+    # so that we return the derived abundances as well as the
+    # variables ones. For the setter, let users set abundances, but if
+    # they try to set ones that are derived, issue a warning.
+    ####################################################################
+
+    @property
+    def abundances(self):
+        """
+        abundances of all species in the chemical network
+        """
+        self._abundances = abundanceDict(self.specListExtended,
+                                         self.extendAbundances())
+        return self._abundances
+
+    @abundances.setter
+    def abundances(self, value):
+        # Loop over key-value pairs in the and update them, but skip
+        # any that are in the extended species list but not the main
+        # list; issue warning if this happens
+        warn = False
+        abd = abundanceDict(self.specList, self.x)
+        for k, v in other.items():
+            if (k in specListExtended) and \
+               (k not in specList):
+                warn = True
+                continue
+            abd[k] = v
+        if warn:
+            warnings.warn("For NL99 network, cannot set abundances"
+            " of derived species H2, He, M, e-; abundances set only "
+            " for other species")
 
 
-########################################################################
-# Method to return the time derivative of all chemical rates
-########################################################################
+    ####################################################################
+    # Method to get derived abundances from ones being stored; this
+    # adds slots for H2, HeI, MI, and e
+    ####################################################################
+    def extendAbundances(self, xin=None):
+        """
+        Compute abundances of derived species not directly followed in
+        the network.
+
+        Parameters
+           xin : array
+              abundances of species directly tracked in the network;
+              if left as None, the abundances stored internally to the
+              network are used
+
+        Returns
+           x : array
+              abundances, including those of derived species
+        """
+
+        # Object we'll be returning
+        xgrow = np.zeros(14)
+
+        # Copy abundances if passed in; otherwise user stored ones
+        if xin is None:
+            xgrow[:10] = self.x
+        else:
+            xgrow[:10] = xin
+
+        # H2 abundances is hardwired for NL99 network
+        xgrow[10] = _xH2
+
+        # He abundance = total He abundance - He+ abundance
+        xgrow[11] = self.xHe - xgrow[0]
+
+        # Neutral metal abundance = total metal abundance - ionized
+        # metal abundance
+        xgrow[12] = self.xM - xgrow[9]
+
+        # e abundance = He+ + H3+ + C+ + HCO+ + M+
+        xgrow[13] = xgrow[0] + xgrow[1] + xgrow[6] + xgrow[7] \
+                    + xgrow[9]
+
+        # Return
+        return xgrow
+
+
+    ####################################################################
+    # Method to return the time derivative of all chemical rates
+    ####################################################################
     def dxdt(self, xin, time):
         """
         This method returns the time derivative of all abundances for
         this chemical network.
 
         Parameters
-        ----------
-        xin : array(10)
-             current abundances of all species
-        time : float
-             current time; not actually used, but included as an
-             argument for compatibility with odeint
+           xin : array(10)
+              current abundances of all species
+           time : float
+              current time; not actually used, but included as an
+              argument for compatibility with odeint
 
         Returns
-        -------
-        dxdt : array(10)
-             time derivative of x
+           dxdt : array(10)
+              time derivative of x
         """
 
-        # Vector to store results; it is convenient for this to have
-        # some phantom slots; slots 10, 11, 12, and 13 store
-        # abundances of H2, HeI, MI, and e, respectively
-        xdot = np.zeros(14)
-        xgrow = np.zeros(14)
-        xgrow[:10] = xin
-        xgrow[10] = _xH2
-        xgrow[11] = self.xHe - xin[0]
-        xgrow[12] = self.xM - xin[9]
-        xgrow[13] = xin[0] + xin[1] + xin[6] + xin[7] + xin[9]
+        # Get abundances of derived quantities
+        xgrow = self.extendAbundances(xin)
 
-        # Cosmic ray / x-ray ionization reactions
-        xdot[0] = xgrow[11]*self.ionRate
-        xdot[1] = self.ionRate
+        # Get clumping factor and effective density
+        cfac = self.cfac
+        n = self.nH * cfac
 
-        # Photon reactions
-        ratecoef = 1.7*self.chi*np.exp(-_avfac*self.AV)*_kph
-        rate = ratecoef*xgrow[_inph]
-        # Apply CO line shielding factor
-        rate[2] = rate[2] * fShield_CO_vDB(xgrow[4]*self.NH, self.NH/2.0) 
-        for i, n in enumerate(_inph):
-            xdot[_inph[i]] -= rate[i]
-            xdot[_outph1[i]] += rate[i]
-            xdot[_outph2[i]] += rate[i]
+        # Use the cosmic ray and photoreaction rate calculators to get
+        # their contributions to dxdt
+        xdot = _cr.dxdt(xgrow, n, self.ionRate)
+        import pdb; pdb.set_trace()
+        xdot += _ph.dxdt(xgrow, n, self.chi, self.AV, 
+                         [[self.NH*xgrow[4], self.NH/2.0]])
 
-        # Two-body reactions
-        rate = _k2*self.temp**_k2Texp*self.cfac*self.nH * \
-            xgrow[_in2bdy1]*xgrow[_in2bdy2]
-        for i, n in enumerate(_in2bdy1):
-            xdot[_in2bdy1[i]] -= rate[i]
-            xdot[_in2bdy2[i]] -= rate[i]
-            xdot[_out2bdy1[i]] += rate[i]
-            xdot[_out2bdy2[i]] += rate[i]
+
+        # Add two-body reactions
+        xdot += _twobody.dxdt(xgrow, n, _twobody_ratecoef(self.temp))
 
         # Return results
-        return xdot[:10]
+        return np.ravel(xdot)[:len(specList)]
 
 
-
-########################################################################
-# Method to write the currently stored abundances to a cloud
-########################################################################
+    ####################################################################
+    # Method to write the currently stored abundances to a cloud
+    ####################################################################
     def applyAbundances(self, addEmitters=False):
         """
         This method writes the abundances produced by the chemical
         network to the cloud's emitter list.
 
         Parameters
-        ----------
-        addEmitters : Boolean
-             if True, emitters that are included in the chemical
-             network but not in the cloud's existing emitter list will
-             be added; if False, abundances of emitters already in the
-             emitter list will be updated, but new emiters will not be
-             added to the cloud
+           addEmitters : Boolean
+              if True, emitters that are included in the chemical
+              network but not in the cloud's existing emitter list will
+              be added; if False, abundances of emitters already in the
+              emitter list will be updated, but new emiters will not be
+              added to the cloud
 
         Returns
-        -------
-        Nothing
+           Nothing
 
         Remarks
-        -------
-        If there is no cloud associated with this chemical network,
-        this routine does nothing and silently returns.
+           If there is no cloud associated with this chemical network,
+           this routine does nothing and silently returns.
         """
 
         # SAFETY check: make sure we have an associated cloud to which
@@ -610,23 +787,24 @@ class NL99(chemNetwork):
                 print 'Warning: unable to add OH; cannot find LAMDA file'
 
         # H2O, assuming OHx is half H2O, and that oH2O and pH2O are
-        # equally abundance
+        # in the same ratio as H2
+        fp = self.cloud.comp.xpH2 / self.cloud.comp.xH2
         if 'ph2o' in emList:
-            emList['ph2o'].abundance = self.x[2]/4.0
+            emList['ph2o'].abundance = self.x[2]/2.0*fp
         elif 'p-h2o' in emList:
-            emList['p-h2o'].abundance = self.x[2]/4.0
+            emList['p-h2o'].abundance = self.x[2]/2.0*fp
         elif addEmitters:
             try:
-                self.cloud.addEmitter('ph2o', self.x[2]/4.0)
+                self.cloud.addEmitter('ph2o', self.x[2]/2.0*fp)
             except despoticError:
                 print 'Warning: unable to add p-H2O; cannot find LAMDA file'
         if 'oh2o' in emList:
-            emList['oh2o'].abundance = self.x[2]/4.0
+            emList['oh2o'].abundance = self.x[2]/2.0*(1-fp)
         elif 'o-h2o' in emList:
-            emList['o-h2o'].abundance = self.x[2]/4.0
+            emList['o-h2o'].abundance = self.x[2]/2.0*(1-fp)
         elif addEmitters:
             try:
-                self.cloud.addEmitter('oh2o', self.x[2]/4.0)
+                self.cloud.addEmitter('oh2o', self.x[2]/2.0*(1-fp))
             except despoticError:
                 print 'Warning: unable to add o-H2O; cannot find LAMDA file'
 
@@ -681,3 +859,4 @@ class NL99(chemNetwork):
                 self.cloud.addEmitter('o', self.x[8])
             except despoticError:
                 print 'Warning: unable to add O; cannot find LAMDA file'
+
