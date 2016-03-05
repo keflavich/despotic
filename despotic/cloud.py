@@ -634,7 +634,8 @@ class cloud(object):
              escapeProbGeom='sphere', PsiUser=None, 
              sumOnly=False, dustOnly=False, gasOnly=False, 
              dustCoolOnly=False, dampFactor=0.5, 
-             verbose=False, overrideSkip=False):
+             verbose=False, overrideSkip=False,
+             max_convergence_attempts=5):
         """
         Return instantaneous values of heating / cooling terms
 
@@ -850,7 +851,7 @@ class cloud(object):
                             # retries before giving up
                             dFac = dFac / 2.0
                             attempts = attempts + 1
-                            if attempts > 5:
+                            if attempts > max_convergence_attempts:
                                 raise despoticError, "convergence " + \
                                     "failed for "+em.name
                             else:
@@ -1217,7 +1218,7 @@ class cloud(object):
     def setTempEq(self, c1Grav=0.0, thin=False, noClump=False,
                   LTE=False, Tinit=None, fixedLevPop=False,
                   escapeProbGeom='sphere', PsiUser=None,
-                  verbose=False, tol=1e-4):
+                  verbose=False, tol=1e-4, dampFactor=0.5):
         """
         Set Tg and Td to equilibrium gas and dust temperatures
 
@@ -1248,6 +1249,9 @@ class cloud(object):
               Psi[1] = dust heating / cooling rate. Positive values
               indicate heating, negative values cooling, and units are
               assumed to be erg s^-1 H^-1.
+           dampFactor : float
+              damping factor to use in calculating level populations
+              (see emitter for details)
            verbose : Boolean
               if True, the code prints diagnostic information as it runs
 
@@ -1278,7 +1282,7 @@ class cloud(object):
         rates = self.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE, 
                           escapeProbGeom=escapeProbGeom, 
                           sumOnly=True, PsiUser=PsiUser, 
-                          noClump=noClump, 
+                          noClump=noClump, dampFactor=dampFactor, 
                           verbose=verbose)
         lumScale = np.zeros(2)
         lumScale[0] = rates['maxAbsdEdtGas']
@@ -1289,7 +1293,7 @@ class cloud(object):
                    args=(self, c1Grav, thin,
                          LTE, escapeProbGeom, 
                          PsiUser, noClump, lumScale, 
-                         verbose), 
+                         verbose, dampFactor), 
                    method='hybr', options = { 'xtol' : tol })
 
         # If we failed to converge, make one more try from a
@@ -1302,7 +1306,7 @@ class cloud(object):
                        args=(self, c1Grav, thin, 
                              LTE, escapeProbGeom, 
                              PsiUser, noClump, lumScale, 
-                             verbose), 
+                             verbose, dampFactor), 
                        method='hybr', options = { 'xtol' : tol })
 
         # Make sure we've converged.
@@ -2183,7 +2187,7 @@ except Exception as E:
 ########################################################################
 def _gdTempResid(logTgd, cloud, c1Grav, thin, LTE,
                  escapeProbGeom, PsiUser, noClump, lumScale,
-                 verbose):
+                 verbose, dampFactor):
 
     # Insert current dust and gas temperatures into cloud structure;
     # floor to CMB temperature to prevent numerical badness in case
@@ -2200,7 +2204,7 @@ def _gdTempResid(logTgd, cloud, c1Grav, thin, LTE,
     rates = cloud.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE,
                        escapeProbGeom=escapeProbGeom,
                        sumOnly=True, PsiUser=PsiUser,
-                       noClump=noClump,
+                       noClump=noClump, dampFactor=dampFactor,
                        verbose=verbose)
 
     # Print status
