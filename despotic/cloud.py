@@ -26,12 +26,12 @@ import numpy as np
 from scipy.optimize import root
 from scipy.optimize import brentq
 from scipy.integrate import odeint
-from emitter import emitter
-from composition import composition
-from radiation import radiation
-from dustProp import dustProp
-from chemistry import abundanceDict, chemEvol, setChemEq
-from despoticError import despoticError
+from .emitter import emitter
+from .composition import composition
+from .radiation import radiation
+from .dustProp import dustProp
+from .chemistry import abundanceDict, chemEvol, setChemEq
+from .despoticError import despoticError
 from copy import deepcopy
 
 # Define some global physical constants in cgs units
@@ -173,8 +173,8 @@ class cloud(object):
         chemical network, stored as an abundanceDict
         """
         if self.chemnetwork is None:
-            raise despoticError, "cloud: cannot get " + \
-                "chemabundances when chemnetwork is None"
+            raise despoticError(
+                "cloud: cannot get chemabundances when chemnetwork is None")
         return self.chemnetwork.abundances
 
     @chemabundances.setter
@@ -190,8 +190,8 @@ class cloud(object):
               already in the emitter list will be added
         """
         if self.chemnetwork is None:
-            raise despoticError, "cloud: cannot set " + \
-                "chemabundances when chemnetwork is None"
+            raise despoticError(
+                "cloud: cannot set chemabundances when chemnetwork is None")
         self.chemnetwork.abundances = abd
         self.chemnetwork.applyAbundances()
 
@@ -229,8 +229,8 @@ class cloud(object):
 
         # Safety check
         if setColDen==True and setnH==True:
-            raise despoticError, "setVirial: cannot use both" +\
-                " setColDen and setnH"
+            raise despoticError(
+                "setVirial: cannot use both setColDen and setnH")
 
         # Thermal velocity disperison squared
         if NTonly == False:
@@ -249,8 +249,8 @@ class cloud(object):
                 self.sigmaNT = np.sqrt(sigmaTotSqr - sigmaThSqr)
             else:
                 self.sigmaNT = 0.0
-                print "setVirial warning: setting sigmaNT = 0, " + \
-                    "virial ratio still exceeds desired value"
+                print("setVirial warning: setting sigmaNT = 0, " +
+                      "virial ratio still exceeds desired value")
         elif setnH==True:
             # Set nH from colDen and sigmaNT
             sigmaTotSqr = np.sqrt(self.sigmaNT**2 + sigmaThSqr)
@@ -288,9 +288,9 @@ class cloud(object):
         try:
             fp = open(fileName, 'r')
             if verbose:
-                print "Reading from file "+fileName+"..."
+                print("Reading from file "+fileName+"...")
         except IOError:
-            raise despoticError, "cannot open file "+fileName
+            raise despoticError("cannot open file "+fileName)
         for line in fp:
 
             # Skip empty and comment lines
@@ -302,9 +302,9 @@ class cloud(object):
             # Break line up based on equal sign
             linesplit = line.split("=")
             if len(linesplit) < 2:
-                raise despoticError, "Error parsing input line: "+line
+                raise despoticError("Error parsing input line: "+line)
             if linesplit[1] == '':
-                raise despoticError, "Error parsing input line: "+line
+                raise despoticError("Error parsing input line: "+line)
 
             # Trim trailing comments from portion after equal sign
             linesplit2 = linesplit[1].split('#')
@@ -320,103 +320,104 @@ class cloud(object):
 
                 self.colDen = float(linesplit2[0])
                 if verbose:
-                    print "Setting column density = " + \
-                        str(self.colDen) + " H cm^-2"
+                    print("Setting column density = " +
+                          str(self.colDen) + " H cm^-2")
 
             elif linesplit[0].upper().strip() == 'SIGMANT':
 
                 self.sigmaNT = float(linesplit2[0])
                 if verbose:
-                    print "Setting sigmaNT = " + \
-                        str(self.sigmaNT) + " cm s^-1"
+                    print("Setting sigmaNT = " + 
+                          str(self.sigmaNT) + " cm s^-1")
 
             elif linesplit[0].upper().strip() == 'DVDR':
 
                 self.dVdr = float(linesplit2[0])
                 if verbose:
-                    print "Setting sigmaNT = " + \
-                        str(self.dVdr) + " cm s^-1 cm^-1"
+                    print("Setting sigmaNT = " + 
+                          str(self.dVdr) + " cm s^-1 cm^-1")
 
             elif linesplit[0].upper().strip() == 'TG':
 
                 self.Tg = float(linesplit2[0])
                 if verbose:
-                    print "Setting Tg = "+str(self.Tg) + " K"
+                    print("Setting Tg = "+str(self.Tg) + " K")
 
             elif linesplit[0].upper().strip() == 'TD':
 
                 self.Td = float(linesplit2[0])
                 if verbose:
-                    print "Setting Td = "+str(self.Td) + " K"
+                    print("Setting Td = "+str(self.Td) + " K")
 
             elif linesplit[0].upper().strip() == 'ALPHAGD':
 
                 self.dust.alphaGD = float(linesplit2[0])
                 if verbose:
-                    print "Setting alpha_GD = " + \
-                        str(self.dust.alphaGD) + \
-                        " erg cm^3 K^-3/2"
+                    print("Setting alpha_GD = " + 
+                          str(self.dust.alphaGD) + 
+                          " erg cm^3 K^-3/2")
 
             elif linesplit[0].upper().strip() == 'SIGMAD10':
 
                 self.dust.sigma10 = float(linesplit2[0])
                 if verbose:
-                    print "Setting sigma_d,10 = " + \
-                        str(self.dust.sigma10) + \
-                        " cm^2 g^-1"
+                    print("Setting sigma_d,10 = " + 
+                          str(self.dust.sigma10) + 
+                          " cm^2 g^-1")
 
             elif linesplit[0].upper().strip() == 'SIGMADPE':
 
                 self.dust.sigmaPE = float(linesplit2[0])
                 if verbose:
-                    print "Setting sigma_d,PE = " + \
-                        str(self.dust.sigmaPE) + \
-                        " cm^2 H^-1"
+                    print("Setting sigma_d,PE = " + 
+                          str(self.dust.sigmaPE) + 
+                          " cm^2 H^-1")
 
             elif linesplit[0].upper().strip() == 'SIGMADISRF':
 
                 self.dust.sigmaISRF = float(linesplit2[0])
                 if verbose:
-                    print "Setting sigma_d,ISRF = " + \
-                        str(self.dust.sigmaISRF) + \
-                        " cm^2 H^-1"
+                    print("Setting sigma_d,ISRF = " + 
+                          str(self.dust.sigmaISRF) + 
+                          " cm^2 H^-1")
 
             elif linesplit[0].upper().strip() == 'ZDUST':
 
                 self.dust.Zd = float(linesplit2[0])
                 if verbose:
-                    print "Setting Z'_d = " + \
-                        str(self.dust.Zd)
+                    print("Setting Z'_d = " + 
+                          str(self.dust.Zd))
 
             elif linesplit[0].upper().strip() == 'BETADUST':
 
                 self.dust.beta = float(linesplit2[0])
                 if verbose:
-                    print "Setting beta_dust = "+str(self.dust.beta)
+                    print("Setting beta_dust = "+str(self.dust.beta))
 
             elif linesplit[0].upper().strip() == 'XHI':
 
                 self.comp.xHI = float(linesplit2[0])
                 if verbose:
-                    print "Setting xHI = "+str(self.comp.xHI)
+                    print("Setting xHI = "+str(self.comp.xHI))
 
             elif linesplit[0].upper().strip() == 'XPH2':
 
                 self.comp.xpH2 = float(linesplit2[0])
                 if verbose:
-                    print "Setting xpH2 = "+str(self.comp.xpH2)
+                    print("Setting xpH2 = "+str(self.comp.xpH2))
 
             elif linesplit[0].upper().strip() == 'XOH2':
 
                 self.comp.xoH2 = float(linesplit2[0])
                 if verbose:
-                    print "Setting xoH2 = "+str(self.comp.xoH2)
+                    print("Setting xoH2 = "+str(self.comp.xoH2))
 
             elif linesplit[0].upper().strip() == 'H2OPR':
 
                 self.comp.H2OPR = float(linesplit2[0])
                 if verbose:
-                    print "Setting H2 ortho-para ratio = "+str(self.comp.H2OPR)
+                    print("Setting H2 ortho-para ratio = "+
+                          str(self.comp.H2OPR))
 
             elif linesplit[0].upper().strip() == 'XH2':
 
@@ -425,60 +426,60 @@ class cloud(object):
                     self.comp.H2OPR = 0.25
                     print("Warning: H2 OPR unspecified, assuming 0.25")
                 if verbose:
-                    print "Setting xpH2 = "+str(self.comp.xpH2)
-                    print "Setting xoH2 = "+str(self.comp.xoH2)
+                    print("Setting xpH2 = "+str(self.comp.xpH2))
+                    print("Setting xoH2 = "+str(self.comp.xoH2))
 
             elif linesplit[0].upper().strip() == 'XHE':
 
                 self.comp.xHe = float(linesplit2[0])
                 if verbose:
-                    print "Setting xHe = "+str(self.comp.xHe)
+                    print("Setting xHe = "+str(self.comp.xHe))
 
             elif linesplit[0].upper().strip() == 'XE':
 
                 self.comp.xe = float(linesplit2[0])
                 if verbose:
-                    print "Setting xe = "+str(self.comp.xe)
+                    print("Setting xe = "+str(self.comp.xe))
 
             elif linesplit[0].upper().strip() == 'XH+':
 
                 self.comp.xe = float(linesplit2[0])
                 if verbose:
-                    print "Setting xH+ = "+str(self.comp.xe)
+                    print("Setting xH+ = "+str(self.comp.xe))
 
             elif linesplit[0].upper().strip() == 'TCMB':
 
                 self.rad.TCMB = float(linesplit2[0])
                 if verbose:
-                    print "Setting T_CMB = "+str(self.rad.TCMB)+" K"
+                    print("Setting T_CMB = "+str(self.rad.TCMB)+" K")
 
             elif linesplit[0].upper().strip() == 'TRADDUST':
 
                 self.rad.TradDust = float(linesplit2[0])
                 if verbose:
-                    print "Setting T_radDust = " + \
-                        str(self.rad.TradDust)+" K"
+                    print("Setting T_radDust = " +
+                          str(self.rad.TradDust)+" K")
 
             elif linesplit[0].upper().strip() == 'RADDUTDILUTION':
 
                 self.rad.fdDilute = float(linesplit2[0])
                 if verbose:
-                    print "Setting radDust dilution factor = " + \
-                        str(self.rad.fdDilute)
+                    print("Setting radDust dilution factor = " + 
+                          str(self.rad.fdDilute))
 
             elif linesplit[0].upper().strip() == 'IONRATE':
 
                 self.rad.ionRate = float(linesplit2[0])
                 if verbose:
-                    print "Setting primary ionization rate = " + \
-                        str(self.rad.ionRate)+" s^-1 H^-1"
+                    print("Setting primary ionization rate = " + 
+                          str(self.rad.ionRate)+" s^-1 H^-1")
 
             elif linesplit[0].upper().strip() == 'CHI':
 
                 self.rad.chi = float(linesplit2[0])
                 if verbose:
-                    print "Setting chi = " + \
-                        str(self.rad.chi)
+                    print("Setting chi = " + 
+                          str(self.rad.chi))
 
             elif linesplit[0].upper().strip() == 'EMITTER':
 
@@ -493,15 +494,15 @@ class cloud(object):
 
                 # Make sure the number of tokens is acceptable
                 if len(linesplit3) < 2 or len(linesplit3) > 6:
-                    raise despoticError, "Error parsing input line: "+line
+                    raise despoticError("Error parsing input line: "+line)
 
                 # Do we have optional tokens?
                 if len(linesplit3) == 2:
 
                     # Handle case of just two tokens
                     if verbose:
-                        print "Adding emitter "+linesplit3[0]+ \
-                                  " with abundance "+linesplit3[1] 
+                        print("Adding emitter "+linesplit3[0]+ 
+                              " with abundance "+linesplit3[1])
                     self.addEmitter(linesplit3[0], \
                                         float(linesplit3[1]))
 
@@ -527,10 +528,10 @@ class cloud(object):
                         elif token.upper().strip()[0:4] == 'URL:':
                             emitterURL=token[4:].strip()
                         else:
-                            raise despoticError, \
-                                'unrecognized token "' + \
-                                token.strip()+'" in line: ' \
-                                + line
+                            raise despoticError(
+                                'unrecognized token "' +
+                                token.strip()+'" in line: '
+                                + line)
 
                     # Now print message and add emitter
                     if verbose:
@@ -544,7 +545,7 @@ class cloud(object):
                             msg += "; using file name "+emitterFile
                         if emitterURL != None:
                             msg += "; using URL "+emitterURL
-                        print msg
+                        print(msg)
                     self.addEmitter(linesplit3[0],
                                     float(linesplit3[1]),
                                     energySkip=energySkip,
@@ -555,8 +556,8 @@ class cloud(object):
             else:
                 # Line does not correspond to any known keyword, so
                 # throw an error
-                raise despoticError, "unrecognized token " + \
-                    linesplit[0].strip() + " in file " + fileName
+                raise despoticError("unrecognized token " +
+                    linesplit[0].strip() + " in file " + fileName)
 
         # Close file
         fp.close()
@@ -564,8 +565,8 @@ class cloud(object):
         # Check that the hydrogen adds up. If not, raise error
         if self.comp.xHI + self.comp.xHplus + \
                 2.0*(self.comp.xpH2 + self.comp.xoH2) != 1:
-            raise despoticError, \
-                "total hydrogen abundance xHI + xH+ + 2 xH2 != 1"
+            raise despoticError(
+                "total hydrogen abundance xHI + xH+ + 2 xH2 != 1")
 
         # Set derived properties based on composition, temperature
         self.comp.computeDerived(self.nH)
@@ -574,16 +575,16 @@ class cloud(object):
 
         # If verbose, print results for derived quantities
         if verbose:
-            print "Derived quantities:"
-            print "   ===> mean mass per particle = " + \
-                str(self.comp.mu) + " mH"
-            print "   ===> mean mass per H = " + \
-                str(self.comp.muH) + " mH"
-            print "   ===> energy added per ionization = " + \
-                str(self.comp.qIon/1.6e-12) + " eV"
+            print("Derived quantities:")
+            print("   ===> mean mass per particle = " + 
+                  str(self.comp.mu) + " mH")
+            print("   ===> mean mass per H = " + 
+                  str(self.comp.muH) + " mH")
+            print("   ===> energy added per ionization = " + 
+                  str(self.comp.qIon/1.6e-12) + " eV")
             if self.Tg > 0.0:
-                print "   ===> c_v/(k_B n_H mu_H) = " + \
-                    str(self.comp.cv)
+                print("   ===> c_v/(k_B n_H mu_H) = " + 
+                      str(self.comp.cv))
 
 
     ####################################################################
@@ -831,18 +832,18 @@ class cloud(object):
                             em.setEscapeProb(self)
                     elif thin==True:
                         # Optically thin but not in LTE
-                        em.setLevPop(self, thin=thin, \
-                                         noClump=noClump)
+                        em.setLevPop(self, thin=thin, 
+                                     noClump=noClump)
                     else:
                         # Neither optically thin nor in LTE; note that
                         # we try multiple times with progressively
                         # smaller damping factors if need be
                         attempts = 0
                         dFac = dampFactor
-                        while em.setLevPopEscapeProb( \
-                            self, escapeProbGeom = escapeProbGeom, \
-                                noClump = noClump, \
-                                verbose = verbose, \
+                        while em.setLevPopEscapeProb( 
+                                self, escapeProbGeom = escapeProbGeom, 
+                                noClump = noClump, 
+                                verbose = verbose, 
                                 dampFactor = dFac) == False:
                             # If we're here, we failed to converge the
                             # level populations, so try again with a
@@ -851,25 +852,25 @@ class cloud(object):
                             dFac = dFac / 2.0
                             attempts = attempts + 1
                             if attempts > 5:
-                                raise despoticError, "convergence " + \
-                                    "failed for "+em.name
+                                raise despoticError("convergence " +
+                                    "failed for "+em.name)
                             else:
-                                print "Warning: convergence failed " + \
-                                    "for "+em.name+", RETRYING " + \
-                                    "with damping factor = " + str(dFac)
+                                print("Warning: convergence failed " + 
+                                    "for "+em.name+", RETRYING " + 
+                                    "with damping factor = " + str(dFac))
                 else:
                     # Safety check
                     if em.levPopInitialized == False:
-                        raise despoticError, \
-                            "for emitter " + em.name + ": " + \
-                            "cannot use fixedLevPop in dEdt" + \
-                            " if any level populations are uninitialized"
+                        raise despoticError(
+                            "for emitter " + em.name + ": " + 
+                            "cannot use fixedLevPop in dEdt" + 
+                            " if any level populations are uninitialized")
                     if em.escapeProbInitialized == False and \
                             thin == False:
-                        raise despoticError, \
-                            "for emitter " + em.name + ": " + \
-                            "cannot use fixedLevPop in dEdt" + \
-                            " if any escape probabilities are uninitialized"
+                        raise despoticError(
+                            "for emitter " + em.name + ": " +
+                            "cannot use fixedLevPop in dEdt" +
+                            " if any escape probabilities are uninitialized")
 
                 # Calculate cooling rates per H for all lines
                 lineLum = em.luminosityPerH(self.rad, thin=thin)
@@ -1569,7 +1570,7 @@ class cloud(object):
 
         # Step 1. Safety check and initial setup
         if not emitName in self.emitters:
-            raise despoticError, 'unknown emitter '+emitName
+            raise despoticError('unknown emitter '+emitName)
         em=self.emitters[emitName]
         if transition==None:
             u = em.data.radUpper
@@ -1594,11 +1595,11 @@ class cloud(object):
                     abstol=abstol, verbose=verbose)
         # Safety check: make sure we're initialized
         if em.levPopInitialized == False:
-            raise despoticError, 'cannot use noRecompute if level' + \
-                ' popuplations are uninitialized'
+            raise despoticError('cannot use noRecompute if level' + 
+                ' popuplations are uninitialized')
         if em.escapeProbInitialized == False and thin == False:
-            raise despoticError, 'cannot use noRecompute if escape' + \
-                ' probabilities are uninitialized'
+            raise despoticError('cannot use noRecompute if escape' + 
+                ' probabilities are uninitialized')
 
         # Step 3. Compute luminosity per H
         lumPerH = self.emitters[emitName]. \
@@ -2150,8 +2151,8 @@ try:
 except Exception as E:
 
     def run_cloud_gui():
-        print 'Cannot use DESPOTIC in gui mode. Failed to import PyQt4, or matplotlib.backends.backend_qt4agg'
-        print "The error was: ",E
+        print('Cannot use DESPOTIC in gui mode. Failed to import PyQt4, or matplotlib.backends.backend_qt4agg')
+        print("The error was: "+str(E))
     
 
 ########################################################################
@@ -2191,10 +2192,10 @@ def _gdTempResid(logTgd, cloud, c1Grav, thin, LTE,
     cloud.Tg = max(np.exp(logTgd[0]), cloud.rad.TCMB)
     cloud.Td = max(np.exp(logTgd[1]), cloud.rad.TCMB)
     if verbose:
-        print ""
-        print "***"
-        print "setTempEq: calculating residual at Tg = " + \
-            str(cloud.Tg) + " K, Td = " + str(cloud.Td) + " K..."
+        print("")
+        print("***")
+        print("setTempEq: calculating residual at Tg = " + 
+              str(cloud.Tg) + " K, Td = " + str(cloud.Td) + " K...")
 
     # Get net heating / cooling rates
     rates = cloud.dEdt(c1Grav=c1Grav, thin=thin, LTE=LTE,
@@ -2205,11 +2206,11 @@ def _gdTempResid(logTgd, cloud, c1Grav, thin, LTE,
 
     # Print status
     if verbose:
-        print "setTempEq: dE_gas/dt = " + str(rates['dEdtGas']) + \
-            " erg s^-1 H^-1, dE_dust/dt = " + \
-            str(rates['dEdtDust']) + " erg s^-1 H^-1, " + \
-            "residuals = " + str(rates['dEdtGas']/lumScale[0]) + \
-            " " + str(rates['dEdtDust']/lumScale[1])
+        print("setTempEq: dE_gas/dt = " + str(rates['dEdtGas']) + 
+              " erg s^-1 H^-1, dE_dust/dt = " + 
+              str(rates['dEdtDust']) + " erg s^-1 H^-1, " + 
+              "residuals = " + str(rates['dEdtGas']/lumScale[0]) + 
+              " " + str(rates['dEdtDust']/lumScale[1]))
 
     # Return result
     return np.array([rates['dEdtGas'], rates['dEdtDust']]) \
@@ -2245,10 +2246,10 @@ def _dustTempResid(logTd, cloud, PsiUser, GammaSum, GammaSumMax,
 
     # Print status if verbose
     if verbose:
-        print "_dustTempResid called with Td = "+str(cloud.Td) + \
-            ", dEdt = " + str(GammaSum+rates['dEdtDust']) + \
-            ", residual = " + \
-            str((GammaSum+rates['dEdtDust'])/lumScale)
+        print("_dustTempResid called with Td = "+str(cloud.Td) + 
+              ", dEdt = " + str(GammaSum+rates['dEdtDust']) + 
+              ", residual = " + 
+              str((GammaSum+rates['dEdtDust'])/lumScale))
 
     # Return dE/dt with correct normalization
     return (GammaSum+rates['dEdtDust'])/lumScale
@@ -2288,10 +2289,10 @@ def _gasTempResid(logTg, cloud, c1Grav, thin, LTE,
 
     # If verbose, print status
     if verbose:
-        print "_gasTempResid called with Tg = "+str(cloud.Tg) + \
-            ", dEdt = " + str(rates['dEdtGas']) + \
-            ", residual = " + \
-            str(rates['dEdtGas']/lumScale)
+        print ("_gasTempResid called with Tg = "+str(cloud.Tg) + 
+               ", dEdt = " + str(rates['dEdtGas']) + 
+               ", residual = " + 
+               str(rates['dEdtGas']/lumScale))
 
     # Return dE/dt with correct normalization
     return rates['dEdtGas']/lumScale
@@ -2329,8 +2330,8 @@ def _gasTempDeriv(Tg, time, cloud, c1Grav, thin, LTE, \
         cloud.nH = isobar / cloud.Tg
 
     if verbose:
-        print "t = "+str(time)+": Tg = "+str(cloud.Tg) + \
-            ", nH = "+str(cloud.nH)
+        print("t = "+str(time)+": Tg = "+str(cloud.Tg) + 
+              ", nH = "+str(cloud.nH))
 
     # Compute new dust temperature
     cloud.setDustTempEq(PsiUser=PsiUser, verbose=verbose,
@@ -2354,12 +2355,12 @@ def _gasTempDeriv(Tg, time, cloud, c1Grav, thin, LTE, \
     # Convert from dE/dt to dTemp/dt by dividing by the c_V
     if isobar > 0:
         if verbose:
-            print "dE/dt = "+str(dEdtGas)+", dT/dt = " + \
-                str(dEdtGas/((cloud.comp.cv+1.0)*kB))
+            print("dE/dt = "+str(dEdtGas)+", dT/dt = " + 
+                  str(dEdtGas/((cloud.comp.cv+1.0)*kB)))
         return dEdtGas/((cloud.comp.cv+1.0)*kB)
     else:
         if verbose:
-            print "dE/dt = "+str(dEdtGas)+", dT/dt = " + \
-                str(dEdtGas/((cloud.comp.cv)*kB))
+            print("dE/dt = "+str(dEdtGas)+", dT/dt = " + 
+                  str(dEdtGas/((cloud.comp.cv)*kB)))
         return dEdtGas/(cloud.comp.cv*kB)
 

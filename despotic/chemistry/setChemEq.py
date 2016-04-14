@@ -24,10 +24,10 @@ exist.
 
 import numpy as np
 from scipy.integrate import odeint
-from .. import despoticError
-from abundanceDict import abundanceDict
+from despotic.despoticError import despoticError
+from .abundanceDict import abundanceDict
 from copy import deepcopy
-from chemEvol import chemEvol
+from .chemEvol import chemEvol
 import scipy.constants as physcons
 kB = physcons.k*1e7
 
@@ -138,8 +138,9 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
         elif not isinstance(cloud.chemnetwork, network):
             cloud.chemnetwork = network(cloud=cloud, info=info)
     elif not hasattr(cloud, 'chemnetwork'):
-        raise despoticError, 'if network is None, cloud must have' + \
-            ' an existing chemnetwork'
+        raise despoticError(
+            'if network is None, cloud must have' +
+            ' an existing chemnetwork')
 
     # Get initial timesale estimate if we were not given one. Picking
     # this is very tricky, because chemical networks often involve
@@ -153,8 +154,8 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
 
         # Print status
         if verbose:
-            print "setChemEquil: estimating characteristic " + \
-                "equilibration timescale..."
+            print("setChemEquil: estimating characteristic " + 
+                  "equilibration timescale...")
 
         # Compute current time derivatives
         xdot1 = cloud.chemnetwork.dxdt(cloud.chemnetwork.x, 0.0)
@@ -194,8 +195,8 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
 
     # Print status
     if verbose:
-        print "setChemEquil: estimated equilibration timescale = " + \
-            str(tEqGuess) + " sec"
+        print("setChemEquil: estimated equilibration timescale = " + 
+              str(tEqGuess) + " sec")
 
     # Decide which species we will consider in determining if
     # abundances are converged
@@ -254,14 +255,16 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
             # Print status
             if verbose:
                 if evolveTemp != 'evol' or np.argmax(err) < len(err-1):
-                    print "setChemEquil: evolved from t = " + str(t) + \
-                        " to "+str(t+tEvol)+" sec, residual = " + \
-                        str(np.amax(err)) + " for species " + \
-                        cloud.chemnetwork.specList[convArray[np.argmax(err)]]
+                    print(
+                        "setChemEquil: evolved from t = " + str(t) + 
+                        " to "+str(t+tEvol)+" sec, residual = " + 
+                        str(np.amax(err)) + " for species " + 
+                        cloud.chemnetwork.specList[convArray[np.argmax(err)]])
                 else:
-                    print "setChemEquil: evolved from t = " + str(t) + \
-                        " to "+str(t+tEvol)+" sec, residual = " + \
-                        str(np.amax(err)) + " for temperature"
+                    print(
+                        "setChemEquil: evolved from t = " + str(t) + 
+                        " to "+str(t+tEvol)+" sec, residual = " + 
+                        str(np.amax(err)) + " for temperature")
 
             # Check for convergence
             if np.amax(err) < tol:
@@ -284,11 +287,12 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
             if np.amax(err) < tol:
                 ad = abundanceDict(cloud.chemnetwork.specList,
                                    cloud.chemnetwork.x)
-                print "setChemEquil: abundances converged: " + \
-                    str(ad)
+                print(
+                    "setChemEquil: abundances converged: " + str(ad))
             else:
-                print "setChemEquil: reached maximum time of " + \
-                    str(maxTime) + " sec without converging"
+                print(
+                    "setChemEquil: reached maximum time of " + 
+                    str(maxTime) + " sec without converging")
 
         # Floor small negative abundances to avoid numerical problems
         idx = np.where(np.logical_and(cloud.chemnetwork.x <= 0.0,
@@ -330,11 +334,11 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
 
             # Print status
             if verbose:
-                print ("setChemEquil: updated temperatures to " +
-                       "Tg = {:f}, Td = {:f}, residual = {:e}"). \
+                print("setChemEquil: updated temperatures to " +
+                      "Tg = {:f}, Td = {:f}, residual = {:e}"). \
                     format(cloud.Tg, cloud.Td, resid)
                 if tempConverge:
-                    print "Temperature converged!"
+                    print("Temperature converged!")
 
         # Break if we've also converged on the temperature
         if tempConverge:

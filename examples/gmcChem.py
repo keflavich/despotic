@@ -1,13 +1,14 @@
 """
 This is an example code for the DESPOTIC library. This code uses the
 Nelson & Langer (1999) network to compute the chemical state of a
-cloud as a function of its column density.
+cloud as a function of its column density. The result is written out
+to a file gmcChem.pdf.
 """
 
 # Import the despotic library and the NL99 network; also import numpy
 from despotic import cloud
-from despotic.chemistry import NL99
-from matplotlib.pyplot import *
+from despotic.chemistry import NL99_GC
+import matplotlib.pyplot as plt
 import numpy as np
 
 # Range in log column density to use
@@ -28,7 +29,7 @@ gmc.Tg = 20.0
 abd=[]
 for lNH in logNH:
     gmc.colDen = 10.**lNH
-    gmc.setChemEq(network=NL99, verbose=True)
+    gmc.setChemEq(network=NL99_GC, verbose=True)
     abd.append(gmc.chemnetwork.abundances)
 
 # Make arrays for plotting
@@ -44,12 +45,14 @@ xC=np.array(xC)
 xCp=np.array(xCp)
 
 # Plot
-plot(logNH, xCO+xC+xCp, 'k', linewidth=3, linestyle='dashed', label='Total C')
-plot(logNH, xCO, label=r'$x_{\rm CO}$', linewidth=3)
-plot(logNH, xC, label=r'$x_{\rm C}$', linewidth=3)
-plot(logNH, xCp, label=r'$x_{\rm C^+}$', linewidth=3)
-yscale('log')
-xlabel(r'$\log\,N_{\rm H}$')
-ylabel('Abundance')
-ylim([1e-7,1e-2])
-legend()
+plt.plot(logNH, xCO+xC+xCp, 'k', linewidth=3, linestyle='dashed',
+         label='Total C')
+plt.plot(logNH, xCO, label=r'$x_{\rm CO}$', linewidth=3)
+plt.plot(logNH, xC, label=r'$x_{\rm C}$', linewidth=3)
+plt.plot(logNH, xCp, label=r'$x_{\rm C^+}$', linewidth=3)
+plt.yscale('log')
+plt.xlabel(r'$\log\,N_{\rm H}$')
+plt.ylabel('Abundance')
+plt.ylim([1e-7,1e-2])
+plt.legend()
+plt.savefig('gmcChem.pdf')

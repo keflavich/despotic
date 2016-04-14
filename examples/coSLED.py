@@ -35,14 +35,14 @@ ulirglines = ulirg.lineLum('co')
 gmclines13 = gmc.lineLum('13co')
 ulirglines13 = ulirg.lineLum('13co')
 t2=datetime.now()
-print 'Execution time = '+str(t2-t1)
+print('Execution time = '+str(t2-t1))
 
 # Print out the CO X factor for both clouds. This is column density
 # divided by velocity-integrated brightness temperature.
-print "GMC X_CO = "+str(gmc.colDen/gmclines[0]['intTB']) + \
-    " cm^-2 / (K km s^-1)"
-print "ULIRG X_CO = "+str(ulirg.colDen/ulirglines[0]['intTB']) + \
-    " cm^-2 / (K km s^-1)"
+print("GMC X_CO = "+str(gmc.colDen/gmclines[0]['intTB']) + 
+      " cm^-2 / (K km s^-1)")
+print("ULIRG X_CO = "+str(ulirg.colDen/ulirglines[0]['intTB']) + 
+      " cm^-2 / (K km s^-1)")
 
 # Extract the integrated brightness temperatures
 gmcTBint=array([line['intTB'] for line in gmclines])

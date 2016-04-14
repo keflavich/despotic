@@ -25,7 +25,7 @@ networks by registering sets of reactions and reactants.
 import numpy as np
 import scipy.sparse as sp
 import inspect
-from abundanceDict import abundanceDict
+from .abundanceDict import abundanceDict
 
 ########################################################################
 # Useful little function, taken directly from

@@ -21,9 +21,9 @@ taken to be exposed to the same external radiation field.
 ########################################################################
 
 import numpy as np
-from cloud import cloud
-from dustProp import dustProp
-from despoticError import despoticError
+from .cloud import cloud
+from .dustProp import dustProp
+from .despoticError import despoticError
 from copy import deepcopy
 import scipy.constants as physcons
 mH = physcons.m_p*1e3
@@ -97,9 +97,9 @@ class zonedcloud(object):
         # Make sure the user has given us column density, AV, or file
         # name
         if (colDen is None) and (AV is None) and (fileName is None):
-            raise despoticError, \
-                "zonedcloud: must specify one of: " + \
-                "colDen, AV, or fileName"
+            raise despoticError(
+                "zonedcloud: must specify one of: " + 
+                "colDen, AV, or fileName")
 
         # Create a base cloud
         basecloud = cloud(fileName=fileName, verbose=verbose)
@@ -130,8 +130,8 @@ class zonedcloud(object):
         # with 0
         self._colDen.sort()
         if self._colDen[0] < 0:
-            raise despoticError, \
-                "zonedcloud: column densities must be > 0!"
+            raise despoticError(
+                "zonedcloud: column densities must be > 0!")
         if self._colDen[0] > 0:
             np.insert(self._colDen, 0, 0.0)
 
@@ -167,9 +167,10 @@ class zonedcloud(object):
         # nH can be a float or listlike
         if hasattr(nH, '__iter__'):
             if len(nH) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(nH))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(nH))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, nH):
                 z.nH = x
         else:
@@ -185,14 +186,16 @@ class zonedcloud(object):
 
         # colDen must be listlike, in increasing order
         if len(colDen) != len(self.zones):
-            raise despoticError, "zonedcloud: could not " + \
-                "broadcast "+str(len(colDen))+" items to " + \
-                str(len(self.zones)) + " zones"
+            raise despoticError(
+                "zonedcloud: could not " + 
+                "broadcast "+str(len(colDen))+" items to " + 
+                str(len(self.zones)) + " zones")
         for i in range(len(colDen)-1):
             if (colDen[i] >= colDen[i+1]) or (colDen[i] <= 0):
-                raise despoticError, "zonedcloud: column " + \
-                    "densities must be positive and " + \
-                    "monotonically increasing"
+                raise despoticError(
+                    "zonedcloud: column " + 
+                    "densities must be positive and " + 
+                    "monotonically increasing")
 
         # Set new column densities
         for z, x in zip(self.zones, colDen):
@@ -211,9 +214,10 @@ class zonedcloud(object):
         # sigmaNT can be a float or listlike
         if hasattr(sigmaNT, '__iter__'):
             if len(sigmaNT) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(sigmaNT))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(sigmaNT))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, sigmaNT):
                 z.sigmaNT = x
         else:
@@ -229,9 +233,10 @@ class zonedcloud(object):
         # dVdr can be a float or listlike
         if hasattr(dVdr, '__iter__'):
             if len(dVdr) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(dVdr))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(dVdr))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, dVdr):
                 z.dVdr = x
         else:
@@ -247,9 +252,10 @@ class zonedcloud(object):
         # Tg can be a float or listlike
         if hasattr(Tg, '__iter__'):
             if len(Tg) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(Tg))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(Tg))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, Tg):
                 z.Tg = x
         else:
@@ -265,9 +271,10 @@ class zonedcloud(object):
         # Td can be a float or listlike
         if hasattr(Td, '__iter__'):
             if len(Td) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(Td))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(Td))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, Td):
                 z.Td = x
         else:
@@ -285,9 +292,10 @@ class zonedcloud(object):
         # compositions can be different
         if hasattr(comp, '__iter__'):
             if len(comp) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(comp))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(comp))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, comp):
                 z.comp = deepcopy(x)
         else:
@@ -306,7 +314,7 @@ class zonedcloud(object):
     @mu.setter
     def mu(self, mu):
         # Disallow direct setting of mu
-        raise despoticError, "zonedcloud: cannot directly set mu"
+        raise despoticError("zonedcloud: cannot directly set mu")
 
     @property
     def muH(self):
@@ -320,7 +328,7 @@ class zonedcloud(object):
     @mu.setter
     def muH(self, muH):
         # Disallow direct setting of muH
-        raise despoticError, "zonedcloud: cannot directly set muH"
+        raise despoticError("zonedcloud: cannot directly set muH")
 
     # Note: dust and rad are the same for all zones
     @property
@@ -356,13 +364,14 @@ class zonedcloud(object):
         if hasattr(emitters, '__iter__'):
             for x in emitters:
                 if set(x.keys()) != set(emitters[0].keys()):
-                    raise despoticError, \
-                        "zonedcloud: all zones must have the " + \
-                        "same emitters"
+                    raise despoticError(
+                        "zonedcloud: all zones must have the " +
+                        "same emitters")
             if len(emitters) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(emitters))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(emitters))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, emitters):
                 z.emitters = deepcopy(x)
         else:
@@ -383,13 +392,14 @@ class zonedcloud(object):
         if hasattr(chemnetwork, '__iter__'):
             for x in chemnetwork:
                 if type(x) != type(chemnetwork[0]):
-                    raise despoticError, \
-                        "zonedcloud: all zones must have the " + \
-                        "same chemnetwork type"
+                    raise despoticError(
+                        "zonedcloud: all zones must have the " + 
+                        "same chemnetwork type")
             if len(chemnetwork) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(chemnetwork))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(chemnetwork))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, chemnetwork):
                 z.chemnetwork = deepcopy(x)
         else:
@@ -600,8 +610,8 @@ class zonedcloud(object):
             self.sigmaNT = np.sqrt(sigmaTotSqr - sigmaThSqr)
         else:
             self.sigmaNT = 0.0
-            print "setVirial warning: setting sigmaNT = 0, " + \
-                "virial ratio still exceeds desired value"
+            print("setVirial warning: setting sigmaNT = 0, " + 
+                  "virial ratio still exceeds desired value")
 
 
     ####################################################################
@@ -640,9 +650,10 @@ class zonedcloud(object):
         """
         if hasattr(emitAbundance, '__iter__'):
             if len(emitAbundance) != len(self.zones):
-                raise despoticError, "zonedcloud: could not " + \
-                    "broadcast "+str(len(emitAbundance))+" items to " + \
-                    str(len(self.zones)) + " zones"
+                raise despoticError(
+                    "zonedcloud: could not " + 
+                    "broadcast "+str(len(emitAbundance))+" items to " + 
+                    str(len(self.zones)) + " zones")
             for z, x in zip(self.zones, emitAbundance):
                 z.addEmitter(emitName, x, emitterFile=emitterFile,
                              emitterURL=emitterURL, extrap=extrap,

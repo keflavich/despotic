@@ -154,4 +154,4 @@ def fShield_CO_vDB(NCO, NH2, order=1):
     elif order==3:
         return np.exp(_logThetavDBinterp3(logNH2, logNCO))
     else:
-        raise ValueError, "order must be 1, 2, or 3"
+        raise ValueError("order must be 1, 2, or 3")

@@ -21,7 +21,7 @@ performing computations related to this data.
 ########################################################################
 
 import numpy as np
-from despoticError import despoticError
+from .despoticError import despoticError
 
 # Physical constants describing H2
 thetaRot = 85.3    # Rotation constant in K

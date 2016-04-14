@@ -108,7 +108,7 @@ for i, t in enumerate(times[istart:-1]):
     fp.close()
 
 # Print execution time
-print "Execution time = "+str(extime)
+print("Execution time = "+str(extime))
 
 # Get temperature history from saved states
 Tg=array([s.Tg for s in stateList])
@@ -123,7 +123,7 @@ PsiGD = -PsiGD
 LambdaSpec = {}
 for k in rates[0]['LambdaLine'].keys():
     LambdaSpec[k] =  array([r['LambdaLine'][k] for r in rates])
-LambdaLine = array([sum(array(r['LambdaLine'].values())) for r in rates])
+LambdaLine = array([sum(array(list(r['LambdaLine'].values()))) for r in rates])
 
 # Compute luminosities of individual CO lines
 coLines = zeros((stateList[0].emitters['co'].data.nlev-1, nOut))

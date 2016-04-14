@@ -22,8 +22,8 @@ propeties and for a specified emitter.
 
 import numpy as np
 from scipy.integrate import odeint
-from emitterData import emitterData
-from despoticError import despoticError
+from .emitterData import emitterData
+from .despoticError import despoticError
 
 # Define some global physical constants in cgs units
 import scipy.constants as physcons
@@ -119,10 +119,11 @@ def lineProfLTE(emdat, u, l, R, denProf, TProf,
 
         # Step 1: safety check
         if emdat.EinsteinA[u,l] == 0.0:
-            raise depoticError, 'no radiative transition from state ' \
-                +str(u)+' to state '+str(l)+' found'
+            raise depoticError(
+                    'no radiative transition from state ' 
+                    +str(u)+' to state '+str(l)+' found')
         if offset < 0.0 or offset > 1.0:
-            raise despoticError, 'offset must be in the range 0 - 1'
+            raise despoticError('offset must be in the range 0 - 1')
 
         # Step 2: set up the helper class to compute normalization
         # constants

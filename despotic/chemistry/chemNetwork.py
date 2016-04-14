@@ -67,9 +67,10 @@ class chemNetwork(object):
     # received a dict containing optional additional arguments. This
     # routine should initialize specList and x.
     def __init__(self, cloud=None, info=None):
-        raise despoticError, "chemNetwork is an abstract class, " + \
-            "and should never be instantiated directly. Only " + \
-            "instantiate classes derived from it."
+        raise despoticError(
+            "chemNetwork is an abstract class, " + 
+            "and should never be instantiated directly. Only " + 
+            "instantiate classes derived from it.")
 
     # The dxdt method takes two arguments: xin is a numpy array in the
     # same format as x, giving the input abundances; time is a float
@@ -91,9 +92,10 @@ class chemNetwork(object):
            dxdt : array
               the time derivative of all species abundances
         """
-        raise despoticError, "chemNetwork is an abstract class, " + \
-            "and should never be instantiated directly. Only " + \
-            "instantiate classes derived from it."
+        raise despoticError(
+            "chemNetwork is an abstract class, " + 
+            "and should never be instantiated directly. Only " + 
+            "instantiate classes derived from it.")
 
     # The applyAbundances method is responsible for taking the
     # abundances stored in the array x and writing them to the
@@ -119,9 +121,10 @@ class chemNetwork(object):
            Nothing
         """
 
-        raise despoticError, "chemNetwork is an abstract class, " + \
-            "and should never be instantiated directly. Only " + \
-            "instantiate classes derived from it."
+        raise despoticError(
+            "chemNetwork is an abstract class, " + 
+            "and should never be instantiated directly. Only " + 
+            "instantiate classes derived from it.")
 
     # This defines abundances as a property of the chemNetwork, and
     # provides a convenient way of getting the abundances in a nice,

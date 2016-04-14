@@ -25,10 +25,10 @@ method that returns collision rates at a specified temperature.
 
 import numpy as np
 from scipy.interpolate import interp1d
-from despoticError import *
+from .despoticError import despoticError
 import pyximport
 pyximport.install(setup_args={'include_dirs':np.get_include()})
-from collPartner_helper import colRates_all_scalar, \
+from .collPartner_helper import colRates_all_scalar, \
     colRates_all_vector, colRates_some_scalar, \
     colRates_some_vector
 
@@ -176,8 +176,8 @@ class collPartner:
         if not self.extrap:
             if np.any(np.array(temp) < self.tempTable[0]) or \
                np.any(np.array(temp) > self.tempTable[-1]):
-                raise despoticError, \
-                    "temperature out of bounds in collPartner"
+                raise despoticError(
+                    "temperature out of bounds in collPartner")
 
         # Handle the four possible cases; all transitions or some,
         # single scalar temperature or array of temperatures

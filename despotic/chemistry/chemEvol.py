@@ -27,7 +27,7 @@ chemistry network for a cloud.
 import numpy as np
 from scipy.integrate import odeint
 from despotic.despoticError import despoticError
-from abundanceDict import abundanceDict
+from .abundanceDict import abundanceDict
 from copy import deepcopy
 import scipy.constants as physcons
 kB = physcons.k*1e7
@@ -121,8 +121,9 @@ def chemEvol(cloud, tFin, tInit=0.0, nOut=100, dt=None,
         elif not isinstance(cloud.chemnetwork, network):
             cloud.chemnetwork = network(cloud=cloud, info=info)
     elif not hasattr(cloud, 'chemnetwork'):
-        raise despoticError, 'if network is None, cloud must have' + \
-            ' an existing chemnetwork'
+        raise despoticError(
+            'if network is None, cloud must have' +
+            ' an existing chemnetwork')
 
     # Set up output times
     if tOut==None:
@@ -222,8 +223,9 @@ def chemEvol(cloud, tFin, tInit=0.0, nOut=100, dt=None,
             Td[i] = cloud.Td
 
     else:
-        raise despoticError, 'chemEvol: invalid option ' + \
-            str(evolveTemp) + 'for evolveTemp'
+        raise despoticError(
+            'chemEvol: invalid option ' + str(evolveTemp) +
+            'for evolveTemp')
 
     # Write final results to chemnetwork
     cloud.chemnetwork.x = xOut[-1,:]

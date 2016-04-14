@@ -21,7 +21,7 @@ This module defines the abundanceDict class.
 import numpy as np
 import collections
 from copy import deepcopy
-from ..despoticError import despoticError
+from despotic import despoticError
 
 class abundanceDict(collections.MutableMapping,dict):
     """
@@ -70,11 +70,11 @@ class abundanceDict(collections.MutableMapping,dict):
 
         # Make sure input specList and x are properly formatted
         if np.ndim(x) < 1:
-            raise despoticError("x must be "+
-                "a numpy array of rank >= 1")
+            raise despoticError(
+                "x must be a numpy array of rank >= 1")
         elif x.shape[0] != len(specList):
-            raise despoticError("first dimension of " +
-                "x must be same length as specList")
+            raise despoticError(
+                "first dimension of x must be same length as specList")
 
         self.x = x
         self.__specDict = collections.OrderedDict(
@@ -100,8 +100,8 @@ class abundanceDict(collections.MutableMapping,dict):
         input species name.
         """
         if key not in self.__specDict:
-            raise despoticError, "cannot add new species to " + \
-                "abundanceDict"
+            raise despoticError(
+                "cannot add new species to abundanceDict")
         self.x[self.__specDict[key]] = value
 
     ########################################################################
@@ -112,8 +112,9 @@ class abundanceDict(collections.MutableMapping,dict):
     def __add__(self, other):
         if type(other) == type(self):
             if self.keys() != other.keys():
-                raise despoticError, "cannot add abundanceDict " + \
-                    "objects containing different species"
+                raise despoticError(
+                    "cannot add abundanceDict " +
+                    "objects containing different species")
             return abundanceDict(self.keys(), self.x + other.x)
         else:
             return abundanceDict(self.keys(), self.x + other)
@@ -124,8 +125,9 @@ class abundanceDict(collections.MutableMapping,dict):
     def __sub__(self, other):
         if type(other) == type(self):
             if self.keys() != other.keys():
-                raise despoticError, "cannot add abundanceDict " + \
-                    "objects containing different species"
+                raise despoticError(
+                    "cannot add abundanceDict " + 
+                    "objects containing different species")
             return abundanceDict(self.keys(), self.x - other.x)
         else:
             return abundanceDict(self.keys(), self.x - other)
@@ -136,8 +138,9 @@ class abundanceDict(collections.MutableMapping,dict):
     def __mul__(self, other):
         if type(other) == type(self):
             if self.keys() != other.keys():
-                raise despoticError, "cannot add abundanceDict " + \
-                    "objects containing different species"
+                raise despoticError(
+                    "cannot add abundanceDict " + 
+                    "objects containing different species")
             return abundanceDict(self.keys(), self.x * other.x)
         else:
             return abundanceDict(self.keys(), self.x * other)
@@ -151,8 +154,9 @@ class abundanceDict(collections.MutableMapping,dict):
     def __div__(self, other):
         if type(other) == type(self):
             if self.keys() != other.keys():
-                raise despoticError, "cannot add abundanceDict " + \
-                    "objects containing different species"
+                raise despoticError(
+                    "cannot add abundanceDict " + 
+                    "objects containing different species")
             return abundanceDict(self.keys(), self.x / other.x)
         else:
             return abundanceDict(self.keys(), self.x / other)
@@ -163,8 +167,9 @@ class abundanceDict(collections.MutableMapping,dict):
     def __floordiv__(self, other):
         if type(other) == type(self):
             if self.keys() != other.keys():
-                raise despoticError, "cannot add abundanceDict " + \
-                    "objects containing different species"
+                raise despoticError(
+                    "cannot add abundanceDict " + 
+                    "objects containing different species")
             return abundanceDict(self.keys(), self.x // other.x)
         else:
             return abundanceDict(self.keys(), self.x // other)
@@ -181,8 +186,9 @@ class abundanceDict(collections.MutableMapping,dict):
     def __pow__(self, other):
         if type(other) == type(self):
             if self.keys() != other.keys():
-                raise despoticError, "cannot add abundanceDict " + \
-                    "objects containing different species"
+                raise despoticError(
+                    "cannot add abundanceDict " + 
+                    "objects containing different species")
             return abundanceDict(self.keys(), self.x ** other.x)
         else:
             return abundanceDict(self.keys(), self.x ** other)
@@ -222,32 +228,32 @@ class abundanceDict(collections.MutableMapping,dict):
         raises an error, since abundanceDicts are
         immutable
         """
-        raise despoticError, "cannot delete species from " + \
-            "abundanceDict"
+        raise despoticError(
+            "cannot delete species from abundanceDict")
 
     def clear(self):
         """
         raises an error, since abundanceDicts are
         immutable
         """
-        raise despoticError, "cannot delete species from " + \
-            "abundanceDict"
+        raise despoticError(
+            "cannot delete species from abundanceDict")
 
     def pop(self, key):
         """
         raises an error, since abundanceDicts are
         immutable
         """
-        raise despoticError, "cannot delete species from " + \
-            "abundanceDict"
+        raise despoticError(
+            "cannot delete species from abundanceDict")
 
     def popitem(self):
         """
         raises an error, since abundanceDicts are
         immutable
         """
-        raise despoticError, "cannot delete species from " + \
-            "abundanceDict"
+        raise despoticError(
+            "cannot delete species from abundanceDict")
 
     ########################################################################
     # define how to print abundanceDict objects

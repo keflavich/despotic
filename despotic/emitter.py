@@ -26,8 +26,8 @@ import numpy as np
 from scipy.optimize import root
 from scipy.optimize import brentq
 import os
-from despoticError import despoticError
-from emitterData import emitterData
+from .despoticError import despoticError
+from .emitterData import emitterData
 
 ########################################################################
 # Global variables
@@ -619,7 +619,10 @@ class emitter(object):
         """
 
         if self.levPopInitialized == False:
-            raise despoticError, "cannot compute escape probabilities before level populations are initialized; call one of the setLevPop routines first"
+            raise despoticError(
+                "cannot compute escape probabilities before level " +
+                "populations are initialized; call one of the "+
+                "setLevPop routines first")
         if transition==None:
             u = self.data.radUpper
             l = self.data.radLower
@@ -671,8 +674,8 @@ class emitter(object):
             self.escapeProb[u[idx], l[idx]] = \
                 1.0 - 3.0*tau[idx]/2.0
         else:
-            raise despoticError, "unknown escapeProbGeom " + \
-                str(escapeProbGeom)
+            raise despoticError("unknown escapeProbGeom " +
+                                str(escapeProbGeom))
 
         # Make negative escape probabilities positive to avoid
         #numerical problems
@@ -816,7 +819,7 @@ class emitter(object):
                 np.identity(self.data.nlev)
 
             # check condition number
-            if np.linalg.cond(m) <= 1.0/(1.0e8*machineeps):
+            if np.linalg.cond(m) <= 1.0/(1.0e9*machineeps):
 
                 # Condition number ok, so solve
                 self.levPop, res, rank, s = np.linalg.lstsq(m, b)
@@ -854,7 +857,7 @@ class emitter(object):
                 mred[-1,:] = 1.0
 
                 # Check condition number again
-                if np.linalg.cond(mred) > 1.0/(1.0e8*machineeps):
+                if np.linalg.cond(mred) > 1.0/(1.0e9*machineeps):
 
                     # Condition number still bad, so progressively
                     # eliminate levels based on population upper
@@ -866,7 +869,7 @@ class emitter(object):
                     levPopLim = sumRateIn / sumRateOut
 
                     # Loop until condition number is acceptable
-                    while np.linalg.cond(mred) > 1.0/(1.0e8*machineeps) \
+                    while np.linalg.cond(mred) > 1.0/(1.0e9*machineeps) \
                             and np.argmin(levPopLim) < 1.0e-6:
 
                         # Delete the level with the most stringent
@@ -908,31 +911,31 @@ class emitter(object):
             relnorm = np.amax(relResid)
             # print status message
             if veryverbose:
-                print 'setLevPopEscapeProb for ' + self.name + \
-                    ': iter ' + str(ctr) + ': abs resid = ' + \
-                    str(absnorm) + ', state; ' + str(np.argmax(resid)) + \
-                    ', rel resid = ' + str(relnorm) + \
-                    ', state = ' + str(np.argmax(relResid))
+                print('setLevPopEscapeProb for ' + self.name + 
+                      ': iter ' + str(ctr) + ': abs resid = ' + 
+                      str(absnorm) + ', state; ' + str(np.argmax(resid)) + 
+                      ', rel resid = ' + str(relnorm) + 
+                      ', state = ' + str(np.argmax(relResid)))
             # update counter
             ctr = ctr+1
 
         # make sure we've converged
         if relnorm > reltol and absnorm > abstol:
             if verbose:
-                print "setLevPopEscapeProb: level populations " + \
-                    "DID NOT CONVERGE for " + self.name + \
-                    " in "+str(ctr)+" iterations; " + \
-                    "relative residual = " + str(relnorm) + \
-                    ", absolute residual = " + str(absnorm)
+                print("setLevPopEscapeProb: level populations " + 
+                      "DID NOT CONVERGE for " + self.name + 
+                      " in "+str(ctr)+" iterations; " + 
+                      "relative residual = " + str(relnorm) + 
+                      ", absolute residual = " + str(absnorm))
             return False
 
         # print status message
         if verbose:
-            print "setLevPopEscapeProb: level populations " + \
-                "converged for " + self.name + \
-                " in "+str(ctr)+" iterations; " + \
-                "relative residual = " + str(relnorm) + \
-                ", absolute residual = " + str(absnorm)
+            print("setLevPopEscapeProb: level populations " + 
+                  "converged for " + self.name + 
+                  " in "+str(ctr)+" iterations; " + 
+                  "relative residual = " + str(relnorm) + 
+                  ", absolute residual = " + str(absnorm))
 
         # flag that level populations and escape probabilities are now
         # valid
@@ -968,7 +971,9 @@ class emitter(object):
         """
 
         if self.escapeProbInitialized == False:
-            raise despoticError, "Error: cannot compute optical depths before escape probabilities are initialized"
+            raise despoticError(
+                "Error: cannot compute optical depths before "+
+                "escape probabilities are initialized")
         if transition==None:
             u = self.data.radUpper
             l = self.data.radLower
@@ -990,8 +995,8 @@ class emitter(object):
                                 args=(beta,))
             return tau
         else:
-            raise despoticError, "unknown escapeProbGeom " + \
-                str(escapeProbGeom)
+            raise despoticError("unknown escapeProbGeom " +
+                                str(escapeProbGeom))
 
 
     ####################################################################
@@ -1032,7 +1037,10 @@ class emitter(object):
 
         # Safety check
         if self.levPopInitialized == False:
-            raise despoticError, "Error: cannot compute luminosities before level populations are initialized; call one of the setLevPop routines first"
+            raise despoticError(
+                "Error: cannot compute luminosities before level "+
+                "populations are initialized; call one of the "+
+                "setLevPop routines first")
 
         # Get list of lines
         if transition==None:

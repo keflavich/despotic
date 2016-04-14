@@ -24,10 +24,10 @@ Glover & MacLow (2007, ApJS, 169, 239), as combined in Glover & Clark
 import numpy as np
 import string
 from despotic.despoticError import despoticError
-from shielding import fShield_CO_vDB, fShield_H2_DB
-from abundanceDict import abundanceDict
-from chemNetwork import chemNetwork
-from reactions import cr_reactions, photoreactions, gr_reactions
+from .shielding import fShield_CO_vDB, fShield_H2_DB
+from .abundanceDict import abundanceDict
+from .chemNetwork import chemNetwork
+from .reactions import cr_reactions, photoreactions, gr_reactions
 import scipy.constants as physcons
 import warnings
 import os
@@ -451,16 +451,27 @@ class NL99_GC(chemNetwork):
             # Sanity check: make sure cloud contains some He, since
             # network will not function properly at He abundance of 0
             if cloud.comp.xHe == 0.0:
-                raise despoticError, "NL99 network requires " + \
-                    "non-zero He abundance"
+                raise despoticError(
+                    "NL99_GC network requires " + 
+                    "non-zero He abundance")
 
             # Set abundances
 
             # Make a case-insensitive version of the emitter list for
             # convenience
-            emList = dict(zip(map(string.lower, 
-                                  cloud.emitters.keys()), 
-                              cloud.emitters.values()))
+            try:
+                # This construction is elegant, but it relies on the
+                # existence of a freestanding string.lower function,
+                # which has been removed in python 3
+                emList = dict(zip(map(string.lower, 
+                                      cloud.emitters.keys()), 
+                                  cloud.emitters.values()))
+            except:
+                # This somewhat more bulky construction is required in
+                # python 3
+                lowkeys = [k.lower() for k in cloud.emitters.keys()]
+                lowvalues = list(cloud.emitters.values())
+                emList = dict(zip(lowkeys, lowvalues))
 
             # Hydrogen
             abd['H+'] = cloud.comp.xHplus
@@ -509,17 +520,18 @@ class NL99_GC(chemNetwork):
                 # Print warning if we're altering existing C+
                 # abundance.
                 if 'c' in emList:
-                    print "Warning: input C abundance is " + \
-                        str(xC) + ", but total input C, C+, CHx, CO, " + \
-                        "HCO+ abundance is " + str(xCtot) + \
-                        "; increasing xC+ to " + str(abd['C+']+xC-xCtot)
+                    print("Warning: input C abundance is " + 
+                          str(xC) + ", but total input C, C+, CHx, CO, " + 
+                          "HCO+ abundance is " + str(xCtot) + 
+                          "; increasing xC+ to " + str(abd['C+']+xC-xCtot))
                 abd['C+'] += xC - xCtot
             elif xCtot > xC:
                 # Throw an error if input C abundance is smaller than
                 # what is accounted for in initial conditions
-                raise despoticError, "input C abundance is " + \
-                    str(xC) + ", but total input C, C+, CHx, CO, " + \
-                    "HCO+ abundance is " + str(xCtot)
+                raise despoticError(
+                    "input C abundance is " + 
+                    str(xC) + ", but total input C, C+, CHx, CO, " + 
+                    "HCO+ abundance is " + str(xCtot))
 
             # O
             if 'o' in emList:
@@ -547,17 +559,18 @@ class NL99_GC(chemNetwork):
                 # Print warning if we're altering existing O
                 # abundance.
                 if 'o' in emList:
-                    print "Warning: input O abundance is " + \
-                        str(xO) + ", but total input O, OHx, CO, " + \
-                        "HCO+ abundance is " + str(xOtot) + \
-                        "; increasing xO to " + str(abd['O']+xO-xOtot)
+                    print("Warning: input O abundance is " + 
+                          str(xO) + ", but total input O, OHx, CO, " + 
+                          "HCO+ abundance is " + str(xOtot) + 
+                          "; increasing xO to " + str(abd['O']+xO-xOtot))
                 abd['O'] += xO - xOtot
             elif xOtot > xO:
                 # Throw an error if input O abundance is smaller than
                 # what is accounted for in initial conditions
-                raise despoticError, "input O abundance is " + \
-                    str(xO) + ", but total input O, OHx, CO, " + \
-                    "HCO+ abundance is " + str(xOtot)
+                raise despoticError(
+                    "input O abundance is " + 
+                    str(xO) + ", but total input O, OHx, CO, " + 
+                    "HCO+ abundance is " + str(xOtot))
 
             # Finally, make sure all H nuclei are accounted for and
             # that all hydrogenic abundances are >= 0
@@ -565,15 +578,17 @@ class NL99_GC(chemNetwork):
             xH = abd1['H+'] + abd1['OHx'] + abd1['CHx'] + abd1['HCO+'] + \
                  abd1['H'] + 2*abd1['H2'] + 3*abd1['H3+']
             if (abs(xH-1.0) > 1.0e-8):
-                raise despoticError, "input hydrogen abundances " \
-                    + "add up to xH = "+str(xH)+" != 1!"
+                raise despoticError(
+                    "input hydrogen abundances " +
+                    "add up to xH = "+str(xH)+" != 1!")
             if (abd1['H+'] < 0) or \
                (abd1['OHx'] < 0) or (abd1['CHx'] < 0) or \
                (abd1['HCO+'] < 0) or (abd1['H'] < 0) or \
                (abd1['H2'] < 0) or (abd1['H3+'] < 0):
-                raise despoticError, "abundances of some " + \
-                    "hydrogenic species are < 0; abundances " + \
-                    "are: " + repr(abd1)
+                raise despoticError(
+                    "abundances of some " + 
+                    "hydrogenic species are < 0; abundances " + 
+                    "are: " + repr(abd1))
 
         # Get rate coefficients in starting state; we will use these
         # to put some species close to equilibrium initially
@@ -684,7 +699,7 @@ class NL99_GC(chemNetwork):
 
     @cfac.setter
     def cfac(self, value):
-        raise despoticError, "cannot set cfac directly"
+        raise despoticError("cannot set cfac directly")
 
     @property
     def xHe(self):
@@ -807,11 +822,11 @@ class NL99_GC(chemNetwork):
                 self._AV = value
         else:
             if self.info is None:
-                raise despoticError, "cannot set AV directly " + \
-                    "unless it is part of info"
+                raise despoticError(
+                    "cannot set AV directly unless it is part of info")
             elif 'AV' not in self.info:
-                raise despoticError, "cannot set AV directly " + \
-                    "unless it is part of info"
+                raise despoticError(
+                    "cannot set AV directly unless it is part of info")
             else:
                 self.info['AV'] = value
                 
@@ -1044,9 +1059,19 @@ class NL99_GC(chemNetwork):
 
         # Make a case-insensitive version of the emitter list for
         # convenience
-        emList = dict(zip(map(string.lower, 
-                              self.cloud.emitters.keys()), 
-                          self.cloud.emitters.values()))
+        try:
+            # This construction is elegant, but it relies on the
+            # existence of a freestanding string.lower function,
+            # which has been removed in python 3
+            emList = dict(zip(map(string.lower, 
+                                  self.cloud.emitters.keys()), 
+                              self.cloud.emitters.values()))
+        except:
+            # This somewhat more bulky construction is required in
+            # python 3
+            lowkeys = [k.lower() for k in self.cloud.emitters.keys()]
+            lowvalues = list(self.cloud.emitters.values())
+            emList = dict(zip(lowkeys, lowvalues))
 
         # Save ratios of ^12C to ^13C, and ^16O to ^18O
         if '13co' in emList and 'co' in emList:
@@ -1063,7 +1088,7 @@ class NL99_GC(chemNetwork):
             try:
                 self.cloud.addEmitter('oh', abd['OHx']/2.0)
             except despoticError:
-                print 'Warning: unable to add OH; cannot find LAMDA file'
+                print('Warning: unable to add OH; cannot find LAMDA file')
 
         # H2O, assuming OHx is half H2O, and that oH2O and pH2O are in
         # the same ratio as oH2 and pH2
@@ -1076,7 +1101,7 @@ class NL99_GC(chemNetwork):
                 self.cloud.addEmitter('ph2o', 
                                       abd['OHx']/2.0*(1-fortho))
             except despoticError:
-                print 'Warning: unable to add p-H2O; cannot find LAMDA file'
+                print('Warning: unable to add p-H2O; cannot find LAMDA file')
         if 'oh2o' in emList:
             emList['oh2o'].abundance = abd['OHx']/2.0*fortho
         elif 'o-h2o' in emList:
@@ -1085,7 +1110,7 @@ class NL99_GC(chemNetwork):
             try:
                 self.cloud.addEmitter('oh2o', abd['OHx']/2.0*fortho)
             except despoticError:
-                print 'Warning: unable to add o-H2O; cannot find LAMDA file'
+                print('Warning: unable to add o-H2O; cannot find LAMDA file')
 
         # CO
         if 'co' in emList:
@@ -1094,7 +1119,7 @@ class NL99_GC(chemNetwork):
             try:
                 self.cloud.addEmitter('co', abd['CO'])
             except despoticError:
-                print 'Warning: unable to add CO; cannot find LAMDA file'
+                print('Warning: unable to add CO; cannot find LAMDA file')
 
         # if we have 13CO or C18O, make their abundances match that of CO
         # multiplied by the appropriate isotopic abundances
@@ -1110,7 +1135,7 @@ class NL99_GC(chemNetwork):
             try:
                 self.cloud.addEmitter('c', abd['C'])
             except despoticError:
-                print 'Warning: unable to add C; cannot find LAMDA file'
+                print('Warning: unable to add C; cannot find LAMDA file')
 
         # C+
         if 'c+' in emList:
@@ -1119,7 +1144,7 @@ class NL99_GC(chemNetwork):
             try:
                 self.cloud.addEmitter('c+', abd['C+'])
             except despoticError:
-                print 'Warning: unable to add C+; cannot find LAMDA file'
+                print('Warning: unable to add C+; cannot find LAMDA file')
 
         # HCO+
         if 'hco+' in emList:
@@ -1128,7 +1153,7 @@ class NL99_GC(chemNetwork):
             try:
                 self.cloud.addEmitter('hco+', abd['HCO+'])
             except despoticError:
-                print 'Warning: unable to add HCO+; cannot find LAMDA file'
+                print('Warning: unable to add HCO+; cannot find LAMDA file')
 
         # O
         if 'o' in emList:
@@ -1137,5 +1162,5 @@ class NL99_GC(chemNetwork):
             try:
                 self.cloud.addEmitter('o', abd['O'])
             except despoticError:
-                print 'Warning: unable to add O; cannot find LAMDA file'
+                print('Warning: unable to add O; cannot find LAMDA file')
 

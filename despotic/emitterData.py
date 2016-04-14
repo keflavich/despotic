@@ -29,9 +29,9 @@ import numpy as np
 import os
 import datetime as dt
 from copy import deepcopy
-from despoticError import despoticError
-from collPartner import collPartner
-from fetchLamda import fetchLamda
+from .despoticError import despoticError
+from .collPartner import collPartner
+from .fetchLamda import fetchLamda
 import warnings
 
 # Define some global physical constants in cgs units
@@ -180,7 +180,8 @@ class emitterData(object):
                     self.lamdaFile = fileName     # Store filename
                     return
                 except IOError:
-                    raise despoticError, "unable to open file "+emitterFile
+                    raise despoticError(
+                        "unable to open file "+emitterFile)
 
         # Set name
         self.name = emitName
@@ -192,7 +193,8 @@ class emitterData(object):
         if emitterURL != None:
             emitterFile = fetchLamda(emitterURL)
             if emitterFile == None:
-                raise despoticError, "unable to download file "+emitterURL
+                raise despoticError(
+                    "unable to download file "+emitterURL)
             else:
                 try:
                     fp = open(emitterFile, 'r')
@@ -201,7 +203,8 @@ class emitterData(object):
                     self.lamdaFile = emitterFile     # Store filename
                     return
                 except IOError:
-                    raise despoticError, "unable to open file "+emitterFile
+                    raise despoticError(
+                        "unable to open file "+emitterFile)
 
         # If we're here, were weren't given an emitter file name or
         # URL, so we have to look for the data ourselves.
@@ -270,15 +273,16 @@ class emitterData(object):
                     self.lamdaFile = downloadName    # Store filename
                     return
                 except IOError:
-                    raise despoticError, "downloaded file " + \
-                        downloadName + " from LAMDA, but " + \
-                        "cannot open it"
+                    raise despoticError(
+                        "downloaded file " + 
+                        downloadName + " from LAMDA, but " + 
+                        "cannot open it")
 
         # Step 5: if we're here, we've failed to find the file on the
         # web, so give up and raise an error
-        raise despoticError, \
-            'cannot locate LAMDA file for emitter ' + emitName + \
-            '; try setting URL or file name by hand'
+        raise despoticError(
+            'cannot locate LAMDA file for emitter ' + emitName + 
+            '; try setting URL or file name by hand')
 
 
 
@@ -392,8 +396,8 @@ class emitterData(object):
             elif idstring=='7':
                 partName = 'H+'
             else:
-                raise despoticError, "unknown collision partner ID " + \
-                    idstring
+                raise despoticError(
+                    "unknown collision partner ID " + idstring)
 
             self.partners[partName] = \
                 collPartner(fp, self.nlev, extrap=extrap)
@@ -548,13 +552,14 @@ class emitterData(object):
                 try:
                     q += n * self.partners[p].\
                         colRateMatrix(temp, self.levWgt, self.levTemp)
-                except ValueError, despoticError:
-                    raise despoticError, "Temperature T = "+str(temp) + \
-                        " K is outside tabulated range " + \
-                        str(self.partners[p].tempTable[0])+" - " + \
-                        str(self.partners[p].tempTable[-1]) + \
-                        " K for species "+self.name+", partner " + \
-                        p
+                except (ValueError, despoticError):
+                    raise despoticError(
+                        "Temperature T = "+str(temp) + 
+                        " K is outside tabulated range " + 
+                        str(self.partners[p].tempTable[0])+" - " + 
+                        str(self.partners[p].tempTable[-1]) + 
+                        " K for species "+self.name+", partner " + 
+                        p)
                 except KeyError:
                     warnings.warn("collision rates not "
                                   "available for "+self.name+
@@ -567,13 +572,13 @@ class emitterData(object):
                 try:
                     q += n * self.partners[p1].\
                         colRateMatrix(temp, self.levWgt, self.levTemp)
-                except ValueError, despoticError:
-                    raise despoticError, "Temperature T = "+str(temp) + \
-                        " K is outside tabulated range " + \
-                        str(self.partners[p1].tempTable[0])+" - " + \
-                        str(self.partners[p1].tempTable[-1]) + \
-                        " K for species "+self.name+", partner " + \
-                        p
+                except (ValueError, despoticError):
+                    raise despoticError("Temperature T = "+str(temp) + 
+                        " K is outside tabulated range " + 
+                        str(self.partners[p1].tempTable[0])+" - " + 
+                        str(self.partners[p1].tempTable[-1]) + 
+                        " K for species "+self.name+", partner " + 
+                        p)
                 except KeyError:
                     warnings.warn("collision rates not "
                                   "available for "+self.name+

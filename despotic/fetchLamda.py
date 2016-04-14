@@ -20,9 +20,16 @@ downloading LAMDA files from the web.
 ########################################################################
 
 import os
-from urllib2 import *
-from urlparse import urljoin
-from despoticError import despoticError
+try:
+    # Python 2
+    from urllib2 import urlopen, HTTPError
+    from urlparse import urljoin
+except:
+    # Python 3
+    from urllib.request import urlopen
+    from urllib.parse import urljoin
+    from urllib.error import HTTPError
+from .despoticError import despoticError
 
 # Default location of LAMDA database
 lamdaURL = 'http://home.strw.leidenuniv.nl/~moldata/'
@@ -73,7 +80,7 @@ def fetchLamda(inputURL, path=None, fileName=None):
         return None
 
     # Print message that we're downloading
-    print "Fetching LAMDA datafile from "+emitterURL+"..."
+    print("Fetching LAMDA datafile from "+emitterURL+"...")
 
     # First make sure there's a valid path to where we want to
     # write the file, and create one if necessary
@@ -81,8 +88,8 @@ def fetchLamda(inputURL, path=None, fileName=None):
         if 'DESPOTIC_HOME' in os.environ:
             # Use environment variable if available
             path = \
-                os.path.join(os.environ['DESPOTIC_HOME'], \
-                                 'LAMDA')
+                os.path.join(os.environ['DESPOTIC_HOME'], 
+                             'LAMDA')
         else:
             # No path given, so just use relative location
             path = 'LAMDA'
@@ -90,7 +97,7 @@ def fetchLamda(inputURL, path=None, fileName=None):
         try:
             os.makedirs(path)
         except:
-            despoticError, "could not create path "+path
+            despoticError("could not create path "+path)
 
     # Construct file name to use to store file, unless one was given
     # as an option
@@ -100,14 +107,14 @@ def fetchLamda(inputURL, path=None, fileName=None):
     # Now open an emitter file, and write from the URL to it
     try:
         fpWrite = open(os.path.join(path, fileName), 'w')
-        fpWrite.write(urlPtr.read())
+        fpWrite.write(urlPtr.read().decode('ascii'))
     except:
-        raise despoticError, "could not write to file " + \
-            os.path.join(path, fileName)
+        raise despoticError("could not write to file " + 
+                            os.path.join(path, fileName))
 
     # Close file and URL
     fpWrite.close()
     urlPtr.close()
-
+    
     # Return success
     return os.path.join(path, fileName)

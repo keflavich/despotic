@@ -17,7 +17,7 @@ tolerances of the solvers.
 
 # Import the despotic library and various standard python libraries
 from despotic import cloud
-from numpy import *
+import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 from datetime import datetime
@@ -28,7 +28,7 @@ from datetime import timedelta
 ########################################################################
 
 # Set up a range of densities
-lognHgrid = arange(2,6.01,0.2)
+lognHgrid = np.arange(2,6.01,0.2)
 
 # Specify whether verbose printing while running is desired
 verbose = True
@@ -74,7 +74,7 @@ for i, logn in enumerate(lognHgrid[startIdx:]):
     core.comp.computeDerived(core.nH)
 
     # Print status message
-    print "Calculating core with lognH = "+str(logn)+"..."
+    print("Calculating core with lognH = "+str(logn)+"...")
 
     # Calculate equilibrium temperature
     t1=datetime.now()
@@ -83,8 +83,8 @@ for i, logn in enumerate(lognHgrid[startIdx:]):
     extime += t2-t1
 
     # Print status message
-    print "Converged to Tg = "+str(core.Tg)+" K, Td = "+str(core.Td)+" K"
-    print ""
+    print("Converged to Tg = "+str(core.Tg)+" K, Td = "+str(core.Td)+" K")
+    print("")
 
     # Record result; note that we use the fixedLevPop option for the
     # rates method, so that the level populations are not
@@ -106,30 +106,31 @@ for i, logn in enumerate(lognHgrid[startIdx:]):
 
 
 # Print execution time
-print "Execution time = "+str(extime)
+print("Execution time = "+str(extime))
 
 # Construct arrays of various cooling terms from the rates dict, for
 # convenience of plotting
-GammaCR = array([r['GammaCR'] for r in rates])
-PsiGD = array([r['PsiGD'] for r in rates])
-GammaDustIR = array([r['GammaDustIR'] for r in rates])
-GammaDustISRF = array([r['GammaDustISRF'] for r in rates])
-GammaDustLine = array([r['GammaDustLine'] for r in rates])
-LambdaDust = array([r['LambdaDust'] for r in rates])
-LambdaCO = array([r['LambdaLine']['co'] for r in rates])
-LambdaC = array([r['LambdaLine']['c'] for r in rates])
-Lambda13CO = array([r['LambdaLine']['13co'] for r in rates])
-LambdaC18O = array([r['LambdaLine']['c18o'] for r in rates])
-LambdaHCOp = array([r['LambdaLine']['hco+'] for r in rates])
-LambdaCS = array([r['LambdaLine']['cs'] for r in rates])
-LambdaO = array([r['LambdaLine']['o'] for r in rates])
-LambdaoH2CO = array([r['LambdaLine']['o-h2co'] for r in rates])
-LambdapH2CO = array([r['LambdaLine']['p-h2co'] for r in rates])
-LambdaoNH3 = array([r['LambdaLine']['o-nh3'] for r in rates])
-LambdapNH3 = array([r['LambdaLine']['p-nh3'] for r in rates])
-LambdaoH2O = array([r['LambdaLine']['oH2O'] for r in rates])
-LambdapH2O = array([r['LambdaLine']['pH2O'] for r in rates])
-LambdaLine = array([sum(array(r['LambdaLine'].values())) for r in rates])
+GammaCR = np.array([r['GammaCR'] for r in rates])
+PsiGD = np.array([r['PsiGD'] for r in rates])
+GammaDustIR = np.array([r['GammaDustIR'] for r in rates])
+GammaDustISRF = np.array([r['GammaDustISRF'] for r in rates])
+GammaDustLine = np.array([r['GammaDustLine'] for r in rates])
+LambdaDust = np.array([r['LambdaDust'] for r in rates])
+LambdaCO = np.array([r['LambdaLine']['co'] for r in rates])
+LambdaC = np.array([r['LambdaLine']['c'] for r in rates])
+Lambda13CO = np.array([r['LambdaLine']['13co'] for r in rates])
+LambdaC18O = np.array([r['LambdaLine']['c18o'] for r in rates])
+LambdaHCOp = np.array([r['LambdaLine']['hco+'] for r in rates])
+LambdaCS = np.array([r['LambdaLine']['cs'] for r in rates])
+LambdaO = np.array([r['LambdaLine']['o'] for r in rates])
+LambdaoH2CO = np.array([r['LambdaLine']['o-h2co'] for r in rates])
+LambdapH2CO = np.array([r['LambdaLine']['p-h2co'] for r in rates])
+LambdaoNH3 = np.array([r['LambdaLine']['o-nh3'] for r in rates])
+LambdapNH3 = np.array([r['LambdaLine']['p-nh3'] for r in rates])
+LambdaoH2O = np.array([r['LambdaLine']['oH2O'] for r in rates])
+LambdapH2O = np.array([r['LambdaLine']['pH2O'] for r in rates])
+LambdaLine = np.array([np.sum(np.array(list(r['LambdaLine'].values())))
+                       for r in rates])
 
 
 # First plot: gas and dust temperature versus density
@@ -158,7 +159,7 @@ ylim1=[-31,-21.5]
 
 # Gas heating
 plt.subplot(221)
-plt.plot(lognHgrid, log10(GammaCR), linewidth=2, label='Ionization')
+plt.plot(lognHgrid, np.log10(GammaCR), linewidth=2, label='Ionization')
 leg=plt.legend(title='Gas heating')
 leg.get_title().set_fontsize('14')
 plt.xlim(xlim1)
@@ -168,10 +169,10 @@ plt.setp(plt.gca().get_xticklabels(), visible=False)
 
 # Dust heating
 plt.subplot(222)
-plt.plot(lognHgrid, log10(GammaDustIR), linewidth=2, label='IR')
-plt.plot(lognHgrid, log10(GammaDustISRF), linewidth=2, label='ISRF')
-plt.plot(lognHgrid, log10(GammaDustLine), linewidth=2, label='Line')
-plt.plot(lognHgrid, log10(-PsiGD), linewidth=2, label='Gas-Dust')
+plt.plot(lognHgrid, np.log10(GammaDustIR), linewidth=2, label='IR')
+plt.plot(lognHgrid, np.log10(GammaDustISRF), linewidth=2, label='ISRF')
+plt.plot(lognHgrid, np.log10(GammaDustLine), linewidth=2, label='Line')
+plt.plot(lognHgrid, np.log10(-PsiGD), linewidth=2, label='Gas-Dust')
 leg=plt.legend(ncol=2, title='Dust heating')
 leg.get_title().set_fontsize('14')
 plt.xlim(xlim)
@@ -181,8 +182,8 @@ plt.setp(plt.gca().get_yticklabels(), visible=False)
 
 # Gas cooling
 plt.subplot(223)
-plt.plot(lognHgrid, log10(LambdaLine), linewidth=2, label='Lines (sum)')
-plt.plot(lognHgrid, log10(-PsiGD), linewidth=2, label='Gas-Dust')
+plt.plot(lognHgrid, np.log10(LambdaLine), linewidth=2, label='Lines (sum)')
+plt.plot(lognHgrid, np.log10(-PsiGD), linewidth=2, label='Gas-Dust')
 leg=plt.legend(title='Gas cooling')
 leg.get_title().set_fontsize('14')
 plt.xlim(xlim1)
@@ -192,7 +193,7 @@ plt.xlabel(r'$\log\,n_{\rm H}$ [cm$^{-3}$]')
 
 # Dust cooling
 plt.subplot(224)
-plt.plot(lognHgrid, log10(LambdaDust), linewidth=2, label='Thermal')
+plt.plot(lognHgrid, np.log10(LambdaDust), linewidth=2, label='Thermal')
 leg=plt.legend(title='Dust cooling')
 leg.get_title().set_fontsize('14')
 plt.xlim(xlim)
@@ -206,20 +207,20 @@ plt.savefig('coreHeatCool.eps')
 
 # Third plot: contributions of individual lines to cooling
 plt.figure(3, figsize=(8,6))
-plt.plot(lognHgrid, log10(LambdaLine), 'k', linewidth=8, label='Lines (sum)')
-plt.plot(lognHgrid, log10(LambdaCO), linewidth=2, label='CO')
-plt.plot(lognHgrid, log10(Lambda13CO), linewidth=2, label=r'$^{13}$CO')
-plt.plot(lognHgrid, log10(LambdaC18O), linewidth=2, label=r'C$^{18}$O')
-plt.plot(lognHgrid, log10(LambdaC), linewidth=2, label='C')
-plt.plot(lognHgrid, log10(LambdaO), linewidth=2, label='O')
-plt.plot(lognHgrid, log10(LambdaCS), linewidth=2, label='CS')
-plt.plot(lognHgrid, log10(LambdaHCOp), '--', linewidth=2, label=r'HCO$^+$')
-plt.plot(lognHgrid, log10(LambdaoH2CO), '--', linewidth=2, label=r'oH$_2$CO')
-plt.plot(lognHgrid, log10(LambdapH2CO), '--', linewidth=2, label=r'pH$_2$CO')
-plt.plot(lognHgrid, log10(LambdaoNH3), '--', linewidth=2, label=r'oNH$_3$')
-plt.plot(lognHgrid, log10(LambdapNH3), '--', linewidth=2, label=r'pNH$_3$')
-plt.plot(lognHgrid, log10(LambdaoH2O), '--', linewidth=2, label=r'oH$_2$O')
-plt.plot(lognHgrid, log10(LambdapH2O), '--', linewidth=2, label=r'pH$_2$O')
+plt.plot(lognHgrid, np.log10(LambdaLine), 'k', linewidth=8, label='Lines (sum)')
+plt.plot(lognHgrid, np.log10(LambdaCO), linewidth=2, label='CO')
+plt.plot(lognHgrid, np.log10(Lambda13CO), linewidth=2, label=r'$^{13}$CO')
+plt.plot(lognHgrid, np.log10(LambdaC18O), linewidth=2, label=r'C$^{18}$O')
+plt.plot(lognHgrid, np.log10(LambdaC), linewidth=2, label='C')
+plt.plot(lognHgrid, np.log10(LambdaO), linewidth=2, label='O')
+plt.plot(lognHgrid, np.log10(LambdaCS), linewidth=2, label='CS')
+plt.plot(lognHgrid, np.log10(LambdaHCOp), '--', linewidth=2, label=r'HCO$^+$')
+plt.plot(lognHgrid, np.log10(LambdaoH2CO), '--', linewidth=2, label=r'oH$_2$CO')
+plt.plot(lognHgrid, np.log10(LambdapH2CO), '--', linewidth=2, label=r'pH$_2$CO')
+plt.plot(lognHgrid, np.log10(LambdaoNH3), '--', linewidth=2, label=r'oNH$_3$')
+plt.plot(lognHgrid, np.log10(LambdapNH3), '--', linewidth=2, label=r'pNH$_3$')
+plt.plot(lognHgrid, np.log10(LambdaoH2O), '--', linewidth=2, label=r'oH$_2$O')
+plt.plot(lognHgrid, np.log10(LambdapH2O), '--', linewidth=2, label=r'pH$_2$O')
 plt.xlim([2,6])
 plt.ylim([-33, -27])
 plt.ylabel(r'$\log\,\Lambda$ [erg s$^{-1}$ H$^{-1}$]')

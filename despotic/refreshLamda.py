@@ -24,9 +24,14 @@ months) and attempts to update old files from LAMDA on the web.
 import os
 import glob
 import datetime as dt
-from despoticError import despoticError
-from fetchLamda import fetchLamda
-from urlparse import urljoin
+from .despoticError import despoticError
+from .fetchLamda import fetchLamda
+try:
+    # Python 2
+    from urlparse import urljoin
+except:
+    # Python 3
+    from urllib.parse import urljoin
 
 def refreshLamda(path=None, cutoffDate=None, cutoffAge=None,
                  LamdaURL=None):
