@@ -334,7 +334,7 @@ class cloud(object):
 
                 self.dVdr = float(linesplit2[0])
                 if verbose:
-                    print("Setting sigmaNT = " + 
+                    print("Setting dVdr = " + 
                           str(self.dVdr) + " cm s^-1 cm^-1")
 
             elif linesplit[0].upper().strip() == 'TG':
