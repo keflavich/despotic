@@ -41,6 +41,7 @@ c = physcons.c*1e2
 mH = (physcons.m_p+physcons.m_e)*1e3
 h = physcons.h*1e7
 hc = h*c
+G = physcons.G*1e3
 
 # List of known collision partners, and their corresponding notations
 # in the Leiden database
@@ -590,6 +591,40 @@ class emitterData(object):
         # Return matrix
         return q
 
+    ####################################################################
+    # Method to derive the tX parameter defined by Krumholz+ (2016)
+    ####################################################################
+    def tX(self, mX, trans=None):
+        """
+        Returns the tX line strength parameter of Krumholz+ (2016)
+
+        Parameters
+           mX : float
+              total mass per particle of this species, in g
+           trans : int, array, or None
+              if set, tX is returned only for the specified
+              transitions in the transition list; default is that it
+              is returned for all transitions
+
+        Returns
+           tX : float or array
+              transition strength parameter for the specified
+              transitions, in seconds
+        """
+        if trans is None:
+            gi = self.levWgt[self.radUpper]
+            gj = self.levWgt[self.radLower]
+            lam = c/self.radFreq
+            A = self.radA
+        else:
+            gi = self.levWgt[self.radUpper][trans]
+            gj = self.levWgt[self.radLower][trans]
+            lam = c/self.radFreq[trans]
+            A = self.radA[trans]
+        tX = (gi/gj) * A*lam**3 / (32*np.pi**2*G*mX)
+        return tX
+
+    
 
 ########################################################################
 # End of class emitterData
