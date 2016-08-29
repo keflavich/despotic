@@ -26,7 +26,7 @@ In this section, and in general when using DESPOTIC, there are two
 important conventions to keep in mind.
 
 1. All quantities are in CGS units unless otherwise specified. The
-   main exceptions are quantites that are normalized to Solar or Solar
+   main exceptions are quantities that are normalized to Solar or Solar
    neighborhood values (e.g. metallicity and interstellar radiation
    field strength) and quantities where the conventional unit is
    non-CGS (e.g. integrated brightness temperatures are expressed in

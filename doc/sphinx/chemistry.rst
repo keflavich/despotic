@@ -142,7 +142,7 @@ does not distinguish between different isotopomers of the same
 species, while the rest of DESPOTIC does. This does not create
 problems in mapping from cloud emitter abundances to the chemical
 network, since the abundances can simply be summed, but it does create
-a question about how to map output chemical abun- dances computed by
+a question about how to map output chemical abundances computed by
 the network into the abundances of emitters that can be operated on by
 the remainder of DESPOTIC. In order to handle this issue, DESPOTIC
 makes the following assumptions:
@@ -171,7 +171,7 @@ updates to the rate coefficients) and the network of `Glover & Mac Low
 (2007, ApJS, 169, 239)
 <http://adsabs.harvard.edu/abs/2007ApJS..169..239G>`_
 for the hydrogen chemistry. Self-shielding of hydrogen is handled via
-the approximate analytic shielding functon of `Draine & Bertoldi
+the approximate analytic shielding function of `Draine & Bertoldi
 (1996, ApJ, 468, 269)
 <http://adsabs.harvard.edu/abs/1996ApJ...468..269D>`_. Effective
 column densities for shielding are computed as in ``NL99``.
@@ -304,7 +304,7 @@ the speed of a numpy array with the convenience of a dict.
 
 Usage is simple. To define an ``abundanceDict`` one simply provides a
 set of chemical species names and a numpy array containing abundances
-of those speces::
+of those species::
 
   from despotic.chemistry import abundanceDict
 
@@ -375,7 +375,7 @@ chemical species, while ``reactions`` is a list of dict's, one dict
 per reaction, describing each reaction. Each dict in ``reactions``
 contains two keys: ``reactions["spec"]`` gives the list of species
 involved in the reaction, and ``reactions["stoich"]`` gives the
-correspnding stoichiometric factors, with reactants on the left hand
+corresponding stoichiometric factors, with reactants on the left hand
 side having negative factors (indicating that they are destroyed by
 the reaction) and those on the right having positive factors
 (indicating that they are created). Thus for example to include the
@@ -428,7 +428,7 @@ if we wished to include the reactions
    \mathrm{CR} + \mathrm{H}_2 & \rightarrow \mathrm{H}_2^+ +
    \mathrm{e}^-
 
-in a network, with the former occuring at a rate per particle equal to
+in a network, with the former occurring at a rate per particle equal to
 the rate of primary cosmic ray ionizations, and the other at a rate
 per particle that is twice the rate of primary ionizations, we would
 define::
@@ -490,7 +490,7 @@ reactions, each element of which is a dict giving the reactants and
 stoichiometric factors. The dict also contains three additional keys
 that are specific to photoreactions: ``rate`` gives the reaction rate
 per reactant per second in an ISRF equal to the unshielded Solar
-neighborhood value (formally, with strength chracterized by
+neighborhood value (formally, with strength characterized by
 :math:`\chi = 1` -- see :ref:`tab-cloudfiles`). The key ``av_fac``
 describes the optical depth per unit visual extinction provided by
 dust for the photons driving the reaction. That is, reaction rates
