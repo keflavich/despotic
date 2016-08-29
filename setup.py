@@ -2,7 +2,6 @@
 
 import os
 import os.path as osp
-import shutil
 import sys
 from distutils.core import setup, Command
 import subprocess
@@ -63,7 +62,6 @@ class RunExamples(Command):
         raise SystemExit(errno)
 
 
-import os 
 # despotic/cloudfiles is a link back to ./cloudfiles
 if not osp.exists(osp.join('despotic', 'cloudfiles')):
     os.symlink(osp.join('..', 'cloudfiles'),
