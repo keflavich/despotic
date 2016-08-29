@@ -2,7 +2,6 @@
 
 import os
 import os.path as osp
-import shutil
 import sys
 from distutils.core import setup, Command
 import subprocess
@@ -63,16 +62,13 @@ class RunExamples(Command):
         raise SystemExit(errno)
 
 
-import os 
 # despotic/cloudfiles is a link back to ./cloudfiles
 if not osp.exists(osp.join('despotic', 'cloudfiles')):
     os.symlink(osp.join('..', 'cloudfiles'),
                osp.join('despotic', 'cloudfiles'))
 
-# Be sure to create the .c from the .pyx, and to provide both the .c
-#and .pyx files
+# Be sure to pass Cython file that will become a compiled extension
 ext_modules = cythonize(osp.join('despotic', 'collPartner_helper.pyx'))
-ext_modules[0].sources.append(osp.join('despotic', 'collPartner_helper.pyx'))
 
 setup(name='DESPOTIC',
       version=version,
