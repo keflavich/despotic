@@ -47,7 +47,7 @@ while for a ``csh``-like shell, it is::
    setenv DESPOTIC_HOME /path/to/despotic
 
 If ``$DESPOTIC_HOME`` is not set, then DESPOTIC will attempt to create
-the cache the directory from which is is run.
+the cache in the directory from which it is run.
 
 Requirements and Dependencies
 -----------------------------
