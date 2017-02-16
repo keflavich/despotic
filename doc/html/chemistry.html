@@ -156,7 +156,7 @@ does not distinguish between different isotopomers of the same
 species, while the rest of DESPOTIC does. This does not create
 problems in mapping from cloud emitter abundances to the chemical
 network, since the abundances can simply be summed, but it does create
-a question about how to map output chemical abun- dances computed by
+a question about how to map output chemical abundances computed by
 the network into the abundances of emitters that can be operated on by
 the remainder of DESPOTIC. In order to handle this issue, DESPOTIC
 makes the following assumptions:</p>
@@ -181,7 +181,7 @@ network effectively uses <code class="docutils literal"><span class="pre">NL99</
 updates to the rate coefficients) and the network of <a class="reference external" href="http://adsabs.harvard.edu/abs/2007ApJS..169..239G">Glover &amp; Mac Low
 (2007, ApJS, 169, 239)</a>
 for the hydrogen chemistry. Self-shielding of hydrogen is handled via
-the approximate analytic shielding functon of <a class="reference external" href="http://adsabs.harvard.edu/abs/1996ApJ...468..269D">Draine &amp; Bertoldi
+the approximate analytic shielding function of <a class="reference external" href="http://adsabs.harvard.edu/abs/1996ApJ...468..269D">Draine &amp; Bertoldi
 (1996, ApJ, 468, 269)</a>. Effective
 column densities for shielding are computed as in <code class="docutils literal"><span class="pre">NL99</span></code>.
 Calculations of hydrogen chemistry are assumed to leave the ratio of
@@ -299,7 +299,7 @@ a dict-like structure on a numpy array, making it possible to combine
 the speed of a numpy array with the convenience of a dict.</p>
 <p>Usage is simple. To define an <code class="docutils literal"><span class="pre">abundanceDict</span></code> one simply provides a
 set of chemical species names and a numpy array containing abundances
-of those speces:</p>
+of those species:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">despotic.chemistry</span> <span class="k">import</span> <span class="n">abundanceDict</span>
 
 <span class="c1"># specList = list of strings containing species names</span>
@@ -360,7 +360,7 @@ chemical species, while <code class="docutils literal"><span class="pre">reactio
 per reaction, describing each reaction. Each dict in <code class="docutils literal"><span class="pre">reactions</span></code>
 contains two keys: <code class="docutils literal"><span class="pre">reactions[&quot;spec&quot;]</span></code> gives the list of species
 involved in the reaction, and <code class="docutils literal"><span class="pre">reactions[&quot;stoich&quot;]</span></code> gives the
-correspnding stoichiometric factors, with reactants on the left hand
+corresponding stoichiometric factors, with reactants on the left hand
 side having negative factors (indicating that they are destroyed by
 the reaction) and those on the right having positive factors
 (indicating that they are created). Thus for example to include the
@@ -404,7 +404,7 @@ if we wished to include the reactions</p>
 \mathrm{e}^- \\
 \mathrm{CR} + \mathrm{H}_2 &amp; \rightarrow \mathrm{H}_2^+ +
 \mathrm{e}^-\end{split}\]</div>
-<p>in a network, with the former occuring at a rate per particle equal to
+<p>in a network, with the former occurring at a rate per particle equal to
 the rate of primary cosmic ray ionizations, and the other at a rate
 per particle that is twice the rate of primary ionizations, we would
 define:</p>
@@ -457,7 +457,7 @@ reactions, each element of which is a dict giving the reactants and
 stoichiometric factors. The dict also contains three additional keys
 that are specific to photoreactions: <code class="docutils literal"><span class="pre">rate</span></code> gives the reaction rate
 per reactant per second in an ISRF equal to the unshielded Solar
-neighborhood value (formally, with strength chracterized by
+neighborhood value (formally, with strength characterized by
 <span class="math">\(\chi = 1\)</span> &#8211; see <a class="reference internal" href="cloudfiles.html#tab-cloudfiles"><span class="std std-ref">Cloud file keys and their meanings</span></a>). The key <code class="docutils literal"><span class="pre">av_fac</span></code>
 describes the optical depth per unit visual extinction provided by
 dust for the photons driving the reaction. That is, reaction rates

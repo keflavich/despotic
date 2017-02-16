@@ -57,3 +57,27 @@ DESPOTIC requires
 * `scipy >= 0.11.0`
 * `cython >= 0.20.x`
 * `matplotlib >= 1.3.x`
+
+.. _ssec-winds-installation:
+  
+Installing the ``despotic.winds`` Module
+----------------------------------------
+
+The ``despotic.winds`` module (see :ref:`sec-winds`) is written in
+C++, and makes use of the `GNU scientific library
+<http://www.gnu.org/software/gsl/>`_. Users who wish to make use of
+this package will need to compile the C++ portions of the
+software. This process should be automatic for users who have an
+installed C++ compiler and standard build tools (``make``), and who
+have the `GSL <http://www.gnu.org/software/gsl/>`_ headers and library
+installed in their ``CXX_INCLUDE_PATH`` and ``LIBRARY_PATH``,
+respectively.
+
+If this does not work, users should be able to build the required C++
+library by changing into the ``despotic/winds`` directory and doing
+``make``. Users can edit the ``Makefile`` in ``despotic/winds`` as
+necessary to tailor the build for their environment.
+
+The ``winds`` module is not required for the operation of the rest of
+the code, so users who are not planning to make use of this capability
+can safely ignore it.

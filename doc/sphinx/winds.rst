@@ -15,6 +15,14 @@ using this code can be found in the repository
 <https://bitbucket.org/krumholz/despotic_winds/>`_ associated with
 this paper.
 
+Compiling
+---------
+
+The ``despotic.winds`` class relies on a copmlementary C++ library for
+speed. This must be compiled separately, though the procedure should
+be automatic for users with standard tools and libraries
+installed. See :ref:`ssec-winds-installation` for details.
+
 .. _ssec-wind-pwind:
 
 The ``pwind`` Class

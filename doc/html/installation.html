@@ -81,7 +81,7 @@ shell, the syntax to set the location of <code class="docutils literal"><span cl
 </pre></div>
 </div>
 <p>If <code class="docutils literal"><span class="pre">$DESPOTIC_HOME</span></code> is not set, then DESPOTIC will attempt to create
-the cache the directory from which is is run.</p>
+the cache in the directory from which it is run.</p>
 </div>
 <div class="section" id="requirements-and-dependencies">
 <h2>Requirements and Dependencies<a class="headerlink" href="#requirements-and-dependencies" title="Permalink to this headline">¶</a></h2>
@@ -91,6 +91,24 @@ the cache the directory from which is is run.</p>
 <li><cite>cython &gt;= 0.20.x</cite></li>
 <li><cite>matplotlib &gt;= 1.3.x</cite></li>
 </ul>
+</div>
+<div class="section" id="installing-the-despotic-winds-module">
+<span id="ssec-winds-installation"></span><h2>Installing the <code class="docutils literal"><span class="pre">despotic.winds</span></code> Module<a class="headerlink" href="#installing-the-despotic-winds-module" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">despotic.winds</span></code> module (see <a class="reference internal" href="winds.html#sec-winds"><span class="std std-ref">Winds</span></a>) is written in
+C++, and makes use of the <a class="reference external" href="http://www.gnu.org/software/gsl/">GNU scientific library</a>. Users who wish to make use of
+this package will need to compile the C++ portions of the
+software. This process should be automatic for users who have an
+installed C++ compiler and standard build tools (<code class="docutils literal"><span class="pre">make</span></code>), and who
+have the <a class="reference external" href="http://www.gnu.org/software/gsl/">GSL</a> headers and library
+installed in their <code class="docutils literal"><span class="pre">CXX_INCLUDE_PATH</span></code> and <code class="docutils literal"><span class="pre">LIBRARY_PATH</span></code>,
+respectively.</p>
+<p>If this does not work, users should be able to build the required C++
+library by changing into the <code class="docutils literal"><span class="pre">despotic/winds</span></code> directory and doing
+<code class="docutils literal"><span class="pre">make</span></code>. Users can edit the <code class="docutils literal"><span class="pre">Makefile</span></code> in <code class="docutils literal"><span class="pre">despotic/winds</span></code> as
+necessary to tailor the build for their environment.</p>
+<p>The <code class="docutils literal"><span class="pre">winds</span></code> module is not required for the operation of the rest of
+the code, so users who are not planning to make use of this capability
+can safely ignore it.</p>
 </div>
 </div>
 
@@ -107,6 +125,7 @@ the cache the directory from which is is run.</p>
 <li><a class="reference internal" href="#installing-from-pip">Installing from pip</a></li>
 <li><a class="reference internal" href="#setting-up-the-environment">Setting Up the Environment</a></li>
 <li><a class="reference internal" href="#requirements-and-dependencies">Requirements and Dependencies</a></li>
+<li><a class="reference internal" href="#installing-the-despotic-winds-module">Installing the <code class="docutils literal"><span class="pre">despotic.winds</span></code> Module</a></li>
 </ul>
 </li>
 </ul>
