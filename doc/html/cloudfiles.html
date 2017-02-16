@@ -45,20 +45,20 @@
 <h2>File Structure<a class="headerlink" href="#file-structure" title="Permalink to this headline">¶</a></h2>
 <p>DESPOTIC cloud files contain descriptions of clouds that can be read
 by the <code class="docutils literal"><span class="pre">cloud</span></code> or <code class="docutils literal"><span class="pre">zonedcloud</span></code> classes, using either the class
-constructor or the read method; see <a class="reference internal" href="fulldoc.html#sssec-full-cloud"><span>cloud</span></a> for
+constructor or the read method; see <a class="reference internal" href="fulldoc.html#sssec-full-cloud"><span class="std std-ref">cloud</span></a> for
 details. This section contains a description of the format for these
 files. It is recommended but not required that cloud files have names
 that end in the extension <code class="docutils literal"><span class="pre">.desp</span></code>.</p>
 <p>Each line of a cloud file must be blank, contain a comment starting
 with the character <code class="docutils literal"><span class="pre">#</span></code>, or contain a key-value pair formatted as:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">key</span> <span class="o">=</span> <span class="n">value</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="n">value</span>
 </pre></div>
 </div>
 <p>The line may also contain comments after <code class="docutils literal"><span class="pre">value</span></code>, again beginning
 with <code class="docutils literal"><span class="pre">#</span></code>. Any content after <code class="docutils literal"><span class="pre">#</span></code> is treated as a comment and is
 ignored. DESPOTIC keys are case-insensitive, and whitespace around
 keys and values are ignored. For the full list of keys, see
-<a class="reference internal" href="#tab-cloudfiles"><span>Cloud file keys and their meanings</span></a>. All quantities must
+<a class="reference internal" href="#tab-cloudfiles"><span class="std std-ref">Cloud file keys and their meanings</span></a>. All quantities must
 be in CGS units. Key-value pairs may be placed in any order, with the
 exception of the key <code class="docutils literal"><span class="pre">H2opr</span></code>, which provides a means of specify the
 ratio of ortho-to-para-<span class="math">\(\mathrm{H}_2\)</span>, instead of directly
@@ -162,7 +162,7 @@ chemical abundances).</p>
 </tr>
 <tr class="row-odd"><td>emitter</td>
 <td>&nbsp;</td>
-<td>See <a class="reference internal" href="#ssec-emitters"><span>Emitters</span></a></td>
+<td>See <a class="reference internal" href="#ssec-emitters"><span class="std std-ref">Emitters</span></a></td>
 </tr>
 </tbody>
 </table>
@@ -171,7 +171,7 @@ chemical abundances).</p>
 <span id="ssec-emitters"></span><h2>Emitters<a class="headerlink" href="#emitters" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal"><span class="pre">emitter</span></code> key is more complex than most, and requires special
 mention. Lines describing emitters follow the format:</p>
-<div class="highlight-python"><div class="highlight"><pre>emitter = name abundance [noextrap] [energySkip] [file:FILE] [url:URL]
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">emitter</span> <span class="o">=</span> <span class="n">name</span> <span class="n">abundance</span> <span class="p">[</span><span class="n">noextrap</span><span class="p">]</span> <span class="p">[</span><span class="n">energySkip</span><span class="p">]</span> <span class="p">[</span><span class="n">file</span><span class="p">:</span><span class="n">FILE</span><span class="p">]</span> <span class="p">[</span><span class="n">url</span><span class="p">:</span><span class="n">URL</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Here the brackets indicate optional items, and the optional items may
@@ -183,7 +183,7 @@ sensitive, in the sense that DESPOTIC will not assume that <code class="docutils
 <code class="docutils literal"><span class="pre">name</span></code>, but if the file or URL containing the data for that species
 is not explicitly specified, the name is used to guess the
 corresponding file name in the Leiden Atomic and Molecular Database
-(LAMDA) &#8211; see <a class="reference internal" href="data.html#sec-data"><span>Atomic and Molecular Data</span></a>. It is therefore generally advisable
+(LAMDA) &#8211; see <a class="reference internal" href="data.html#sec-data"><span class="std std-ref">Atomic and Molecular Data</span></a>. It is therefore generally advisable
 to name a species following LAMDA convention, which is that molecules
 are specified by their chemical formula, with a number specifying the
 atomic weight preceding the if the species is not the most common
@@ -194,7 +194,7 @@ isotope. Thus LAMDA refers to <span class="math">\(^{28}\mathrm{Si}^{16}\mathrm{
 search for files in LAMDA also includes common variants of
 the file name used in LAMDA. The actual file name from
 which DESPOTIC reads data for a given emitter is stored in
-the emitterData class &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span>emitterData</span></a>.</p>
+the emitterData class &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span class="std std-ref">emitterData</span></a>.</p>
 <p>The second mandatory item, <code class="docutils literal"><span class="pre">abundance</span></code>, gives the abundance of that
 species relative to H nuclei. For example, an abundance of 0.1 would
 indicate that there is 1 of that species per 10 H nuclei.</p>
@@ -207,7 +207,7 @@ data file. If not, DESPOTIC will instead handle temperatures outside
 the tabulated range by substituting the closest temperature inside the
 tabulated range. Note that this behavior can be altered within a
 DESPOTIC program by using the <code class="docutils literal"><span class="pre">extrap</span></code> property of the
-<code class="docutils literal"><span class="pre">emitterData</span></code> class &#8211; see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a>.</p>
+<code class="docutils literal"><span class="pre">emitterData</span></code> class &#8211; see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span class="std std-ref">Full Documentation of All DESPOTIC Classes and Functions</span></a>.</p>
 <p>The optional item <code class="docutils literal"><span class="pre">energySkip</span></code> specifies that a species should be
 ignored when computing heating and cooling rates via the
 <code class="docutils literal"><span class="pre">cloud.dEdt</span></code> method, and by extension whenever thermal equilibria or
@@ -279,14 +279,11 @@ variable is not specified, DESPOTIC searches for the file at
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -297,7 +294,7 @@ variable is not specified, DESPOTIC searches for the file at
       &copy;2015, Mark R. Krumholz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
       
       |

@@ -18,6 +18,7 @@ Contents:
    cloudfiles
    data
    chemistry
+   winds
    fulldoc
    acknowledgements
 

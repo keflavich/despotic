@@ -154,3 +154,49 @@ Shielding functions
 
 .. autofunction:: despotic.chemistry.shielding.fShield_H2_DB
 .. autofunction:: despotic.chemistry.shielding.fShield_CO_vDB
+		  
+
+despotic.winds classes
+----------------------
+
+.. _sssec-full-pwind:
+
+``pwind``
+^^^^^^^^^
+.. autoclass:: despotic.winds.pwind
+   :members:
+      
+   .. automethod:: despotic.winds.pwind.__init__
+		      
+despotic.winds functions
+------------------------
+
+``sxMach``
+^^^^^^^^^^
+
+.. autofunction:: despotic.winds.pwind_util.sxMach
+
+``zetaM``
+^^^^^^^^^
+
+.. autofunction:: despotic.winds.pwind_util.zetaM
+
+``zetaA``
+^^^^^^^^^
+
+.. autofunction:: despotic.winds.pwind_util.zetaA
+
+``pM``
+^^^^^^
+
+.. autofunction:: despotic.winds.pwind_util.pM
+
+``pA``
+^^^^^^
+
+.. autofunction:: despotic.winds.pwind_util.pA
+
+``tX``
+^^^^^^
+
+.. autofunction:: despotic.winds.pwind_util.tX

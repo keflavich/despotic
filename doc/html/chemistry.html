@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
-    <link rel="next" title="Full Documentation of All DESPOTIC Classes and Functions" href="fulldoc.html" />
+    <link rel="next" title="Winds" href="winds.html" />
     <link rel="prev" title="Atomic and Molecular Data" href="data.html" />
    
   
@@ -56,7 +56,7 @@ vector <span class="math">\(\mathbf{p}\)</span> specifies a set of parameters on
 reaction rates depend, and it may include quantities such as the
 ambient radiation field (for photoreactions), the density, the
 temperature, etc. The numerical implementation of chemical networks is
-described in <a class="reference internal" href="#ssec-chemnetworks"><span>Defining New Chemical Networks: the chemNetwork Class</span></a>. Given any chemical network,
+described in <a class="reference internal" href="#ssec-chemnetworks"><span class="std std-ref">Defining New Chemical Networks: the chemNetwork Class</span></a>. Given any chemical network,
 DESPOTIC is capable of two operations:</p>
 <ul class="simple">
 <li>Given an initial set of abundances at <span class="math">\(\mathbf{x}(t_0)\)</span> at
@@ -138,11 +138,11 @@ Journal, 731, 25)</a>. However, the
 user may override this choice. For line shielding, DESPOTIC computes
 the <span class="math">\(\mathrm{H}_2\)</span> and CO column densities</p>
 <div class="math">
-\[N_{\mathrm{H}_2} = x_{\mathrm{H}_2} N_{\mathrm{H}}/2\]\[N_\mathrm{CO} = x_\mathrm{CO} N_\mathrm{H} /2,\]</div>
+\[ \begin{align}\begin{aligned}N_{\mathrm{H}_2} = x_{\mathrm{H}_2} N_{\mathrm{H}}/2\\N_\mathrm{CO} = x_\mathrm{CO} N_\mathrm{H} /2,\end{aligned}\end{align} \]</div>
 <p>which amounts to assuming that the CO and <span class="math">\(\mathrm{H}_2\)</span> are
 uniformly distributed. Note that the NL99 network explicitly assumes
 <span class="math">\(x_{\mathrm{H}_2} = 0.5\)</span>, as no reactions involving atomic H are
-included &#8211; see <a class="reference internal" href="#sssec-nl99-gc"><span>NL99_GC</span></a> for a network that does include
+included &#8211; see <a class="reference internal" href="#sssec-nl99-gc"><span class="std std-ref">NL99_GC</span></a> for a network that does include
 hydrogen chemistry. These column densities are then used to find a
 shielding factor by interpolating the tabulated values of <a class="reference external" href="http://adsabs.harvard.edu/abs/1988ApJ...334..771V">van Dishoeck
 &amp; Black (1988, Astrophysical Journal, 334, 771)</a>.</p>
@@ -196,12 +196,12 @@ to <code class="docutils literal"><span class="pre">NL99</span></code>.</p>
 <span id="ssec-chemnetworks"></span><h2>Defining New Chemical Networks: the <code class="docutils literal"><span class="pre">chemNetwork</span></code> Class<a class="headerlink" href="#defining-new-chemical-networks-the-chemnetwork-class" title="Permalink to this headline">¶</a></h2>
 <p>DESPOTIC implements chemical networks through the abstract base class
 <code class="docutils literal"><span class="pre">chemNetwork</span></code>, which is defined by module
-<code class="docutils literal"><span class="pre">despotic.chemistry.chemNetwork</span></code> &#8211; see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a> for full
+<code class="docutils literal"><span class="pre">despotic.chemistry.chemNetwork</span></code> &#8211; see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span class="std std-ref">Full Documentation of All DESPOTIC Classes and Functions</span></a> for full
 details. This class defines the required elements that all chemistry
 networks must contain; users who wish to implement their own chemistry
 networks must derive them from this class, and must override the class
 methods listed below. Users are encouraged to examine the two
-<a class="reference internal" href="#ssec-predefined-networks"><span>Predefined Chemical Networks</span></a> for examples of how to derive a
+<a class="reference internal" href="#ssec-predefined-networks"><span class="std std-ref">Predefined Chemical Networks</span></a> for examples of how to derive a
 chemical network class from <code class="docutils literal"><span class="pre">chemNetwork</span></code>.</p>
 <p>For any class <code class="docutils literal"><span class="pre">cn</span></code> derived from <code class="docutils literal"><span class="pre">chemNetwork</span></code>, the user is
 required to define the following non-callable traits:</p>
@@ -263,7 +263,7 @@ are not surprised.</li>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">cn.abundances</span></code>: this is a property that returns the abundance
 information defined in <code class="docutils literal"><span class="pre">cn.x</span></code> as a object of class
-<a class="reference internal" href="#sssec-abundancedict"><span>abundanceDict</span></a>. This class is a utility class that
+<a class="reference internal" href="#sssec-abundancedict"><span class="std std-ref">abundanceDict</span></a>. This class is a utility class that
 provides an interface to the chemical abundances in a network
 that operates like a Python dict. The property abundances is defined
 in the base <code class="docutils literal"><span class="pre">chemNetwork</span></code> class, so it is available by inheritance
@@ -272,7 +272,7 @@ the user may find it convenient to override
 <code class="docutils literal"><span class="pre">chemNetwork.abundances</span></code> to provide more information, e.g., to
 provide abundances of species that are not explicitly evolved in the
 network, and are instead derived via conservation relations. Both
-the <a class="reference internal" href="#sssec-nl99"><span>NL99</span></a> and <a class="reference internal" href="#sssec-nl99-gc"><span>NL99_GC</span></a> classes do this.</li>
+the <a class="reference internal" href="#sssec-nl99"><span class="std std-ref">NL99</span></a> and <a class="reference internal" href="#sssec-nl99-gc"><span class="std std-ref">NL99_GC</span></a> classes do this.</li>
 </ul>
 <p>Once a chemical network class that defines the above methods has been
 defined, that class can be passed as an argument associated with the
@@ -281,7 +281,7 @@ methods (and their equivalents in <code class="docutils literal"><span class="pr
 will automatically perform chemical calculations using the input
 network.</p>
 <p>In setting up chemical networks, it often convenient to make use of
-the <a class="reference internal" href="#ssec-chemhelpers"><span>Helper Modules for Chemical Networks</span></a> that are provided.</p>
+the <a class="reference internal" href="#ssec-chemhelpers"><span class="std std-ref">Helper Modules for Chemical Networks</span></a> that are provided.</p>
 </div>
 <div class="section" id="helper-modules-for-chemical-networks">
 <span id="ssec-chemhelpers"></span><h2>Helper Modules for Chemical Networks<a class="headerlink" href="#helper-modules-for-chemical-networks" title="Permalink to this headline">¶</a></h2>
@@ -300,20 +300,20 @@ the speed of a numpy array with the convenience of a dict.</p>
 <p>Usage is simple. To define an <code class="docutils literal"><span class="pre">abundanceDict</span></code> one simply provides a
 set of chemical species names and a numpy array containing abundances
 of those speces:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry</span> <span class="kn">import</span> <span class="n">abundanceDict</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">despotic.chemistry</span> <span class="k">import</span> <span class="n">abundanceDict</span>
 
-<span class="c"># specList = list of strings containing species names</span>
-<span class="c"># x = numpy array containing species abundances</span>
+<span class="c1"># specList = list of strings containing species names</span>
+<span class="c1"># x = numpy array containing species abundances</span>
 <span class="n">abd</span> <span class="o">=</span> <span class="n">abundanceDict</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Once created, an <code class="docutils literal"><span class="pre">abundanceDict</span></code> can be handled much like a dict, in
 which the species names in <code class="docutils literal"><span class="pre">specList</span></code> are the keys:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># Print abundance of the species CO</span>
-<span class="k">print</span> <span class="n">abd</span><span class="o">.</span><span class="n">abundances</span><span class="p">[</span><span class="s">&quot;CO&quot;</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Print abundance of the species CO</span>
+<span class="nb">print</span> <span class="n">abd</span><span class="o">.</span><span class="n">abundances</span><span class="p">[</span><span class="s2">&quot;CO&quot;</span><span class="p">]</span>
 
-<span class="c"># Set the C+ abundance to 1e-10</span>
-<span class="n">abd</span><span class="p">[</span><span class="s">&quot;C+&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-10</span>
+<span class="c1"># Set the C+ abundance to 1e-10</span>
+<span class="n">abd</span><span class="p">[</span><span class="s2">&quot;C+&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">10</span>
 </pre></div>
 </div>
 <p>These operations will alter the underlying numpy array appropriately;
@@ -324,10 +324,10 @@ negligibly small in almost all cases, so it is recommended to use
 keys, as this makes for much more human-readable code.</p>
 <p>Mathematical operations on the abundances will pass through and be
 applied to the underlying numpy array:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># Double the abundance of every species</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Double the abundance of every species</span>
 <span class="n">abd</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">abd</span>
 
-<span class="c"># Add the abundances of two different abundanceDict&#39;s, abd1 and abd2</span>
+<span class="c1"># Add the abundances of two different abundanceDict&#39;s, abd1 and abd2</span>
 <span class="n">abd3</span> <span class="o">=</span> <span class="n">abd1</span> <span class="o">+</span> <span class="n">abd2</span>
 </pre></div>
 </div>
@@ -335,7 +335,7 @@ applied to the underlying numpy array:</p>
 in that, once they are created, their species lists are immutable;
 species abundances can be changed, but species cannot be added or
 removed.</p>
-<p>For full details on <code class="docutils literal"><span class="pre">abundanceDict</span></code>, see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span>Full Documentation of All DESPOTIC Classes and Functions</span></a>.</p>
+<p>For full details on <code class="docutils literal"><span class="pre">abundanceDict</span></code>, see <a class="reference internal" href="fulldoc.html#sec-fulldoc"><span class="std std-ref">Full Documentation of All DESPOTIC Classes and Functions</span></a>.</p>
 </div>
 <div class="section" id="reactions">
 <span id="sssec-reactions"></span><h3><code class="docutils literal"><span class="pre">reactions</span></code><a class="headerlink" href="#reactions" title="Permalink to this headline">¶</a></h3>
@@ -351,7 +351,7 @@ numpy operations at high speed.</p>
 <p>The most general class in <code class="docutils literal"><span class="pre">reactions</span></code> is called
 <code class="docutils literal"><span class="pre">reaction_matrix</span></code>. To instantiate it, one provides a list of species
 and a list of reactions between them:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="kn">import</span> <span class="n">reaction_matrix</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="k">import</span> <span class="n">reaction_matrix</span>
 <span class="n">rm</span> <span class="o">=</span> <span class="n">reaction_matrix</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -369,14 +369,14 @@ reactions</p>
 \[\begin{split}\mathrm{C} + \mathrm{O} &amp; \rightarrow \mathrm{CO} \\
 \mathrm{H} + \mathrm{H} &amp; \rightarrow \mathrm{H}_2\end{split}\]</div>
 <p>in a network, one could define the reactions as:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">reactions</span> \
-   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;O&quot;</span><span class="p">,</span> <span class="s">&quot;CO&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">},</span>
-       <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;H&quot;</span><span class="p">,</span> <span class="s">&quot;H2&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">}</span> <span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">reactions</span> \
+   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s2">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;CO&quot;</span><span class="p">],</span> <span class="s2">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s2">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H2&quot;</span><span class="p">],</span> <span class="s2">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">}</span> <span class="p">]</span>
 </pre></div>
 </div>
 <p>Once a <code class="docutils literal"><span class="pre">reaction_matrix</span></code> has been defined, one can compute the rates
 of change of all species using the method <code class="docutils literal"><span class="pre">reaction_matrix.dxdt</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">dxdt</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ratecoef</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dxdt</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ratecoef</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here <code class="docutils literal"><span class="pre">x</span></code> is a numpy array giving the instantaneous abundances of all
@@ -390,11 +390,11 @@ automatically.</p>
 <div class="section" id="cr-reactions">
 <h4><code class="docutils literal"><span class="pre">cr_reactions</span></code><a class="headerlink" href="#cr-reactions" title="Permalink to this headline">¶</a></h4>
 <p>The <code class="docutils literal"><span class="pre">cr_reactions</span></code> class is a specialized class derived from
-<a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a> that is intended to handle cosmic
+<a class="reference internal" href="#ssssec-reaction-matrix"><span class="std std-ref">reaction_matrix</span></a> that is intended to handle cosmic
 ray-induced reactions &#8211; those where the rate is proportional to
 the cosmic ray ionization rate.</p>
 <p>Instantiation of a <code class="docutils literal"><span class="pre">cr_reactions</span></code> object takes the same two
-arguments as <a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a>, but <code class="docutils literal"><span class="pre">reactions</span></code>, the
+arguments as <a class="reference internal" href="#ssssec-reaction-matrix"><span class="std std-ref">reaction_matrix</span></a>, but <code class="docutils literal"><span class="pre">reactions</span></code>, the
 list of reactions to be passed, is altered in that each reaction takes
 an additional key, <code class="docutils literal"><span class="pre">rate</span></code>, that gives the proportionality between
 the reaction rate and the cosmic ray ionization rate. Thus for example
@@ -408,20 +408,20 @@ if we wished to include the reactions</p>
 the rate of primary cosmic ray ionizations, and the other at a rate
 per particle that is twice the rate of primary ionizations, we would
 define:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="kn">import</span> <span class="n">cr_reactions</span>
-<span class="n">specList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;H&quot;</span><span class="p">,</span> <span class="s">&quot;H2&quot;</span><span class="p">,</span> <span class="s">&quot;H+&quot;</span><span class="p">,</span> <span class="s">&quot;H2+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="k">import</span> <span class="n">cr_reactions</span>
+<span class="n">specList</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H2&quot;</span><span class="p">,</span> <span class="s2">&quot;H+&quot;</span><span class="p">,</span> <span class="s2">&quot;H2+&quot;</span><span class="p">,</span> <span class="s2">&quot;e-&quot;</span><span class="p">]</span>
 <span class="n">reactions</span> \
-   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;H&quot;</span><span class="p">,</span> <span class="s">&quot;H+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">1.0</span> <span class="p">},</span>
-       <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;H2&quot;</span><span class="p">,</span> <span class="s">&quot;H2+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">2.0</span> <span class="p">}</span> <span class="p">]</span>
+   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s2">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H+&quot;</span><span class="p">,</span> <span class="s2">&quot;e-&quot;</span><span class="p">],</span> <span class="s2">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s2">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">1.0</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s2">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;H2&quot;</span><span class="p">,</span> <span class="s2">&quot;H2+&quot;</span><span class="p">,</span> <span class="s2">&quot;e-&quot;</span><span class="p">],</span> <span class="s2">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s2">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">2.0</span> <span class="p">}</span> <span class="p">]</span>
 <span class="n">cr</span> <span class="o">=</span> <span class="n">cr_reactions</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Once a <code class="docutils literal"><span class="pre">cr_reactions</span></code> object is instantiated, it can be used to
 compute the rates of change all species using the
 <code class="docutils literal"><span class="pre">cr_reactions.dxdt</span></code> routine:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">dxdt</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ionrate</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dxdt</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ionrate</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here <code class="docutils literal"><span class="pre">x</span></code> is a numpy array giving the current abundances, <code class="docutils literal"><span class="pre">n</span></code> is
@@ -432,7 +432,7 @@ it is needed only if there is more than one reactant on the left hand
 side of a reaction. It is provided to enable the case where a cosmic
 ray ionization is followed immediately by another reaction, and the
 network combines the two steps for speed. For example, the
-<a class="reference internal" href="#sssec-nl99"><span>NL99</span></a> network combines the two reactions</p>
+<a class="reference internal" href="#sssec-nl99"><span class="std std-ref">NL99</span></a> network combines the two reactions</p>
 <div class="math">
 \[\begin{split}\mathrm{CR} + \mathrm{H}_2 &amp; \rightarrow \mathrm{H}_2^+ +
 \mathrm{e}^- \\
@@ -447,18 +447,18 @@ network combines the two steps for speed. For example, the
 <div class="section" id="photoreactions">
 <h4><code class="docutils literal"><span class="pre">photoreactions</span></code><a class="headerlink" href="#photoreactions" title="Permalink to this headline">¶</a></h4>
 <p>The <code class="docutils literal"><span class="pre">photoreactions</span></code> class is a specialized class derived from
-<a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a> that is intended to handle reactions
+<a class="reference internal" href="#ssssec-reaction-matrix"><span class="std std-ref">reaction_matrix</span></a> that is intended to handle reactions
 that are driven by FUV photons, and thus have rates proportional to
 the interstellar radiation field (ISRF) strength, modified by dust and
 gas shielding, and possibly also by line shielding.</p>
 <p>Instantiation of <code class="docutils literal"><span class="pre">photoreactions</span></code> takes the same two arguments as
-<a class="reference internal" href="#ssssec-reaction-matrix"><span>reaction_matrix</span></a>: a list of species, and a list of
+<a class="reference internal" href="#ssssec-reaction-matrix"><span class="std std-ref">reaction_matrix</span></a>: a list of species, and a list of
 reactions, each element of which is a dict giving the reactants and
 stoichiometric factors. The dict also contains three additional keys
 that are specific to photoreactions: <code class="docutils literal"><span class="pre">rate</span></code> gives the reaction rate
 per reactant per second in an ISRF equal to the unshielded Solar
 neighborhood value (formally, with strength chracterized by
-<span class="math">\(\chi = 1\)</span> &#8211; see <a class="reference internal" href="cloudfiles.html#tab-cloudfiles"><span>Cloud file keys and their meanings</span></a>). The key <code class="docutils literal"><span class="pre">av_fac</span></code>
+<span class="math">\(\chi = 1\)</span> &#8211; see <a class="reference internal" href="cloudfiles.html#tab-cloudfiles"><span class="std std-ref">Cloud file keys and their meanings</span></a>). The key <code class="docutils literal"><span class="pre">av_fac</span></code>
 describes the optical depth per unit visual extinction provided by
 dust for the photons driving the reaction. That is, reaction rates
 will be reduced by a factor <span class="math">\(\exp(-\mathrm{av\_fac}\times
@@ -483,29 +483,29 @@ unshielded space, with a dust optical depth equal to <span class="math">\(1.7\ti
 A_V\)</span>, and with an additional function describing line shielding called
 <code class="docutils literal"><span class="pre">fShield_CO</span></code>. We could create a <code class="docutils literal"><span class="pre">photoeactions</span></code> object containing
 this reaction by doing:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="kn">import</span> <span class="n">photoreactions</span>
-<span class="n">specList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;C+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">,</span> <span class="s">&quot;O&quot;</span><span class="p">,</span> <span class="s">&quot;CO&quot;</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">despotic.chemistry.reactions</span> <span class="k">import</span> <span class="n">photoreactions</span>
+<span class="n">specList</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C+&quot;</span><span class="p">,</span> <span class="s2">&quot;e-&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;CO&quot;</span><span class="p">]</span>
 <span class="n">reactions</span> \
-   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;C+&quot;</span><span class="p">,</span> <span class="s">&quot;e-&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">5.1e-10</span><span class="p">,</span> <span class="s">&quot;av_fac&quot;</span> <span class="p">:</span> <span class="mf">3.0</span> <span class="p">},</span>
-       <span class="p">{</span> <span class="s">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&quot;CO&quot;</span><span class="p">,</span> <span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="s">&quot;O&quot;</span><span class="p">],</span> <span class="s">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-         <span class="s">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">1.7e-10</span><span class="p">,</span> <span class="s">&quot;av_fac&quot;</span> <span class="p">:</span> <span class="mf">1.7</span><span class="p">,</span>
-         <span class="s">&quot;shield_fac&quot;</span> <span class="p">:</span> <span class="n">fShield_CO</span> <span class="p">}</span> <span class="p">]</span>
+   <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s2">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C+&quot;</span><span class="p">,</span> <span class="s2">&quot;e-&quot;</span><span class="p">],</span> <span class="s2">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s2">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">5.1e-10</span><span class="p">,</span> <span class="s2">&quot;av_fac&quot;</span> <span class="p">:</span> <span class="mf">3.0</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s2">&quot;spec&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CO&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">],</span> <span class="s2">&quot;stoich&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+         <span class="s2">&quot;rate&quot;</span> <span class="p">:</span> <span class="mf">1.7e-10</span><span class="p">,</span> <span class="s2">&quot;av_fac&quot;</span> <span class="p">:</span> <span class="mf">1.7</span><span class="p">,</span>
+         <span class="s2">&quot;shield_fac&quot;</span> <span class="p">:</span> <span class="n">fShield_CO</span> <span class="p">}</span> <span class="p">]</span>
 <span class="n">phr</span> <span class="o">=</span> <span class="n">photoreactions</span><span class="p">(</span><span class="n">specList</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Once a photoreactions object exists, the rates of change of all
 species due to the included photoreactions can be computed using the
 <code class="docutils literal"><span class="pre">photoreactions.dxdt</span></code> routine. Usage is as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre>dxdt = phr.dxdt(x, n, chi, AV,
-                shield_args=[[f1_arg1, f1_arg2, ...],
-                             [f2_arg1, f2_arg2, ...],
-                             ... ],
-                shield_kw_args = [ { &quot;f1_kw1&quot; : val1,
-                                     &quot;f1_kw2&quot; : val2, ... },
-                                   { &quot;f2_kw1&quot; : val1,
-                                     &quot;f2_kw2&quot; : val2, ... },
-                                   ... ])
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dxdt</span> <span class="o">=</span> <span class="n">phr</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">AV</span><span class="p">,</span>
+                <span class="n">shield_args</span><span class="o">=</span><span class="p">[[</span><span class="n">f1_arg1</span><span class="p">,</span> <span class="n">f1_arg2</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                             <span class="p">[</span><span class="n">f2_arg1</span><span class="p">,</span> <span class="n">f2_arg2</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                             <span class="o">...</span> <span class="p">],</span>
+                <span class="n">shield_kw_args</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s2">&quot;f1_kw1&quot;</span> <span class="p">:</span> <span class="n">val1</span><span class="p">,</span>
+                                     <span class="s2">&quot;f1_kw2&quot;</span> <span class="p">:</span> <span class="n">val2</span><span class="p">,</span> <span class="o">...</span> <span class="p">},</span>
+                                   <span class="p">{</span> <span class="s2">&quot;f2_kw1&quot;</span> <span class="p">:</span> <span class="n">val1</span><span class="p">,</span>
+                                     <span class="s2">&quot;f2_kw2&quot;</span> <span class="p">:</span> <span class="n">val2</span><span class="p">,</span> <span class="o">...</span> <span class="p">},</span>
+                                   <span class="o">...</span> <span class="p">])</span>
 </pre></div>
 </div>
 <p>Here <code class="docutils literal"><span class="pre">x</span></code> is a numpy array giving the current abundances, <code class="docutils literal"><span class="pre">n</span></code> is
@@ -537,13 +537,13 @@ respectively. It also accepts a keyword argument <code class="docutils literal">
 specifies the order of interpolation to be used in computing the
 shielding function from a table. In this case one could compute the
 rates of change of the abundances via:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">dxdt</span> <span class="o">=</span> <span class="n">phr</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">AV</span><span class="p">,</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dxdt</span> <span class="o">=</span> <span class="n">phr</span><span class="o">.</span><span class="n">dxdt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">AV</span><span class="p">,</span>
                 <span class="n">shield_args</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NH2</span><span class="p">,</span> <span class="n">NCO</span><span class="p">]],</span>
-                <span class="n">shield_kw_args</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span><span class="s">&quot;order&quot;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">}</span> <span class="p">])</span>
+                <span class="n">shield_kw_args</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span><span class="s2">&quot;order&quot;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">}</span> <span class="p">])</span>
 </pre></div>
 </div>
 <p>This would call <code class="docutils literal"><span class="pre">fShield_CO</span></code> as:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">fShield_CO</span><span class="p">(</span><span class="n">NH2</span><span class="p">,</span> <span class="n">NCO</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fShield_CO</span><span class="p">(</span><span class="n">NH2</span><span class="p">,</span> <span class="n">NCO</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -585,7 +585,7 @@ rates of change of the abundances via:</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="data.html" title="previous chapter">Atomic and Molecular Data</a></li>
-      <li>Next: <a href="fulldoc.html" title="next chapter">Full Documentation of All DESPOTIC Classes and Functions</a></li>
+      <li>Next: <a href="winds.html" title="next chapter">Winds</a></li>
   </ul></li>
 </ul>
 </div>
@@ -599,14 +599,11 @@ rates of change of the abundances via:</p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -617,7 +614,7 @@ rates of change of the abundances via:</p>
       &copy;2015, Mark R. Krumholz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
       
       |
