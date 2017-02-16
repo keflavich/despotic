@@ -60,64 +60,64 @@ class pwind(object):
         of winds
 
         Parameters
-           Gamma : float
+           Gamma: float
               Eddington factor
-           mach : float
+           mach: float
               Mach number
-           driver : 'ideal' | 'radiation' | 'hot'
+           driver: 'ideal' | 'radiation' | 'hot'
               wind driving mechanism; allowed values are 'ideal'
               (ideal momentum-driven wind), 'radiation'
               (radiation-driven wind), and 'hot' (wind driven by hot
               gas entrainment)
-           potential : 'point' | 'isothermal'
+           potential: 'point' | 'isothermal'
               gravitational potential confining the wind; allowed
               values are 'point' and 'isothermal', for point and
               isothermal potentials, respectively
-           expansion : 'area' | 'intermediate' | 'solid angle'
+           expansion: 'area' | 'intermediate' | 'solid angle'
               cloud expansion law: clouds can maintain constant area
               ('area'), maintain constant solid angle ('solid angle'),
               or have intermediate behavior ('intermediate') where the
               area increases with distance as r and the solid angle
               decreases as 1/r
-           geometry : 'sphere' | 'cone' | 'cone sheath'
+           geometry: 'sphere' | 'cone' | 'cone sheath'
               geometry of the wind; allowed values are sphere (covers
               all space), conical, and conical sheath (meaning that
               the wind is bounded by an inner and outer cone)
-           fcrit : float
+           fcrit: float
               material is only considered to be launched into the wind
               if x < f_crit x_crit; must be <= 1.0
-           epsabs : float
+           epsabs: float
               absolute error tolerance for numerical integrations
-           epsrel : float
+           epsrel: float
               relative error tolerance for numerical integrations
-           theta : float, in the range (0, pi/2)
+           theta: float, in the range (0, pi/2)
               opening angle of the outer edge of the wind for cone or
               cone sheath geometry; ignored for all other geometries
-           phi : float, in the range [-pi/2, pi/2]
+           phi: float, in the range [-pi/2, pi/2]
               inclination of the wind cone central axis relative to
               the plane of the sky for either cone or cone sheath
               geometry; ignored for all other geometries; phi = 0
               corresponds to a wind cone in the plane of the sky, phi > 0
               corresponds to the varpi > 0 side of the wind pointed
               away from the observer
-           theta_in : float, in range (0, theta)
+           theta_in: float, in range (0, theta)
               opening angle of the inner edge of the wind for cone
               sheath geometry, ignored for all other geometries
-           tau0 : float
+           tau0: float
               for radiation-driven winds, the optical depth at the
               mean surface density; must be specified for
               radiation-driven winds, ignored for all other drivers
-           uh : float
+           uh: float
               for hot gas-driven winds, the hot gas speed relative to
               the escape speed; must be specified for hot gas-driven
               winds, ignored for all other drivers
-           interpabs : float
+           interpabs: float
               absolute error tolerance of the iterpolation tables used
               for hot gas-driven winds; ignored for all other drivers;
               note that using smaller tolerances quickly becomes very
               expensive in memory and computation time, so values much
               below 10^-2 are not recommended
-           interprel : float
+           interprel: float
               same as interpabs, but giving relative rather tahn
               absolute error tolerance
         """
@@ -161,9 +161,9 @@ class pwind(object):
         if self.__geom is not None:
             libpwind.pwind_geom_free(self.__geom)
             self.__geom = None
-        if self.geometry == 'sphere' :
+        if self.geometry == 'sphere':
             self.__geom = libpwind.pwind_geom_sphere_new()
-        elif self.geometry == 'cone' :
+        elif self.geometry == 'cone':
             if self.theta is None or self.phi is None:
                 raise ValueError("pwind: for cone geometry, must "
                                  "set theta and phi")
@@ -173,7 +173,7 @@ class pwind(object):
                                  "have theta in (0, pi/2) and phi "
                                  "in [-pi/2, pi/2]")
             self.__geom = libpwind.pwind_geom_cone_new(self.theta, self.phi)
-        elif self.geometry == 'cone sheath' :
+        elif self.geometry == 'cone sheath':
             if self.theta is None or self.phi is None:
                 raise ValueError("pwind: for cone sheaht geometry, must "
                                  "set theta, phi, and theta_in")
@@ -496,11 +496,11 @@ class pwind(object):
         Return the cloud area function y(a) for this wind
 
         Parameters:
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           y : float or arraylike
+           y: float or arraylike
               cloud area function
         """
         if hasattr(a, '__iter__'):
@@ -517,11 +517,11 @@ class pwind(object):
         this wind
 
         Parameters:
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           dyda : float or arraylike
+           dyda: float or arraylike
               derivative of cloud area function
         """
         if hasattr(a, '__iter__'):
@@ -537,11 +537,11 @@ class pwind(object):
         Return the potential shape function m(a) for this wind
 
         Parameters:
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           m : float or arraylike
+           m: float or arraylike
               potential shape function
         """
         if hasattr(a, '__iter__'):
@@ -557,13 +557,13 @@ class pwind(object):
         Return the square velocity U_a^2(x) for this wind
 
         Parameters:
-           x : float or arraylike
+           x: float or arraylike
               dimensionless column density
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           U2 : float or arraylike
+           U2: float or arraylike
               dimensionless square velocity; a value of nan is returned
               for any combinations of x and a that are forbidden for
               this wind
@@ -596,13 +596,13 @@ class pwind(object):
         Return d/dx(U_a^2(x)) for this wind
 
         Parameters:
-           x : float or arraylike
+           x: float or arraylike
               dimensionless column density
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           dU2dx : float or arraylike
+           dU2dx: float or arraylike
               dimensionless d/dx(U^2); a value of nan is returned
               for any combinations of x and a that are forbidden for
               this wind
@@ -635,13 +635,13 @@ class pwind(object):
         Return d/da(U_a^2(x)) for this wind
 
         Parameters:
-           x : float or arraylike
+           x: float or arraylike
               dimensionless column density
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           dU2da : float or arraylike
+           dU2da: float or arraylike
               dimensionless d/da(U^2); a value of nan is returned
               for any combinations of x and a that are forbidden for
               this wind
@@ -674,13 +674,13 @@ class pwind(object):
         Return the column density X_a(ur) for this wind
 
         Parameters:
-           ur : float
+           ur: float
               dimensionless radial velocity
-           a : float
+           a: float
               dimensionless radius
 
         Returns:
-           X : array
+           X: array
               dimensionless column densities; a value of nan is
               returned for combinations of ur and a that are forbitten
               for this wind
@@ -719,13 +719,13 @@ class pwind(object):
         Return the radial velocity U_a(x) for this wind
 
         Parameters:
-           x : float or arraylike
+           x: float or arraylike
               dimensionless column density
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           U : float or arraylike
+           U: float or arraylike
               dimensionless radial velocity
         """
         return np.sqrt(self.U2(x,a))
@@ -736,13 +736,13 @@ class pwind(object):
         function of x and a
 
         Parameters:
-           x : float or arraylike
+           x: float or arraylike
               dimensionless column density
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           rho : float or arraylike
+           rho: float or arraylike
               dimensionless density
         """
         return pM(x, self.sx) / \
@@ -755,13 +755,13 @@ class pwind(object):
         radius a
 
         Parameters:
-           x : float or arraylike
+           x: float or arraylike
               dimensionless column density
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           drhodx : float or arraylike
+           drhodx: float or arraylike
               dimensionless differential density
         """
         return pM(x, self.sx) / (a**2 * self.U(x,a))
@@ -773,13 +773,13 @@ class pwind(object):
         function of x and a
 
         Parameters:
-           x : float or arraylike
+           x: float or arraylike
               dimensionless column density
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           dfcdx : float or arraylike
+           dfcdx: float or arraylike
               differential covering factor
         """
         return pA(x, self.sx)*self.y(a)/a**2
@@ -789,11 +789,11 @@ class pwind(object):
         Return the covering factor f_c as a function of radius
 
         Parameters:
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           fc : float or array
+           fc: float or array
               covering fraction
         """
         return self.zetaA*self.y(a)/a**2
@@ -809,7 +809,7 @@ class pwind(object):
            None
 
         Returns:
-           f_area : float
+           f_area: float
               area fraction
         """
         if self.geometry == 'sphere':
@@ -824,11 +824,11 @@ class pwind(object):
         Return derivative of the covering factor df_c / da
 
         Parameters:
-           a : float or arraylike
+           a: float or arraylike
               dimensionless radius
 
         Returns:
-           dfcda : float or arraylike
+           dfcda: float or arraylike
               value of df_c/da
         """
         return self.zetaA * (a*self.dyda(a)-2*self.y(a))/a**3
@@ -840,18 +840,18 @@ class pwind(object):
         through the plane of the sky
 
         Parameters:
-           varpi : float
+           varpi: float
               dimensionless impact parameter along the wind axis
-           varpi_t : float
+           varpi_t: float
               dimensionless impact parameter transverse to the wind axis
-           u : float
+           u: float
               velocity of interest; if u > 0, only distances on the
               far side wind are returned; if u < 0, only
               distances on the near side are returned; if u == 0.0,
               both far and near side distances are returned
 
         Returns:
-           s_crit : array
+           s_crit: array
               dimensionless locations of wind entry or exit, or
               passage through the midplane, ordered from smallest to
               largest value of s
@@ -867,18 +867,18 @@ class pwind(object):
         the wind, or passes through the plane of the sky
 
         Parameters:
-           varpi : float
+           varpi: float
               dimensionless impact parameter along the wind axis
-           varpi_t : float
+           varpi_t: float
               dimensionless impact parameter transverse to the wind axis
-           u : float
+           u: float
               velocity of interest; if u > 0, only distances on the
               far side wind are returned; if u < 0, only
               distances on the near side are returned; if u == 0.0,
               both far and near side distances are returned
 
         Returns:
-           a_crit : array(0), array(2) or array(4)
+           a_crit: array(0), array(2) or array(4)
               dimensionless radii of wind entry or exit, or
               passage through the midplane, ordered from smallest to
               largest value of s
@@ -894,16 +894,16 @@ class pwind(object):
         radius a, normalised to the driving momentum flux.
 
         Parameters:
-           a : float or array
+           a: float or array
               dimensionless radius
-           fg : float or array
+           fg: float or array
               gas fraction; must be in the range (0, 1]
-           tctw : float or array
+           tctw: float or array
               ratio of the crossing time of the launch region to the
               wind evacuation time
 
         Returns:
-           pdot : float or array
+           pdot: float or array
               momentum flux normalised to driving momentum flux
 
         Notes:
@@ -946,45 +946,45 @@ class pwind(object):
         This returns the optical depth through the wind.
 
         Parameters:
-           u : float or arraylike
+           u: float or arraylike
               dimensionless line of sight velocity
-           tXtw : float or arraylike
+           tXtw: float or arraylike
               ratio tX/tw for the wind
-           abd : float or arraylike
+           abd: float or arraylike
               abundance of absorbers relative to H
-           Omega : float or arraylike
+           Omega: float or arraylike
               oscillator strength for transition
-           wl : float or arraylike
+           wl: float or arraylike
               wavelength for transition, in cm
-           muH : float or arraylike
+           muH: float or arraylike
               gas mass per H nucleus, in units of H masses
-           tw : float or arraylike
+           tw: float or arraylike
               mass removal timescale, in sec
-           fj : float or array
+           fj: float or array
               fraction of the emitters in the lower state of the
               transition
-           boltzfac : float or array
+           boltzfac: float or array
               Boltzmann factor exp(-E_ij/kB T_ex) for the two states of
               the transition, where T_ex = excitation temperature
-           u_trans : arraylike
+           u_trans: arraylike
               velocity offset between transitions for multiple
               transition computations
-           correlated : bool
+           correlated: bool
               if True, assume correlated winds; if False, uncorrelated
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
               None, defaults to zeta_A; only used if correlated is True
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           a0 : float or arraylike
+           a0: float or arraylike
               minimum radius from which to integrate optical depth
-           a1 : float or arraylike
+           a1: float or arraylike
               maximum radius from which to integrate optical depth
 
         Returns:
-           tau : float or array
+           tau: float or array
               optical depth at specified velocity
 
         Notes:
@@ -1024,40 +1024,40 @@ class pwind(object):
         uncorrelated.
 
         Parameters:
-           u : float or arraylike
+           u: float or arraylike
               dimensionless line of sight velocity
-           tXtw : float or arraylike
+           tXtw: float or arraylike
               ratio tX/tw for the wind
-           abd : float or arraylike
+           abd: float or arraylike
               abundance of absorbers relative to H
-           Omega : float or arraylike
+           Omega: float or arraylike
               oscillator strength for transition
-           wl : float or arraylike
+           wl: float or arraylike
               wavelength for transition, in cm
-           muH : float or arraylike
+           muH: float or arraylike
               gas mass per H nucleus, in units of H masses
-           tw : float or arraylike
+           tw: float or arraylike
               mass removal timescale, in sec
-           fj : float or array
+           fj: float or array
               fraction of the emitters in the lower state of the
               transition
-           boltzfac : float or array
+           boltzfac: float or array
               Boltzmann factor exp(-E_ij/kB T_ex) for the two states of
               the transition, where T_ex = excitation temperature
-           u_trans : arraylike
+           u_trans: arraylike
               velocity offset between transitions for multiple
               transition computations
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           a0 : float or arraylike
+           a0: float or arraylike
               minimum radius from which to integrate optical depth
-           a1 : float or arraylike
+           a1: float or arraylike
               maximum radius from which to integrate optical depth
 
         Returns:
-           tau : float or array
+           tau: float or array
               optical depth at specified velocity
 
         Notes:
@@ -1170,43 +1170,43 @@ class pwind(object):
         correlated.
 
         Parameters:
-           u : float or arraylike
+           u: float or arraylike
               dimensionless line of sight velocity
-           tXtw : float or arraylike
+           tXtw: float or arraylike
               ratio tX/tw for the wind
-           abd : float or arraylike
+           abd: float or arraylike
               abundance of absorbers relative to H
-           Omega : float or arraylike
+           Omega: float or arraylike
               oscillator strength for transition
-           wl : float or arraylike
+           wl: float or arraylike
               wavelength for transition, in cm
-           muH : float or arraylike
+           muH: float or arraylike
               gas mass per H nucleus, in units of H masses
-           tw : float or arraylike
+           tw: float or arraylike
               mass removal timescale, in sec
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
               None, defaults to zeta_A
-           fj : float or array
+           fj: float or array
               fraction of the emitters in the lower state of the
               transition
-           boltzfac : float or array
+           boltzfac: float or array
               Boltzmann factor exp(-E_ij/kB T_ex) for the two states of
               the transition, where T_ex = excitation temperature
-           u_trans : arraylike
+           u_trans: arraylike
               velocity offset between transitions for multiple
               transition computations
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           a0 : float or arraylike
+           a0: float or arraylike
               minimum radius from which to integrate optical depth
-           a1 : float or arraylike
+           a1: float or arraylike
               maximum radius from which to integrate optical depth
 
         Returns:
-           tau : float or array
+           tau: float or array
               optical depth at specified velocity
 
         Notes:
@@ -1315,22 +1315,22 @@ class pwind(object):
         Return the correlated absorption function Phi_c
 
         Parameters:
-           u : float or arraylike
+           u: float or arraylike
               dimensionless line of sight velocity
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
               None, defaults to zeta_A
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           a0 : float or arraylike
+           a0: float or arraylike
               minimum radius from which to integrate
-           a1 : float or arraylike
+           a1: float or arraylike
               maximum radius from which to integrate
 
         Returns:
-           Phi_c : float or array
+           Phi_c: float or array
               correlated absorption function
         """
         bcast = np.broadcast(np.asarray(u), np.asarray(fw),
@@ -1361,20 +1361,20 @@ class pwind(object):
         Return the uncorrelated absorption function Phi_c
 
         Parameters:
-           u : float or arraylike
+           u: float or arraylike
               dimensionless line of sight velocity
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind
               axis
-           a0 : float or arraylike
+           a0: float or arraylike
               minimum radius from which to integrate Phi_uc
-           a1 : float or arraylike
+           a1: float or arraylike
               maximum radius from which to integrate Phi_uc
 
         Returns:
-           Phi_uc : float or array
+           Phi_uc: float or array
               correlated absorption function
         """
         bcast = np.broadcast(np.asarray(u),
@@ -1402,15 +1402,15 @@ class pwind(object):
         Xi.
 
         Parameters:
-           u : float or arraylike
+           u: float or arraylike
               dimensionless line of sight velocity
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
 
         Returns:
-           Xi : float or array
+           Xi: float or array
               subcritical line emission shape function
         """
         bcast = np.broadcast(np.asarray(u), np.asarray(varpi),
@@ -1432,13 +1432,13 @@ class pwind(object):
         Return the optically thin integrated intensity function xi.
 
         Parameters:
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
 
         Returns:
-           xi : float or array
+           xi: float or array
               subcritical line emission intensity function
         """
         bcast = np.broadcast(np.asarray(varpi),
@@ -1461,40 +1461,40 @@ class pwind(object):
         Return the LTE emission profile function eta
 
         Parameters:
-           u : float or array
+           u: float or array
               dimensionless line of sight velocity
-           tXtw : float or array
+           tXtw: float or array
               ratio of timescales tX and tw
-           abd : float or arraylike
+           abd: float or arraylike
               abundance of absorbers relative to H
-           Omega : float or arraylike
+           Omega: float or arraylike
               oscillator strength for transition
-           wl : float or arraylike
+           wl: float or arraylike
               wavelength for transition, in cm
-           muH : float or arraylike
+           muH: float or arraylike
               gas mass per H nucleus, in units of H masses
-           tw : float or arraylike
+           tw: float or arraylike
               mass removal timescale, in sec
-           fj : float or array
+           fj: float or array
               fraction of the emitters in the lower state of the
               transition
-           boltzfac : float or array
+           boltzfac: float or array
               Boltzmann factor exp(-E_ij/kB T) for the two states of
               the transition
-           correlated : bool
+           correlated: bool
               if True, assume correlated winds; if False, uncorrelated
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
               None, defaults to zeta_A; only used if correlated is True
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           thin : bool or array of bool
+           thin: bool or array of bool
               if True, the escape probability is set to 1
 
         Returns:
-           eta : float or array
+           eta: float or array
               the LTE emission function eta
 
         Notes:
@@ -1562,48 +1562,48 @@ class pwind(object):
         for a species in LTE observed at velocity u
 
         Parameters:
-           u : float or array
+           u: float or array
               dimensionless line of sight velocity
-           T : float or array
+           T: float or array
               wind kinetic temperature, in K
-           emit : emitter or sequence of emitter
+           emit: emitter or sequence of emitter
               an emitter object for the transition of interest
-           tw : float or arraylike
+           tw: float or arraylike
               mass removal timescale, in sec
-           tXtw : float or array
+           tXtw: float or array
               ratio of timescales tX and tw
-           abd : float or arraylike
+           abd: float or arraylike
               abundance of absorbers relative to H
-           Omega : float or arraylike
+           Omega: float or arraylike
               oscillator strength for transition
-           wl : float or arraylike
+           wl: float or arraylike
               wavelength for transition, in cm
-           muH : float or arraylike
+           muH: float or arraylike
               gas mass per H nucleus, in units of H masses
-           fj : float or array
+           fj: float or array
               fraction of the emitters in the lower state of the
               transition
-           boltzfac : float or array
+           boltzfac: float or array
               Boltzmann factor exp(-E_ij/kB T) for the two states of
               the transition
-           trans : int or array of int
+           trans: int or array of int
               transition for which to compute the emission
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           correlated : bool
+           correlated: bool
               if True, assume correlated winds; if False, uncorrelated
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
-           thin : bool or array of bool
+           thin: bool or array of bool
               if True, the escape probability is set to 1
-           TA : bool
+           TA: bool
               if True, quantity returned is antenna temperature;
               default is to return brightness temperature
 
         Returns:
-           Temp : float or array
+           Temp: float or array
               brightness temperature (or antenna temperature if TA is
               set to True) in K as a function of the velocity u
 
@@ -1691,28 +1691,28 @@ class pwind(object):
         Return the integrated intensity integral Psi
 
         Parameters:
-           tXtw : float or array
+           tXtw: float or array
               ratio of timescales tX and tw
-           fj : float or array
+           fj: float or array
               fraction of the emitters in the lower state of the
               transition
-           boltzfac : float or array
+           boltzfac: float or array
               Boltzmann factor exp(-E_ij/kB T) for the two states of
               the transition
-           correlated : bool
+           correlated: bool
               if True, assume correlated winds; if False, uncorrelated
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
               None, defaults to zeta_A; only used if correlated is True
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           thin : bool or array of bool
+           thin: bool or array of bool
               if True, the escape probability is set to 1
 
         Returns:
-           Psi : float or array
+           Psi: float or array
               value of the integral Psi
         """
         bcast = np.broadcast(np.asarray(tXtw), np.asarray(fj),
@@ -1758,47 +1758,47 @@ class pwind(object):
         a particular line of sight
 
         Parameters:
-           v0 : float or array
+           v0: float or array
               escape speed of system; units are arbitrary, and output
               integrated antenna temperature will be in the same
               velocity units as v0
-           T : float or array
+           T: float or array
               wind kinetic temperature, in K
-           emit : emitter or sequence of emitter
+           emit: emitter or sequence of emitter
               an emitter object for the transition of interest
-           tw : float or arraylike
+           tw: float or arraylike
               mass removal timescale, in sec
-           tXtw : float or array
+           tXtw: float or array
               ratio of timescales tX and tw
-           abd : float or arraylike
+           abd: float or arraylike
               abundance of absorbers relative to H
-           Omega : float or arraylike
+           Omega: float or arraylike
               oscillator strength for transition
-           wl : float or arraylike
+           wl: float or arraylike
               wavelength for transition, in cm
-           muH : float or arraylike
+           muH: float or arraylike
               gas mass per H nucleus, in units of H masses
-           fj : float or array
+           fj: float or array
               fraction of the emitters in the lower state of the
               transition
-           boltzfac : float or array
+           boltzfac: float or array
               Boltzmann factor exp(-E_ij/kB T) for the two states of
               the transition
-           trans : int or array of int
+           trans: int or array of int
               transition for which to compute the emission
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           correlated : bool
+           correlated: bool
               if True, assume correlated winds; if False, uncorrelated
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
-           thin : bool or array of bool
+           thin: bool or array of bool
               if True, the escape probability is set to 1
 
         Returns:
-           vT : float or array
+           vT: float or array
               velocity-integrated antenna temperature, in units of K
               times whatever units v0 is in (i.e., if v0 is in km / s,
               then the returned value will be in units of K km / s)
@@ -1881,25 +1881,25 @@ class pwind(object):
         velocity-integrated antenna temperature.
 
         Parameters:
-           T : float or array
+           T: float or array
               wind kinetic temperature, in K
-           emit : emitter or sequence of emitter
+           emit: emitter or sequence of emitter
               an emitter object for the transition of interest
-           tw : float or arraylike
+           tw: float or arraylike
               mass removal timescale, in sec
-           trans : int or array of int
+           trans: int or array of int
               transition for which to compute the emission
-           varpi : float or arraylike
+           varpi: float or arraylike
               dimensionless impact parameter along the wind axis
-           varpi_t : float or arraylike
+           varpi_t: float or arraylike
               dimensionless impact parameter transverse to the wind axis
-           correlated : bool
+           correlated: bool
               if True, assume correlated winds; if False, uncorrelated
-           fw : float or arraylike
+           fw: float or arraylike
               covering factor of wind at launch point; if left as
 
         Returns:
-           Xfac : float or array
+           Xfac: float or array
               X factor, in the same units as Xthin
         """
         # Get tXtw, fj, boltzfac from emit and tw

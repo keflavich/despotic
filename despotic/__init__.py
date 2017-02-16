@@ -1,4 +1,4 @@
-__version__ = '2.0'
+__version__ = '2.1'
 __all__ = ["cloud", "collPartner", "composition", "despoticError",
            "dustProp", "emitter", "emitterData", "fetchLamda",
            "lineProfLTE", "radiation", "refreshLamda",
@@ -25,3 +25,4 @@ from .radiation import radiation
 from .refreshLamda import refreshLamda
 from .zonedcloud import zonedcloud
 from . import chemistry
+from . import winds

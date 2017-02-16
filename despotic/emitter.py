@@ -1070,6 +1070,49 @@ class emitter(object):
         else:
             return lum
 
+    ####################################################################
+    # Method to derive the tX parameter defined by Krumholz+ (2016)
+    ####################################################################
+    def tX(self, mX, trans=None):
+        """
+        Returns the tX line strength parameter of Krumholz+ (2016);
+        this is just a thin wrapper around emitterData.tX
+
+        Parameters
+           mX : float
+              total mass per particle of this species, in g
+           trans : int, array, or None
+              if set, tX is returned only for the specified
+              transitions in the transition list; default is that it
+              is returned for all transitions
+
+        Returns
+           tX : float or array
+              transition strength parameter for the specified
+              transitions, in seconds
+        """
+        return self.data.tX(mX, trans=trans)
+
+    ####################################################################
+    # Method to derive the Xthin parameter defined by Krumholz+ (2016)
+    ####################################################################
+    def Xthin(self, trans=None):
+        """
+        Returns the Xthin parameter of Krumholz+ (2016); this function
+        is just a thin wrapper around emitterData.Xthin
+
+        Parameters
+           trans : int, array, or None
+              if set, Xthin is returned only for the specified
+              transitions in the transition list; default is that it
+              is returned for all transitions
+
+        Returns
+           Xthin : float or array
+              Xthin parameter for the specified transitions, in cm^-2
+              / (K km s^-1)
+        """
+        return self.data.Xthin(self.abundance, trans=trans)
 
 ########################################################################
 # End of class emitterSpecies

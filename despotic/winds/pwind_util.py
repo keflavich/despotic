@@ -10,11 +10,11 @@ def sxMach(mach):
     Returns the dispersion in log column density versus Mach number
 
     Parameters:
-       mach : float or arraylike
+       mach: float or arraylike
           Mach number
 
     Returns:
-       sx : float or array
+       sx: float or array
           dispersion of log column density
     """
     alpha = 2.5
@@ -28,13 +28,13 @@ def zetaM(xcrit, sx):
     Returns the mass fraction at column density x < xcrit
 
     Parameters:
-       xcrit : float or arraylike
+       xcrit: float or arraylike
           maximum column density
-       sx : float or arraylike
+       sx: float or arraylike
           dispersion of column densities
 
     Returns:
-       zetaM : float or array
+       zetaM: float or array
           mass fraction with x < xcrit
     """
     return 0.5*(1.0-erf((-2*np.asarray(xcrit)+np.asarray(sx)**2) /
@@ -45,13 +45,13 @@ def zetaA(xcrit, sx):
     Returns the area fraction at column density x < xcrit
 
     Parameters:
-       xcrit : float or arraylike
+       xcrit: float or arraylike
           maximum column density
-       sx : float or arraylike
+       sx: float or arraylike
           dispersion of column densities
 
     Returns:
-       zetaA : float or array
+       zetaA: float or array
           area fraction with x < xcrit
     """
     return 0.5*(1.0+erf((2*np.asarray(xcrit)+np.asarray(sx)**2) /
@@ -62,13 +62,13 @@ def pM(x, sx):
     Returns the mass PDF evaluated at column density x
 
     Parameters:
-       x : float or arraylike
+       x: float or arraylike
           dimensionless log column density
-       sx : float or arraylike
+       sx: float or arraylike
           dispersion of column densities
 
     Returns:
-       pM : float or array
+       pM: float or array
           mass PDF of column densities evaluated at x
     """
     return 1.0/np.sqrt(2.0*np.pi*np.asarray(sx)**2) * \
@@ -80,13 +80,13 @@ def pA(x, sx):
     Returns the area PDF evaluated at column density x
 
     Parameters:
-       x : float or arraylike
+       x: float or arraylike
           dimensionless log column density
-       sx : float or arraylike
+       sx: float or arraylike
           dispersion of column densities
 
     Returns:
-       pA : float or array
+       pA: float or array
           area PDF of column densities evaluated at x
     """
     return 1.0/np.sqrt(2.0*np.pi*np.asarray(sx)**2) * \
@@ -97,17 +97,17 @@ def tX(abd, Omega, wl, muH=1.4):
     Returns the line timescale tX
 
     Parameters:
-       abd : float or array
+       abd: float or array
           abundance relative to hydrogen
-       muH : float or array
+       muH: float or array
           gas mass per H nucleus, in units of H masses
-       Omega : float or array
+       Omega: float or array
           transition oscillator strength
-       wl : float or array
+       wl: float or array
           transition wavelength in cm
 
     Returns:
-       tX : float or array
+       tX: float or array
           transition time parameter tX
     """
     mX = muH*mH/abd
