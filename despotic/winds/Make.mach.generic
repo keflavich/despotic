@@ -1,0 +1,28 @@
+# Machine-specific settings file when we can't figure out what type of
+# machine we're on. This may or may not work, depending on your
+# system.
+
+# Default name for c++/ c compilers
+MACH_CXX          = c++
+MACH_CC		  = cc
+
+# Flag needed to specify c++11 standard
+MACH_C11FLAG      = -std=c++11
+
+# Optimization flags
+MACH_CXXOPTFLAGS  = -O2
+MACH_COPTFLAGS	  = $(MACH_CXXOPTFLAGS)
+MACH_LDOPTFLAGS   = -O2
+
+# Debug flags
+MACH_CXXDEBFLAGS  = -g
+MACH_CDEBFLAGS	  = $(MACH_CXXDEBFLAGS)
+MACH_LDDEBFLAGS   = -g
+
+# Flags to compile shared libaries
+LIB_EXTENSION	   = .so
+CLIBFLAGS	   = -fPIC
+DYNLIBFLAG	   = -shared
+
+# Assume boost library is untagged on this platform
+MACH_BOOST_TAG    =
