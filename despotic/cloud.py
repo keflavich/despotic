@@ -1862,8 +1862,50 @@ class cloud(object):
 # End of class gasProp
 ########################################################################
 
+def turb_heating_generator(lengthscale=3e18, turbulence=True):
+    """
+    Generator for a turbulent heating function with a given length scale
+    (cloud objects do not generally contain size scale information)
 
-try:    
+    Parameters
+    ----------
+    lengthscale : float
+        The length scale in centimeters
+    turbulence : bool
+        A boolean flag to turn the turbulent heating on or off.  If False,
+        the heating will be zero
+    """
+    def turb_heating(cloud, lengthscale=lengthscale):
+        """ Turbulent heating rate depends on cloud linewidth
+        (sigma_nonthermal) and driving scale of the turbulence
+        DESPOTIC wants units of erg/s/H (per hydrogen), so the turbulent
+        heating rate n sigma^3 / L is divided by n to get just sigma^3/L
+
+        MacLow 1999, 2002, 2004 gives exactly:
+            3e-27 erg cm^-3 s^-1 (n/1 cm^3) (v/10 km/s)**3 (L/100 pc)**-1
+
+        Parameters
+        ----------
+        cloud : cloud
+            A cloud object.  Must have sigmaNT defined, where sigmaNT is the 1D
+            nonthermal velocity dispersion
+        lengthscale : float
+            The length scale in cm.  Most simply interpreted as the driving
+            length scale
+        """
+        if turbulence:
+            # sigmaNT is assumed to be the 1D velocity dispersion, so it is
+            # multiplied by sqrt(3)
+            # it has units cm/s
+            gamturb = (1.4 * mH *
+                       (0.5*3**1.5 * (cloud.sigmaNT)**3 / (lengthscale)))
+            return [gamturb, 0]
+        else:
+            return [0,0]
+    return turb_heating
+
+
+try:
     from PyQt4 import QtGui, QtCore
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
