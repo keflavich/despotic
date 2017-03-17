@@ -1874,6 +1874,12 @@ def turb_heating_generator(lengthscale=3e18, turbulence=True):
     turbulence : bool
         A boolean flag to turn the turbulent heating on or off.  If False,
         the heating will be zero
+
+    Examples
+    --------
+    >>> turb_heating = turb_heating_generator(3e18)
+    >>> gmc.setTempEq(escapeProbGeom='LVG', PsiUser=turb_heating)
+
     """
     def turb_heating(cloud, lengthscale=lengthscale):
         """ Turbulent heating rate depends on cloud linewidth
