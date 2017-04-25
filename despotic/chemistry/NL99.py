@@ -733,7 +733,7 @@ class NL99(chemNetwork):
         # Use the cosmic ray and photoreaction rate calculators to get
         # their contributions to dxdt
         xdot = _cr.dxdt(xgrow, n, self.ionRate)
-        import pdb; pdb.set_trace()
+        
         xdot += _ph.dxdt(xgrow, n, self.chi, self.AV, 
                          [[self.NH*xgrow[4], self.NH/2.0]])
 
