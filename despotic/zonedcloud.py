@@ -776,19 +776,29 @@ class zonedcloud(object):
                              noRecompute=noRecompute) 
                    for z in self.zones]
 
-        # Sum over zones
+        # Combine zones
         if intOnly:
 
-            # Integrated intensities just add
-            zoneLum = np.array(zoneLum)
-            lineLum = np.sum(zoneLum, axis=0)
-            return lineLum
+            # Integrated intensities have been computed assuming each
+            # zone is a sphere, when in fact it is a hollow shell or
+            # slab; we therefore need to correct for this. Our
+            # strategy is to turn the intensities back into
+            # luminosities, mass-weight them, then turn them back into
+            # an intensity using the overall column for the total cloud
+            zoneInt = np.array(zoneLum)
+            mass = self.mass()
+            zoneCol = np.array([z.colDen for z in self.zones])
+            lumPerH_zone = np.transpose(zoneInt) / zoneCol
+            lumPerH = np.sum(mass*lumPerH_zone, axis=1) \
+                      / np.sum(mass)
+            return lumPerH * self.colDen[-1]
 
         elif TBOnly:
 
             # For velocity-integrated brightness temperatures, we need
-            # to back out the intensity, add the intensities, then
-            # turn back into a brightness temperature
+            # to back out the intensity, sum the intensities as for
+            # the intensity case, then turn back into a brightness
+            # temperature
             intTB = np.array(zoneLum)
             if transition is None:
                 u = self.zones[0].emitters[emitName].data.radUpper
@@ -797,11 +807,16 @@ class zonedcloud(object):
                 u = transition[0]
                 l = transition[1]
             freq = self.zones[0].emitters[emitName].data.freq[u,l]
-            intIntensity \
+            zoneInt \
                 = 2*h*freq**3/(c**2 * (np.exp(h*c/(kB*intTB*1e5)) - 1.0))
-            intIntensity = np.sum(intIntensity, axis=0)
+            mass = self.mass()
+            zoneCol = np.array([z.colDen for z in self.zones])
+            lumPerH_zone = np.transpose(zoneInt) / zoneCol
+            lumPerH = np.sum(mass*lumPerH_zone, axis=1) \
+                      / np.sum(mass)
+            intIntensity = lumPerH * self.colDen[-1]
             intTB = h*c/kB / \
-                    np.log(1.0 + 2.0*h*freq**3/(c**2*intInensity)) / 1e5
+                    np.log(1.0 + 2.0*h*freq**3/(c**2*intIntensity)) / 1e5
             return intTB
 
         elif lumOnly:
@@ -814,25 +829,8 @@ class zonedcloud(object):
 
         else:
 
-            # Returning full output, so use each of the summing
-            # procedures above
+            # Returning full output, use each of the procedures above
             lineLum = zoneLum[0]
-
-            # Intensities just add
-            intIntensity = np.array(
-                [[x['intIntensity'] for x in z] for z in zoneLum])
-            intIntensity = np.sum(intIntensity, axis=0)
-            for l, i in zip(lineLum, intIntensity):
-                l['intIntensity'] = i
-
-            # Derive velocity-integrated brightness temperature from
-            # intensity
-            freq = np.array([x['freq'] for x in zoneLum[0]])
-            intTB = h*c/kB / \
-                    np.log(1.0 + 2.0*h*freq**3/ (c**2*intIntensity)) \
-                    / 1e5
-            for l, t in zip(lineLum, intTB):
-                l['intTB'] = t
 
             # Derive luminosity per unit mass by mass-weighing zones
             lumPerH = np.array(
@@ -841,7 +839,26 @@ class zonedcloud(object):
             lumPerH = np.sum(mass*np.transpose(lumPerH), axis=1) \
                       / np.sum(mass)
             for l, t in zip(lineLum, lumPerH):
-                l['lumPerH'] = t
+                l['lumPerH'] = t            
+                
+            # Intensities just add
+            intIntensity = np.array(
+                [[x['intIntensity'] for x in z] for z in zoneLum])
+            zoneCol = np.array([z.colDen for z in self.zones])
+            lumPerH_zone = np.transpose(intIntensity) / zoneCol
+            lumPerH = np.sum(mass*lumPerH_zone, axis=1) \
+                      / np.sum(mass)
+            for l, t in zip(lineLum, lumPerH):
+                l['intIntensity'] = t * self.colDen[-1]
+
+            # Derive velocity-integrated brightness temperature from
+            # intensity
+            freq = np.array([x['freq'] for x in zoneLum[0]])
+            for l, f in zip(lineLum, freq):
+                l['intTB'] = h*c/kB / \
+                             np.log(1.0 + 2.0*h*f**3/
+                                    (c**2*l['intIntensity'])) \
+                             / 1e5
 
             # Excitation temperatues and optical depths really only
             # make sense zone by zone, so we return these as arrays
