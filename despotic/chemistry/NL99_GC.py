@@ -550,7 +550,7 @@ class NL99_GC(chemNetwork):
             # park the extra in OI
             if info is None:
                 xO = _xOdefault
-            elif 'xC' in info:
+            elif 'xO' in info:
                 xO = info['xO']
             else:
                 xO = _xOdefault
