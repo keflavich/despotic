@@ -17,7 +17,7 @@ libdir = osp.dirname(osp.realpath(__file__))
 try:
     libpwind = npct.load_library("libpwind", libdir)
 except OSError:
-    print "Failed to load libpwind... trying to compile it"
+    print("Failed to load libpwind... trying to compile it")
     os.system("cd "+libdir+"; make")
     libpwind = npct.load_library("libpwind", libdir)
 

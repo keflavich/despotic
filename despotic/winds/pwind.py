@@ -1725,12 +1725,10 @@ class pwind(object):
              varpi_, varpi_t_, thin_) in bcast:
             if fw_ is None:
                 fw_ = self.zetaA
-            print i
             Psi.flat[i] = libpwind.Psi(tXtw_, fj_, boltzfac_,
                                        correlated_, fw_,
                                        varpi_, varpi_t_, thin_,
                                        self.__pw)
-            print i, Psi.flat[i]
             i = i+1
         if (not hasattr(tXtw, '__iter__')) and \
            (not hasattr(fj, '__iter__')) and \
