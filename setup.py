@@ -6,10 +6,10 @@ import sys
 from distutils.core import setup, Command
 import subprocess
 import numpy
-from Cython.Build import cythonize
 if 'develop' in sys.argv:
     # use setuptools for develop, but nothing else
     from setuptools import setup
+from Cython.Build import cythonize
 
 with open('README.md') as file:
     long_description = file.read()
