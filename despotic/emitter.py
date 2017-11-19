@@ -79,6 +79,9 @@ class emitter(object):
               if True, collision rate coefficients for this species will
               be extrapolated to temperatures outside the range given in
               the LAMDA tables
+           dampFactor : float
+              default damping factor to use when iteratively calculating
+              level populations
 
         Returns
            Nothing
@@ -102,6 +105,9 @@ class emitter(object):
        energySkip : Boolean
           flag that this species should be skipped when computing line
           cooling rates
+       dampFactor : float
+          default damping factor to use when iteratively calculating
+          level populations
     """
 
     ####################################################################
@@ -109,7 +115,7 @@ class emitter(object):
     ####################################################################
     def __init__(self, emitName, emitAbundance, extrap=True,
                  energySkip=False, emitterFile=None,
-                 emitterURL=None):
+                 emitterURL=None, dampFactor=0.5):
 
         """
         Initialization routine
@@ -132,6 +138,9 @@ class emitter(object):
               if True, collision rate coefficients for this species will
               be extrapolated to temperatures outside the range given in
               the LAMDA tables
+          dampFactor : float
+             default damping factor to use when iteratively calculating
+             level populations
 
         Returns
            Nothing
@@ -141,6 +150,7 @@ class emitter(object):
         self.name = emitName
         self.abundance = emitAbundance
         self.energySkip = energySkip
+        self.dampFactor = dampFactor
 
         # Get emitter data
         if emitName in knownEmitterData:
@@ -694,7 +704,7 @@ class emitter(object):
                             noClump=False, verbose=False,
                             reltol=1e-6, abstol=1e-8,
                             maxiter=200, veryverbose=False,
-                            dampFactor=0.5):
+                            dampFactor=None):
         """
         Compute escape probabilities and level populations
         simultaneously.
@@ -735,7 +745,8 @@ class emitter(object):
               a number in the range (0, 1] that damps out changes in level
               populations at each iteration. A value of 1 means no
               damping, while a value of 0 means the level populations
-              never change.
+              never change. If left as None, the value used will be
+              the value of self.dampFactor
 
         Remarks
            Convergence occurs when either the relative or the absolute
@@ -753,6 +764,10 @@ class emitter(object):
         nH = np.maximum(thisCloud.nH, small)
         Tg = np.maximum(thisCloud.Tg, small)
         sigmaNT = np.maximum(thisCloud.sigmaNT, 0.0)
+        if dampFactor is None:
+            dFac = self.dampFactor
+        else:
+            dFac = dampFactor
 
         # Get collision rate matrix with clumping factor correction
         qcoltrans = self.data.collRateMatrix(
@@ -803,8 +818,8 @@ class emitter(object):
         while relnorm > reltol and absnorm > abstol and ctr < maxiter:
 
             # damp changes from last cycle
-            self.levPop = dampFactor*self.levPop + \
-                (1.0-dampFactor)*levPopOld
+            self.levPop = dFac*self.levPop + \
+                (1.0-dFac)*levPopOld
 
             # store last iterates
             levPopOld = self.levPop.copy()

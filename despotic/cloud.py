@@ -196,6 +196,42 @@ class cloud(object):
         self.chemnetwork.applyAbundances()
 
     ####################################################################
+    # Damping factor property; used as a shorthand to set the damping
+    # factor of each emitter
+    ####################################################################
+    @property
+    def dampFactor(self):
+        """
+        Return the damping factors used by all emitters
+        """
+        dFac = {}
+        for k in self.emitters.keys():
+            dFac[k] = self.emitters[k].dampFactor
+        return dFac
+
+
+    @dampFactor.setter
+    def dampFactor(self, dFac):
+        """
+        Set the damping factor for all emitters
+
+        Parameters
+           dFac : float or arraylike
+              new default damping factor for all emitters; if set to a
+              float, this value will be used for all emitters; if set
+              to an iterable, damping factors will be applied to
+              emitters in the same order they are stored in
+              cloud.emitters
+        """
+        if not hasattr(dFac, '__iter__'):
+            for em in self.emitters.values():
+                em.dampFactor = dFac
+        else:
+            for dF, em in zip(dFac, self.emitters.values()):
+                em.dampFactor = dF
+
+    
+    ####################################################################
     # Method to set velocity dispersion to virial value
     ####################################################################
     def setVirial(self, alphaVir=1.0, setColDen=False, setnH=False, \
@@ -634,7 +670,7 @@ class cloud(object):
              fixedLevPop=False, noClump=False, 
              escapeProbGeom='sphere', PsiUser=None, 
              sumOnly=False, dustOnly=False, gasOnly=False, 
-             dustCoolOnly=False, dampFactor=0.5, 
+             dustCoolOnly=False, dampFactor=None, 
              verbose=False, overrideSkip=False):
         """
         Return instantaneous values of heating / cooling terms
@@ -660,7 +696,8 @@ class cloud(object):
              rates for n^2 processes is set to unity
            dampFactor : float
               damping factor to use in level population calculations;
-              see emitter.setLevPopEscapeProb
+              default is the value of dampFactor for each emitter; see 
+              emitter.setLevPopEscapeProb for details
            PsiUser : callable
               A user-specified function to add additional heating /
               cooling terms to the calculation. The function takes the
@@ -839,7 +876,10 @@ class cloud(object):
                         # we try multiple times with progressively
                         # smaller damping factors if need be
                         attempts = 0
-                        dFac = dampFactor
+                        if dampFactor is not None:
+                            dFac = dampFactor
+                        else:
+                            dFac = em.dampFactor
                         while em.setLevPopEscapeProb( 
                                 self, escapeProbGeom = escapeProbGeom, 
                                 noClump = noClump, 
@@ -996,7 +1036,7 @@ class cloud(object):
     ####################################################################
     def setDustTempEq(self, PsiUser=None, Tdinit=None,
                       noLines=False, noClump=False,
-                      verbose=False, dampFactor=0.5):
+                      verbose=False, dampFactor=None):
         """
         Set Td to equilibrium dust temperature at fixed Tg
 
@@ -1019,7 +1059,8 @@ class cloud(object):
              rates for n^2 processes is set to unity
            dampFactor : float
              damping factor to use in level population calculations;
-             see emitter.setLevPopEscapeProb
+             default is the value of dampFactor attached to each
+             emitter; see emitter.setLevPopEscapeProb
            verbose : Boolean
              if True, diagnostic information is printed
 
@@ -1326,7 +1367,7 @@ class cloud(object):
                  thin=False, LTE=False, fixedLevPop=False,
                  escapeProbGeom='sphere', nOut=100, dt=None,
                  tOut=None, PsiUser=None, isobaric=False,
-                 fullOutput=False, dampFactor=0.5,
+                 fullOutput=False, dampFactor=None,
                  verbose=False):
         """
         Calculate the evolution of the gas temperature in time
@@ -1377,9 +1418,9 @@ class cloud(object):
               if True, the full cloud state is returned at every time,
               as opposed to simply the gas temperature
            dampFactor : float
-              damping factor to use in calculating level populations
-              (see emitter for details)
-
+              damping factor to use in calculating level populations;
+              default is the value of dampFactor attached to each
+              emitter; see emitter for details
 
         Returns
            if fullOutput == False:
@@ -1476,7 +1517,7 @@ class cloud(object):
     def lineLum(self, emitName, LTE=False, noClump=False,
                 transition=None, thin=False, intOnly=False,
                 TBOnly=False, lumOnly=False,
-                escapeProbGeom='sphere', dampFactor=0.5,
+                escapeProbGeom='sphere', dampFactor=None,
                 noRecompute=False, abstol=1.0e-8,
                 verbose=False):
         """
@@ -1522,7 +1563,7 @@ class cloud(object):
               are already initialized
            dampFactor : float
               damping factor to use in level population calculations;
-              see emitter.setLevPopEscapeProb
+              default is the value of dampFactor attached to the emitter
            noRecompute : False
               if True, level populations and escape probabilities are
               not recomputed; instead, stored values are used
