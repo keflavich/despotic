@@ -127,7 +127,7 @@ class emitterData(object):
     # Initialization routine
     ####################################################################
     def __init__(self, emitName, emitterFile=None, emitterURL=None,
-                 extrap=True, noRefresh=False):
+                 extrap=True, noRefresh=False, noWarn=False):
         """
         Initialization routine
 
@@ -147,10 +147,14 @@ class emitterData(object):
            noRefresh : Boolean
               if True, the routine will not attempt to automatically
               fetch updated versions of files from the web
+           noWarn : Boolean
+              if True, suppress warning messages about missing
+              collision rate data
         """
 
-        # Save extrapolation state
+        # Save extrapolation and warning state
         self.__extrap = extrap
+        self.noWarn = noWarn
 
         # Check if we have been given a file name for this emitter. If
         # we have, try to read it, and raise an error if we fail.
@@ -562,12 +566,13 @@ class emitterData(object):
                         " K for species "+self.name+", partner " + 
                         p)
                 except KeyError:
-                    warnings.warn("collision rates not "
-                                  "available for "+self.name+
-                                  " with species "
-                                  +p+" (fractional abundance "
-                                  "{:e}".format(n/nH)+") will be "
-                                  "omitted from calculation")
+                    if not self.noWarn:
+                        warnings.warn("collision rates not "
+                                      "available for "+self.name+
+                                      " with species "
+                                      +p+" (fractional abundance "
+                                      "{:e}".format(n/nH)+") will be "
+                                      "omitted from calculation")
             else:
                 p1='pH2'
                 try:
@@ -581,12 +586,13 @@ class emitterData(object):
                         " K for species "+self.name+", partner " + 
                         p)
                 except KeyError:
-                    warnings.warn("collision rates not "
-                                  "available for "+self.name+
-                                  " with species "
-                                  +p+" (fractional abundance "
-                                  "{:e}".format(n/nH)+") will be "
-                                  "omitted from calculation")
+                    if not self.noWarn:
+                        warnings.warn("collision rates not "
+                                      "available for "+self.name+
+                                      " with species "
+                                      +p+" (fractional abundance "
+                                      "{:e}".format(n/nH)+") will be "
+                                      "omitted from calculation")
 
         # Return matrix
         return q
