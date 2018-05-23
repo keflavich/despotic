@@ -334,9 +334,9 @@ def setChemEq(cloud, tEqGuess=None, network=None, info=None,
 
             # Print status
             if verbose:
-                print("setChemEquil: updated temperatures to " +
-                      "Tg = {:f}, Td = {:f}, residual = {:e}"). \
-                    format(cloud.Tg, cloud.Td, resid)
+                print(("setChemEquil: updated temperatures to " +
+                      "Tg = {:f}, Td = {:f}, residual = {:e}"). 
+                      format(cloud.Tg, cloud.Td, resid))
                 if tempConverge:
                     print("Temperature converged!")
 

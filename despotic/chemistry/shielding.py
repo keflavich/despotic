@@ -155,3 +155,119 @@ def fShield_CO_vDB(NCO, NH2, order=1):
         return np.exp(_logThetavDBinterp3(logNH2, logNCO))
     else:
         raise ValueError("order must be 1, 2, or 3")
+
+
+
+######################################################################
+# Shielding of CO by CO and H2, following Visser, van Dishoeck & Black
+# (2009, A&A, 503, 323)
+######################################################################
+
+# Protect this inside this block, so that readthedocs doesn't choke
+# when trying to import
+if not on_rtd:
+
+    # Tabulated data from van Dishoeck & Black
+    _logNCOVvDB = np.array([0, 13, 14, 15, 16, 17, 18, 19]) # CO column densities
+    _logNH2VvDB = np.array([0, 19, 20, 21, 22, 23])         # H2 column densities
+    _ThetaVvDB = np.array([
+        [1.0, 8.080e-1, 5.250e-1, 2.434e-1, 5.467e-2, 1.362e-2, 3.378e-3, 5.240e-5],
+        [8.176e-1, 6.347e-1, 3.891e-1, 1.787e-1, 4.297e-2, 1.152e-2, 2.922e-3, 4.662e-4],
+        [7.223e-1, 5.624e-1, 3.434e-1, 1.540e-1, 3.515e-2, 9.231e-3, 2.388e-3, 3.899e-4],
+        [3.260e-1, 2.810e-1, 1.953e-1, 8.726e-2, 1.907e-2, 4.768e-3, 1.150e-3, 1.941e-4],
+        [1.108e-2, 1.081e-2, 9.033e-3, 4.441e-3, 1.102e-3, 2.644e-4, 7.329e-5, 1.437e-5],
+        [3.938e-7, 3.938e-7, 3.936e-7, 3.923e-7, 3.901e-7, 3.893e-7, 3.890e-7, 3.875e-7]
+    ])  # Tabulated shielding factors
+
+    # Extend Visser, van Dishoeck & Black's table 3 dex in each direction by
+    # linear extrapolation
+    _logNCOVvDB1 = np.zeros(9)
+    _logNCOVvDB1[:-1] = _logNCOVvDB
+    _logNCOVvDB1[-1] = 22
+    _exCO = (_logNCOVvDB1[-1] - _logNCOVvDB1[-2]) / (_logNCOVvDB1[-2] - _logNCOVvDB1[-3])
+    _logNH2VvDB1 = np.zeros(7)
+    _logNH2VvDB1[:-1] = _logNH2VvDB
+    _logNH2VvDB1[-1] = 25
+    _exH2 = (_logNH2VvDB1[-1] - _logNH2VvDB1[-2]) / (_logNH2VvDB1[-2] - _logNH2VvDB1[-3])
+    _ThetaVvDB1 = np.zeros((7,9))
+    _ThetaVvDB1[:6,:8] = _ThetaVvDB
+    for _i, _logNH2 in enumerate(_logNH2VvDB):
+        _ThetaVvDB1[_i,-1] = _ThetaVvDB1[_i,-2] * \
+                             (_ThetaVvDB1[_i,-2]/_ThetaVvDB1[_i,-3])**_exCO
+    for _j, _logNH2 in enumerate(_logNCOVvDB):
+        _ThetaVvDB1[-1,_j] = _ThetaVvDB1[-2,_j] * \
+                             (_ThetaVvDB1[-2,_j]/_ThetaVvDB1[-3,_j])**_exH2
+    _ThetaVvDB1[-1,-1] = np.sqrt(
+        _ThetaVvDB1[-1,-2] * (_ThetaVvDB1[-1,-2]/_ThetaVvDB1[-1,-3])**_exCO *
+        _ThetaVvDB1[-2,-1] * (_ThetaVvDB1[-2,-1]/_ThetaVvDB1[-3,-1])**_exH2)
+
+    # Create interpolation functions at various orders
+    _logThetaVvDBinterp1 = RectBivariateSpline(_logNH2VvDB1, _logNCOVvDB1,
+                                               np.log(_ThetaVvDB1),
+                                               kx=1, ky=1)
+    _logThetaVvDBinterp2 = RectBivariateSpline(_logNH2VvDB1, _logNCOVvDB1,
+                                               np.log(_ThetaVvDB1),
+                                               kx=2, ky=2)
+    _logThetaVvDBinterp3 = RectBivariateSpline(_logNH2VvDB1, _logNCOVvDB1,
+                                               np.log(_ThetaVvDB1),
+                                               kx=3, ky=3)
+
+# Visser, van Dishoeck & Black's shielding function
+def fShield_CO_VvDB(NCO, NH2, order=1):
+    """
+    This function returns the shielding factor for CO
+    photodissociation as a function of CO and H2 column densities,
+    based on the model of Visser, van Dishoeck & Black (2009)
+
+    Parameters
+       NCO : float | array
+          CO column density in cm^-2
+       NH2 : float | array
+          H2 column density in cm^-2
+       order : 1 | 2 | 3
+          order of spline interpolation on van Dishoeck & Black's table;
+          1 is the safest choice, but 2 and 3 are also provided, and may
+          be more accurate in some ranges
+
+    Returns
+       fShield : array
+          the shielding factor for the input NCO and NH2 values
+
+    Raises
+       ValueError if order is not 1, 2, or 3
+    """
+    logNCO = np.log10(np.clip(NCO, 10.**_logNCOVvDB[0], 10.**_logNCOVvDB[-1]))
+    logNH2 = np.log10(np.clip(NH2, 10.**_logNH2VvDB[0], 10.**_logNH2VvDB[-1]))
+    if order==1:
+        return np.exp(_logThetaVvDBinterp1(logNH2, logNCO))
+    elif order==2:
+        return np.exp(_logThetaVvDBinterp2(logNH2, logNCO))
+    elif order==3:
+        return np.exp(_logThetaVvDBinterp3(logNH2, logNCO))
+    else:
+        raise ValueError("order must be 1, 2, or 3")
+
+
+######################################################################
+# Shielding of C by C and H2, following Tielens & Hollenbach (1985,
+# ApJ, 291, 722)
+######################################################################
+
+def fShield_C_TH(NC, NH2):
+    """
+    This function returns the shielding factor for C
+    photodissociation as a function of C and H2 column densities,
+    based on the model of Tielens & Hollenbach (1985)
+
+    Parameters
+       NC : float | array
+          C column density in cm^-2
+       NH2 : float | array
+          H2 column density in cm^-2
+
+    Returns
+       fShield : array
+          the shielding factor for the input NC and NH2 values
+    """
+    rH2 = 2.8e-22*NH2
+    return np.exp(-1.6e-17*NC) * np.exp(-rH2)/(1.0+rH2)
