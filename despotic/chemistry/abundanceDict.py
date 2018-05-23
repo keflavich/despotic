@@ -79,8 +79,6 @@ class abundanceDict(collections.MutableMapping,dict):
         self.x = x
         self.__specDict = collections.OrderedDict(
             zip(specList, range(len(specList))))
-        #for i, s in enumerate(specList):
-        #    self.__specDict[s] = i
 
 
     ########################################################################

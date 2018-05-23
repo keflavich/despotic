@@ -265,8 +265,10 @@ class cr_reactions(reaction_matrix):
     Examples
        To list the reaction cr + H -> H+ + e-, the dict entry should be::
 
-          { 'spec' : ['H', 'H+', 'e-'], 'stoich' : [-1, 1, 1],
-            'rate' : 1.0 }
+          { 'spec'   : ['H', 'H+', 'e-'], 
+            'stoich' : [-1, 1, 1],
+            'rate'   : 1.0 }
+
     """
 
     def __init__(self, specList, reactions, sparse=False):
@@ -555,7 +557,7 @@ class gr_reactions(reaction_matrix):
               'stoich' : stoichiometric factor for each species
               'grain' : (optional) if this key exists and is True, the
                  reaction is grain catalyzed and the rate scales as
-                 the dust abundance; if this key is absence, the
+                 the dust abundance; if this key is absent, the
                  reaction is assumed not to be grain-mediated
         sparse : bool
            If True, the reaction rate matrix is represented as a
@@ -567,13 +569,25 @@ class gr_reactions(reaction_matrix):
         Returns
         -------
         Nothing
+
+        Notes
+        -----
+        Important note on grain-mediated reactions: these are assumed
+        to have rates that scale as n_1 * n_gr instead of n_1 * n_2,
+        where n_i is the number density of reactant i and n_gr is the
+        number density of grains. This means that the rates of
+        grain-mediated reactions occur at a rate that depends only on
+        the first reactant in the reactant list, rather than all
+        reactants.
         """
 
         # Call the parent constructor
         super(gr_reactions, self).__init__(specList, reactions,
-                                             sparse=sparse)
+                                           sparse=sparse)
 
-        # Record which reactions, if any, are grain catalyzed
+        # Record which reactions, if any, are grain catalyzed; for
+        # those that are grain-catalyzed, record the index of the
+        # first species
         grain = []
         for r in reactions:
             if 'grain' in r.keys():
@@ -583,7 +597,7 @@ class gr_reactions(reaction_matrix):
                     grain.append(False)
             else:
                 grain.append(False)
-        self.grain = np.where(grain)[0]
+        self.grain = np.array(grain, dtype='bool')
 
     def dxdt(self, x, n, ratecoef, Zd):
         """
@@ -610,12 +624,18 @@ class gr_reactions(reaction_matrix):
            rate of change of all species abundances
         """
 
-        # Scale grain-mediated reaction rates
+        # Do non-grain reactions
         rcoef = np.copy(ratecoef)
-        rcoef[self.grain] *= Zd
-
-        # Compute dxdt
+        rcoef[self.grain] = 0.0
         dxdt = super(gr_reactions, self).dxdt(x, n, rcoef)
+
+        # Now do grain reactions; note that the rate calculation is
+        # different than for non-grain reactions
+        rgr = np.copy(ratecoef)
+        rgr[self.grain] *= Zd
+        rgr[np.logical_not(self.grain)] = 0.0
+        rates = rgr * x[self.lhsidx[:,0]] * n
+        dxdt += self.mat.dot(rates)
 
         # Return
         return dxdt
