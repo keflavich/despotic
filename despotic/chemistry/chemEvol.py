@@ -360,16 +360,16 @@ class _dxdt_wrapper(object):
 
         idx = np.argmin(xTin/np.abs(dxTdt_out))
         if idx != len(xTin)-1:
-            print ('time = {:e}, Tg = {:f}, xCO = {:e}, xlim = {:e}' +
+            print(('time = {:e}, Tg = {:f}, xCO = {:e}, xlim = {:e}' +
                    ', x/xdotlim = {:e}, speclim = {:s}').format(
                        time, self.cloud.Tg, xTin[5], xTin[idx],
                        xTin[idx]/dxTdt_out[idx],
-                       self.cloud.chemnetwork.specList[idx])
+                       self.cloud.chemnetwork.specList[idx]))
         else:
-            print ('time = {:e}, Tg = {:f}, xCO = {:e}' +
+            print(('time = {:e}, Tg = {:f}, xCO = {:e}' +
                    ', T/Tdot = {:e}').format(
                        time, self.cloud.Tg, xTin[5], 
-                       xTin[-1]/dxTdt_out[-1])
+                       xTin[-1]/dxTdt_out[-1]))
 
         # Return
         return dxTdt_out
