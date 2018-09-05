@@ -6,7 +6,6 @@ from .abundanceDict import abundanceDict
 from .chemNetwork import chemNetwork
 from .NL99 import NL99
 from .NL99_GC import NL99_GC
-from .NL99_GO import NL99_GO
 from .GOW import GOW
 from .chemEvol import chemEvol
 from .setChemEq import setChemEq
