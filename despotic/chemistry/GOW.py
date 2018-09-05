@@ -1052,7 +1052,7 @@ class GOW(chemNetwork):
                 continue
             abd[k] = v
         if warn:
-            warnings.warn("For NL99_GO network, cannot set abundances"
+            warnings.warn("For GOW network, cannot set abundances"
             " of derived species H, He, M, e-; abundances set only "
             " for other species")
         self.applyAbundances()
