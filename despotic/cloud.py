@@ -91,18 +91,25 @@ class cloud(object):
           are objects of class emitter
        chemnetwork : chemical network class (optional)
           a chemical network that is to be used to perform
-          time-dependent chemical evolution calcualtions for this cloud
+          time-dependent chemical evolution calcualtions for this
+          cloud
+       noWarn : bool
+          if set to True, warning messages about convergence of
+          emitters attached to this cloud are suppressed
     """
 
 
     ####################################################################
     # Method to initialize
     ####################################################################
-    def __init__(self, fileName=None, verbose=False):
+    def __init__(self, fileName=None, noWarn=False, verbose=False):
         """
         Parameters
            fileName : string
               name of file from which to read cloud description
+           noWarn : Boolean
+              if True, warning messages about convergence are
+              suppressed
            verbose : Boolean
               print out information about the cloud as we read it
 
@@ -117,6 +124,7 @@ class cloud(object):
         self.dVdr = 0.0
         self.Tg = 0.0
         self.Td = 0.0
+        self.noWarn = noWarn
         self.comp = composition()
         self.rad = radiation()
         self.dust = dustProp()
@@ -196,8 +204,10 @@ class cloud(object):
         self.chemnetwork.applyAbundances()
 
     ####################################################################
-    # Damping factor property; used as a shorthand to set the damping
-    # factor of each emitter
+    # Pass-through properties; these are properties of emitters, and
+    # the hooks here just provide a convenient way of setting the
+    # corresponding properties for every emitter a cloud has, or
+    # getting back the properties for all emitters
     ####################################################################
     @property
     def dampFactor(self):
@@ -230,7 +240,99 @@ class cloud(object):
             for dF, em in zip(dFac, self.emitters.values()):
                 em.dampFactor = dF
 
+    @property
+    def maxIter(self):
+        """
+        Return the value of maxIter used by all emitters
+        """
+        maxIter_ = {}
+        for k in self.emitters.keys():
+            maxIter_[k] = self.emitters[k].maxIter
+        return maxIter_
+
+
+    @maxIter.setter
+    def maxIter(self, maxIter_):
+        """
+        Set the damping factor for all emitters
+
+        Parameters
+           maxIter_ : int or arraylike
+              new default maximum iterations for all emitters; if set to an
+              int, this value will be used for all emitters; if set
+              to an iterable, the values will be applied to
+              emitters in the same order they are stored in
+              cloud.emitters
+        """
+        if not hasattr(maxIter_, '__iter__'):
+            for em in self.emitters.values():
+                em.maxIter = maxIter_
+        else:
+            for maxIter__, em in zip(maxIter_, self.emitters.values()):
+                em.maxIter = maxIter__
+                
+    @property
+    def absTol(self):
+        """
+        Return the value of absTol used by all emitters
+        """
+        absTol_ = {}
+        for k in self.emitters.keys():
+            absTol_[k] = self.emitters[k].absTol
+        return absTol_
+
+
+    @absTol.setter
+    def absTol(self, absTol_):
+        """
+        Set the damping factor for all emitters
+
+        Parameters
+           absTol_ : float or arraylike
+              new default absolute tolerance for all emitters; if set to a
+              float, this value will be used for all emitters; if set
+              to an iterable, the values will be applied to
+              emitters in the same order they are stored in
+              cloud.emitters
+        """
+        if not hasattr(absTol_, '__iter__'):
+            for em in self.emitters.values():
+                em.absTol = absTol_
+        else:
+            for absTol__, em in zip(absTol_, self.emitters.values()):
+                em.absTol = absTol__
     
+    @property
+    def relTol(self):
+        """
+        Return the value of relTol used by all emitters
+        """
+        relTol_ = {}
+        for k in self.emitters.keys():
+            relTol_[k] = self.emitters[k].relTol
+        return relTol_
+
+
+    @relTol.setter
+    def relTol(self, relTol_):
+        """
+        Set the damping factor for all emitters
+
+        Parameters
+           relTol_ : float or arraylike
+              new default absolute tolerance for all emitters; if set to a
+              float, this value will be used for all emitters; if set
+              to an iterable, the values will be applied to
+              emitters in the same order they are stored in
+              cloud.emitters
+        """
+        if not hasattr(relTol_, '__iter__'):
+            for em in self.emitters.values():
+                em.relTol = relTol_
+        else:
+            for relTol__, em in zip(relTol_, self.emitters.values()):
+                em.relTol = relTol__
+                
     ####################################################################
     # Method to set velocity dispersion to virial value
     ####################################################################
@@ -780,6 +882,7 @@ class cloud(object):
         """
 
         # Make sure composition-derived quantities are initialized
+        #import pdb; pdb.set_trace()
         if self.comp.mu == 0.0:
             self.comp.computeDerived(self.nH)
 
@@ -895,9 +998,10 @@ class cloud(object):
                                 raise despoticError("convergence " +
                                     "failed for "+em.name)
                             else:
-                                print("Warning: convergence failed " + 
-                                    "for "+em.name+", RETRYING " + 
-                                    "with damping factor = " + str(dFac))
+                                if not self.noWarn:
+                                    print("Warning: convergence failed " + 
+                                          "for "+em.name+", RETRYING " + 
+                                          "with damping factor = " + str(dFac))
                 else:
                     # Safety check
                     if em.levPopInitialized == False:
@@ -1518,7 +1622,7 @@ class cloud(object):
                 transition=None, thin=False, intOnly=False,
                 TBOnly=False, lumOnly=False,
                 escapeProbGeom='sphere', dampFactor=None,
-                noRecompute=False, abstol=1.0e-8,
+                noRecompute=False, absTol=None, relTol=None,
                 verbose=False):
         """
         Return the frequency-integrated intensity of various lines
@@ -1563,7 +1667,14 @@ class cloud(object):
               are already initialized
            dampFactor : float
               damping factor to use in level population calculations;
-              default is the value of dampFactor attached to the emitter
+              default is the value of dampFactor attached to the
+              emitter
+           absTol : float
+              absolute tolerance when calculating level populations;
+              default is the value of absTol for the emitter
+           relTol : float
+              absolute tolerance when calculating level populations;
+              default is the value of relTol for the emitter
            noRecompute : False
               if True, level populations and escape probabilities are
               not recomputed; instead, stored values are used
@@ -1633,7 +1744,7 @@ class cloud(object):
                 em.setLevPopEscapeProb(
                     self, noClump=noClump, dampFactor=dampFactor, 
                     escapeProbGeom=escapeProbGeom, 
-                    abstol=abstol, verbose=verbose)
+                    absTol=absTol, relTol=relTol, verbose=verbose)
         # Safety check: make sure we're initialized
         if em.levPopInitialized == False:
             raise despoticError('cannot use noRecompute if level' + 
