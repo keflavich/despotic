@@ -424,12 +424,17 @@ class cloud(object):
 
         # Read file
         try:
-            import os.path
-            # Hack to compute the path to the installed module root, so we can load files even when installed
-            module_dir = os.path.dirname(os.path.realpath(__file__))
-            fp = open(os.path.join(module_dir, fileName), 'r')
-            if verbose:
-                print("Reading from file "+fileName+"...")
+            # First look for the file locally
+            try:
+                fp = open(fileName, 'r')
+            except IOError:
+                # Look for file in despotic directory
+                import os.path
+                # Hack to compute the path to the installed module root, so we can load files even when installed
+                module_dir = os.path.dirname(os.path.realpath(__file__))
+                fp = open(os.path.join(module_dir, fileName), 'r')
+                if verbose:
+                    print("Reading from file "+fileName+"...")
         except IOError:
             raise despoticError("cannot open file "+fileName)
         for line in fp:
