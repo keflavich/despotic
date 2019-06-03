@@ -221,6 +221,8 @@ class emitterData(object):
         emitterFile = []
         emitterFile.append(emitName+'.dat')      # Usual extension
         emitterFile.append(emitName+'@xpol.dat') # Extrapolation flag
+        emitterFile.append(emitName+'@lique.dat') # Contributor name
+        emitterFile.append(emitName+'@daniel.dat') # Contributor name
         emitterFile.append(emitName+'atom.dat')  # Atom flag
         if emitName.lower() != emitName:         # Lowercase versions
             namesCopy = deepcopy(emitterFile)
