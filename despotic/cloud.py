@@ -424,7 +424,10 @@ class cloud(object):
 
         # Read file
         try:
-            fp = open(fileName, 'r')
+            import os.path
+            # Hack to compute the path to the installed module root, so we can load files even when installed
+            module_dir = os.path.dirname(os.path.realpath(__file__))
+            fp = open(os.path.join(module_dir, fileName), 'r')
             if verbose:
                 print("Reading from file "+fileName+"...")
         except IOError:
