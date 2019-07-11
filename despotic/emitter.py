@@ -25,6 +25,7 @@ knownEmitterData.
 import numpy as np
 from scipy.optimize import root
 from scipy.optimize import brentq
+from scipy.optimize import nnls
 import os
 from .despoticError import despoticError
 from .emitterData import emitterData
@@ -108,6 +109,13 @@ class emitter(object):
        dampFactor : float
           default damping factor to use when iteratively calculating
           level populations
+       maxIter : int
+          maximum number of iterations to allow when calculating level
+          populations
+       absTol : float
+          absolute tolerance when calculating level populations
+       relTol : float
+          relative tolerance when calculating level populations
     """
 
     ####################################################################
@@ -115,7 +123,8 @@ class emitter(object):
     ####################################################################
     def __init__(self, emitName, emitAbundance, extrap=True,
                  energySkip=False, emitterFile=None,
-                 emitterURL=None, dampFactor=0.5):
+                 emitterURL=None, dampFactor=0.5, maxIter=200,
+                 absTol=1e-8, relTol=1e-6):
 
         """
         Initialization routine
@@ -141,6 +150,13 @@ class emitter(object):
           dampFactor : float
              default damping factor to use when iteratively calculating
              level populations
+          maxIter : int
+             maximum number of iterations to allow when calculating level
+             populations
+          absTol : float
+             absolute tolerance when calculating level populations
+          relTol : float
+             relative tolerance when calculating level populations
 
         Returns
            Nothing
@@ -151,6 +167,9 @@ class emitter(object):
         self.abundance = emitAbundance
         self.energySkip = energySkip
         self.dampFactor = dampFactor
+        self.maxIter = maxIter
+        self.absTol = absTol
+        self.relTol = relTol
 
         # Get emitter data
         if emitName in knownEmitterData:
@@ -502,7 +521,8 @@ class emitter(object):
             # Kill levels that are below the minimum for both
             levPopMax = np.maximum(levPopLTEGas, levPopLTERad)
             levKeep = np.delete(levKeep, np.where(levPopMax < machineeps))
-            levDel = np.setdiff1d(np.arange(self.data.nlev, dtype='int'), levKeep)
+            levDel = np.setdiff1d(np.arange(self.data.nlev, dtype='int'),
+                                  levKeep)
 
             # Build new matrix with some levels removed
             m = msave
@@ -574,13 +594,14 @@ class emitter(object):
                     infoDict['mRed2'] = m2
 
         # Step 5. Do the non-linear least squares solve to get the
-        # level populations. Handle special case of only on level
+        # level populations. Handle special case of only one level
         # present by just setting the population of that level to
         # unity.
         if diagOnly == True:
             return infoDict
         if len(b) > 2:
-            self.levPop, res, rank, s = np.linalg.lstsq(m2, b)
+            #self.levPop, res, rank, s = np.linalg.lstsq(m2, b)
+            self.levPop, res = nnls(m2, b)
         else:
             self.levPop = array([1.0])
 
@@ -591,8 +612,10 @@ class emitter(object):
             self.levPop = np.zeros(self.data.nlev)
             self.levPop[levKeep] = levPop
 
-        # Step 6. Floor to avoid numerical issues
+        # Step 6. Floor to avoid numerical issues, and enforce that
+        # sum of level populations is unity to machine precision
         self.levPop[self.levPop < small] = small
+        self.levPop = self.levPop / np.sum(self.levPop)
 
         # Flag that level populations are now set
         self.levPopInitialized = True
@@ -688,7 +711,7 @@ class emitter(object):
                                 str(escapeProbGeom))
 
         # Make negative escape probabilities positive to avoid
-        #numerical problems
+        # numerical problems
         self.escapeProb[self.escapeProb < 0.0] = \
             -self.escapeProb[self.escapeProb < 0.0]
 
@@ -702,8 +725,8 @@ class emitter(object):
     ####################################################################
     def setLevPopEscapeProb(self, thisCloud, escapeProbGeom='sphere',
                             noClump=False, verbose=False,
-                            reltol=1e-6, abstol=1e-8,
-                            maxiter=200, veryverbose=False,
+                            relTol=None, absTol=None,
+                            maxIter=None, veryverbose=False,
                             dampFactor=None):
         """
         Compute escape probabilities and level populations
@@ -730,34 +753,37 @@ class emitter(object):
            veryverbose : Boolean
               if True, a very large amount of diagnostic information is
               printed; probably useful only for debugging
-           reltol : float
+           relTol : float
               relative tolerance; convergence is considered to have
               occured when the absolute value of the difference
               between two iterations, divided by the larger of the two
-              results being differences, is less than reltol
-           abstol : float
+              results being differences, is less than relTol; if left
+              as None, defaults to self.relTol
+           absTol : float
               absolute tolerance; convergence is considered to have
               occured when the absolute value of the difference
-              between two iterations is less than abstol
-           maxiter : int
-              maximum number of iterations to allow
+              between two iterations is less than absTol; if left as
+              None, defaults to self.absTol
+           maxIter : int
+              maximum number of iterations to allow; if left as None,
+              defaults to the value of self.maxIter
            dampFactor : float
               a number in the range (0, 1] that damps out changes in level
               populations at each iteration. A value of 1 means no
               damping, while a value of 0 means the level populations
               never change. If left as None, the value used will be
               the value of self.dampFactor
-
+           
         Remarks
            Convergence occurs when either the relative or the absolute
            tolerance condition is satisfied. To disable either relative
            or absolute tolerance checking, just set the appropriate
            tolerance <= 0. However, be warned that in many circumstances
-           disabling absolute tolerances will gaurantee non-convergence,
-           because truncation errors tend to produce large relative
-           residuals for high energy states whose populations are very
-           low, and no amount of iterating will reduce these errors
-           substantially.
+           disabling absolute tolerances will almost always guarantee
+           non-convergence, because truncation errors tend to produce
+           large relative residuals for high energy states whose
+           populations are very low, and no amount of iterating will
+           reduce these errors substantially.
         """
 
         # Sanitize inputs
@@ -768,6 +794,18 @@ class emitter(object):
             dFac = self.dampFactor
         else:
             dFac = dampFactor
+        if maxIter is None:
+            maxiter = self.maxIter
+        else:
+            maxiter = maxIter
+        if absTol is None:
+            abstol = self.absTol
+        else:
+            abstol = absTol
+        if relTol is None:
+            reltol = self.relTol
+        else:
+            reltol = relTol
 
         # Get collision rate matrix with clumping factor correction
         qcoltrans = self.data.collRateMatrix(
@@ -837,7 +875,8 @@ class emitter(object):
             if np.linalg.cond(m) <= 1.0/(1.0e9*machineeps):
 
                 # Condition number ok, so solve
-                self.levPop, res, rank, s = np.linalg.lstsq(m, b)
+                #self.levPop, res, rank, s = np.linalg.lstsq(m, b)
+                self.levPop, res = nnls(m, b)
 
             else:
 
@@ -912,7 +951,8 @@ class emitter(object):
                 # now construct the RHS and solve
                 bred = np.zeros(len(levKeep)+1)
                 bred[-1] = 1.0
-                levPop, res, rank, s = np.linalg.lstsq(mred, bred)
+                #levPop, res, rank, s = np.linalg.lstsq(mred, bred)
+                levPop, res = nnls(mred, bred)
                 self.levPop[levKeep] = levPop
                 self.levPop[levDel] = 0.0
 
@@ -956,6 +996,11 @@ class emitter(object):
         # valid
         self.levPopInitialized = True
         self.escapeProbInitialized = True
+
+        # For level populations to add up to unity to machine
+        # precision; the solver enforces this only to machine
+        # precision divided by the condition number of the matrix
+        self.levPop = self.levPop / np.sum(self.levPop)
 
         # return success
         return True
