@@ -3,7 +3,8 @@
 import os
 import os.path as osp
 import sys
-from distutils.core import setup, Command
+from setuptools import setup
+from distutils.core import Command
 import subprocess
 import numpy
 if 'develop' in sys.argv:
