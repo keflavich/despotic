@@ -349,7 +349,7 @@ def _twobody_ratecoef(T, n, nH, nH2, ne, chi):
     ci = np.array([3.4e-8, 6.97e-9, 1.31e-7, 1.51e-4])
     Ti = np.array([7.62, 1.38, 2.66e1, 8.11e3])
     ratecoef[0] = 1.04e-9*(300.0/T)**0.00231 + \
-                  T**1.5 * np.sum(ci*np.exp(-Ti/T))
+                  T**-1.5 * np.sum(ci*np.exp(-Ti/T))
 
     # (2) H3+ + O -> OHx + H2
     kH2OpH2 = 6.0e-10
