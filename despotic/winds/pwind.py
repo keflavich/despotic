@@ -22,7 +22,7 @@ calculating atomic properties, and to provide vector broadcasting.
 ########################################################################
 
 from .pwind_interface import libpwind
-from .pwind_util import pM, pA
+from .pwind_util import pM, pA, tX
 import numpy as np
 from ctypes import c_double
 
