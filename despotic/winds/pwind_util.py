@@ -4,6 +4,14 @@ This module contains some utility functions for momentum-driven winds
 
 import numpy as np
 from scipy.special import erf
+import scipy.constants as physcons
+me = physcons.m_e * 1e3
+mH = physcons.m_p * 1e3 + me
+h = physcons.h * 1e7
+c = physcons.c * 1e2
+G = physcons.G * 1e3
+kB = physcons.k * 1e7
+e = physcons.e * c/1e1
 
 def sxMach(mach):
     """
