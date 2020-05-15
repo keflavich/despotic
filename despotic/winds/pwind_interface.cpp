@@ -332,3 +332,8 @@ void set_geometry(const pwind_geom *geom, pwind *pw)
 void set_fcrit(const double fcrit, pwind *pw)
 { pw->setFcrit(fcrit); }
 
+// Expose methods for handling errors
+int get_err(const pwind *pw) { return pw->getErr(); }
+void set_err(const int err, pwind *pw) { pw->setErr(err); }
+void clear_err(pwind *pw) { pw->clearErr(); }
+const char *get_err_str(const pwind *pw) { return pw->getErrStr(); }

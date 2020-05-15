@@ -1,5 +1,5 @@
 #include "pwind_hot.H"
-#include "pwind_util.H"
+#include "pwind_util.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_poly.h>

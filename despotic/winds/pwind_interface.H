@@ -223,4 +223,10 @@ extern "C" {
   	     const double boltzfac, const bool correlated, const double fw,
 	     const double varpi, const double varpi_t, const bool thin,
 	     const pwind *pw);
+
+  // Error management
+  int get_err(const pwind *pw);
+  void set_err(const int err, pwind *pw);
+  void clear_err(pwind *pw);
+  const char *get_err_str(const pwind *pw);
 }

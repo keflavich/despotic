@@ -6,7 +6,7 @@ import numpy as np
 import os
 import os.path as osp
 import numpy.ctypeslib as npct
-from ctypes import c_double, c_void_p, c_bool, c_ulong
+from ctypes import c_double, c_void_p, c_bool, c_ulong, c_int, c_char_p
 
 # Type definition
 array_1d_double = npct.ndpointer(dtype=np.double, ndim=1,
@@ -215,3 +215,13 @@ libpwind.eta.argtypes = [ c_double, c_double, c_double, c_double, c_bool,
 libpwind.Psi.restype = c_double
 libpwind.Psi.argtypes = [ c_double, c_double, c_double, c_bool,
                           c_double, c_double, c_double, c_bool, c_void_p ]
+
+# Error management methods
+libpwind.get_err.restype = c_int
+libpwind.get_err.argtypes = [ c_void_p ]
+libpwind.set_err.restype = None
+libpwind.set_err.argtypes = [ c_int, c_void_p ]
+libpwind.clear_err.restype = None
+libpwind.clear_err.argtypes = [ c_void_p ]
+libpwind.get_err_str.restype = c_char_p
+libpwind.get_err_str.argtypes = [ c_void_p ]

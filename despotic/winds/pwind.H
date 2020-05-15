@@ -9,8 +9,9 @@
 #include "pwind_expansion.H"
 #include "pwind_geom.H"
 #include "pwind_potential.H"
-#include "pwind_util.H"
+#include "pwind_util.h"
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_errno.h>
 
 class pwind {
 
@@ -23,17 +24,12 @@ public:
 	const pwind_geom *geom_ =
 	static_cast<const pwind_geom *>(&pw_geom_sphere),
 	const double epsabs_ = 1.0e-6, const double epsrel_ = 1.0e-6,
-	const double fcrit_ = 1.0) :
-    potential(potential_),
-    expansion(expansion_),
-    geom(geom_),
-    Gamma(Gamma_), mach(mach_), fcrit(fcrit_),
-    epsabs(epsabs_), epsrel(epsrel_),
-    sx(sxMach(mach)) { };
+	const double fcrit_ = 1.0);
 
   // Destructor; virtual so that we force the derived class's delete
-  // method to be called when we are deleted
-  virtual ~pwind() { };
+  // method to be called when we are deleted; the only thing this does
+  // is restore the old GSL error handler
+  virtual ~pwind() { gsl_set_error_handler(err_handler); };
 
   // Shortcuts to expansion and potential functions, for simplicity
   double y(const double a) const { return expansion->y(a); }
@@ -226,6 +222,12 @@ public:
 	     const bool correlated, const double fw=-1.0,
 	     const double varpi=0.0, const double varpi_t=0.0,
 	     const bool thin=false) const;
+
+  // Error management functions
+  int getErr() const { return gsl_err_stat; }
+  void setErr(int err_stat) const { gsl_err_stat = err_stat; }
+  void clearErr() const { gsl_err_stat = GSL_SUCCESS; }
+  const char *getErrStr() const { return gsl_strerror(gsl_err_stat); }
   
 protected:
 
@@ -238,10 +240,15 @@ protected:
   const double Gamma;
   double mach, theta, phi, fcrit;
   mutable double epsabs, epsrel;
+
+  // GSL error status and handling
+  mutable int gsl_err_stat;
+  gsl_error_handler_t *err_handler;
+  void checkForErr(int gsl_err) const {
+    if (gsl_err != GSL_SUCCESS) gsl_err_stat = gsl_err; }
   
   // Derived data; some must be defined by derived classes
   double sx, xcrit, zeta_M, zeta_A, umax, amax_abs;
-
 };
 
 #endif

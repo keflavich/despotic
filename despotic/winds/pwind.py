@@ -24,6 +24,7 @@ calculating atomic properties, and to provide vector broadcasting.
 from .pwind_interface import libpwind
 from .pwind_util import pM, pA, tX
 import numpy as np
+from warnings import warn
 from ctypes import c_double
 
 ########################################################################
@@ -54,7 +55,7 @@ class pwind(object):
                  epsabs=1.0e-4, epsrel=1.0e-2,
                  theta=None, phi=None, theta_in=None,
                  tau0=None, uh=None, interpabs=1.0e-2,
-                 interprel=1.0e-2):
+                 interprel=1.0e-2, error_policy="warn"):
         """
         Creates a generic wind object to compute observable property
         of winds
@@ -120,6 +121,17 @@ class pwind(object):
            interprel: float
               same as interpabs, but giving relative rather tahn
               absolute error tolerance
+           error_policy: 'warn' | 'halt' | 'silent'
+              policy on how to respond to numerical errors in
+              evaluation of integrals, most commonly having to do with
+              inability to achieve the requested tolerance; such
+              errors will always lead to error_stat being set, but
+              additional behavior depends on the value of error_policy;
+              options are: 'warn' means that a warning will be issued,
+              but the calculation will continue; 'halt' means that a
+              RuntimeError will be raised; 'silent' means that there
+              will be no visible warning or error, just a change in the 
+              error_stat
         """
 
         # Record information
@@ -139,6 +151,10 @@ class pwind(object):
         self.uh_ = uh
         self.interpabs_ = interpabs
         self.interprel_ = interprel
+
+        # Set up error handling options
+        self.error_policy = error_policy
+        self.error_stat = None
 
         # Build the c++ class we are wrapping
         self.__pw = None
@@ -914,6 +930,8 @@ class pwind(object):
            momentum flux. It is an error if one is None and the other
            is not.
         """
+
+        # Call c code to do computation
         bcast = np.broadcast(a, fg, tctw)
         pdot = np.zeros(bcast.shape)
         i = 0
@@ -928,10 +946,23 @@ class pwind(object):
                     "pwind.pdot: fg and tctw must both be None, or"
                     " neither be None")
             i = i+1
+
+        # Manage return type
         if not hasattr(a, '__iter__') and \
            not hasattr(fg, '__iter__') and \
            not hasattr(tctw, '__iter__'):
             pdot = float(pdot)
+
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+
+        # Return
         return pdot
     
     ################################################################
@@ -1139,6 +1170,8 @@ class pwind(object):
                                           varpi_, varpi_t_, a0_, a1_,
                                           self.__pw)
             i = i+1
+
+        # Manage return type
         if u_trans is None:
             if (not hasattr(u, '__iter__')) and \
                (not hasattr(tXtw, '__iter__')) and \
@@ -1159,6 +1192,16 @@ class pwind(object):
                (not hasattr(a0, '__iter__')) and \
                (not hasattr(a1, '__iter__')):
                 tau_c = float(tau_uc)
+                
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return tau_uc
                 
     def tau_c(self, u, tXtw=None, abd=None, Omega=None, wl=None,
@@ -1284,6 +1327,8 @@ class pwind(object):
                                          fw_, varpi_, varpi_t_, a0_, a1_,
                                          self.__pw)
             i = i+1
+
+        # Manage return type
         if u_trans is None:
             if (not hasattr(u, '__iter__')) and \
                (not hasattr(tXtw, '__iter__')) and \
@@ -1306,6 +1351,16 @@ class pwind(object):
                (not hasattr(a0, '__iter__')) and \
                (not hasattr(a1, '__iter__')):
                 tau_c = float(tau_c)
+                
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return tau_c
 
 
@@ -1346,6 +1401,8 @@ class pwind(object):
             Phi_c.flat[i] = libpwind.Phi_c(u_, fw_, varpi_, varpi_t_,
                                            a0_, a1_, self.__pw)
             i = i+1
+
+        # Manage return type
         if (not hasattr(u, '__iter__')) and \
            (not hasattr(fw, '__iter__')) and \
            (not hasattr(varpi, '__iter__')) and \
@@ -1353,6 +1410,16 @@ class pwind(object):
            (not hasattr(a0, '__iter__')) and \
            (not hasattr(a1, '__iter__')):
             Phi_c = float(Phi_c)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return Phi_c
     
     def Phi_uc(self, u, varpi=0.0, varpi_t=0.0, a0=1.0,
@@ -1388,12 +1455,24 @@ class pwind(object):
             Phi_uc.flat[i] = libpwind.Phi_uc(u_, varpi_, varpi_t_,
                                              a0_, a1_, self.__pw)
             i = i+1
+
+        # Manage return type
         if (not hasattr(u, '__iter__')) and \
            (not hasattr(varpi, '__iter__')) and \
            (not hasattr(varpi_t, '__iter__')) and \
            (not hasattr(a0, '__iter__')) and \
            (not hasattr(a1, '__iter__')):
             Phi_uc = float(Phi_uc)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return Phi_uc
 
     def Xi(self, u, varpi=0.0, varpi_t=0.0):
@@ -1418,13 +1497,24 @@ class pwind(object):
         Xi = np.zeros(bcast.shape)
         i = 0
         for (u_, varpi_, varpi_t_) in bcast:
-            #print u_, varpi_, varpi_t_
             Xi.flat[i] = libpwind.Xi(u_, varpi_, varpi_t_, self.__pw)
             i = i+1
+
+        # Manage return type
         if (not hasattr(u, '__iter__')) and \
            (not hasattr(varpi, '__iter__')) and \
            (not hasattr(varpi_t, '__iter__')):
             Xi = float(Xi)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return Xi
 
     def xi(self, varpi=0.0, varpi_t=0.0):
@@ -1448,9 +1538,21 @@ class pwind(object):
         for (varpi_, varpi_t_) in bcast:
             xi.flat[i] = libpwind.xi(varpi_, varpi_t_, self.__pw)            
             i = i+1
+
+        # Manage return type
         if (not hasattr(varpi, '__iter__')) and \
            (not hasattr(varpi_t, '__iter__')):
             xi = float(xi)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return xi
 
     
@@ -1532,6 +1634,8 @@ class pwind(object):
                                        correlated_, fw_, varpi_,
                                        varpi_t_, thin_, self.__pw)
             i = i+1
+            
+        # Manage return type
         if (not hasattr(u, '__iter__')) and \
            (not hasattr(tXtw, '__iter__')) and \
            (not hasattr(fj, '__iter__')) and \
@@ -1542,6 +1646,16 @@ class pwind(object):
            (not hasattr(varpi_t, '__iter__')) and \
            (not hasattr(thin, '__iter__')):
             eta = float(eta)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return eta
 
     def temp_LTE(self, u, T,
@@ -1730,6 +1844,8 @@ class pwind(object):
                                        varpi_, varpi_t_, thin_,
                                        self.__pw)
             i = i+1
+
+        # Manage return type
         if (not hasattr(tXtw, '__iter__')) and \
            (not hasattr(fj, '__iter__')) and \
            (not hasattr(boltzfac, '__iter__')) and \
@@ -1737,6 +1853,16 @@ class pwind(object):
            (not hasattr(varpi_t, '__iter__')) and \
            (not hasattr(thin, '__iter__')):
             Psi = float(Psi)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            libpwind.clear_err(self.__pw)
+            
         return Psi
 
     def intTA_LTE(self, v0, T,
@@ -1936,3 +2062,61 @@ class pwind(object):
         # Get final result and return
         X = emit.Xthin(trans=trans) * Psi_thin / (fi * Psi)
         return X
+    
+    ################################################################
+    # Utilities for error handling
+    ################################################################
+    @property
+    def error_policy(self):
+        return self.__error_policy
+    @error_policy.setter
+    def error_policy(self, val):
+        if val in ("warn", "halt", "silent"):
+            self.__error_policy = val
+        else:
+            raise ValueError("pwind.error_policy must be 'warn',"
+                             "'halt', or 'silent'")
+    @property
+    def error_stat(self):
+        return self.__error_stat
+    @error_stat.setter
+    def error_stat(self, val):
+        self.__error_stat = val
+        if self.error_policy == "warn" and val is not None:
+            warn("pwind: warning: "+str(val))
+        elif self.error_policy == "halt" and val is not None:
+            raise RuntimeError("pwind: error: "+str(val))
+        
+    @property
+    def errcode(self):
+        return libpwind.get_err(self.__pw)
+    @errcode.setter
+    def errcode(self, val):
+        libpwind.set_err(val, self.__pw)
+    @property
+    def errstr(self):
+        if self.errcode == 0:
+            return None
+        else:
+            try:
+                # Works in for python 3-style strings
+                return libpwind.get_err_str(self.__pw).decode("ascii")
+            except:
+                # For python 2-style strings
+                return libpwind.get_err_str(self.__pw)
+    @errstr.setter
+    def errstr(self, val):
+        raise NotImplementedError(
+            "pwind: can't set errstr directly; set errcode instead")
+        
+    def clear_err(self):
+        """
+        This method clears the error code
+
+        Parameters
+           None
+
+        Returns
+           Nothing
+        """
+        libpwind.clear_err(self.__pw)

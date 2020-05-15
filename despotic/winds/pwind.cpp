@@ -60,6 +60,7 @@ struct Xi_params {
 struct xi_params {
   double a, vp2;
   double epsabs, epsrel;
+  int gsl_err;
   const pwind *w;
 };
 
@@ -83,6 +84,25 @@ struct Psi_params {
   bool correlated, thin;
   const pwind *w;
 };
+
+////////////////////////////////////////////////////////////////////////
+// Constructor; note that we turn off GSL error handling here, because
+// we will handle errors manually
+////////////////////////////////////////////////////////////////////////
+pwind::pwind(const double Gamma_, const double mach_,
+	     const pwind_potential *potential_,
+	     const pwind_expansion *expansion_,
+	     const pwind_geom *geom_,
+	     const double epsabs_, const double epsrel_,
+	     const double fcrit_) :
+    potential(potential_),
+    expansion(expansion_),
+    geom(geom_),
+    Gamma(Gamma_), mach(mach_), fcrit(fcrit_),
+    epsabs(epsabs_), epsrel(epsrel_),
+    gsl_err_stat(GSL_SUCCESS),
+    err_handler(gsl_set_error_handler_off()),
+    sx(sxMach(mach)) { };
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -239,22 +259,26 @@ double pwind::pdot(const double a) const {
   // Get integration limits
   vector<double> xlim = xlimits(a);
 
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
+
   // Integrate
-  gsl_integration_workspace *w =
-    gsl_integration_workspace_alloc(MAXINTERVAL);
   double result, err;
   if (xlim[0] == -numeric_limits<double>::max()) {
-    gsl_integration_qagil(&F, xlim[1]+log(fcrit), epsabs, epsrel,
-			  MAXINTERVAL, w, &result, &err);
+    checkForErr(gsl_integration_qagil(&F, xlim[1]+log(fcrit), epsabs, epsrel,
+				      MAXINTERVAL, w, &result, &err));
   } else {
     if (xlim[1] - log(fcrit) > xlim[0])
-      gsl_integration_qag(&F, xlim[0], xlim[1]+log(fcrit), epsabs, epsrel,
-			  MAXINTERVAL, GSL_INTEG_GAUSS61, w, &result, &err);
-    else
+      checkForErr(gsl_integration_qag(&F, xlim[0], xlim[1]+log(fcrit),
+				      epsabs, epsrel,
+				      MAXINTERVAL, GSL_INTEG_GAUSS61,
+				      w, &result, &err));
+    else {
       result = 0.0;
+    }
   }
 
-  // Free
+  // Take down integration machinery
   gsl_integration_workspace_free(w);
 
   // Multiply by prefactor and return
@@ -399,28 +423,29 @@ double pwind::Phi_uc(const double u, const double varpi,
   F.function = &Phi_uc_integ;
   F.params = &par;
 
-  // Allocate workspace
-  gsl_integration_workspace *w =
-    gsl_integration_workspace_alloc(MAXINTERVAL);
-
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
+  
   // Integrate
   double integ = 0.0;
   for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
     if (alim[2*i+1] <= alim[2*i]) continue;
     if (alim[2*i+1] < numeric_limits<double>::max()) {
-      gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
-			  epsabs, epsrel, MAXINTERVAL,
-			  GSL_INTEG_GAUSS61, w, &result, &err);
+      checkForErr(gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
+				      epsabs, epsrel, MAXINTERVAL,
+				      GSL_INTEG_GAUSS61, w, &result, &err));
     } else {
-      gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
-			    MAXINTERVAL, w, &result, &err);
+      checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
+					MAXINTERVAL, w, &result, &err));
     }
     integ += result;
   }
   integ /= zeta_M;
 
-  // Free and return
+  // Take down integration machinery
   gsl_integration_workspace_free(w);
+  
+  // Return
   return integ;
 }
 
@@ -483,32 +508,33 @@ double pwind::Phi_c(const double u, const double fw,
   F.function = &Phi_c_integ;
   F.params = &par;
 
-  // Allocate workspace
-  gsl_integration_workspace *w =
-    gsl_integration_workspace_alloc(MAXINTERVAL);
-
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
+  
   // Integrate
   double integ = 0.0;
   for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
     if (alim[2*i+1] <= alim[2*i]) continue;
     if (alim[2*i+1] < numeric_limits<double>::max()) {
-      gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
-			  epsabs, epsrel, MAXINTERVAL,
-			  GSL_INTEG_GAUSS61, w, &result, &err);
+      checkForErr(gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
+				      epsabs, epsrel, MAXINTERVAL,
+				      GSL_INTEG_GAUSS61, w, &result, &err));
     } else {
-      gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
-			    MAXINTERVAL, w, &result, &err);
+      checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
+					MAXINTERVAL, w, &result, &err));
     }
     integ += result;
   }
   integ /= zeta_M;
 
+  // Take down integration machinery
+  gsl_integration_workspace_free(w);
+
   // Apply covering factor correction
   if (fw <= 0) integ /= zeta_A;
   else integ /= fw;
 
-  // Free and return
-  gsl_integration_workspace_free(w);
+  // Return
   return integ;
 }
 
@@ -519,10 +545,6 @@ static double tau_c_func(double b, void *params) {
   double a = 1.0 + exp(b);
   double tau = par->tXtw * par->fj * (1.0 - par->boltzfac) * 
     par->w->Phi_c(par->u, par->fw, sqrt(par->vp2), 0.0, 1.0, a, par->alim);
-  //cout << "a = " << a
-  //     << ", tau = " << tau
-  //     << ", err = " << tau-par->tau_target
-  //     << endl;
   return tau - par->tau_target;
 }
 
@@ -538,10 +560,6 @@ static double tau_c_func_vec(double b, void *params) {
       par->w->Phi_c(par->u - par->u_trans[k], par->fw, sqrt(par->vp2), 0.0,
 		    1.0, a, par->alim_k[k]);
   }
-  //cout << "a = " << a
-  //     << ", tau = " << tau
-  //     << ", err = " << tau-par->tau_target
-  //     << endl;
   return tau - par->tau_target;
 }
 
@@ -595,9 +613,8 @@ double pwind::tau_c(const double u, const double tXtw,
     F.function = &tau_c_integ;
     F.params = &par;
 
-    // Allocate workspace
-    gsl_integration_workspace *w =
-      gsl_integration_workspace_alloc(MAXINTERVAL);
+    // Set up integration
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
 
     // Integrate; this sometimes runs into trouble because the integrand
     // can have a-near step function discontinuity very close to the
@@ -653,24 +670,27 @@ double pwind::tau_c(const double u, const double tXtw,
     double res, result, err;
     result = 0.0;
     for (vector<double>::size_type i=0; i<loga_int_lim.size()-1; i++) {
-      gsl_integration_qag(&F, loga_int_lim[i], loga_int_lim[i+1],
-			  epsabs_save, epsrel_save,
-			  GSL_INTEG_GAUSS61, MAXINTERVAL,
-			  w, &res, &err);
+      checkForErr(gsl_integration_qag(&F, loga_int_lim[i], loga_int_lim[i+1],
+				      epsabs_save, epsrel_save,
+				      GSL_INTEG_GAUSS61, MAXINTERVAL,
+				      w, &res, &err));
       result += res;
     }
 
     // Final interval, out to infinity
-    gsl_integration_qagiu(&F, loga_int_lim.back(), epsabs_save, epsrel_save,
-			  MAXINTERVAL, w, &res, &err);
+    checkForErr(gsl_integration_qagiu(&F, loga_int_lim.back(),
+				      epsabs_save, epsrel_save,
+				      MAXINTERVAL, w, &res, &err));
     result += res;
 
     // Restore tolerance
     epsabs = epsabs_save;
     epsrel = epsrel_save;
     
-    // Free and return
+    // Take down integration machinery
     gsl_integration_workspace_free(w);
+    
+    // Return
     return -log(1.0 - fc0 + result);
   }
 }
@@ -752,9 +772,8 @@ double pwind::tau_c(const double u,
     F.function = &tau_c_integ_vec;
     F.params = &par;
 
-    // Allocate workspace
-    gsl_integration_workspace *w =
-      gsl_integration_workspace_alloc(MAXINTERVAL);
+    // Set up integration
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
 
     // Integrate; this sometimes runs into trouble because the integrand
     // can have a-near step function discontinuity very close to the
@@ -810,58 +829,27 @@ double pwind::tau_c(const double u,
     double res, result, err;
     result = 0.0;
     for (vector<double>::size_type i=0; i<loga_int_lim.size()-1; i++) {
-      //cout << "integrating from " << exp(loga_int_lim[i])
-      //   << " - " << exp(loga_int_lim[i+1])
-      //   << endl;
-      gsl_error_handler_t *err_handler = gsl_set_error_handler_off();
-      int errcode =
-	gsl_integration_qag(&F, loga_int_lim[i], loga_int_lim[i+1],
-			    epsabs_save, epsrel_save,
-			    GSL_INTEG_GAUSS61, MAXINTERVAL,
-			    w, &res, &err);
-      if (errcode != 0) {
-	if (errcode == GSL_EMAXITER) {
-	  cerr << "Warning in pwind::tau_c: gsl_integration_qag reports"
-	       << " requested tolerance cannot be reached in "
-	       << MAXINTERVAL << " sub-divisions; estimated error is "
-	       << err << " (absolute), " << err/res
-	       << " (relative); calculation will continue" << endl;
-	} else {
-	  abort();
-	}
-      }
-      gsl_set_error_handler(err_handler);
+      checkForErr(gsl_integration_qag(&F, loga_int_lim[i], loga_int_lim[i+1],
+				      epsabs_save, epsrel_save,
+				      GSL_INTEG_GAUSS61, MAXINTERVAL,
+				      w, &res, &err));
       result += res;
     }
 
     // Final interval, out to infinity
-    //cout << "integrating from " << exp(loga_int_lim.back())
-    //	 << " - inf" 
-    //	 << endl;
-    gsl_error_handler_t *err_handler = gsl_set_error_handler_off();
-    int errcode =
-      gsl_integration_qagiu(&F, loga_int_lim.back(), epsabs_save,
-			    epsrel_save, MAXINTERVAL, w, &res, &err);
-    if (errcode != 0) {
-      if (errcode == GSL_EMAXITER) {
-	cerr << "Warning in pwind::tau_c: gsl_integration_qag reports"
-	     << " requested tolerance cannot be reached in "
-	     << MAXINTERVAL << " sub-divisions; estimated error is "
-	     << err << " (absolute), " << err/res
-	     << " (relative); calculation will continue" << endl;
-      } else {
-	abort();
-      }
-    }
-    gsl_set_error_handler(err_handler);
+    checkForErr(gsl_integration_qagiu(&F, loga_int_lim.back(), epsabs_save,
+				      epsrel_save, MAXINTERVAL, w,
+				      &res, &err));
     result += res;
 
+    // Take down integration machinery
+    gsl_integration_workspace_free(w);
+    
     // Restore tolerance
     epsabs = epsabs_save;
     epsrel = epsrel_save;
-    
-    // Free and return
-    gsl_integration_workspace_free(w);
+        
+    // Return
     return -log(1.0 - fc0 + result);
   }
 }
@@ -1055,9 +1043,8 @@ void pwind::tau_interp_var_fc(const double u, const double tXtw,
   F.function = &tau_interp_var_fc_integ;
   F.params = &par;
 
-  // Allocate workspace
-  gsl_integration_workspace *w =
-    gsl_integration_workspace_alloc(MAXINTERVAL);
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
 
   // Now we need to build a grid of tau
 
@@ -1107,13 +1094,13 @@ void pwind::tau_interp_var_fc(const double u, const double tXtw,
 	double loga_hi = min(loga1, loga_int_lim[j+1]);
 	if (loga_lo >= loga_hi) continue;
 	if (loga_hi < log(numeric_limits<double>::max()))
-	  gsl_integration_qag(&F, loga_lo, loga_hi, epsabs,
-			      epsrel, MAXINTERVAL,
-			      GSL_INTEG_GAUSS61, w, &res, &err);
+	  checkForErr(gsl_integration_qag(&F, loga_lo, loga_hi, epsabs,
+					  epsrel, MAXINTERVAL,
+					  GSL_INTEG_GAUSS61, w, &res, &err));
 	else
-	  gsl_integration_qagiu(&F, loga_lo, epsabs,
-				epsrel, MAXINTERVAL, w,
-				&res, &err);
+	  checkForErr(gsl_integration_qagiu(&F, loga_lo, epsabs,
+					    epsrel, MAXINTERVAL, w,
+					    &res, &err));
 	integ += res;
       }
       if (integ == 0) {
@@ -1235,25 +1222,15 @@ void pwind::tau_interp_var_fc(const double u, const double tXtw,
 	  double loga_hi = min(loga1, loga_int_lim[j+1]);
 	  if (loga_lo >= loga_hi) continue;
 	  if (loga_hi < log(numeric_limits<double>::max())) {
-	    gsl_integration_qag(&F, loga_lo, loga_hi, epsabs,
-				epsrel, MAXINTERVAL,
-				GSL_INTEG_GAUSS61, w, &res, &err);
+	    checkForErr(gsl_integration_qag(&F, loga_lo, loga_hi, epsabs,
+					    epsrel, MAXINTERVAL,
+					    GSL_INTEG_GAUSS61, w, &res, &err));
 	    integ += res;
 	  } else {
-	    // Don't bail if we can't converge due to roundoff; also,
-	    // break up the integration interval to improve convergence
-	    gsl_error_handler_t *tmp_handler = gsl_set_error_handler_off();
-	    int success =
-	      gsl_integration_qagiu(&F, loga_lo, epsabs,
-				    epsrel, MAXINTERVAL, w,
-				    &res, &err);
+	    checkForErr(gsl_integration_qagiu(&F, loga_lo, epsabs,
+					      epsrel, MAXINTERVAL, w,
+					      &res, &err));
 	    integ += res;
-	    if (success != GSL_EROUND && success != GSL_SUCCESS) {
-	      cerr << "GSL integration error, "
-		   << gsl_strerror(success) << endl;
-	      abort();
-	    }
-	    gsl_set_error_handler(tmp_handler);
 	  }
 	}
 
@@ -1336,21 +1313,20 @@ double pwind::Xi(const double u, const double varpi,
   F.function = &Xi_integ;
   F.params = &par;
 
-  // Allocate workspace
-  gsl_integration_workspace *w =
-    gsl_integration_workspace_alloc(MAXINTERVAL);
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
 
   // Integrate
   double integ = 0.0;
   for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
     double result, err;
     if (alim[2*i+1] < numeric_limits<double>::max()) {
-      gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
-			  epsabs, epsrel, MAXINTERVAL,
-			  GSL_INTEG_GAUSS61, w, &result, &err);
+      checkForErr(gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
+				      epsabs, epsrel, MAXINTERVAL,
+				      GSL_INTEG_GAUSS61, w, &result, &err));
     } else {
-      gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
-			    MAXINTERVAL, w, &result, &err);
+      checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
+					MAXINTERVAL, w, &result, &err));
     }
     integ += result;
   }
@@ -1392,18 +1368,26 @@ static double xi_integ_s(double s, void *params) {
 
   // Integrate
   double result, err;
+  int success;
   if (xlim[0] == -numeric_limits<double>::max()) {
-    gsl_integration_qagil(&F, xlim[1]+log(par->w->getFcrit()),
-			  par->epsabs, par->epsrel,
-			  MAXINTERVAL, w, &result, &err);
+    success = gsl_integration_qagil(&F, xlim[1]+log(par->w->getFcrit()),
+				    par->epsabs, par->epsrel,
+				    MAXINTERVAL, w, &result, &err);
   } else {
     if (xlim[0] < xlim[1]+log(par->w->getFcrit()))
-      gsl_integration_qag(&F, xlim[0], xlim[1]+log(par->w->getFcrit()),
-			  par->epsabs, par->epsrel,
-			  MAXINTERVAL, GSL_INTEG_GAUSS61, w, &result, &err);
-    else
+      success = gsl_integration_qag(&F, xlim[0],
+				    xlim[1]+log(par->w->getFcrit()),
+				    par->epsabs, par->epsrel,
+				    MAXINTERVAL, GSL_INTEG_GAUSS61, w,
+				    &result, &err);
+    else {
       result = 0.0;
+      success = GSL_SUCCESS;
+    }
   }
+
+  // Store error status
+  if (success != GSL_SUCCESS) par->gsl_err = success;
 
   // Multiply by prefactor
   result /= (par->w->y(par->a) * SQR(par->a));
@@ -1432,6 +1416,7 @@ double pwind::xi(const double varpi, const double varpi_t) const {
   par.epsrel = epsrel;
   par.epsabs = epsabs;
   par.w = this;
+  par.gsl_err = GSL_SUCCESS;
   gsl_function F;
   F.function = &xi_integ_s;
   F.params = &par;
@@ -1450,22 +1435,26 @@ double pwind::xi(const double varpi, const double varpi_t) const {
       slim[2*i] = -sqrt(SQR(amax_abs)+par.vp2);
     if (slim[2*i] > -numeric_limits<double>::max() &&
 	slim[2*i+1] < numeric_limits<double>::max()) {
-      gsl_integration_qag(&F, slim[2*i], slim[2*i+1],
-      			  epsabs, epsrel, MAXINTERVAL,
-			  GSL_INTEG_GAUSS61, w, &result, &err);
+      checkForErr(gsl_integration_qag(&F, slim[2*i], slim[2*i+1],
+				      epsabs, epsrel, MAXINTERVAL,
+				      GSL_INTEG_GAUSS61, w, &result, &err));
     } else if (slim[2*i] > -numeric_limits<double>::max()) {
-      gsl_integration_qagiu(&F, slim[2*i], epsabs, epsrel,
-			    MAXINTERVAL, w, &result, &err);
+      checkForErr(gsl_integration_qagiu(&F, slim[2*i], epsabs, epsrel,
+					MAXINTERVAL, w, &result, &err));
     } else if (slim[2*i+1] < numeric_limits<double>::max()) {
-      gsl_integration_qagil(&F, slim[2*i+1], epsabs, epsrel,
-			    MAXINTERVAL, w, &result, &err);
+      checkForErr(gsl_integration_qagil(&F, slim[2*i+1], epsabs, epsrel,
+					MAXINTERVAL, w, &result, &err));
     } else {
-      gsl_integration_qagi(&F, epsabs, epsrel,
-			   MAXINTERVAL, w, &result, &err);
+      checkForErr(gsl_integration_qagi(&F, epsabs, epsrel,
+				       MAXINTERVAL, w, &result, &err));
     }
     integ += result;
   }
   integ /= SQR(zeta_M);
+
+  // If one of the inner integrals threw an error, be sure to record
+  // that
+  if (par.gsl_err != GSL_SUCCESS) gsl_err_stat = par.gsl_err;
 
   // Free and return
   gsl_integration_workspace_free(w);
@@ -1590,9 +1579,10 @@ double pwind::eta(const double u, const double tXtw,
       double loga_hi = min(loga_int_lim[j+1], log(alim[2*i+1]));
       if (loga_lo >= loga_hi) continue;
       if (loga_hi < log(numeric_limits<double>::max())) {
-	gsl_integration_qag(&F, loga_lo, loga_hi, epsabs,
-			    epsrel, MAXINTERVAL, GSL_INTEG_GAUSS61, w,
-			    &res, &err);
+	checkForErr(gsl_integration_qag(&F, loga_lo, loga_hi, epsabs,
+					epsrel, MAXINTERVAL,
+					GSL_INTEG_GAUSS61, w,
+					&res, &err));
       } else {
 	if ((fabs(2*loga_lo - log(par.vp2)) > 0.1) &&
 	    (loga_lo > 0.1)) {
@@ -1604,11 +1594,12 @@ double pwind::eta(const double u, const double tXtw,
 	  // a_min = 1. We check for this case and avoid it by
 	  // breaking up the integral.
 	  double res1; 
-	  gsl_integration_qag(&F, loga_lo, loga_lo+0.1, epsabs,
-			      epsrel, MAXINTERVAL, GSL_INTEG_GAUSS61, w,
-			      &res1, &err);
-	  gsl_integration_qagiu(&F, loga_lo+0.1, epsabs, epsrel,
-				MAXINTERVAL, w, &res, &err);
+	  checkForErr(gsl_integration_qag(&F, loga_lo, loga_lo+0.1, epsabs,
+					  epsrel, MAXINTERVAL,
+					  GSL_INTEG_GAUSS61, w,
+					  &res1, &err));
+	  checkForErr(gsl_integration_qagiu(&F, loga_lo+0.1, epsabs, epsrel,
+					    MAXINTERVAL, w, &res, &err));
 	  res += res1;
 	}
       }
@@ -1659,9 +1650,8 @@ double pwind::Psi(const double tXtw,
   F.function = &Psi_integ;
   F.params = &par;
 
-  // Allocate workspace
-  gsl_integration_workspace *w =
-    gsl_integration_workspace_alloc(MAXINTERVAL);
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
 
   // Increase internal accuracy; this is needed to make the
   // computation of eta accurate enough to allow convergence
@@ -1672,28 +1662,14 @@ double pwind::Psi(const double tXtw,
 
   // Integrate
   double res, err;
-  gsl_error_handler_t *tmp_handler = gsl_set_error_handler_off();
-  int success =
-    gsl_integration_qagi(&F, epsabs_save, epsrel_save, MAXINTERVAL,
-			 w, &res, &err);
-  if (success != GSL_EROUND && success != GSL_SUCCESS) {
-    cerr << "pwind::Psi: GSL integration error, "
-	 << gsl_strerror(success)
-	 << "; final estimate = " << res << endl;
-    abort();
-  }
-  if (success == GSL_EROUND) {
-    cerr << "pwind::Psi: warning: could not achieve "
-	 << "requested tolerance, returning closest estimate"
-	 << endl;
-  }
-  gsl_set_error_handler(tmp_handler);
+  checkForErr(gsl_integration_qagi(&F, epsabs_save, epsrel_save, MAXINTERVAL,
+				   w, &res, &err));
 
   // Restore accuracy target
   epsabs = epsabs_save;
   epsrel = epsrel_save;
 
-  // Free workspace
+  // Take down integration machinery
   gsl_integration_workspace_free(w);
 
   // Return
