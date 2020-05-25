@@ -1,5 +1,5 @@
 #include "pwind_geom.H"
-#include "pwind_util.H"
+#include "pwind_util.h"
 #include <algorithm>
 #include <limits>
 

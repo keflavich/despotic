@@ -1486,9 +1486,17 @@ static double eta_integ(double loga, void *params) {
   if (par->thin) beta = 1.0;
   else beta = exp(-gsl_spline_eval(par->tau_spl, loga, par->tau_acc));
 
-  // Return integrand
+  // Return integrand; note that we adda numerical safety to dU2dx to
+  // handle a specific case: if both X(ur, a) and the limits on the
+  // integration have to be determined numerically, then when one is
+  // at the limit of the integral, it is possible that the inversion
+  // required to get X(ur, a) will fail, and X will wind up being set
+  // to xlo. When this happens, evaluation of pM(x) / dU2dx can
+  // produce 0 / 0 = NaN. We avoid this by adding a safety in the
+  // denominator of the intregrand.
   double ret = 1.0 / (a - par->vp2/a) * beta *
-    pM(x, par->w->s()) / fabs(dU2dx);
+    pM(x, par->w->s()) /
+    (fabs(dU2dx) + numeric_limits<double>::epsilon());
   return ret;
 }
 

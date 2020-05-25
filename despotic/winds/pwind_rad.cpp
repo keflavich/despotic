@@ -296,8 +296,7 @@ static double U2max_func_loga(double loga, void *params) {
   // This routine returns the residual for U2max(a) - U2_target
   struct U2max_params *par = (struct U2max_params *) params;
   double a = exp(loga);
-  double U2 = SQR(par->u) / (1.0 - par->vp2/SQR(a));
-  double ret = U2 - par->pw->U2max(a);
+  double ret = SQR(par->u) - par->pw->U2max(a) * (1.0 - par->vp2/SQR(a));
   // GSL doesn't like infinities
   if (ret > numeric_limits<double>::max())
     ret = numeric_limits<double>::max();
@@ -337,6 +336,7 @@ pwind_rad_isothermal::a_from_u_max(const double u,
 
   // Ensure that the root is properly bracketed; return -1 if not
   double sgn1 = U2max_func_loga(loga_lo, &params);
+  if (loga_lo ==  0.5*log(params.vp2)) sgn1 = 0.0;
   double sgn2 = U2max_func_loga(loga_hi, & params);
   if (sgn1*sgn2 > 0){
     gsl_root_fsolver_free(s);
@@ -370,9 +370,8 @@ static double a_max_u_loga(double loga, void *params) {
   // a_max_umax_from_varpi
   struct a_max_u_params *par = (struct a_max_u_params *) params;
   double a = exp(loga);
-  double ret = par->pw->dU2da(par->x, a) +
-    2.0*par->pw->U2(par->x, a) * par->vp2 /
-    (a * (SQR(a) - par->vp2));
+  double ret = (1.0 - par->vp2/SQR(a)) * par->pw->dU2da(par->x, a) +
+    par->vp2 / (a*SQR(a)) * par->pw->U2(par->x, a);
   // GSL doesn't like infinities
   if (ret > numeric_limits<double>::max())
     ret = numeric_limits<double>::max();
@@ -388,13 +387,13 @@ a_max_u_from_varpi(const double x, const double varpi,
 		   const int maxiter) const {
   // To understand what this function does, note that
   //
-  // u^2 = ur^2 / (1 - varpi^2/a^2),
+  // u^2 = ur^2 * (1 - varpi^2/a^2),
   //
   // so the maximum of u^2 (or u) occurs at the radius a that
   // satisfies
   //
-  // 0 = d/da [ur^2 / (1 - varpi^2/a^2)]
-  // 0 = d/da ur^2 + 2 varpi^2 ur^2 / [a (a^2 - varpi^2) ]
+  // 0 = d/da [ur^2 * (1 - varpi^2/a^2)]
+  // 0 = (1 - varpi^2/a^2) * d/da ur^2 + varpi^2 / (2 a^3) * ur^2
 
   // Prepare data for GSL
   struct a_max_u_params par;
@@ -445,8 +444,10 @@ static double a_max_umax_loga(double loga, void *params) {
   // Handle the case with a == varpi exactly by hand, to avoid
   // producing infinities that will crash the GSL
   if (SQR(a) == par->vp2) return numeric_limits<double>::max();
-  double ret = par->pw->dU2maxda(a) +
-    2.0*par->pw->U2max(a) / (a * (SQR(a)/par->vp2 - 1.0));
+  //double ret = par->pw->dU2maxda(a) +
+  //  2.0*par->pw->U2max(a) / (a * (SQR(a)/par->vp2 - 1.0));
+  double ret = (1.0 - par->vp2/SQR(a)) * par->pw->dU2maxda(a) +
+    par->vp2 / (a*SQR(a)) * par->pw->U2max(a);
   return ret;
 }
 
@@ -639,7 +640,7 @@ pwind_rad_ia::alimits(const double u, const double varpi,
     // radus, to check if a solution exists
     double vp2 = SQR(varpi) + SQR(varpi_t);
     double apeak = a_max_umax_from_varpi(varpi, varpi_t);
-    double u2peak = U2max(apeak) / (1.0 - vp2/SQR(apeak));
+    double u2peak = U2max(apeak) * (1.0 - vp2/SQR(apeak));
     if (SQR(u) > u2peak) return ret; // No solutions; u too big
     ret.resize(2);
     ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak);
