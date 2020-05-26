@@ -23,14 +23,29 @@ method that returns collision rates at a specified temperature.
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
 
+# Special check for readthedocs, which can't deal with pyx files
+import os
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
 import numpy as np
 from scipy.interpolate import interp1d
 from .despoticError import despoticError
 import pyximport
 pyximport.install(setup_args={'include_dirs':np.get_include()})
-from .collPartner_helper import colRates_all_scalar, \
-    colRates_all_vector, colRates_some_scalar, \
-    colRates_some_vector
+if not on_rtd:
+    from .collPartner_helper import colRates_all_scalar, \
+        colRates_all_vector, colRates_some_scalar, \
+        colRates_some_vector
+else:
+    # Dummy functions so that we can import successfully on RTD
+    def collRates_all_scalar(a,b,c):
+        return None
+    def collRates_all_vector(a,b,c):
+        return None
+    def collRates_some_scalar(a,b,c,d,e,f):
+        return None
+    def collRates_some_vector(a,b,c,d,e,f):
+        return None
 
 class collPartner:
     """
