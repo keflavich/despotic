@@ -8,9 +8,11 @@ The wind modelling capability in DESPOTIC is located in the
 code is ROCKETSTAR -- as named by the primary author's 5-year old.
 
 The physical model used in the ``despotic.winds`` module is described
-in Krumholz et al. (2017), and users are encouraged to read that paper
-to understand the physical basis of the calculations. Example scripts
-using this code can be found in the repository
+in `Krumholz et al. (2017)
+<https://ui.adsabs.harvard.edu/abs/2017MNRAS.471.4061K/abstract>`_,
+and users are encouraged to read that paper to understand the physical
+basis of the calculations. Example scripts using this code can be
+found in the repository
 `https://bitbucket.org/krumholz/despotic_winds/
 <https://bitbucket.org/krumholz/despotic_winds/>`_ associated with
 this paper.
@@ -82,8 +84,8 @@ ratio :math:`\Gamma = 0.2` and a Mach number :math:`\mathcal{M} =
 50`, and the optical depth at the mean surface density of the launch
 region is :math:`\tau_0 = 100`.
 
-Caculations Using ``pwind``
----------------------------
+Calculations Using ``pwind``
+----------------------------
 
 The ``pwind`` class defines a series of methods that can be used to
 compute the observable properties of the specified wind. There are
@@ -139,3 +141,55 @@ The are a range of other keywords that affect the behavior of these
 computation routines. See :ref:`sssec-full-pwind` for a full
 listing.
 
+
+Accuracy Control and Numerical Errors
+-------------------------------------
+
+The winds module performs its backend calculations via a
+custom-written C++ library, which in turn makes use of the `GNU
+Scientific Library (GSL) <https://www.gnu.org/software/gsl/>`_. The
+GSL implements its own protocols for numerical accuracy and error
+handling, and the ``pwind`` class provides an interface to control
+these parameters. See the documentation to the GSL for details in the
+exact meaning and implementation of the accuracy parameters.
+
+The accuracy of numerical computations is controlled by four
+properties of pwind objects:
+
+* ``pwind.epsabs``: absolute accuracy goal used in evaluating
+  numerical integrals. This corresponds to the ``epsabs`` parameter
+  used by all GSL numerical integrators.
+
+* ``pwind.epsrel``: relative accuracy goal used in evaluating
+  numerical integrals. This corresponds to the ``epsabs`` parameter
+  used by all GSL numerical integrators.
+
+* ``pwind.interpabs``: absolute accuracy goal for the interpolator
+  used for integrating the cloud equations of motion in the case of
+  hot winds; not used for other driving mechanisms
+
+* ``pwind.interprel``: relative accuracy goal for the interpolator
+  used for integrating the cloud equations of motion in the case of
+  hot winds; not used for other driving mechanisms
+
+In addition to these accuracy parameters, the ``pwind`` class also
+provides the ability to control the behavior of calculations in the
+case of numerical error, for example inability to reach the input
+accuracy goal due to roundoff error. The behavior of ``pwind`` objects
+in response to numerical errors is dictated by the
+``pwind.error_policy`` property, which can be set to three possible
+values:
+
+* ``'halt'``: in this case a numerical error in the GSL computation
+  causes ``pwind`` to generate a ``RunTimeError``.
+
+* ``'warn'``: in this case a numerical error causes a warning to be
+  printed (implemented via the ``warn`` module) reporting the GSL
+  error, but the calculation continues.
+
+* ``'silent'``: in this case an error triggers no automatic reaction,
+  but it sets the property ``pwind.errcode`` to a non-zero value equal
+  to the GSL error code, and the property ``pwind.errstr`` equal to
+  the GSL error string associated with that error code. The error
+  state may be cleared by calling ``pwind.clear_err()``; this returns
+  the error code to 0, and clears the error string.

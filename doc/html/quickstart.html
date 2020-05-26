@@ -1,42 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Quickstart &mdash; DESPOTIC 2.0 documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Quickstart &#8212; DESPOTIC 2.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Functional Guide to DESPOTIC Capabilities" href="functions.html" />
     <link rel="prev" title="Installing DESPOTIC" href="installation.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body role="document">  
+  </head><body>
+  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="quickstart">
@@ -54,56 +48,56 @@ session using DESPOTIC. This will work equally well from an ipython
 shell or in an ipython notebook.</p>
 </div>
 <div class="section" id="the-cloud-class">
-<h2>The <code class="docutils literal"><span class="pre">cloud</span></code> Class<a class="headerlink" href="#the-cloud-class" title="Permalink to this headline">¶</a></h2>
+<h2>The <code class="docutils literal notranslate"><span class="pre">cloud</span></code> Class<a class="headerlink" href="#the-cloud-class" title="Permalink to this headline">¶</a></h2>
 <p>The basic object in DESPOTIC, which provides an interface to most of
-its functionality, is the class <code class="docutils literal"><span class="pre">cloud</span></code>. This class stores the basic
+its functionality, is the class <code class="docutils literal notranslate"><span class="pre">cloud</span></code>. This class stores the basic
 properties of an interstellar cloud, and provides methods to perform
 calculations on those properties. The first step in most DESPOTIC
 sessions is to import this class:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>from despotic import cloud
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>from despotic import cloud
 </pre></div>
 </div>
 <p>The next step is generally to input data describing a cloud upon which
-computations are to be performed. The input data describe the cloud&#8217;s
+computations are to be performed. The input data describe the cloud’s
 physical properties (density, temperature, etc.), the bulk composition
 of the cloud, what emitting species it contains, and the radiation
 field around it. While it is possible to enter the data manually, it
 is usually easier to read the data from a file, using the
-<a class="reference internal" href="cloudfiles.html#sec-cloudfiles"><span class="std std-ref">Cloud Files</span></a> format. For this Quickstart, we&#8217;ll use one of
+<a class="reference internal" href="cloudfiles.html#sec-cloudfiles"><span class="std std-ref">Cloud Files</span></a> format. For this Quickstart, we’ll use one of
 the configuration files that ship with DESPOTIC and that are
-included in the <code class="docutils literal"><span class="pre">cloudfiles</span></code> subdirectory of the DESPOTIC
+included in the <code class="docutils literal notranslate"><span class="pre">cloudfiles</span></code> subdirectory of the DESPOTIC
 distribution. To create a cloud whose properties are as given in
 a particular cloud file, we simply invoke the constructor with
-the <code class="docutils literal"><span class="pre">fileName</span></code> optional argument set equal to a string containing
+the <code class="docutils literal notranslate"><span class="pre">fileName</span></code> optional argument set equal to a string containing
 the name of the file to be read:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>gmc = cloud(fileName=&quot;cloudfiles/MilkyWayGMC.desp&quot;, verbose=True)
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>gmc = cloud(fileName=&quot;cloudfiles/MilkyWayGMC.desp&quot;, verbose=True)
 </pre></div>
 </div>
-<p>Note that, if you&#8217;re not running DESPOTIC from the directory where you
-installed it, you&#8217;ll need to include the full path to the <code class="docutils literal"><span class="pre">cloudfiles</span></code>
+<p>Note that, if you’re not running DESPOTIC from the directory where you
+installed it, you’ll need to include the full path to the <code class="docutils literal notranslate"><span class="pre">cloudfiles</span></code>
 subdirectory in this command. Also note the optional argument
-<code class="docutils literal"><span class="pre">verbose</span></code>, which we have set to <code class="docutils literal"><span class="pre">True</span></code>. Most DESPOTIC methods
-accept the <code class="docutils literal"><span class="pre">verbose</span></code> argument, which causes them to produce printed
+<code class="docutils literal notranslate"><span class="pre">verbose</span></code>, which we have set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. Most DESPOTIC methods
+accept the <code class="docutils literal notranslate"><span class="pre">verbose</span></code> argument, which causes them to produce printed
 output containing a variety of information. By default DESPOTIC
 operations are silent.</p>
 </div>
 <div class="section" id="computing-temperatures">
 <h2>Computing Temperatures<a class="headerlink" href="#computing-temperatures" title="Permalink to this headline">¶</a></h2>
 <p>At this point most of the calculations one could want to do on a cloud
-are provided as methods of the <code class="docutils literal"><span class="pre">cloud</span></code> class. One of the most basic is
+are provided as methods of the <code class="docutils literal notranslate"><span class="pre">cloud</span></code> class. One of the most basic is
 to set the cloud to its equilibrium dust and gas temperatures. This is
-accomplished via the <code class="docutils literal"><span class="pre">setTempEq</span></code> method:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>gmc.setTempEq(verbose=True)
+accomplished via the <code class="docutils literal notranslate"><span class="pre">setTempEq</span></code> method:</p>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>gmc.setTempEq(verbose=True)
 </pre></div>
 </div>
-<p>With <code class="docutils literal"><span class="pre">verbose</span></code> set to <code class="docutils literal"><span class="pre">True</span></code>, this command will produce variety of
+<p>With <code class="docutils literal notranslate"><span class="pre">verbose</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, this command will produce variety of
 output as it iterates to calculate the equilibrium gas and dust
-temperatures, before finally printing <code class="docutils literal"><span class="pre">True</span></code>. This illustrates
+temperatures, before finally printing <code class="docutils literal notranslate"><span class="pre">True</span></code>. This illustrates
 another feature of DESPOTIC commands: those that iterate return a
-value of <code class="docutils literal"><span class="pre">True</span></code> if they converge, and <code class="docutils literal"><span class="pre">False</span></code> if they do not.</p>
+value of <code class="docutils literal notranslate"><span class="pre">True</span></code> if they converge, and <code class="docutils literal notranslate"><span class="pre">False</span></code> if they do not.</p>
 <p>To see the gas and dust temperatures to which the cloud has been set,
 we can simply print them:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>print gmc.Tg
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>print gmc.Tg
 print gmc.Td
 </pre></div>
 </div>
@@ -113,39 +107,39 @@ of 10.2 K, and an equilibrium dust temperature of 14.4 K.</p>
 <div class="section" id="line-emission">
 <h2>Line Emission<a class="headerlink" href="#line-emission" title="Permalink to this headline">¶</a></h2>
 <p>Next we might wish to compute the CO line emission emerging from the
-cloud. We do this with the <code class="docutils literal"><span class="pre">cloud</span></code> method <code class="docutils literal"><span class="pre">lineLum</span></code>:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>lines = gmc.lineLum(&quot;co&quot;)
+cloud. We do this with the <code class="docutils literal notranslate"><span class="pre">cloud</span></code> method <code class="docutils literal notranslate"><span class="pre">lineLum</span></code>:</p>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>lines = gmc.lineLum(&quot;co&quot;)
 </pre></div>
 </div>
-<p>The argument <code class="docutils literal"><span class="pre">co</span></code> specifies that we are interested in the emission
-from the CO molecule. This method returns a <code class="docutils literal"><span class="pre">list</span></code> of <code class="docutils literal"><span class="pre">dict</span></code>, each
-of which gives information about one of the CO lines. The <code class="docutils literal"><span class="pre">dict</span></code>
+<p>The argument <code class="docutils literal notranslate"><span class="pre">co</span></code> specifies that we are interested in the emission
+from the CO molecule. This method returns a <code class="docutils literal notranslate"><span class="pre">list</span></code> of <code class="docutils literal notranslate"><span class="pre">dict</span></code>, each
+of which gives information about one of the CO lines. The <code class="docutils literal notranslate"><span class="pre">dict</span></code>
 contains a variety of fields, but one of them is the
 velocity-integrated brightness temperature of the line. Again, we can
 just print the values we want. The first element in the list is the
-<span class="math">\(J = 1 \rightarrow 0\)</span> line, and the velocity-integrated
-brightness temperature is listed as <code class="docutils literal"><span class="pre">intTB</span></code> in the <code class="docutils literal"><span class="pre">dict</span></code>. Thus to
+<span class="math notranslate nohighlight">\(J = 1 \rightarrow 0\)</span> line, and the velocity-integrated
+brightness temperature is listed as <code class="docutils literal notranslate"><span class="pre">intTB</span></code> in the <code class="docutils literal notranslate"><span class="pre">dict</span></code>. Thus to
 get the velocity-integrated brightness temperature of the first line,
 we just do:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>print lines[0][’intTB’]
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>print lines[0][’intTB’]
 </pre></div>
 </div>
 <p>This shows that the velocity-integrated brightness temperature of the
-CO <span class="math">\(J = 1 \rightarrow 0\)</span> line is 79 K km/s.</p>
+CO <span class="math notranslate nohighlight">\(J = 1 \rightarrow 0\)</span> line is 79 K km/s.</p>
 </div>
 <div class="section" id="heating-and-cooling-rates">
 <h2>Heating and Cooling Rates<a class="headerlink" href="#heating-and-cooling-rates" title="Permalink to this headline">¶</a></h2>
 <p>Finally, we might wish to know the heating and cooling rates produced
 by various processes, which lets us determined what sets the thermal
-balance in the cloud. This may be computed using the method <code class="docutils literal"><span class="pre">dEdt</span></code>,
+balance in the cloud. This may be computed using the method <code class="docutils literal notranslate"><span class="pre">dEdt</span></code>,
 as follows:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>rates = gmc.dEdt()
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>rates = gmc.dEdt()
 </pre></div>
 </div>
-<p>This method returns a <code class="docutils literal"><span class="pre">dict</span></code> that contains all the heating and
+<p>This method returns a <code class="docutils literal notranslate"><span class="pre">dict</span></code> that contains all the heating and
 cooling terms for gas and dust. For example, we can print the rates of
 cosmic ray heating and CO line cooling via:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>print rates[&quot;GammaCR&quot;]
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>print rates[&quot;GammaCR&quot;]
 print rates[&quot;LambdaLine&quot;][&quot;co&quot;]
 </pre></div>
 </div>
@@ -154,21 +148,41 @@ print rates[&quot;LambdaLine&quot;][&quot;co&quot;]
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Quickstart</a><ul>
-<li><a class="reference internal" href="#introduction">Introduction</a></li>
-<li><a class="reference internal" href="#the-cloud-class">The <code class="docutils literal"><span class="pre">cloud</span></code> Class</a></li>
-<li><a class="reference internal" href="#computing-temperatures">Computing Temperatures</a></li>
-<li><a class="reference internal" href="#line-emission">Line Emission</a></li>
-<li><a class="reference internal" href="#heating-and-cooling-rates">Heating and Cooling Rates</a></li>
+<h1 class="logo"><a href="index.html">DESPOTIC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="license.html">License and Citations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing DESPOTIC</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-cloud-class">The <code class="docutils literal notranslate"><span class="pre">cloud</span></code> Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computing-temperatures">Computing Temperatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#line-emission">Line Emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#heating-and-cooling-rates">Heating and Cooling Rates</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functional Guide to DESPOTIC Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloudfiles.html">Cloud Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Atomic and Molecular Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chemistry.html">Chemistry and Chemical Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="winds.html">Winds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fulldoc.html">Full Documentation of All DESPOTIC Classes and Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 </ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -178,23 +192,24 @@ print rates[&quot;LambdaLine&quot;][&quot;co&quot;]
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/quickstart.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -203,11 +218,11 @@ print rates[&quot;LambdaLine&quot;][&quot;co&quot;]
       &copy;2015, Mark R. Krumholz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/quickstart.txt"
+      <a href="_sources/quickstart.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

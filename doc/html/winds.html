@@ -1,92 +1,87 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Winds &mdash; DESPOTIC 2.0 documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Winds &#8212; DESPOTIC 2.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Full Documentation of All DESPOTIC Classes and Functions" href="fulldoc.html" />
     <link rel="prev" title="Chemistry and Chemical Networks" href="chemistry.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body role="document">  
+  </head><body>
+  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="winds">
 <span id="sec-winds"></span><h1>Winds<a class="headerlink" href="#winds" title="Permalink to this headline">¶</a></h1>
 <p>The wind modelling capability in DESPOTIC is located in the
-<code class="docutils literal"><span class="pre">despotic.winds</span></code> module. The unofficial name for this portion of the
-code is ROCKETSTAR &#8211; as named by the primary author&#8217;s 5-year old.</p>
-<p>The physical model used in the <code class="docutils literal"><span class="pre">despotic.winds</span></code> module is described
-in Krumholz et al. (2017), and users are encouraged to read that paper
-to understand the physical basis of the calculations. Example scripts
-using this code can be found in the repository
+<code class="docutils literal notranslate"><span class="pre">despotic.winds</span></code> module. The unofficial name for this portion of the
+code is ROCKETSTAR – as named by the primary author’s 5-year old.</p>
+<p>The physical model used in the <code class="docutils literal notranslate"><span class="pre">despotic.winds</span></code> module is described
+in <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2017MNRAS.471.4061K/abstract">Krumholz et al. (2017)</a>,
+and users are encouraged to read that paper to understand the physical
+basis of the calculations. Example scripts using this code can be
+found in the repository
 <a class="reference external" href="https://bitbucket.org/krumholz/despotic_winds/">https://bitbucket.org/krumholz/despotic_winds/</a> associated with
 this paper.</p>
 <div class="section" id="compiling">
 <h2>Compiling<a class="headerlink" href="#compiling" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal"><span class="pre">despotic.winds</span></code> class relies on a copmlementary C++ library for
+<p>The <code class="docutils literal notranslate"><span class="pre">despotic.winds</span></code> class relies on a copmlementary C++ library for
 speed. This must be compiled separately, though the procedure should
 be automatic for users with standard tools and libraries
 installed. See <a class="reference internal" href="installation.html#ssec-winds-installation"><span class="std std-ref">Installing the despotic.winds Module</span></a> for details.</p>
 </div>
 <div class="section" id="the-pwind-class">
-<span id="ssec-wind-pwind"></span><h2>The <code class="docutils literal"><span class="pre">pwind</span></code> Class<a class="headerlink" href="#the-pwind-class" title="Permalink to this headline">¶</a></h2>
-<p>The front end to the <code class="docutils literal"><span class="pre">despotic.winds</span></code> is the <code class="docutils literal"><span class="pre">pwind</span></code> class. This
+<span id="ssec-wind-pwind"></span><h2>The <code class="docutils literal notranslate"><span class="pre">pwind</span></code> Class<a class="headerlink" href="#the-pwind-class" title="Permalink to this headline">¶</a></h2>
+<p>The front end to the <code class="docutils literal notranslate"><span class="pre">despotic.winds</span></code> is the <code class="docutils literal notranslate"><span class="pre">pwind</span></code> class. This
 class requires that the user specify the generalized Eddington ratio
-<span class="math">\(\Gamma\)</span> and the Mach number <span class="math">\(\mathcal{M}\)</span> for the
+<span class="math notranslate nohighlight">\(\Gamma\)</span> and the Mach number <span class="math notranslate nohighlight">\(\mathcal{M}\)</span> for the
 wind. By default this will create a spherical, ideal wind, which is
 fully defined by these two parameters. In addition, the the user can
 specify a number of other proprties:</p>
 <ul class="simple">
-<li>The rate of cloud expansion, specified by the keyword
-<code class="docutils literal"><span class="pre">expansion</span></code>. Valid values are <code class="docutils literal"><span class="pre">area</span></code>, <code class="docutils literal"><span class="pre">intermediate</span></code>, and
-<code class="docutils literal"><span class="pre">solid</span> <span class="pre">angle</span></code>.</li>
-<li>The gravitational potential, specified by the keyword
-<code class="docutils literal"><span class="pre">potential</span></code>. Valid values are <code class="docutils literal"><span class="pre">point</span></code> and <code class="docutils literal"><span class="pre">isothermal</span></code>.</li>
-<li>The geometry of the wind, specified by the keyword
-<code class="docutils literal"><span class="pre">geometry</span></code>. Valid values are <code class="docutils literal"><span class="pre">sphere</span></code>, <code class="docutils literal"><span class="pre">cone</span></code>, and
-<code class="docutils literal"><span class="pre">cone</span> <span class="pre">sheath</span></code>. For <code class="docutils literal"><span class="pre">cone</span></code> the user must also specify the cone
-tilt (via the keyword <code class="docutils literal"><span class="pre">phi</span></code>) and the cone opening angle (via the
-keyword <code class="docutils literal"><span class="pre">theta</span></code>). For <code class="docutils literal"><span class="pre">cone</span> <span class="pre">sheath</span></code> the user must also specify
-the inner opening angle (via the keyword <code class="docutils literal"><span class="pre">theta_in</span></code>).</li>
-<li>The driving mechanism, specified by the keyword <code class="docutils literal"><span class="pre">driver</span></code>. Valid
-values are <code class="docutils literal"><span class="pre">ideal</span></code>, <code class="docutils literal"><span class="pre">radiation</span></code>, and <code class="docutils literal"><span class="pre">hot</span></code>. For <code class="docutils literal"><span class="pre">radiation</span></code>,
+<li><p>The rate of cloud expansion, specified by the keyword
+<code class="docutils literal notranslate"><span class="pre">expansion</span></code>. Valid values are <code class="docutils literal notranslate"><span class="pre">area</span></code>, <code class="docutils literal notranslate"><span class="pre">intermediate</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">solid</span> <span class="pre">angle</span></code>.</p></li>
+<li><p>The gravitational potential, specified by the keyword
+<code class="docutils literal notranslate"><span class="pre">potential</span></code>. Valid values are <code class="docutils literal notranslate"><span class="pre">point</span></code> and <code class="docutils literal notranslate"><span class="pre">isothermal</span></code>.</p></li>
+<li><p>The geometry of the wind, specified by the keyword
+<code class="docutils literal notranslate"><span class="pre">geometry</span></code>. Valid values are <code class="docutils literal notranslate"><span class="pre">sphere</span></code>, <code class="docutils literal notranslate"><span class="pre">cone</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">cone</span> <span class="pre">sheath</span></code>. For <code class="docutils literal notranslate"><span class="pre">cone</span></code> the user must also specify the cone
+tilt (via the keyword <code class="docutils literal notranslate"><span class="pre">phi</span></code>) and the cone opening angle (via the
+keyword <code class="docutils literal notranslate"><span class="pre">theta</span></code>). For <code class="docutils literal notranslate"><span class="pre">cone</span> <span class="pre">sheath</span></code> the user must also specify
+the inner opening angle (via the keyword <code class="docutils literal notranslate"><span class="pre">theta_in</span></code>).</p></li>
+<li><p>The driving mechanism, specified by the keyword <code class="docutils literal notranslate"><span class="pre">driver</span></code>. Valid
+values are <code class="docutils literal notranslate"><span class="pre">ideal</span></code>, <code class="docutils literal notranslate"><span class="pre">radiation</span></code>, and <code class="docutils literal notranslate"><span class="pre">hot</span></code>. For <code class="docutils literal notranslate"><span class="pre">radiation</span></code>,
 the user must specify the optical depth at the mean surface density
-(via the keyword <code class="docutils literal"><span class="pre">tau0</span></code>). For <code class="docutils literal"><span class="pre">hot</span></code>, the user must specify the
-dimensionless hot gas velocity (via the keyword <code class="docutils literal"><span class="pre">uh</span></code>).</li>
+(via the keyword <code class="docutils literal notranslate"><span class="pre">tau0</span></code>). For <code class="docutils literal notranslate"><span class="pre">hot</span></code>, the user must specify the
+dimensionless hot gas velocity (via the keyword <code class="docutils literal notranslate"><span class="pre">uh</span></code>).</p></li>
 </ul>
-<p>The are a range of other keywords the affect the behavior of <code class="docutils literal"><span class="pre">pwind</span></code>
+<p>The are a range of other keywords the affect the behavior of <code class="docutils literal notranslate"><span class="pre">pwind</span></code>
 objects. See <a class="reference internal" href="fulldoc.html#sssec-full-pwind"><span class="std std-ref">pwind</span></a> for a full listing.</p>
 <p>An example is:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">despotic.winds</span> <span class="k">import</span> <span class="n">pwind</span>
 
 <span class="n">Gamma</span> <span class="o">=</span> <span class="mf">0.2</span>
@@ -100,60 +95,60 @@ objects. See <a class="reference internal" href="fulldoc.html#sssec-full-pwind">
            <span class="n">tau0</span><span class="o">=</span><span class="n">tau0</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This creates a <code class="docutils literal"><span class="pre">pwind</span></code> object that represents a radiatively-driven
+<p>This creates a <code class="docutils literal notranslate"><span class="pre">pwind</span></code> object that represents a radiatively-driven
 wind in an isothermal potential, with clouds maintaining constant
 solid angle. The wind is confined to a cone that is tipped by
-<span class="math">\(45^\circ\)</span> relative to the vertical, with a <span class="math">\(90^\circ\)</span>
+<span class="math notranslate nohighlight">\(45^\circ\)</span> relative to the vertical, with a <span class="math notranslate nohighlight">\(90^\circ\)</span>
 opening angle. The wind is characterized by a generalized Eddington
-ratio <span class="math">\(\Gamma = 0.2\)</span> and a Mach number <span class="math">\(\mathcal{M} =
+ratio <span class="math notranslate nohighlight">\(\Gamma = 0.2\)</span> and a Mach number <span class="math notranslate nohighlight">\(\mathcal{M} =
 50\)</span>, and the optical depth at the mean surface density of the launch
-region is <span class="math">\(\tau_0 = 100\)</span>.</p>
+region is <span class="math notranslate nohighlight">\(\tau_0 = 100\)</span>.</p>
 </div>
-<div class="section" id="caculations-using-pwind">
-<h2>Caculations Using <code class="docutils literal"><span class="pre">pwind</span></code><a class="headerlink" href="#caculations-using-pwind" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal"><span class="pre">pwind</span></code> class defines a series of methods that can be used to
+<div class="section" id="calculations-using-pwind">
+<h2>Calculations Using <code class="docutils literal notranslate"><span class="pre">pwind</span></code><a class="headerlink" href="#calculations-using-pwind" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pwind</span></code> class defines a series of methods that can be used to
 compute the observable properties of the specified wind. There are
 four basic types of observables that can be computed:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">pwind.tau</span></code>: this method computes absorption optical depths. The
-user must specify the dimensionless velocity or velocities <code class="docutils literal"><span class="pre">u</span></code> at
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.tau</span></code>: this method computes absorption optical depths. The
+user must specify the dimensionless velocity or velocities <code class="docutils literal notranslate"><span class="pre">u</span></code> at
 which to compute the absorption, as well as the dimensionless
-transition strength <span class="math">\(t_X/t_w\)</span> for the wind. This can be
-specified either directly, via the keyword <code class="docutils literal"><span class="pre">tXtw</span></code>, or computed
-from an input oscillator strength <code class="docutils literal"><span class="pre">Omega</span></code>, wavelength
-<code class="docutils literal"><span class="pre">wl</span></code>, abundance <code class="docutils literal"><span class="pre">abd</span></code>, and wind mass removal timescale
-<code class="docutils literal"><span class="pre">tw</span></code>. The keyword <code class="docutils literal"><span class="pre">correlated</span></code> specifies whether the wind should
-be treated as correlated or uncorrelated. The keyword <code class="docutils literal"><span class="pre">u_trans</span></code>
+transition strength <span class="math notranslate nohighlight">\(t_X/t_w\)</span> for the wind. This can be
+specified either directly, via the keyword <code class="docutils literal notranslate"><span class="pre">tXtw</span></code>, or computed
+from an input oscillator strength <code class="docutils literal notranslate"><span class="pre">Omega</span></code>, wavelength
+<code class="docutils literal notranslate"><span class="pre">wl</span></code>, abundance <code class="docutils literal notranslate"><span class="pre">abd</span></code>, and wind mass removal timescale
+<code class="docutils literal notranslate"><span class="pre">tw</span></code>. The keyword <code class="docutils literal notranslate"><span class="pre">correlated</span></code> specifies whether the wind should
+be treated as correlated or uncorrelated. The keyword <code class="docutils literal notranslate"><span class="pre">u_trans</span></code>
 specifies that the transition in question is a multiplet, with
 the individual transitions occurring at dimensionless velocities
-given by <code class="docutils literal"><span class="pre">u_trans</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">pwind.Xi</span></code>: this method returns the optically thin emission line
-shape function <span class="math">\(\Xi\)</span>, as defined in the Krumholz et al. (2017)
+given by <code class="docutils literal notranslate"><span class="pre">u_trans</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.Xi</span></code>: this method returns the optically thin emission line
+shape function <span class="math notranslate nohighlight">\(\Xi\)</span>, as defined in the Krumholz et al. (2017)
 paper. The user must specify the dimensionless velocity or
-velocities <code class="docutils literal"><span class="pre">u</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">pwind.temp_LTE</span></code>: this returns the brightness or antenna
+velocities <code class="docutils literal notranslate"><span class="pre">u</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.temp_LTE</span></code>: this returns the brightness or antenna
 temperature for a species in LTE. The user must provide the
-dimensionless velocity or velocities <code class="docutils literal"><span class="pre">u</span></code> and the wind kinetic
-temperature <code class="docutils literal"><span class="pre">T</span></code>. In addition, the user must provide the dimensionless
-transition strength <span class="math">\(t_X/t_w\)</span> for the wind. This can be
-specified either directly, via the keyword <code class="docutils literal"><span class="pre">tXtw</span></code>, or computed
+dimensionless velocity or velocities <code class="docutils literal notranslate"><span class="pre">u</span></code> and the wind kinetic
+temperature <code class="docutils literal notranslate"><span class="pre">T</span></code>. In addition, the user must provide the dimensionless
+transition strength <span class="math notranslate nohighlight">\(t_X/t_w\)</span> for the wind. This can be
+specified either directly, via the keyword <code class="docutils literal notranslate"><span class="pre">tXtw</span></code>, or computed
 on the fly in one of two ways. First, the user can specify
-<code class="docutils literal"><span class="pre">Omega</span></code>, <code class="docutils literal"><span class="pre">wl</span></code>, <code class="docutils literal"><span class="pre">abd</span></code> and <code class="docutils literal"><span class="pre">tw</span></code>, exactly as for
-<code class="docutils literal"><span class="pre">pwind.tau</span></code>. Second, the user can provide a DESPOTIC <code class="docutils literal"><span class="pre">emitter</span></code>
+<code class="docutils literal notranslate"><span class="pre">Omega</span></code>, <code class="docutils literal notranslate"><span class="pre">wl</span></code>, <code class="docutils literal notranslate"><span class="pre">abd</span></code> and <code class="docutils literal notranslate"><span class="pre">tw</span></code>, exactly as for
+<code class="docutils literal notranslate"><span class="pre">pwind.tau</span></code>. Second, the user can provide a DESPOTIC <code class="docutils literal notranslate"><span class="pre">emitter</span></code>
 object (see <a class="reference internal" href="fulldoc.html#sssec-full-emitter"><span class="std std-ref">emitter</span></a>) and a wind removal timescale
-<code class="docutils literal"><span class="pre">tw</span></code>. Finally, the keyword <code class="docutils literal"><span class="pre">correlated</span></code> specifies whether the
-wind should be treated as correlated or uncorrelated.</li>
-<li><code class="docutils literal"><span class="pre">pwind.intTA_LTE</span></code>: this computes the velocity-integrated antenna
+<code class="docutils literal notranslate"><span class="pre">tw</span></code>. Finally, the keyword <code class="docutils literal notranslate"><span class="pre">correlated</span></code> specifies whether the
+wind should be treated as correlated or uncorrelated.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.intTA_LTE</span></code>: this computes the velocity-integrated antenna
 temperature for an emitting species in LTE. The user must provide
-the velocity scale <code class="docutils literal"><span class="pre">v0</span></code> for the wind launching region and the wind
-kinetic temperature <code class="docutils literal"><span class="pre">T</span></code>. All other parameters are as for
-<code class="docutils literal"><span class="pre">pwind.temp_LTE</span></code>.</li>
+the velocity scale <code class="docutils literal notranslate"><span class="pre">v0</span></code> for the wind launching region and the wind
+kinetic temperature <code class="docutils literal notranslate"><span class="pre">T</span></code>. All other parameters are as for
+<code class="docutils literal notranslate"><span class="pre">pwind.temp_LTE</span></code>.</p></li>
 </ul>
-<p>All of these routines accept the keywords <code class="docutils literal"><span class="pre">varpi</span></code> and <code class="docutils literal"><span class="pre">varpi_t</span></code>
+<p>All of these routines accept the keywords <code class="docutils literal notranslate"><span class="pre">varpi</span></code> and <code class="docutils literal notranslate"><span class="pre">varpi_t</span></code>
 which specify the dimensionless axial and transverse position of the
-line of sight (<span class="math">\(\varpi_a\)</span> and <span class="math">\(\varpi_t\)</span> in the
+line of sight (<span class="math notranslate nohighlight">\(\varpi_a\)</span> and <span class="math notranslate nohighlight">\(\varpi_t\)</span> in the
 terminology of Krumholz et al. 2017). In addition, all routines except
-<code class="docutils literal"><span class="pre">pwind.Xi</span></code> accept the keywords <code class="docutils literal"><span class="pre">fj</span></code> and <code class="docutils literal"><span class="pre">boltzfac</span></code>, which
+<code class="docutils literal notranslate"><span class="pre">pwind.Xi</span></code> accept the keywords <code class="docutils literal notranslate"><span class="pre">fj</span></code> and <code class="docutils literal notranslate"><span class="pre">boltzfac</span></code>, which
 specify the fractional level population for the lower level and the
 Boltzmann factor between the two levels of the transition,
 respectively.</p>
@@ -161,23 +156,90 @@ respectively.</p>
 computation routines. See <a class="reference internal" href="fulldoc.html#sssec-full-pwind"><span class="std std-ref">pwind</span></a> for a full
 listing.</p>
 </div>
+<div class="section" id="accuracy-control-and-numerical-errors">
+<h2>Accuracy Control and Numerical Errors<a class="headerlink" href="#accuracy-control-and-numerical-errors" title="Permalink to this headline">¶</a></h2>
+<p>The winds module performs its backend calculations via a
+custom-written C++ library, which in turn makes use of the <a class="reference external" href="https://www.gnu.org/software/gsl/">GNU
+Scientific Library (GSL)</a>. The
+GSL implements its own protocols for numerical accuracy and error
+handling, and the <code class="docutils literal notranslate"><span class="pre">pwind</span></code> class provides an interface to control
+these parameters. See the documentation to the GSL for details in the
+exact meaning and implementation of the accuracy parameters.</p>
+<p>The accuracy of numerical computations is controlled by four
+properties of pwind objects:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.epsabs</span></code>: absolute accuracy goal used in evaluating
+numerical integrals. This corresponds to the <code class="docutils literal notranslate"><span class="pre">epsabs</span></code> parameter
+used by all GSL numerical integrators.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.epsrel</span></code>: relative accuracy goal used in evaluating
+numerical integrals. This corresponds to the <code class="docutils literal notranslate"><span class="pre">epsabs</span></code> parameter
+used by all GSL numerical integrators.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.interpabs</span></code>: absolute accuracy goal for the interpolator
+used for integrating the cloud equations of motion in the case of
+hot winds; not used for other driving mechanisms</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pwind.interprel</span></code>: relative accuracy goal for the interpolator
+used for integrating the cloud equations of motion in the case of
+hot winds; not used for other driving mechanisms</p></li>
+</ul>
+<p>In addition to these accuracy parameters, the <code class="docutils literal notranslate"><span class="pre">pwind</span></code> class also
+provides the ability to control the behavior of calculations in the
+case of numerical error, for example inability to reach the input
+accuracy goal due to roundoff error. The behavior of <code class="docutils literal notranslate"><span class="pre">pwind</span></code> objects
+in response to numerical errors is dictated by the
+<code class="docutils literal notranslate"><span class="pre">pwind.error_policy</span></code> property, which can be set to three possible
+values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'halt'</span></code>: in this case a numerical error in the GSL computation
+causes <code class="docutils literal notranslate"><span class="pre">pwind</span></code> to generate a <code class="docutils literal notranslate"><span class="pre">RunTimeError</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'warn'</span></code>: in this case a numerical error causes a warning to be
+printed (implemented via the <code class="docutils literal notranslate"><span class="pre">warn</span></code> module) reporting the GSL
+error, but the calculation continues.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'silent'</span></code>: in this case an error triggers no automatic reaction,
+but it sets the property <code class="docutils literal notranslate"><span class="pre">pwind.errcode</span></code> to a non-zero value equal
+to the GSL error code, and the property <code class="docutils literal notranslate"><span class="pre">pwind.errstr</span></code> equal to
+the GSL error string associated with that error code. The error
+state may be cleared by calling <code class="docutils literal notranslate"><span class="pre">pwind.clear_err()</span></code>; this returns
+the error code to 0, and clears the error string.</p></li>
+</ul>
+</div>
 </div>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Winds</a><ul>
-<li><a class="reference internal" href="#compiling">Compiling</a></li>
-<li><a class="reference internal" href="#the-pwind-class">The <code class="docutils literal"><span class="pre">pwind</span></code> Class</a></li>
-<li><a class="reference internal" href="#caculations-using-pwind">Caculations Using <code class="docutils literal"><span class="pre">pwind</span></code></a></li>
+<h1 class="logo"><a href="index.html">DESPOTIC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="license.html">License and Citations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing DESPOTIC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functional Guide to DESPOTIC Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloudfiles.html">Cloud Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Atomic and Molecular Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chemistry.html">Chemistry and Chemical Networks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Winds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#compiling">Compiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-pwind-class">The <code class="docutils literal notranslate"><span class="pre">pwind</span></code> Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calculations-using-pwind">Calculations Using <code class="docutils literal notranslate"><span class="pre">pwind</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accuracy-control-and-numerical-errors">Accuracy Control and Numerical Errors</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="fulldoc.html">Full Documentation of All DESPOTIC Classes and Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 </ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -187,23 +249,24 @@ listing.</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/winds.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -212,11 +275,11 @@ listing.</p>
       &copy;2015, Mark R. Krumholz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/winds.txt"
+      <a href="_sources/winds.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

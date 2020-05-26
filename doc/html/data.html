@@ -1,42 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Atomic and Molecular Data &mdash; DESPOTIC 2.0 documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Atomic and Molecular Data &#8212; DESPOTIC 2.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Chemistry and Chemical Networks" href="chemistry.html" />
     <link rel="prev" title="Cloud Files" href="cloudfiles.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body role="document">  
+  </head><body>
+  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="atomic-and-molecular-data">
@@ -51,21 +45,21 @@ workings.</p>
 supply the required data files, but the more common use case is to
 access the data directly from LAMDA. When emitter data is required,
 DESPOTIC will attempt to guess the name of the required data file and
-download it automatically &#8211; see <a class="reference internal" href="cloudfiles.html#ssec-emitters"><span class="std std-ref">Emitters</span></a>. When DESPOTIC
+download it automatically – see <a class="reference internal" href="cloudfiles.html#ssec-emitters"><span class="std std-ref">Emitters</span></a>. When DESPOTIC
 downloads a file from <a class="reference external" href="http://home.strw.leidenuniv.nl/~moldata/">LAMDA</a>, it caches a local copy
 for future use. The next time the same emitter is used, unless
 DESPOTIC is given an explicit URL from which the file should be
 fetched, it will use the local copy instead of re-downloading the file
 from LAMDA. (However, see <a class="reference internal" href="#ssec-database-updates"><span class="std std-ref">Keeping the Atomic and Molecular Data Up to Date</span></a>.)</p>
 <p>The location of the database is up to the user, and is specified
-through the environment variable <code class="docutils literal"><span class="pre">$DESPOTIC_HOME</span></code>. If this
+through the environment variable <code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME</span></code>. If this
 environment variable is set, LAMDA files will be places in the
-directory <code class="docutils literal"><span class="pre">$DESPOTIC_HOME/LAMDA</span></code>, and that is the default location
+directory <code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME/LAMDA</span></code>, and that is the default location
 that will be searched when a file is needed. If the environment
-variable <code class="docutils literal"><span class="pre">$DESPOTIC_HOME</span></code> is not set, DESPOTIC looks for files in a
+variable <code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME</span></code> is not set, DESPOTIC looks for files in a
 subdirectory LAMDA of the current working directory, and caches files
 in that directory if they are downloaded. It is recommended that users
-set a <code class="docutils literal"><span class="pre">$DESPOTIC_HOME</span></code> environment variable when working with
+set a <code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME</span></code> environment variable when working with
 DESPOTIC, so as to avoid downloading and caching multiple copies of
 LAMDA for different projects in different directories.</p>
 </div>
@@ -80,14 +74,14 @@ default, if DESPOTIC discovers that a given data file is more than six
 months old, it will re-download that file from LAMDA. This behavior
 can be overridden by manually specifying a file name, either in the
 cloud file (see <a class="reference internal" href="cloudfiles.html#sec-cloudfiles"><span class="std std-ref">Cloud Files</span></a>) or when invoking
-the <code class="docutils literal"><span class="pre">cloud.addEmitter</span></code> or <code class="docutils literal"><span class="pre">emitter.__init__</span></code> methods. Users
+the <code class="docutils literal notranslate"><span class="pre">cloud.addEmitter</span></code> or <code class="docutils literal notranslate"><span class="pre">emitter.__init__</span></code> methods. Users
 can also force updates of the local database more frequently using the
-<code class="docutils literal"><span class="pre">refreshLamda</span></code> function &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-refreshlamda"><span class="std std-ref">refreshLamda</span></a>.</p>
+<code class="docutils literal notranslate"><span class="pre">refreshLamda</span></code> function – see <a class="reference internal" href="fulldoc.html#sssec-full-refreshlamda"><span class="std std-ref">refreshLamda</span></a>.</p>
 </div>
 <div class="section" id="despotic-s-internal-model-for-atomic-and-molecular-data">
-<span id="ssec-database-internal"></span><h2>DESPOTIC&#8217;s Internal Model for Atomic and Molecular Data<a class="headerlink" href="#despotic-s-internal-model-for-atomic-and-molecular-data" title="Permalink to this headline">¶</a></h2>
+<span id="ssec-database-internal"></span><h2>DESPOTIC’s Internal Model for Atomic and Molecular Data<a class="headerlink" href="#despotic-s-internal-model-for-atomic-and-molecular-data" title="Permalink to this headline">¶</a></h2>
 <p>When it is running, DESPOTIC maintains a list of emitting species for
-which data have been read within the <code class="docutils literal"><span class="pre">emitter</span></code> module (see
+which data have been read within the <code class="docutils literal notranslate"><span class="pre">emitter</span></code> module (see
 <a class="reference internal" href="fulldoc.html#sssec-full-emitter"><span class="std std-ref">emitter</span></a>). Whenever a new emitter is created, either for an
 existing cloud, for a new cloud being created, or as a free-standing
 object of the emitter class, DESPOTIC checks the emitter name against
@@ -98,38 +92,58 @@ also to ensure consistency between emitters of the same species
 associated with different clouds. However, this model has some
 important consequences of which the user should be aware.</p>
 <ol class="arabic simple">
-<li>Since data on level structure, collision rates, etc. (everything
-stored in the <code class="docutils literal"><span class="pre">emitterData</span></code> class &#8211; see <a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span class="std std-ref">emitterData</span></a>) is
+<li><p>Since data on level structure, collision rates, etc. (everything
+stored in the <code class="docutils literal notranslate"><span class="pre">emitterData</span></code> class – see <a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span class="std std-ref">emitterData</span></a>) is
 shared between all emitters of the same name, and any alterations
 made to the data for one emitter will affect all others of the same
-name.</li>
-<li>It is not possible to have two emitters of the same name but with
+name.</p></li>
+<li><p>It is not possible to have two emitters of the same name but with
 different data. Should a user desire to achieve this for some
 reason (e.g., to compare results computed using an older LAMDA file
 and a newer one), the way to achieve this is to give the two
-emitters different names, such as <code class="docutils literal"><span class="pre">co_ver1</span></code> and <code class="docutils literal"><span class="pre">co_ver2</span></code>.</li>
-<li>Maintenance of a central emitter list affects how deepcopy and
+emitters different names, such as <code class="docutils literal notranslate"><span class="pre">co_ver1</span></code> and <code class="docutils literal notranslate"><span class="pre">co_ver2</span></code>.</p></li>
+<li><p>Maintenance of a central emitter list affects how deepcopy and
 pickling operations operate on emitters. See
-<a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span class="std std-ref">emitterData</span></a> for details.</li>
+<a class="reference internal" href="fulldoc.html#sssec-full-emitterdata"><span class="std std-ref">emitterData</span></a> for details.</p></li>
 </ol>
 </div>
 </div>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Atomic and Molecular Data</a><ul>
-<li><a class="reference internal" href="#the-local-database">The Local Database</a></li>
-<li><a class="reference internal" href="#keeping-the-atomic-and-molecular-data-up-to-date">Keeping the Atomic and Molecular Data Up to Date</a></li>
-<li><a class="reference internal" href="#despotic-s-internal-model-for-atomic-and-molecular-data">DESPOTIC&#8217;s Internal Model for Atomic and Molecular Data</a></li>
+<h1 class="logo"><a href="index.html">DESPOTIC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="license.html">License and Citations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing DESPOTIC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functional Guide to DESPOTIC Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloudfiles.html">Cloud Files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Atomic and Molecular Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-local-database">The Local Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#keeping-the-atomic-and-molecular-data-up-to-date">Keeping the Atomic and Molecular Data Up to Date</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#despotic-s-internal-model-for-atomic-and-molecular-data">DESPOTIC’s Internal Model for Atomic and Molecular Data</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="chemistry.html">Chemistry and Chemical Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="winds.html">Winds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fulldoc.html">Full Documentation of All DESPOTIC Classes and Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 </ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -139,23 +153,24 @@ pickling operations operate on emitters. See
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/data.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -164,11 +179,11 @@ pickling operations operate on emitters. See
       &copy;2015, Mark R. Krumholz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/data.txt"
+      <a href="_sources/data.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

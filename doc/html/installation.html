@@ -1,42 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Installing DESPOTIC &mdash; DESPOTIC 2.0 documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Installing DESPOTIC &#8212; DESPOTIC 2.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="DESPOTIC 2.0 documentation" href="index.html" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Quickstart" href="quickstart.html" />
     <link rel="prev" title="License and Citations" href="license.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body role="document">  
+  </head><body>
+  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="installing-despotic">
@@ -45,68 +39,68 @@
 <div class="section" id="installing-from-git">
 <h2>Installing from git<a class="headerlink" href="#installing-from-git" title="Permalink to this headline">¶</a></h2>
 <p>The full source distribution, including example Python programs using it and sample cloud descriptor files, is available from <a class="reference external" href="https://bitbucket.org/krumholz/despotic/">bitbucket</a>, and can be obtained via git by doing:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>git clone git@bitbucket.org:krumholz/despotic.git
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>git clone git@bitbucket.org:krumholz/despotic.git
 </pre></div>
 </div>
 <p>The package can then be installed by doing:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>python setup.py install
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>python setup.py install
 </pre></div>
 </div>
-<p>in the <code class="docutils literal"><span class="pre">despotic</span></code> directory. You may need to preface this with
-<code class="docutils literal"><span class="pre">sudo</span></code> if you want to install in a way that is accessible for all
+<p>in the <code class="docutils literal notranslate"><span class="pre">despotic</span></code> directory. You may need to preface this with
+<code class="docutils literal notranslate"><span class="pre">sudo</span></code> if you want to install in a way that is accessible for all
 users on the system.</p>
 </div>
 <div class="section" id="installing-from-pip">
 <h2>Installing from pip<a class="headerlink" href="#installing-from-pip" title="Permalink to this headline">¶</a></h2>
 <p>DESPOTIC is also available through the python package index. If you
 have pip installed, you can just type:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>pip install despotic
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>pip install despotic
 </pre></div>
 </div>
-<p>As with the setup via <code class="docutils literal"><span class="pre">git</span></code>, you may need to preface this with
-<code class="docutils literal"><span class="pre">sudo</span></code> to install globally.</p>
+<p>As with the setup via <code class="docutils literal notranslate"><span class="pre">git</span></code>, you may need to preface this with
+<code class="docutils literal notranslate"><span class="pre">sudo</span></code> to install globally.</p>
 </div>
 <div class="section" id="setting-up-the-environment">
 <h2>Setting Up the Environment<a class="headerlink" href="#setting-up-the-environment" title="Permalink to this headline">¶</a></h2>
 <p>DESPOTIC creates a local cache of atomic and molecular data files. You
 can specify the location of this cache by setting the
-<code class="docutils literal"><span class="pre">$DESPOTIC_HOME</span></code> environment variable; the data cache will be
-created in <code class="docutils literal"><span class="pre">$DESPOTIC_HOME/LAMDA</span></code> If you are using a <code class="docutils literal"><span class="pre">bash</span></code>-like
-shell, the syntax to set the location of <code class="docutils literal"><span class="pre">$DESPOTIC_HOME</span></code> is:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>export DESPOTIC_HOME = /path/to/despotic
+<code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME</span></code> environment variable; the data cache will be
+created in <code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME/LAMDA</span></code> If you are using a <code class="docutils literal notranslate"><span class="pre">bash</span></code>-like
+shell, the syntax to set the location of <code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME</span></code> is:</p>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>export DESPOTIC_HOME = /path/to/despotic
 </pre></div>
 </div>
-<p>while for a <code class="docutils literal"><span class="pre">csh</span></code>-like shell, it is:</p>
-<div class="highlight-rest"><div class="highlight"><pre><span></span>setenv DESPOTIC_HOME /path/to/despotic
+<p>while for a <code class="docutils literal notranslate"><span class="pre">csh</span></code>-like shell, it is:</p>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>setenv DESPOTIC_HOME /path/to/despotic
 </pre></div>
 </div>
-<p>If <code class="docutils literal"><span class="pre">$DESPOTIC_HOME</span></code> is not set, then DESPOTIC will attempt to create
+<p>If <code class="docutils literal notranslate"><span class="pre">$DESPOTIC_HOME</span></code> is not set, then DESPOTIC will attempt to create
 the cache in the directory from which it is run.</p>
 </div>
 <div class="section" id="requirements-and-dependencies">
 <h2>Requirements and Dependencies<a class="headerlink" href="#requirements-and-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>DESPOTIC requires</p>
 <ul class="simple">
-<li><cite>scipy &gt;= 0.11.0</cite></li>
-<li><cite>cython &gt;= 0.20.x</cite></li>
-<li><cite>matplotlib &gt;= 1.3.x</cite></li>
+<li><p><cite>scipy &gt;= 0.11.0</cite></p></li>
+<li><p><cite>cython &gt;= 0.20.x</cite></p></li>
+<li><p><cite>matplotlib &gt;= 1.3.x</cite></p></li>
 </ul>
 </div>
 <div class="section" id="installing-the-despotic-winds-module">
-<span id="ssec-winds-installation"></span><h2>Installing the <code class="docutils literal"><span class="pre">despotic.winds</span></code> Module<a class="headerlink" href="#installing-the-despotic-winds-module" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal"><span class="pre">despotic.winds</span></code> module (see <a class="reference internal" href="winds.html#sec-winds"><span class="std std-ref">Winds</span></a>) is written in
+<span id="ssec-winds-installation"></span><h2>Installing the <code class="docutils literal notranslate"><span class="pre">despotic.winds</span></code> Module<a class="headerlink" href="#installing-the-despotic-winds-module" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">despotic.winds</span></code> module (see <a class="reference internal" href="winds.html#sec-winds"><span class="std std-ref">Winds</span></a>) is written in
 C++, and makes use of the <a class="reference external" href="http://www.gnu.org/software/gsl/">GNU scientific library</a>. Users who wish to make use of
 this package will need to compile the C++ portions of the
 software. This process should be automatic for users who have an
-installed C++ compiler and standard build tools (<code class="docutils literal"><span class="pre">make</span></code>), and who
+installed C++ compiler and standard build tools (<code class="docutils literal notranslate"><span class="pre">make</span></code>), and who
 have the <a class="reference external" href="http://www.gnu.org/software/gsl/">GSL</a> headers and library
-installed in their <code class="docutils literal"><span class="pre">CXX_INCLUDE_PATH</span></code> and <code class="docutils literal"><span class="pre">LIBRARY_PATH</span></code>,
+installed in their <code class="docutils literal notranslate"><span class="pre">CXX_INCLUDE_PATH</span></code> and <code class="docutils literal notranslate"><span class="pre">LIBRARY_PATH</span></code>,
 respectively.</p>
 <p>If this does not work, users should be able to build the required C++
-library by changing into the <code class="docutils literal"><span class="pre">despotic/winds</span></code> directory and doing
-<code class="docutils literal"><span class="pre">make</span></code>. Users can edit the <code class="docutils literal"><span class="pre">Makefile</span></code> in <code class="docutils literal"><span class="pre">despotic/winds</span></code> as
+library by changing into the <code class="docutils literal notranslate"><span class="pre">despotic/winds</span></code> directory and doing
+<code class="docutils literal notranslate"><span class="pre">make</span></code>. Users can edit the <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> in <code class="docutils literal notranslate"><span class="pre">despotic/winds</span></code> as
 necessary to tailor the build for their environment.</p>
-<p>The <code class="docutils literal"><span class="pre">winds</span></code> module is not required for the operation of the rest of
+<p>The <code class="docutils literal notranslate"><span class="pre">winds</span></code> module is not required for the operation of the rest of
 the code, so users who are not planning to make use of this capability
 can safely ignore it.</p>
 </div>
@@ -114,21 +108,41 @@ can safely ignore it.</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Installing DESPOTIC</a><ul>
-<li><a class="reference internal" href="#installing-from-git">Installing from git</a></li>
-<li><a class="reference internal" href="#installing-from-pip">Installing from pip</a></li>
-<li><a class="reference internal" href="#setting-up-the-environment">Setting Up the Environment</a></li>
-<li><a class="reference internal" href="#requirements-and-dependencies">Requirements and Dependencies</a></li>
-<li><a class="reference internal" href="#installing-the-despotic-winds-module">Installing the <code class="docutils literal"><span class="pre">despotic.winds</span></code> Module</a></li>
+<h1 class="logo"><a href="index.html">DESPOTIC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="license.html">License and Citations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installing DESPOTIC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installing-from-git">Installing from git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-from-pip">Installing from pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-the-environment">Setting Up the Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements-and-dependencies">Requirements and Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-despotic-winds-module">Installing the <code class="docutils literal notranslate"><span class="pre">despotic.winds</span></code> Module</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functional Guide to DESPOTIC Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloudfiles.html">Cloud Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Atomic and Molecular Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chemistry.html">Chemistry and Chemical Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="winds.html">Winds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fulldoc.html">Full Documentation of All DESPOTIC Classes and Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 </ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -138,23 +152,24 @@ can safely ignore it.</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/installation.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -163,11 +178,11 @@ can safely ignore it.</p>
       &copy;2015, Mark R. Krumholz.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/installation.txt"
+      <a href="_sources/installation.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

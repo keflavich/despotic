@@ -960,7 +960,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
 
         # Return
         return pdot
@@ -1200,7 +1201,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return tau_uc
                 
@@ -1359,7 +1361,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return tau_c
 
@@ -1418,7 +1421,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return Phi_c
     
@@ -1471,7 +1475,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return Phi_uc
 
@@ -1513,7 +1518,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return Xi
 
@@ -1551,7 +1557,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return xi
 
@@ -1654,7 +1661,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return eta
 
@@ -1861,7 +1869,8 @@ class pwind(object):
                     self.__pw).decode("ascii")
             except:
                 self.error_stat = libpwind.get_err_str(self.__pw)
-            libpwind.clear_err(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
             
         return Psi
 
