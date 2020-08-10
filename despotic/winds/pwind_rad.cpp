@@ -273,7 +273,13 @@ pwind_rad_isothermal(const double Gamma_, const double mach_,
 {
   umax = sqrt(Gamma_*tau0_ - log(Gamma_*tau0_) - 1.0);
   a_maxu = Gamma_*tau0_;
-  amax_abs = a_from_u_max(0.0, 0.0, 0.0, 1.0+1.0e-8);
+  // Note: use high tolerance here, because we need to compute this
+  // limit numerically; then switch back to original
+  epsrel /= 1e4;
+  epsabs /= 1e4;
+  amax_abs = a_from_u_max(0.0, 0.0, 0.0, 1.0+fmin(epsabs, epsrel));
+  epsrel *= 1e4;
+  epsabs *= 1e4;
 }
 
 double
