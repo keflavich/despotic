@@ -190,7 +190,7 @@ pwind_hot::U2(const double x, const double a) const {
     double xtmp = x;
     xtmp = max(xtmp, x_grid[0]+1.0e-10);
     // The 1.0e-10 prevents catastrophic failures due to roundoff
-    // problems in the gsl inerpolation routine
+    // problems in the gsl interpolation routine
     xtmp = min(xtmp, x_grid.back());
     double u2 = gsl_spline2d_eval(U2_interp, xtmp,
 				  min(loga, loga_grid.back()),
@@ -563,7 +563,7 @@ void pwind_hot::add_table_row(const double x) {
   if (yoverm < 1.0)
     loga_stop_grid.insert(loga_stop_grid.begin()+idx, loga_stop);
 
-  // Check we had to extend the grid further in a; if so, go back and
+  // Check if we had to extend the grid further in a; if so, go back and
   // extend any previously-computed grids using the new grid points
   if (loga_new.back() > loga_grid.back()) {
 
@@ -825,7 +825,10 @@ void pwind_hot::build_interpolators() {
   // that case
   vector<double> u_grid_tmp, loga_grid_tmp;
   if (loga_stop_grid.size() == 0) {
-    // Wind case
+    // Wind case; add a point at a = 1, u = 0 to make sure we can
+    // interpolate to zero velocity
+    u_grid_tmp.push_back(0.0);
+    loga_grid_tmp.push_back(0.0);    
     u_grid_tmp.push_back(u_grid.front()[0]);
     loga_grid_tmp.push_back(loga_grid[0]);
     for (vector<double>::size_type i=1; i<u_grid.front().size(); i++) {
@@ -860,7 +863,11 @@ void pwind_hot::build_interpolators() {
 	aMin_interp_breakpt = loga_grid[j];
       }
     }
-    // Build interpolator for region where u is rising with a
+    // Build interpolator for region where u is rising with a; add a
+    // point at a = 1, u = 0 to make sure we can interpolate to zero
+    // velocity
+    u_grid_tmp.push_back(0.0);
+    loga_grid_tmp.push_back(0.0);    
     u_grid_tmp.push_back(u_grid.front()[0]);
     loga_grid_tmp.push_back(loga_grid[0]);
     for (vector<double>::size_type j=1; j<=i; j++) {
@@ -880,8 +887,17 @@ void pwind_hot::build_interpolators() {
     loga_grid_tmp.resize(0);
     for (vector<double>::size_type j=loga_grid.size()-1; j>=i; j--) {
       if (u_grid.front()[j] < 0.0) continue;
-      if (u_grid_tmp.size() > 0)
+      if (u_grid_tmp.size() > 0) {
+	// Stop if velocity is no longer rising
 	if (u_grid.front()[j] <= u_grid_tmp.back()) continue;
+      } else {
+	// If velocity drops to zero along this track, add a
+	// zero-velocity point
+	if (j != loga_grid.size()-1) {
+	  u_grid_tmp.push_back(0.0);
+	  loga_grid_tmp.push_back(loga_grid[j+1]);
+	}
+      }
       u_grid_tmp.push_back(u_grid.front()[j]);
       loga_grid_tmp.push_back(loga_grid[j]);
     }
@@ -899,12 +915,18 @@ void pwind_hot::build_interpolators() {
   else {
     u_grid_tmp.resize(0);
     loga_grid_tmp.resize(0);
+    u_grid_tmp.push_back(0.0);
+    loga_grid_tmp.push_back(0.0);
     u_grid_tmp.push_back(u_grid.back()[0]);
     loga_grid_tmp.push_back(loga_grid[0]);
     for (vector<double>::size_type i=1; i<u_grid.back().size(); i++) {
       if (u_grid.back()[i] > u_grid_tmp.back()) {
 	u_grid_tmp.push_back(u_grid.back()[i]);
 	loga_grid_tmp.push_back(loga_grid[i]);
+      } else if (u_grid.back()[i] == -1.0) {
+	u_grid_tmp.push_back(0.0);
+	loga_grid_tmp.push_back(loga_grid[i]);
+	break;
       }
     } 
     aMax_interp = gsl_spline_alloc(gsl_interp_cspline, loga_grid_tmp.size());
@@ -990,8 +1012,10 @@ void pwind_hot::build_interpolators() {
   //   (3c) If u > U_max(a), set X(u, a) = xmin
   // (5) Construct 2D interpolation function for X(u, a)
 
-  // Step (1): set up a grid in u, consisting of sorted, unique u values
+  // Step (1): set up a grid in u, consisting of sorted, unique u
+  // values; we also add a zero point
   vector<double> ux_grid;
+  //ux_grid.push_back(0.0);
   for (vector<double>::size_type i=0; i<x_grid.size(); i++) {
     for (vector<double>::size_type j=0; j<loga_grid.size(); j++) {
       ux_grid.push_back(u_grid[i][j]);
@@ -1082,7 +1106,7 @@ void pwind_hot::build_interpolators() {
 // tabulates it, and makes the interpolators required to use it. We do
 // this in a separate routine and not in the constructor because we
 // require access to the wind expansion factor and potential, which
-// are not defined until the derived classes are instantiatied, which
+// are not defined until the derived classes are instantiated, which
 // happens after pwind_hot's constructor has run. Thus the calling
 // order must be pwind_hot::pwind_hot, followed by
 // pwind_hot_XY::pwind_hot_XY, and only then can we call
@@ -1128,12 +1152,13 @@ void pwind_hot::init(const double amax_init) {
   }
   gsl_root_fsolver_free(s);
 
-  // Establish the initial grid in x; start with factors of 2 in
-  // Sigma, corresponding to steps of log(2) in x
+  // Establish the initial grid in x; start with 40 sample points per
+  // dex in x
   vector<double> x_grid_init;
   x_grid_init.push_back(xcrit);
+
   while (x_grid_init[0] > xmin) {
-    x_grid_init.insert(x_grid_init.begin(), 1, x_grid_init[0]-log(2.0));
+    x_grid_init.insert(x_grid_init.begin(), 1, x_grid_init[0]-log(1.025));
   }
 
   // Initialise the ODE integrator
