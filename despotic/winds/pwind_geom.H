@@ -8,8 +8,12 @@
 
 class pwind_geom {
 public:
-  pwind_geom() {}
+  pwind_geom(const double phi_ = 0.0) : phi(phi_), mu(cos(phi_)) {}
   virtual ~pwind_geom() {}
+
+  // Return angle phi or its cosine
+  double get_phi() const { return phi; }
+  double get_mu() const { return mu; }
 
   // Radii where line from infinity crosses wind boundary
   virtual std::vector<double>
@@ -30,6 +34,13 @@ public:
 
   // Geometric covering fraction -- defined in derived class
   virtual double fcov() const = 0;
+
+protected:
+  // Orientation of wind relative to line of sight; only used /
+  // meaningful if geometry is cone or cone_sheath, or if wind
+  // specific angular momentum jsp != 0
+  double phi;
+  double mu; // mu = cos(phi) -- cached for speed
 };
 
 // Geometries we know about
@@ -37,7 +48,7 @@ public:
 // A trivial case of a spherical wind
 class pwind_geom_sphere : public pwind_geom {
 public:
-  pwind_geom_sphere() {}
+  pwind_geom_sphere(const double phi_ = 0.0) : pwind_geom(phi_) {}
   virtual ~pwind_geom_sphere() {}
   virtual std::vector<double> s_crit(const double varpi,
 				     const double varpi_t,
@@ -49,7 +60,7 @@ public:
 class pwind_geom_cone : public pwind_geom {
 public:
   pwind_geom_cone(const double theta_, const double phi_) :
-    theta(theta_), phi(phi_) {}
+    pwind_geom(phi_), theta(theta_) {}
   virtual ~pwind_geom_cone() {}
   virtual std::vector<double> s_crit(const double varpi,
 				     const double varpi_t,
@@ -60,16 +71,16 @@ public:
 	       const double u=0.0) const;
   virtual double fcov() const { return sin(theta); }
 protected:
-  double theta, phi;
+  double theta;
 };
 
 // A biconical sheath
 class pwind_geom_cone_sheath : public pwind_geom_cone {
 public:
   pwind_geom_cone_sheath(const double theta_out, const double theta_in,
-			 const double phi) :
-    pwind_geom_cone(theta_out, phi),
-    inner_cone(theta_in, phi) {}
+			 const double phi_) :
+    pwind_geom_cone(theta_out, phi_),
+    inner_cone(theta_in, phi_) {}
   virtual ~pwind_geom_cone_sheath() {}
   virtual std::vector<double> s_crit(const double varpi,
 				     const double varpi_t,

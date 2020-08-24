@@ -23,8 +23,10 @@ public:
 	const pwind_expansion *expansion_,
 	const pwind_geom *geom_ =
 	static_cast<const pwind_geom *>(&pw_geom_sphere),
-	const double epsabs_ = 1.0e-6, const double epsrel_ = 1.0e-6,
-	const double fcrit_ = 1.0);
+	const double epsabs_ = 1.0e-6,
+	const double epsrel_ = 1.0e-6,
+	const double fcrit_ = 1.0,
+	const double jsp_ = 0.0);
 
   // Destructor; virtual so that we force the derived class's delete
   // method to be called when we are deleted; the only thing this does
@@ -69,6 +71,7 @@ public:
   double getEpsrel() const { return epsrel; }
   double getEpsabs() const { return epsabs; }
   double getFcrit() const { return fcrit; }
+  double getJsp() const { return jsp; }
 
   // Parameters that can be changed without affecting the internal state
   void setMach(const double mach_) { mach = mach_; }
@@ -80,6 +83,7 @@ public:
     zeta_M = zetaM(xcrit+log(fcrit_), sx);
     zeta_A = zetaA(xcrit+log(fcrit_), sx);
   }
+  void setJsp(const double jsp_) { jsp = jsp_; }
 
   // Utility quantities
   virtual std::vector<double> alimits
@@ -118,6 +122,8 @@ public:
   double zA() const { return zeta_A; }
   double uMax() const { return umax; }
   double aMaxAbs() const { return amax_abs; }
+  double getJproj() const { return jsp * geom->get_mu(); }
+  double uRotMax(const double varpi_t) const { return getJproj()/varpi_t; }
   
   // Functions that perform numerical inversions of the wind
   // acceleration law; not all derived classes will use these, because
@@ -238,7 +244,7 @@ protected:
 
   // Base data
   const double Gamma;
-  double mach, theta, phi, fcrit;
+  double mach, theta, phi, fcrit, jsp;
   mutable double epsabs, epsrel;
 
   // GSL error status and handling

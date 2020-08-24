@@ -27,7 +27,8 @@ public:
 	      static_cast<const pwind_geom *>(&pw_geom_sphere),
 	      const double epsabs_ = 1.0e-6,
 	      const double epsrel_ = 1.0e-6,
-	      const double fcrit_ = 1.0);
+	      const double fcrit_ = 1.0,
+	      const double jsp_ = 0.0);
 
   // The destructor
   virtual ~pwind_ideal() { }
@@ -49,11 +50,12 @@ public:
 		 static_cast<const pwind_geom *>(&pw_geom_sphere),
 		 const double epsabs_ = 1.0e-6,
 		 const double epsrel_ = 1.0e-6,
-		 const double fcrit_ = 1.0) :
+		 const double fcrit_ = 1.0,
+		 const double jsp_ = 0.0) :
     pwind_ideal(Gamma_, mach_,
 		static_cast<const pwind_potential *>(&pwind_potential_point),
 		static_cast<const pwind_expansion *>(&pwind_expansion_area),
-		geom_, epsabs_, epsrel_, fcrit_) { }
+		geom_, epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_ideal_pa() { }
 
   // Wind kinematics
@@ -85,12 +87,13 @@ public:
 		 static_cast<const pwind_geom *>(&pw_geom_sphere),
 		 const double epsabs_ = 1.0e-6,
 		 const double epsrel_ = 1.0e-6,
-		 const double fcrit_ = 1.0) :
+		 const double fcrit_ = 1.0,
+		 const double jsp_ = 0.0) :
     pwind_ideal(Gamma_, mach_,
 		static_cast<const pwind_potential *>(&pwind_potential_point),
 		static_cast<const pwind_expansion *>
 		(&pwind_expansion_intermediate),
-		geom_, epsabs_, epsrel_, fcrit_) { }
+		geom_, epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_ideal_pi() { }
 
   // Wind kinematics
@@ -113,12 +116,13 @@ public:
 		 static_cast<const pwind_geom *>(&pw_geom_sphere),
 		 const double epsabs_ = 1.0e-6,
 		 const double epsrel_ = 1.0e-6,
-		 const double fcrit_ = 1.0) :
+		 const double fcrit_ = 1.0,
+		 const double jsp_ = 0.0) :
     pwind_ideal(Gamma_, mach_,
 		static_cast<const pwind_potential *>(&pwind_potential_point),
 		static_cast<const pwind_expansion *>
 		(&pwind_expansion_solid_angle),
-		geom_, epsabs_, epsrel_, fcrit_) { }
+		geom_, epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_ideal_ps() { }
 
   // Wind kinematics
@@ -142,12 +146,13 @@ public:
 		 static_cast<const pwind_geom *>(&pw_geom_sphere),
 		 const double epsabs_ = 1.0e-6,
 		 const double epsrel_ = 1.0e-6,
-		 const double fcrit_ = 1.0) :
+		 const double fcrit_ = 1.0,
+		 const double jsp_ = 0.0) :
     pwind_ideal(Gamma_, mach_,
 		static_cast<const pwind_potential *>
 		(&pwind_potential_isothermal),
 		static_cast<const pwind_expansion *>(&pwind_expansion_area),
-		geom_, epsabs_, epsrel_, fcrit_) { }
+		geom_, epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_ideal_ia() { }
 
   // Wind kinematics
@@ -179,13 +184,14 @@ public:
 		 static_cast<const pwind_geom *>(&pw_geom_sphere),
 		 const double epsabs_ = 1.0e-6,
 		 const double epsrel_ = 1.0e-6,
-		 const double fcrit_ = 1.0) :
+		 const double fcrit_ = 1.0,
+		 const double jsp_ = 0.0) :
     pwind_ideal(Gamma_, mach_,
 		static_cast<const pwind_potential *>
 		(&pwind_potential_isothermal),
 		static_cast<const pwind_expansion *>
 		(&pwind_expansion_intermediate),
-		geom_, epsabs_, epsrel_, fcrit_) { }
+		geom_, epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_ideal_ii() { }
 
   // Wind kinematics
@@ -217,13 +223,14 @@ public:
 		 static_cast<const pwind_geom *>(&pw_geom_sphere),
 		 const double epsabs_ = 1.0e-6,
 		 const double epsrel_ = 1.0e-6,
-		 const double fcrit_ = 1.0) :
+		 const double fcrit_ = 1.0,
+		 const double jsp_ = 0.0) :
     pwind_ideal(Gamma_, mach_,
 		static_cast<const pwind_potential *>
 		(&pwind_potential_isothermal),
 		static_cast<const pwind_expansion *>
 		(&pwind_expansion_solid_angle),
-		geom_, epsabs_, epsrel_, fcrit_) { }
+		geom_, epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_ideal_is() { }
 
   // Wind kinematics

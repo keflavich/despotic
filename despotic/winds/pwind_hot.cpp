@@ -111,9 +111,10 @@ pwind_hot::pwind_hot(const double Gamma_, const double mach_,
 		     const double epsabs_,
 		     const double epsrel_, const double interpabs_,
 		     const double interprel_, const double fcrit_,
+		     const double jsp_,
 		     const double amax_grid_) :
   pwind(Gamma_, mach_, potential_, expansion_, geom_,
-	epsabs_, epsrel_, fcrit_),
+	epsabs_, epsrel_, fcrit_, jsp_),
   uh(uh_), yoverm(yoverm_), interpabs(interpabs_), interprel(interprel_),
   amax_grid(amax_grid_)
 {
@@ -1467,13 +1468,14 @@ pwind_hot_pa::pwind_hot_pa(const double Gamma_, const double mach_,
 			   const double interpabs_,
 			   const double interprel_,
 			   const double fcrit_,
+			   const double jsp_,
 			   const double amax_grid_,
 			   const double amax_init) :
   pwind_hot(Gamma_, mach_, uh_, 1.0,
 	    static_cast<const pwind_potential *>(&pwind_potential_point),
 	    static_cast<const pwind_expansion *>(&pwind_expansion_area),
 	    geom_, epsabs_,
-	    epsrel_, interpabs_, interprel_, fcrit_, amax_grid_) {
+	    epsrel_, interpabs_, interprel_, fcrit_, jsp_, amax_grid_) {
   init(amax_init);
   amax_abs = numeric_limits<double>::max(); // Gas reaches infinity
   uMin_inf = 0.0; // Material with x = xcrit has 0 velocity as a->infinity
@@ -1495,6 +1497,7 @@ pwind_hot_pi::pwind_hot_pi(const double Gamma_, const double mach_,
 			   const double interpabs_,
 			   const double interprel_,
 			   const double fcrit_,
+			   const double jsp_,
 			   const double amax_grid_,
 			   const double amax_init) :
   pwind_hot(Gamma_, mach_, uh_, numeric_limits<double>::max(),
@@ -1502,7 +1505,7 @@ pwind_hot_pi::pwind_hot_pi(const double Gamma_, const double mach_,
 	    static_cast<const pwind_expansion *>
 	    (&pwind_expansion_intermediate),
 	    geom_, epsabs_,
-	    epsrel_, interpabs_, interprel_, fcrit_, amax_grid_) {
+	    epsrel_, interpabs_, interprel_, fcrit_, jsp_, amax_grid_) {
   init(amax_init);
   amax_abs = numeric_limits<double>::max();  // Gas reaches infinity
   uMin_inf = u_grid.back().back();
@@ -1524,13 +1527,14 @@ pwind_hot_ps::pwind_hot_ps(const double Gamma_, const double mach_,
 			   const double interpabs_,
 			   const double interprel_,
 			   const double fcrit_,
+			   const double jsp_,
 			   const double amax_grid_,
 			   const double amax_init) :
   pwind_hot(Gamma_, mach_, uh_, numeric_limits<double>::max(),
 	    static_cast<const pwind_potential *>(&pwind_potential_point),
 	    static_cast<const pwind_expansion *>(&pwind_expansion_solid_angle),
 	    geom_, epsabs_,
-	    epsrel_, interpabs_, interprel_, fcrit_, amax_grid_) {
+	    epsrel_, interpabs_, interprel_, fcrit_, jsp_, amax_grid_) {
   init(amax_init);
   amax_abs = numeric_limits<double>::max();  // Gas reaches infinity
   uMin_inf = u_grid.back().back();
@@ -1553,13 +1557,14 @@ pwind_hot_ia::pwind_hot_ia(const double Gamma_, const double mach_,
 			   const double interpabs_,
 			   const double interprel_,
 			   const double fcrit_,
+			   const double jsp_,
 			   const double amax_grid_,
 			   const double amax_init) :
   pwind_hot(Gamma_, mach_, uh_, 0.0,
 	    static_cast<const pwind_potential *>(&pwind_potential_isothermal),
 	    static_cast<const pwind_expansion *>(&pwind_expansion_area),
 	    geom_, epsabs_,
-	    epsrel_, interpabs_, interprel_, fcrit_, amax_grid_) {
+	    epsrel_, interpabs_, interprel_, fcrit_, jsp_, amax_grid_) {
   init(amax_init);
   amax_abs = exp(loga_grid.back());  // Maximum radius reached
 }
@@ -1709,13 +1714,14 @@ pwind_hot_ii::pwind_hot_ii(const double Gamma_, const double mach_,
 			   const double interpabs_,
 			   const double interprel_,
 			   const double fcrit_,
+			   const double jsp_,
 			   const double amax_grid_,
 			   const double amax_init) :
   pwind_hot(Gamma_, mach_, uh_, 1.0,
 	    static_cast<const pwind_potential *>(&pwind_potential_isothermal),
 	    static_cast<const pwind_expansion *>(&pwind_expansion_intermediate),
 	    geom_, epsabs_,
-	    epsrel_, interpabs_, interprel_, fcrit_, amax_grid_) {
+	    epsrel_, interpabs_, interprel_, fcrit_, jsp_, amax_grid_) {
   init(amax_init);
   amax_abs = numeric_limits<double>::max();  // Gas reaches infinity
   uMin_inf = u_grid.back().back();
@@ -1737,13 +1743,14 @@ pwind_hot_is::pwind_hot_is(const double Gamma_, const double mach_,
 			   const double interpabs_,
 			   const double interprel_,
 			   const double fcrit_,
+			   const double jsp_,
 			   const double amax_grid_,
 			   const double amax_init) :
   pwind_hot(Gamma_, mach_, uh_, numeric_limits<double>::max(),
 	    static_cast<const pwind_potential *>(&pwind_potential_isothermal),
 	    static_cast<const pwind_expansion *>(&pwind_expansion_solid_angle),
 	    geom_, epsabs_,
-	    epsrel_, interpabs_, interprel_, fcrit_, amax_grid_) {
+	    epsrel_, interpabs_, interprel_, fcrit_, jsp_, amax_grid_) {
   init(amax_init);
   amax_abs = numeric_limits<double>::max();  // Gas reaches infinity
   uMin_inf = u_grid.back().back();

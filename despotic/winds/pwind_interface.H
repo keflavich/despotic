@@ -16,7 +16,7 @@ extern "C" {
   void pwind_geom_free(pwind_geom *geom);
 
   // Geometric allocation
-  pwind_geom_sphere *pwind_geom_sphere_new();
+  pwind_geom_sphere *pwind_geom_sphere_new(const double phi);
 
   pwind_geom_cone *
   pwind_geom_cone_new(const double theta, const double phi);
@@ -31,64 +31,76 @@ extern "C" {
   pwind_ideal_pa_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
 		     const double epsabs, const double epsrel,
-		     const double fcrit);
+		     const double fcrit,
+		     const double jsp);
   pwind_ideal_pi *
   pwind_ideal_pi_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
 		     const double epsabs, const double epsrel,
-		     const double fcrit);
+		     const double fcrit,
+		     const double jsp);
   pwind_ideal_ps *
   pwind_ideal_ps_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
 		     const double epsabs, const double epsrel,
-		     const double fcrit);
+		     const double fcrit,
+		     const double jsp);
   pwind_ideal_ia *
   pwind_ideal_ia_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
 		     const double epsabs, const double epsrel,
-		     const double fcrit);
+		     const double fcrit,
+		     const double jsp);
   pwind_ideal_ii *
   pwind_ideal_ii_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
 		     const double epsabs, const double epsrel,
-		     const double fcrit);
+		     const double fcrit,
+		     const double jsp);
   pwind_ideal_is *
   pwind_ideal_is_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
 		     const double epsabs, const double epsrel,
-		     const double fcrit);
+		     const double fcrit,
+		     const double jsp);
 
   // Radiation-driven
   pwind_rad_pa *
   pwind_rad_pa_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_rad_pi *
   pwind_rad_pi_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_rad_ps *
   pwind_rad_ps_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_rad_ia *
   pwind_rad_ia_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_rad_ii *
   pwind_rad_ii_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_rad_is *
   pwind_rad_is_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
 
   // Hot gas-driven
   pwind_hot_pa *
@@ -97,42 +109,48 @@ extern "C" {
 		   const double epsabs, const double epsrel,
 		   const double interpabs,
 		   const double interprel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_hot_pi *
   pwind_hot_pi_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
 		   const double interpabs,
 		   const double interprel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_hot_ps *
   pwind_hot_ps_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
 		   const double interpabs,
 		   const double interprel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_hot_ia *
   pwind_hot_ia_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
 		   const double interpabs,
 		   const double interprel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_hot_ii *
   pwind_hot_ii_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
 		   const double interpabs,
 		   const double interprel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
   pwind_hot_is *
   pwind_hot_is_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
 		   const double interpabs,
 		   const double interprel,
-		   const double fcrit);
+		   const double fcrit,
+		   const double jsp);
  
   ////////////////////////////////////////////////////////////////////////
   // Expose methods that set and return simple information from pwind
@@ -150,6 +168,7 @@ extern "C" {
   double epsrel(const pwind *pw);
   double epsabs(const pwind *pw);
   double fcrit(const pwind *pw);
+  double jsp(const pwind *pw);
   double xcrit(const pwind *pw);
   double sx(const pwind *pw);
   double zetaM(const pwind *pw);
@@ -161,6 +180,7 @@ extern "C" {
   void set_epsabs(const double epsabs, pwind *pw);
   void set_geometry(const pwind_geom *geom, pwind *pw);
   void set_fcrit(const double fcrit, pwind *pw);
+  void set_jsp(const double jsp, pwind *pw);
   
   ////////////////////////////////////////////////////////////////////////
   // Computation functions

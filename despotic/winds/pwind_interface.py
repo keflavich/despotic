@@ -25,7 +25,7 @@ except OSError:
 
 # Geometries
 libpwind.pwind_geom_sphere_new.restype = c_void_p
-libpwind.pwind_geom_sphere_new.argtypes = [ ]
+libpwind.pwind_geom_sphere_new.argtypes = [ c_double ]
 libpwind.pwind_geom_cone_new.restype = c_void_p
 libpwind.pwind_geom_cone_new.argtypes = [ c_double, c_double ]
 libpwind.pwind_geom_cone_sheath_new.restype = c_void_p
@@ -35,74 +35,74 @@ libpwind.pwind_geom_cone_sheath_new.argtypes \
 # Ideal winds
 libpwind.pwind_ideal_pa_new.restype = c_void_p
 libpwind.pwind_ideal_pa_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
 libpwind.pwind_ideal_pi_new.restype = c_void_p
 libpwind.pwind_ideal_pi_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
 libpwind.pwind_ideal_ps_new.restype = c_void_p
 libpwind.pwind_ideal_ps_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
 libpwind.pwind_ideal_ia_new.restype = c_void_p
 libpwind.pwind_ideal_ia_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
 libpwind.pwind_ideal_ii_new.restype = c_void_p
 libpwind.pwind_ideal_ii_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
 libpwind.pwind_ideal_is_new.restype = c_void_p
 libpwind.pwind_ideal_is_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
 
 # Radiation-driven winds
 libpwind.pwind_rad_pa_new.restype = c_void_p
 libpwind.pwind_rad_pa_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double ]
 libpwind.pwind_rad_pi_new.restype = c_void_p
 libpwind.pwind_rad_pi_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double ]
 libpwind.pwind_rad_ps_new.restype = c_void_p
 libpwind.pwind_rad_ps_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double ]
 libpwind.pwind_rad_ia_new.restype = c_void_p
 libpwind.pwind_rad_ia_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double ]
 libpwind.pwind_rad_ii_new.restype = c_void_p
 libpwind.pwind_rad_ii_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double ]
 libpwind.pwind_rad_is_new.restype = c_void_p
 libpwind.pwind_rad_is_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double ]
 
 # Hot gas-driven winds
 libpwind.pwind_hot_pa_new.restype = c_void_p
 libpwind.pwind_hot_pa_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_double, c_double ]
 libpwind.pwind_hot_pi_new.restype = c_void_p
 libpwind.pwind_hot_pi_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_double, c_double ]
 libpwind.pwind_hot_ps_new.restype = c_void_p
 libpwind.pwind_hot_ps_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_double, c_double ]
 libpwind.pwind_hot_ia_new.restype = c_void_p
 libpwind.pwind_hot_ia_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_double, c_double ]
 libpwind.pwind_hot_ii_new.restype = c_void_p
 libpwind.pwind_hot_ii_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_double, c_double ]
 libpwind.pwind_hot_is_new.restype = c_void_p
 libpwind.pwind_hot_is_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_double, c_double ]
 
 # Free
 libpwind.pwind_free.restype = None
@@ -121,6 +121,8 @@ libpwind.epsabs.restype = c_double
 libpwind.epsabs.argtypes = [ c_void_p ]
 libpwind.fcrit.restype = c_double
 libpwind.fcrit.argtypes = [ c_void_p ]
+libpwind.jsp.restype = c_double
+libpwind.jsp.argtypes = [ c_void_p ]
 libpwind.xcrit.restype = c_double
 libpwind.xcrit.argtypes = [ c_void_p ]
 libpwind.sx.restype = c_double
@@ -141,6 +143,8 @@ libpwind.set_epsabs.restype = None
 libpwind.set_epsabs.argtypes = [ c_double, c_void_p ]
 libpwind.set_fcrit.restype = None
 libpwind.set_fcrit.argtypes = [ c_double, c_void_p ]
+libpwind.set_jsp.restype = None
+libpwind.set_jsp.argtypes = [ c_double, c_void_p ]
 libpwind.set_geometry.restype = None
 libpwind.set_geometry.argtypes = [ c_void_p, c_void_p ]
 

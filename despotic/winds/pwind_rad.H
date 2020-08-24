@@ -71,7 +71,8 @@ public:
 	    static_cast<const pwind_geom *>(&pw_geom_sphere),
 	    const double epsabs_ = 1.0e-6,
 	    const double epsrel_ = 1.0e-6,
-	    const double fcrit_ = 1.0);
+	    const double fcrit_ = 1.0,
+	    const double jsp_ = 0.0);
 
   // The destructor
   virtual ~pwind_rad() { }
@@ -134,7 +135,8 @@ public:
 		  static_cast<const pwind_geom *>(&pw_geom_sphere),
 		  const double epsabs_ = 1.0e-6,
 		  const double epsrel_ = 1.0e-6,
-		  const double fcrit_ = 1.0);
+		  const double fcrit_ = 1.0,
+		  const double jsp_ = 0.0);
   virtual ~pwind_rad_point() { }
 
   // Velocity of fluid element with x -> -infinity; same for all point
@@ -165,7 +167,8 @@ public:
 		       static_cast<const pwind_geom *>(&pw_geom_sphere),
 		       const double epsabs_ = 1.0e-6,
 		       const double epsrel_ = 1.0e-6,
-		       const double fcrit_ = 1.0);
+		       const double fcrit_ = 1.0,
+		       const double jsp_ = 0.0);
   virtual ~pwind_rad_isothermal() { }
 
   // Velocity of fluid element with x -> -infinity; same for all 
@@ -216,11 +219,12 @@ public:
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
 	       const double epsabs_ = 1.0e-6,
 	       const double epsrel_ = 1.0e-6,
-	       const double fcrit_ = 1.0) :
+	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0) :
     pwind_rad_point(Gamma_, mach_, tau0_,
 		    static_cast<const pwind_expansion *>
 		    (&pwind_expansion_area), geom_,
-		    epsabs_, epsrel_, fcrit_) { }
+		    epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_rad_pa() { }
 
   // Wind kinematics
@@ -250,7 +254,8 @@ public:
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
 	       const double epsabs_ = 1.0e-6,
 	       const double epsrel_ = 1.0e-6,
-	       const double fcrit_ = 1.0);
+	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0);
   virtual ~pwind_rad_pi() { }
 
   // Wind kinematics
@@ -274,7 +279,8 @@ public:
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
 	       const double epsabs_ = 1.0e-6,
 	       const double epsrel_ = 1.0e-6,
-	    const double fcrit_ = 1.0);
+	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0);
   virtual ~pwind_rad_ps() { }
 
   // Wind kinematics
@@ -299,11 +305,12 @@ public:
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
 	       const double epsabs_ = 1.0e-6,
 	       const double epsrel_ = 1.0e-6,
-	       const double fcrit_ = 1.0) :
+	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0) :
     pwind_rad_isothermal(Gamma_, mach_, tau0_,
 			 static_cast<const pwind_expansion *>
 			 (&pwind_expansion_area), geom_,
-			 epsabs_, epsrel_, fcrit_) { }
+			 epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_rad_ia() { }
 
   // Wind kinematics
@@ -327,11 +334,12 @@ public:
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
 	       const double epsabs_ = 1.0e-6,
 	       const double epsrel_ = 1.0e-6,
-	       const double fcrit_ = 1.0) :
+	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0) :
     pwind_rad_isothermal(Gamma_, mach_, tau0_,
 			 static_cast<const pwind_expansion *>
 			 (&pwind_expansion_intermediate), geom_,
-			 epsabs_, epsrel_, fcrit_) { }
+			 epsabs_, epsrel_, fcrit_, jsp_) { }
   virtual ~pwind_rad_ii() { }
 
   // Wind kinematics
@@ -355,7 +363,8 @@ public:
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
 	       const double epsabs_ = 1.0e-6,
 	       const double epsrel_ = 1.0e-6,
-	       const double fcrit_ = 1.0);
+	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0);
   virtual ~pwind_rad_is() { }
 
   // Wind kinematics

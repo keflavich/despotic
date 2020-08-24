@@ -31,9 +31,10 @@ pwind_rad::pwind_rad(const double Gamma_, const double mach_,
 		     const pwind_potential *potential_,
 		     const pwind_expansion *expansion_,
 		     const pwind_geom *geom_, const double epsabs_,
-		     const double epsrel_, const double fcrit_) :
+		     const double epsrel_, const double fcrit_,
+		     const double jsp_) :
   pwind(Gamma_, mach_, potential_, expansion_, geom_,
-	epsabs_, epsrel_, fcrit_),
+	epsabs_, epsrel_, fcrit_, jsp_),
   tau0(tau0_)
 {
   xcrit = xCrit();
@@ -209,11 +210,12 @@ pwind_rad_point::
 pwind_rad_point(const double Gamma_, const double mach_,
 		const double tau0_, const pwind_expansion *expansion_,
 		const pwind_geom *geom_, const double epsabs_,
-		const double epsrel_, const double fcrit_) :
+		const double epsrel_, const double fcrit_,
+		const double jsp_) :
   pwind_rad(Gamma_, mach_, tau0_,
 	    static_cast<const pwind_potential *>(&pwind_potential_point),
 	    expansion_,
-	    geom_, epsabs_, epsrel_, fcrit_)
+	    geom_, epsabs_, epsrel_, fcrit_, jsp_)
 {
   umax = sqrt(Gamma_*tau0_-1.0);
   amax_abs = numeric_limits<double>::max();
@@ -266,10 +268,11 @@ pwind_rad_isothermal(const double Gamma_, const double mach_,
 		     const double tau0_,
 		     const pwind_expansion *expansion_,
 		     const pwind_geom *geom_, const double epsabs_,
-		     const double epsrel_, const double fcrit_) :
+		     const double epsrel_, const double fcrit_,
+		     const double jsp_) :
   pwind_rad(Gamma_, mach_, tau0_,
 	    static_cast<const pwind_potential *>(&pwind_potential_isothermal),
-	    expansion_, geom_, epsabs_, epsrel_, fcrit_)
+	    expansion_, geom_, epsabs_, epsrel_, fcrit_, jsp_)
 {
   umax = sqrt(Gamma_*tau0_ - log(Gamma_*tau0_) - 1.0);
   a_maxu = Gamma_*tau0_;
@@ -544,11 +547,12 @@ pwind_rad_pi::
 pwind_rad_pi(const double Gamma_, const double mach_,
 	     const double tau0_, 
 	     const pwind_geom *geom_, const double epsabs_,
-	     const double epsrel_, const double fcrit_) :
+	     const double epsrel_, const double fcrit_,
+	     const double jsp_) :
     pwind_rad_point(Gamma_, mach_, tau0_,
 		    static_cast<const pwind_expansion *>
 		    (&pwind_expansion_intermediate), geom_,
-		    epsabs_, epsrel_, fcrit_) {
+		    epsabs_, epsrel_, fcrit_, jsp_) {
   u_min_infinity = sqrt(U2(xcrit, numeric_limits<double>::max()));
 }
 double
@@ -582,11 +586,12 @@ pwind_rad_ps::
 pwind_rad_ps(const double Gamma_, const double mach_,
 	     const double tau0_, 
 	     const pwind_geom *geom_, const double epsabs_,
-	     const double epsrel_, const double fcrit_) :
+	     const double epsrel_, const double fcrit_,
+	     const double jsp_) :
     pwind_rad_point(Gamma_, mach_, tau0_,
 		    static_cast<const pwind_expansion *>
 		    (&pwind_expansion_solid_angle), geom_,
-		    epsabs_, epsrel_, fcrit_) {
+		    epsabs_, epsrel_, fcrit_, jsp_) {
   u_min_infinity = sqrt(U2(xcrit, numeric_limits<double>::max()));
 }
 double
@@ -733,11 +738,12 @@ pwind_rad_ii::amax(const double x) const {
 pwind_rad_is::pwind_rad_is(const double Gamma_, const double mach_,
 			   const double tau0_, 
 			   const pwind_geom *geom_, const double epsabs_,
-			   const double epsrel_, const double fcrit_) :
+			   const double epsrel_, const double fcrit_,
+			   const double jsp_) :
   pwind_rad_isothermal(Gamma_, mach_, tau0_,
 		       static_cast<const pwind_expansion *>
 		       (&pwind_expansion_solid_angle), geom_,
-		       epsabs_, epsrel_, fcrit_)
+		       epsabs_, epsrel_, fcrit_, jsp_)
 {
   // Solve for radius of maximum velocity along x = xcrit curve
   a_maxu_xcrit = a_max_u_from_varpi(xcrit);

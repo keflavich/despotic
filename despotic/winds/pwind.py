@@ -51,9 +51,9 @@ class pwind(object):
     def __init__(self, Gamma, mach, 
                  driver='ideal', potential='point',
                  expansion='intermediate',
-                 geometry='sphere', fcrit=1.0,
+                 geometry='sphere', fcrit=1.0, jsp=0.0,
                  epsabs=1.0e-4, epsrel=1.0e-2,
-                 theta=None, phi=None, theta_in=None,
+                 theta=None, phi=0.0, theta_in=None,
                  tau0=None, uh=None, interpabs=1.0e-2,
                  interprel=1.0e-2, error_policy="warn"):
         """
@@ -87,6 +87,8 @@ class pwind(object):
            fcrit: float
               material is only considered to be launched into the wind
               if x < f_crit x_crit; must be <= 1.0
+           jsp : float
+              dimensionless specific angluar momentum of wind
            epsabs: float
               absolute error tolerance for numerical integrations
            epsrel: float
@@ -95,12 +97,12 @@ class pwind(object):
               opening angle of the outer edge of the wind for cone or
               cone sheath geometry; ignored for all other geometries
            phi: float, in the range [-pi/2, pi/2]
-              inclination of the wind cone central axis relative to
-              the plane of the sky for either cone or cone sheath
-              geometry; ignored for all other geometries; phi = 0
-              corresponds to a wind cone in the plane of the sky, phi > 0
-              corresponds to the varpi > 0 side of the wind pointed
-              away from the observer
+              inclination of the wind central axis relative to
+              the plane of the sky; phi = 0 corresponds to the axis
+              lying in the plane of the sky, phi > 0 corresponds to the
+              varpi > 0 side of the wind pointed away from the
+              observer; only used if goemetry is cone or cone sheath,
+              or if specific angular momentum jsp != 0
            theta_in: float, in range (0, theta)
               opening angle of the inner edge of the wind for cone
               sheath geometry, ignored for all other geometries
@@ -141,6 +143,7 @@ class pwind(object):
         self.expansion_ = expansion
         self.geometry_ = geometry
         self.fcrit_ = fcrit
+        self.jsp_ = jsp
         self.theta_ = theta
         self.phi_ = phi
         self.theta_in_ = theta_in
@@ -178,7 +181,7 @@ class pwind(object):
             libpwind.pwind_geom_free(self.__geom)
             self.__geom = None
         if self.geometry == 'sphere':
-            self.__geom = libpwind.pwind_geom_sphere_new()
+            self.__geom = libpwind.pwind_geom_sphere_new(self.phi)
         elif self.geometry == 'cone':
             if self.theta is None or self.phi is None:
                 raise ValueError("pwind: for cone geometry, must "
@@ -224,30 +227,30 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_ideal_pa_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_ideal_pi_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_ideal_ps_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
                 else: raise(ValueError("pwind: unknown expansion "
                                       "value "+str(self.expansion_)))
             elif self.potential_ == 'isothermal':
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_ideal_ia_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_ideal_ii_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_ideal_is_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
                 else: raise(ValueError("pwind: unknown expansion "
                                       "value "+str(self.expansion_)))
             else: raise(ValueError("pwind: unknown potential " +
@@ -263,30 +266,36 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_rad_pa_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_rad_pi_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_rad_ps_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.jsp_)
                 else: raise(ValueError("pwind: unknown expansion "
                                       "value "+str(self.expansion_)))
             elif self.potential_ == 'isothermal':
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_rad_ia_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_rad_ii_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_rad_is_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_)
+                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.jsp_)
                 else: raise(ValueError("pwind: unknown expansion "
                                       "value "+str(self.expansion_)))
             else: raise(ValueError("pwind: unknown potential " +
@@ -303,17 +312,20 @@ class pwind(object):
                     self.__pw = libpwind.pwind_hot_pa_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_)
+                        self.interpabs_, self.interprel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_pi_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_)
+                        self.interpabs_, self.interprel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_ps_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_)
+                        self.interpabs_, self.interprel_, self.fcrit_,
+                        self.jsp_)
                 else: raise(ValueError("pwind: unknown expansion "
                                       "value "+str(self.expansion_)))
             elif self.potential_ == 'isothermal':
@@ -321,17 +333,20 @@ class pwind(object):
                     self.__pw = libpwind.pwind_hot_ia_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_)
+                        self.interpabs_, self.interprel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_ii_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_)
+                        self.interpabs_, self.interprel_, self.fcrit_,
+                        self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_is_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_)
+                        self.interpabs_, self.interprel_, self.fcrit_,
+                        self.jsp_)
                 else: raise(ValueError("pwind: unknown expansion "
                                        "value "+str(self.expansion_)))
             else: raise(ValueError("pwind: unknown potential " +
@@ -436,6 +451,13 @@ class pwind(object):
     def fcrit(self, val):
         self.fcrit_ = val
         libpwind.set_fcrit(val, self.__pw)
+    @property
+    def jsp(self):
+        return self.jsp_
+    @jsp.setter
+    def jsp(self, val):
+        self.jsp_ = val
+        libpwind.set_jsp(val, self.__pw)
     @property
     def tau0(self):
         return self.tau0_

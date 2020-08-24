@@ -40,6 +40,7 @@ public:
 	    const double interpabs_ = 1.0e-2,
 	    const double interprel_ = 1.0e-2,
 	    const double fcrit_ = 1.0,
+	    const double jsp_ = 0.0,
 	    const double amax_grid = 1.0e10);
 
   // The destructor
@@ -136,6 +137,7 @@ public:
 	       const double interpabs_ = 1.0e-2,
 	       const double interprel_ = 1.0e-2,
 	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0,
 	       const double amax_grid_ = 1.0e10,
 	       const double amax_init = 1000.0);
   virtual ~pwind_hot_pa() { }
@@ -157,6 +159,7 @@ public:
 	       const double interpabs_ = 1.0e-2,
 	       const double interprel_ = 1.0e-2,
 	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0,
 	       const double amax_grid_ = 1.0e10,
 	       const double amax_init = 1000.0);
   virtual ~pwind_hot_pi() { }
@@ -179,6 +182,7 @@ public:
 	       const double interpabs_ = 1.0e-2,
 	       const double interprel_ = 1.0e-2,
 	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0,
 	       const double amax_grid_ = 1.0e10,
 	       const double amax_init = 1000.0);
   virtual ~pwind_hot_ps() { }
@@ -201,6 +205,7 @@ public:
 	       const double interpabs_ = 1.0e-2,
 	       const double interprel_ = 1.0e-2,
 	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0,
 	       const double amax_grid_ = 1.0e10,
 	       const double amax_init = 1000.0);
   virtual ~pwind_hot_ia() { }
@@ -226,6 +231,7 @@ public:
 	       const double interpabs_ = 1.0e-2,
 	       const double interprel_ = 1.0e-2,
 	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0,
 	       const double amax_grid_ = 1.0e10,
 	       const double amax_init = 1000.0);
   virtual ~pwind_hot_ii() { }
@@ -248,6 +254,7 @@ public:
 	       const double interpabs_ = 1.0e-2,
 	       const double interprel_ = 1.0e-2,
 	       const double fcrit_ = 1.0,
+	       const double jsp_ = 0.0,
 	       const double amax_grid_ = 1.0e10,
 	       const double amax_init = 1000.0);
   virtual ~pwind_hot_is() { }

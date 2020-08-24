@@ -11,9 +11,10 @@ pwind_ideal::pwind_ideal(const double Gamma_, const double mach_,
 			 const pwind_expansion *expansion_,
 			 const pwind_geom *geom_,
 			 const double epsabs_, const double epsrel_,
-			 const double fcrit_) :
+			 const double fcrit_,
+			 const double jsp_) :
   pwind(Gamma_, mach_, potential_, expansion_, geom_, epsabs_, epsrel_,
-	fcrit_)
+	fcrit_, jsp_)
 {
   xcrit = log(Gamma_);
   umax = numeric_limits<double>::max();

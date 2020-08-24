@@ -35,7 +35,7 @@ struct U2_params {
 };
 
 struct Phi_params {
-  double u, vp2;
+  double u, varpi, varpi_t, vp2, jproj;
   double tXtw, fj, boltzfac;  // This need only be initialised for tau_c
   double tau_target; // Only used by tau_c_func
   double fw; // Only used in the correlated case
@@ -44,7 +44,7 @@ struct Phi_params {
 };
 
 struct Phi_params_vec {
-  double u, vp2, fj, boltzfac;
+  double u, varpi, varpi_t, vp2, jproj, fj, boltzfac;
   vector<double> u_trans, tXtw;
   double tau_target;
   double fw;
@@ -87,18 +87,21 @@ struct Psi_params {
 
 ////////////////////////////////////////////////////////////////////////
 // Constructor; note that we turn off GSL error handling here, because
-// we will handle errors manually
+// we will handle errors manually.
 ////////////////////////////////////////////////////////////////////////
-pwind::pwind(const double Gamma_, const double mach_,
+pwind::pwind(const double Gamma_,
+	     const double mach_,
 	     const pwind_potential *potential_,
 	     const pwind_expansion *expansion_,
 	     const pwind_geom *geom_,
-	     const double epsabs_, const double epsrel_,
-	     const double fcrit_) :
+	     const double epsabs_,
+	     const double epsrel_,
+	     const double fcrit_,
+	     const double jsp_) :
     potential(potential_),
     expansion(expansion_),
     geom(geom_),
-    Gamma(Gamma_), mach(mach_), fcrit(fcrit_),
+    Gamma(Gamma_), mach(mach_), fcrit(fcrit_), jsp(jsp_),
     epsabs(epsabs_), epsrel(epsrel_),
     gsl_err_stat(GSL_SUCCESS),
     err_handler(gsl_set_error_handler_off()),
@@ -309,7 +312,10 @@ static double Phi_uc_integ(double loga, void *params) {
   if (par->vp2 >= SQR(a)) return 0.0;
 
   // Get x and dU2/dx
-  double ur = fabs(par->u) / sqrt(1.0 - par->vp2/SQR(a));
+  double ur = fabs(par->u -
+		   par->jproj * par->varpi_t /
+		   (a*a - par->varpi*par->varpi)) /
+    sqrt(1.0 - par->vp2/SQR(a));
   if (ur > par->w->uMax()) return 0.0;
   double x = par->w->X(ur, a);
   if (x > par->w->xcr() + log(par->w->getFcrit())) return 0.0;
@@ -359,10 +365,6 @@ static double tau_c_integ(double loga, void *params) {
 
   // Return integrand
   double ret = a*fabs(par->w->dfcda(a, par->fw))*exp(-tau);
-  //cout << "a = " << a
-  //     << ", tau = " << tau
-  //     << ", ret = " << ret
-  //     << endl;
   return ret;
 }    
 
@@ -386,10 +388,6 @@ static double tau_c_integ_vec(double loga, void *params) {
 
   // Return integrand
   double ret = a*fabs(par->w->dfcda(a, par->fw))*exp(-tau);
-  //cout << "a = " << a
-  //     << ", tau = " << tau
-  //     << ", ret = " << ret
-  //     << endl;
   return ret;
 }    
 
@@ -401,52 +399,72 @@ double pwind::Phi_uc(const double u, const double varpi,
   struct Phi_params par;
   double result, err;
 
-  // Check if velocity is outside bounds
-  if (u == 0) return numeric_limits<double>::max();
-  if (u >= umax) return 0.0;
+  // If this is a rotating wind, check if we are in the case with
+  // solutions only on one side, or if solutions exist on both sides
+  double urot = uRotMax(varpi_t);    // Maximum rotation speed
+  if ((urot > 0 && u > 0 && u < urot) ||
+      (urot < 0 && u < 0 && u > urot)) {
 
-  // Get integration limits from velocity and geometry
-  vector<double> alim_v = alimits(u, varpi, varpi_t);
-  vector<double> alim = geom->a_lim(alim_v, varpi, varpi_t, u);
-  if (alim.size() == 0) return 0.0;
+    // Two solution case
 
-  // Apply input limits
-  for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
-    if (alim[2*i] < a0) alim[2*i] = a0;
-    if (alim[2*i+1] > a1) alim[2*i+1] = a1;
-  }
+    // Placeholder
+    return 0.0;
+    
 
-  // Load the GSL data
-  par.u = fabs(u);
-  par.vp2 = SQR(varpi) + SQR(varpi_t);
-  par.w = this;
-  F.function = &Phi_uc_integ;
-  F.params = &par;
+  } else {
 
-  // Set up integration
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
-  
-  // Integrate
-  double integ = 0.0;
-  for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
-    if (alim[2*i+1] <= alim[2*i]) continue;
-    if (alim[2*i+1] < numeric_limits<double>::max()) {
-      checkForErr(gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
-				      epsabs, epsrel, MAXINTERVAL,
-				      GSL_INTEG_GAUSS61, w, &result, &err));
-    } else {
-      checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
-					MAXINTERVAL, w, &result, &err));
+    // Single solution case
+
+    // Check if velocity is outside bounds
+    if (u == 0) return numeric_limits<double>::max();
+    if (u >= umax) return 0.0;
+
+    // Get integration limits from velocity and geometry
+    vector<double> alim_v = alimits(u, varpi, varpi_t);
+    vector<double> alim = geom->a_lim(alim_v, varpi, varpi_t, u);
+    if (alim.size() == 0) return 0.0;
+
+    // Apply input limits
+    for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
+      if (alim[2*i] < a0) alim[2*i] = a0;
+      if (alim[2*i+1] > a1) alim[2*i+1] = a1;
     }
-    integ += result;
-  }
-  integ /= zeta_M;
 
-  // Take down integration machinery
-  gsl_integration_workspace_free(w);
+    // Load the GSL data
+    par.u = fabs(u);
+    par.varpi = varpi;
+    par.varpi_t = varpi_t;
+    par.vp2 = SQR(varpi) + SQR(varpi_t);
+    par.jproj = getJproj();
+    par.w = this;
+    F.function = &Phi_uc_integ;
+    F.params = &par;
+
+    // Set up integration
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
   
-  // Return
-  return integ;
+    // Integrate
+    double integ = 0.0;
+    for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
+      if (alim[2*i+1] <= alim[2*i]) continue;
+      if (alim[2*i+1] < numeric_limits<double>::max()) {
+	checkForErr(gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
+					epsabs, epsrel, MAXINTERVAL,
+					GSL_INTEG_GAUSS61, w, &result, &err));
+      } else {
+	checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
+					  MAXINTERVAL, w, &result, &err));
+      }
+      integ += result;
+    }
+    integ /= zeta_M;
+
+    // Take down integration machinery
+    gsl_integration_workspace_free(w);
+  
+    // Return
+    return integ;
+  }
 }
 
 double pwind::tau_uc(const double u, const double tXtw,
