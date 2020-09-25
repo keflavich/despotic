@@ -23,5 +23,5 @@ LIB_EXTENSION	   = .so
 CLIBFLAGS	   = -fPIC
 DYNLIBFLAG	   = -shared
 
-# By default boost library names under linux do not have tags
-MACH_BOOST_TAG    =
+# OpenMP flag
+MACH_OMPFLAGS	   = -fopenmp

@@ -1,15 +1,16 @@
 # Machine-specific settings for Darwin/OSX
 
-# Default is g++
+# C and C++ compilers
 MACH_CXX	  = c++
+MACH_CC		  = cc
 
 # Flag needed to specify c++11 standard
 MACH_C11FLAG      = -std=c++11
 
 # Optimization flags for clang
-MACH_CXXOPTFLAGS   = -O3 -Wall
+MACH_CXXOPTFLAGS   = -Ofast -Wall
 MACH_COPTFLAGS	  = $(MACH_CXXOPTFLAGS)
-MACH_LDOPTFLAGS	   = -O4 -Wall
+MACH_LDOPTFLAGS	   = -Ofast -Wall
 
 # Debug flags for clang
 MACH_CXXDEBFLAGS  = -g -Wall
