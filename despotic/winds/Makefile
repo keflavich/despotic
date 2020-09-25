@@ -10,14 +10,12 @@ else
 
      # Do we have a makefile that matches the machine name? If so, use
      # that. If not, use a generic makefile depending on the OS.
-     ifeq ($(UNAMEN), hyades.ucsc.edu)
-          include Make.mach.ucsc-hyades
-     else ifeq ($(UNAMEN), cosma-e)
-          include Make.mach.icc-cosma4
-     else ifeq ($(UNAMEN), mosura)
-          include Make.mach.coala
-     else ifneq (,$(findstring raijin, $(UNAMEN)))
-          include Make.mach.icc-raijin
+     ifeq ($(UNAMEN), morticia.anu.edu.au)
+          include Make.mach.morticia
+     else ifeq ($(UNAMEN), avatar)
+          include Make.mach.avatar
+     else ifneq (,$(findstring gadi, $(UNAMEN)))
+          include Make.mach.icc-gadi
      else ifeq ($(UNAME), Linux)
           include Make.mach.linux-gnu
      else ifeq ($(UNAME), Darwin)
@@ -30,15 +28,16 @@ endif
 
 # Set compiler
 CXX		= $(MACH_CXX) $(MACH_C11FLAG)
+CC		= $(MACH_CC)
 
 # Set optimization mode flags
-CXXOPTFLAGS	= $(MACH_CXXOPTFLAGS) -DNDEBUG \
+CXXOPTFLAGS	= $(MACH_CXXOPTFLAGS) $(MACH_OMPFLAGS) -DNDEBUG \
 	-DHAVE_INLINE -MMD -MP
-LDOPTFLAGS	= $(MACH_LDOPTFLAGS) $(MACH_CXXFLAG)
+LDOPTFLAGS	= $(MACH_LDOPTFLAGS) $(MACH_OMPFLAGS) $(MACH_CXXFLAG)
 
 # Set debug mode flags
-CXXDEBFLAGS     = $(MACH_CXXDEBFLAGS) -MMD -MP
-LDDEBFLAGS	= $(MACH_LDDEBFLAGS) $(MACH_CXXFLAG)
+CXXDEBFLAGS     = $(MACH_CXXDEBFLAGS) $(MACH_OMPFLAGS) -MMD -MP
+LDDEBFLAGS	= $(MACH_LDDEBFLAGS) $(MACH_OMPFLAGS) $(MACH_CXXFLAG)
 
 # Read any user overrides
 -include Make.config.override
@@ -109,5 +108,15 @@ $(LIBSTATNAME): $(OBJECTS)
 
 compile:	$(OBJECTS)
 
+
 clean:
 	rm -f $(EXENAME) $(OBJECTS) $(DEPS) $(LIBNAME)
+
+table:
+	$(CC) -o hot_wind_tab hot_wind_tab.c $(CXXOPTFLAGS) $(LDOPTFLAGS) \
+		$(INCFLAGS) $(LDLIBFLAGS)
+
+table-debug:
+	$(CC) -o hot_wind_tab hot_wind_tab.c $(CXXDEBFLAGS) $(LDDEBFLAGS) \
+		$(INCFLAGS) $(LDLIBFLAGS)
+
