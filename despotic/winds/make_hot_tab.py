@@ -1,0 +1,98 @@
+"""
+Script to generae a hot wind output table
+"""
+
+import subprocess
+import shlex
+import numpy as np
+import time
+from multiprocessing import cpu_count
+
+# Set to overwrite existing grid
+overwrite = True
+
+# Set directory into which to write output
+outdir = "hot_gas_data"
+
+# Resolution of grid to compute
+nu = 1024
+nq = 256
+ngex = 512
+qmin = -4.0
+qmax = 4.0
+loggex_max = 3.0
+
+# Range of parameters
+m = np.array([0, 1], dtype=int)
+y = np.array([0, 1, 2], dtype=int)
+uh =  np.append(
+    np.append(np.arange(1.0, 10.01, 0.1), np.arange(10.5, 20.01, 0.5)),
+    np.arange(21.0, 50.01, 1.0))
+
+# Construct array of values to loop over
+ma, ya, uha = np.meshgrid(m, y, uh)
+ma = ma.flatten()
+ya = ya.flatten()
+uha = uha.flatten()
+
+# Calculate all cases in parallal
+ncpus = cpu_count()
+ptr = 0
+procs = []
+logfiles = []
+while ptr < ya.size:
+
+    # Check if there is a free slot in the process list; if there is,
+    # start a new job
+    while len(procs) < ncpus:
+
+        # Build command string for this case
+        cmd = (
+            "./hot_wind_tab {:f} {:d} {:d} {:d} {:d} {:f} {:f} {:d} "
+            "{:f} --dir {:s} --verbose").format(
+                uha[ptr], ya[ptr], ma[ptr],
+                nu, nq, qmin, qmax, ngex, loggex_max,
+                outdir)
+        if overwrite:
+            cmd += " --overwrite"
+        args = shlex.split(cmd)
+
+        # Set name of log file
+        logfile = "uh{:04.1f}_y{:d}_m{:d}.log".\
+                  format(uha[ptr], ya[ptr], ma[ptr])
+        logfiles.append(logfile)
+
+        # Start process
+        print(cmd)
+        procs.append(subprocess.Popen(args, stdout=subprocess.PIPE))
+
+        # Increment pointer; if we are out of jobs to do, stop
+        ptr += 1
+        if ptr >= ya.size: break
+
+    # Check if any existing processes have finished, and, if so, read
+    # their output and then pop them off the list
+    polls = [p.poll() for p in procs]
+    for pr, po, lo in zip(procs, polls, logfiles):
+        if po is not None:
+            outs, errs = pr.communicate()
+            fp = open(lo, "wb")
+            if outs is not None: fp.write(outs)
+            if errs is not None: fp.write(errs)
+            fp.close()
+    procs = [pr for pr, po in zip(procs, polls) if po is None]
+    logfiles = [lo for lo, po in zip(logfiles, polls) if po is None]
+
+# Wait for remaining processes to finish
+while len(procs) > 0:
+    polls = [p.poll() for p in procs]
+    for pr, po, lo in zip(procs, polls, logfiles):
+        if po is not None:
+            outs, errs = pr.communicate()
+            fp = open(lo, "wb")
+            if outs is not None: fp.write(outs)
+            if errs is not None: fp.write(errs)
+            fp.close()
+    procs = [pr for pr, po in zip(procs, polls) if po is None]
+    logfiles = [lo for lo, po in zip(logfiles, polls) if po is None]
+    
