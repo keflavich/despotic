@@ -1,5 +1,5 @@
 """
-Script to generae a hot wind output table
+Script to generate a hot wind output table
 """
 
 import subprocess
@@ -7,9 +7,11 @@ import shlex
 import numpy as np
 import time
 from multiprocessing import cpu_count
+import os.path as osp
+from shutil import copyfileobj
 
 # Set to overwrite existing grid
-overwrite = True
+overwrite = False
 
 # Set directory into which to write output
 outdir = "hot_gas_data"
@@ -96,3 +98,99 @@ while len(procs) > 0:
     procs = [pr for pr, po in zip(procs, polls) if po is None]
     logfiles = [lo for lo, po in zip(logfiles, polls) if po is None]
     
+# Consolidate the output data into a smaller number of files for
+# easier IO; to do this, we basically just stack all the different uh
+# values into a single file
+for m_ in m:
+    for y_ in y:
+
+        # Metadata files
+        metaname = osp.join(outdir, "table_params_y{:1d}_m{:1d}.txt".
+                            format(y_, m_))
+        fp = open(metaname, 'w')
+        fp.write(str(len(uh))+"\n")
+        fp.write(str(nu)+"\n")
+        fp.write(str(nq)+"\n")
+        fp.write(str(ngex)+"\n")
+        fp.write(str(qmin)+"\n")
+        fp.write(str(qmax)+"\n")
+        fp.write(str(loggex_max)+"\n")
+        for u_ in uh:
+            fp.write("   {:5.2f}".format(u_))
+        fp.write("\n")
+        fp.close()
+
+        # gex files
+        dstname = osp.join(outdir,
+                           "gextab_gex_y{:1d}_m{:1d}.bin".format(y_, m_))
+        if overwrite or not osp.isfile(dstname):
+            print("Consolidating to {:s}...".format(dstname))
+            fpout = open(dstname, 'wb')
+            for u_ in uh:
+                inname = osp.join(outdir,
+                                  "gextab_gex_uh{:f}_y{:1d}_m{:1d}.bin".
+                                  format(u_, y_, m_))
+                fpin = open(inname, 'rb')
+                copyfileobj(fpin, fpout)
+                fpin.close()
+                print("   processed {:s}".format(inname))
+
+        # gex_q files
+        dstname = osp.join(outdir,
+                           "gextab_q_y{:1d}_m{:1d}.bin".format(y_, m_))
+        if overwrite or not osp.isfile(dstname):
+            print("Consolidating to {:s}...".format(dstname))
+            fpout = open(dstname, 'wb')
+            for u_ in uh:
+                inname = osp.join(outdir,
+                                  "gextab_q_uh{:f}_y{:1d}_m{:1d}.bin".
+                                  format(u_, y_, m_))
+                fpin = open(inname, 'rb')
+                copyfileobj(fpin, fpout)
+                fpin.close()
+                print("   processed {:s}".format(inname))
+
+        # gex_u files
+        dstname = osp.join(outdir,
+                           "gextab_u_y{:1d}_m{:1d}.bin".format(y_, m_))
+        if overwrite or not osp.isfile(dstname):
+            print("Consolidating to {:s}...".format(dstname))
+            fpout = open(dstname, 'wb')
+            for u_ in uh:
+                inname = osp.join(outdir,
+                                  "gextab_u_uh{:f}_y{:1d}_m{:1d}.bin".
+                                  format(u_, y_, m_))
+                fpin = open(inname, 'rb')
+                copyfileobj(fpin, fpout)
+                fpin.close()
+                print("   processed {:s}".format(inname))
+
+        # q_u files
+        dstname = osp.join(outdir,
+                           "qtab_u_y{:1d}_m{:1d}.bin".format(y_, m_))
+        if overwrite or not osp.isfile(dstname):
+            print("Consolidating to {:s}...".format(dstname))
+            fpout = open(dstname, 'wb')
+            for u_ in uh:
+                inname = osp.join(outdir,
+                                  "qtab_u_uh{:f}_y{:1d}_m{:1d}.bin".
+                                  format(u_, y_, m_))
+                fpin = open(inname, 'rb')
+                copyfileobj(fpin, fpout)
+                fpin.close()
+                print("   processed {:s}".format(inname))
+
+        # gex_u files
+        dstname = osp.join(outdir,
+                           "qtab_q_y{:1d}_m{:1d}.bin".format(y_, m_))
+        if overwrite or not osp.isfile(dstname):
+            print("Consolidating to {:s}...".format(dstname))
+            fpout = open(dstname, 'wb')
+            for u_ in uh:
+                inname = osp.join(outdir,
+                                  "qtab_q_uh{:f}_y{:1d}_m{:1d}.bin".
+                                  format(u_, y_, m_))
+                fpin = open(inname, 'rb')
+                copyfileobj(fpin, fpout)
+                fpin.close()
+                print("   processed {:s}".format(inname))
