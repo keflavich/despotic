@@ -655,7 +655,8 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
 			double qmax,
 			double *q, double *umax, double *q_umax,
 			double *q_stop,
-			double *mean_err, double *max_err) {
+			double *mean_err, double *max_err,
+			double *max_err_u, double *max_err_loggex) {
   
   // Build GSL machinery we will be using
   ode_params par = { 0.0, uh, yidx, midx };
@@ -671,8 +672,8 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
     if (verbose)
       printf("   ...row %d / %d at loggex = %f\n", j+1, ngex, loggex);
 
-    // Handle special case gex = 1 and yidx <= midx, in which case
-    // there is no wind
+    // Handle special cases gex = 1 and yidx <= midx, in which case
+    // the wind fails to launch at all
     if (j == 0 && yidx <= midx) {
       umax[j] = 0;
       q_umax[j] = -DBL_MAX;
@@ -681,7 +682,7 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
       if (yidx < midx) 
 	for (int i=0; i<nu; i++) q[ngex*nu + i + nu*j] = -DBL_MAX;
       continue;
-    }
+    } 
 
     // Get critical points at this loggex value
     par.gex = pow(10., loggex);
@@ -749,9 +750,17 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
 
   // Estimate interpolation error by compute the difference between
   // the value at every grid point and the results of a linear
-  // interpolation from its neighbours
+  // interpolation from its neighbours; note that we have a special
+  // case here: if yidx = midx, then the function q(u/umax, gex)
+  // becomes undefined as gex -> 1, because umax -> 0. Evaluating the
+  // error at the gex -> 1 boundary therefore results in an error that
+  // never converges no matter what resolution is used; we therefore
+  // exclude j = 1 from the error analysis for this case only
   *mean_err = *max_err = 0.0;
-  for (int j=1; j<ngex-1; j++) {
+  *max_err_u = *max_err_loggex = -1.0;
+  int jstart = 1;
+  if (yidx == midx) jstart = 2;
+  for (int j=jstart; j<ngex-1; j++) {
     for (int i=1; i<nu-1; i++) {
       double q_interp = 0.25 *
 	(q[i-1 + nu*(j-1)] +
@@ -761,8 +770,12 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
       double a_interp = 1.0 + pow(10., q_interp);
       double a = 1.0 + pow(10., q[i + nu*j]);
       double err = fabs(a - a_interp) / fmin(a, a_interp);
-      *max_err = err > *max_err ? err : *max_err;
       *mean_err += err;
+      if (err > *max_err) {
+	*max_err = err;
+	*max_err_u = i / (nu-1.0);
+	*max_err_loggex = j * loggex_max / (ngex-1.0);
+      }
       if (yidx < midx) {
 	int off = nu * (ngex+j) + i;
 	q_interp = 0.25 *
@@ -773,8 +786,12 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
 	a_interp = 1.0 + pow(10., q_interp);
 	a = 1.0 + pow(10., q[off]);
 	err = fabs(a - a_interp) / fmin(a, a_interp);
-	*max_err = err > *max_err ? err : *max_err;
 	*mean_err += err;
+	if (err > *max_err) {
+	  *max_err = err;
+	  *max_err_u = i / (nu-1.0);
+	  *max_err_loggex = j * loggex_max / (ngex-1.0);
+	}
       }
     }
   }
@@ -793,7 +810,7 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
 int main(int argc, char *argv[]) {
 
   // Parse inputs
-  char usage[] = "Usage: hot_wind_tab uh yidx midx nu nq qmin qmax ngex loggex_max [-v, --verbose] [-ovr, --overwrite] [-d, --dir dir] [-a, --ascii]\n   uh = hot gas velocity\n   yidx = expansion parameter for clouds, y = a^yidx\n   midx = gravitational potential parameter, m = a^idx\n   nu = number of grid points in velocity\n   nq = number of grid points in q, where q = log_10(a - 1)\n   qmin = minimum value of q in grid\n   qmax = maximum value of q in grid\n   ngex = number of grid points in log_10(Gamma e^-x)\n   loggex_max = maximum value of log_10(Gamma e^-x) in grid\n   --verbose = produce verbose output\n   --ovewrite = overwrite existing output files (default behavior is to skip if existing output is found)\n   --dir = write output to directory dir (default is run directory)\n   --asci = write ASCII output (default is raw binary output)\n";
+  char usage[] = "Usage: hot_wind_tab uh yidx midx nu nq qmin qmax ngex loggex_max [-v, --verbose] [-ovr, --overwrite] [-d, --dir dir] [-a, --ascii]\n   uh = hot gas velocity\n   yidx = expansion parameter for clouds, y = a^yidx\n   midx = gravitational potential parameter, m = a^idx\n   nu = number of grid points in velocity\n   nq = number of grid points in q, where q = log_10(a - 1)\n   qmin = minimum value of q in grid\n   qmax = maximum value of q in grid\n   ngex = number of grid points in log_10(Gamma e^-x)\n   loggex_max = maximum value of log_10(Gamma e^-x) in grid\n   --verbose = produce verbose output\n   --ovewrite = overwrite existing output files (default behavior is to skip if existing output is found)\n   --dir = write output to directory dir (default is run directory)\n   --ascii = write ASCII output (default is raw binary output)\n";
   if (argc < 10 || argc > 15) {
     fprintf(stderr, "%s", usage);
     exit(1);
@@ -904,12 +921,14 @@ int main(int argc, char *argv[]) {
     }
   
     // Build q(u, gex) grid
-    double mean_err, max_err;
+    double mean_err, max_err, max_err_u, max_err_loggex;
     build_q_gex_u_grid(uh, yidx, midx, nu, ngex, loggex_max, qmax,
 		       q, umax, q_umax, q_stop,
-		       &mean_err, &max_err);
+		       &mean_err, &max_err,
+		       &max_err_u, &max_err_loggex);
     if (verbose)
-      printf("Mean error = %f, max error = %f\n", mean_err, max_err);
+      printf("Mean error = %f, max error = %f at u/umax = %f, loggex = %f\n",
+	     mean_err, max_err, max_err_u, max_err_loggex);
 
     // Write output
     fp1 = fopen(fname1, "w");
@@ -918,7 +937,7 @@ int main(int argc, char *argv[]) {
 
       // ASCII mode
       for (int j=0; j<ngex; j++) {
-	double loggex = j * loggex_max / (j-1);
+	double loggex = j * loggex_max / (ngex-1);
 	fprintf(fp1, "%e   %e   %e   %e\n",
 		loggex, umax[j], q_umax[j], q_stop[j]);
       }
@@ -940,7 +959,7 @@ int main(int argc, char *argv[]) {
 
       // Binary mode
       for (int j=0; j<ngex; j++) {
-	double loggex = j * loggex_max / (j-1);
+	double loggex = j * loggex_max / (ngex-1);
 	fwrite(&loggex, sizeof(double), 1, fp1);
       }
       fwrite(umax, sizeof(double), ngex, fp1);
@@ -1010,7 +1029,8 @@ int main(int argc, char *argv[]) {
 		       loggex, umin,
 		       &mean_err, &max_err);
     if (verbose)
-      printf("Mean error = %f, max error = %f\n", mean_err, max_err);
+      printf("Mean error = %f, max error = %f\n",
+	     mean_err, max_err);
 
     // Write results
     fp1 = fopen(fname1, "w");
