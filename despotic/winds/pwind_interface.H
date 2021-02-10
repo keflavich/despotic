@@ -107,50 +107,44 @@ extern "C" {
   pwind_hot_pa_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double interpabs,
-		   const double interprel,
 		   const double fcrit,
-		   const double jsp);
+		   const double jsp,
+		   hot_wind_table *tab);
   pwind_hot_pi *
   pwind_hot_pi_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double interpabs,
-		   const double interprel,
 		   const double fcrit,
-		   const double jsp);
+		   const double jsp,
+		   hot_wind_table *tab);
   pwind_hot_ps *
   pwind_hot_ps_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double interpabs,
-		   const double interprel,
 		   const double fcrit,
-		   const double jsp);
+		   const double jsp,
+		   hot_wind_table *tab);
   pwind_hot_ia *
   pwind_hot_ia_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double interpabs,
-		   const double interprel,
 		   const double fcrit,
-		   const double jsp);
+		   const double jsp,
+		   hot_wind_table *tab);
   pwind_hot_ii *
   pwind_hot_ii_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double interpabs,
-		   const double interprel,
 		   const double fcrit,
-		   const double jsp);
+		   const double jsp,
+		   hot_wind_table *tab);
   pwind_hot_is *
   pwind_hot_is_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
 		   const double epsabs, const double epsrel,
-		   const double interpabs,
-		   const double interprel,
 		   const double fcrit,
-		   const double jsp);
+		   const double jsp,
+		   hot_wind_table *tab);
  
   ////////////////////////////////////////////////////////////////////////
   // Expose methods that set and return simple information from pwind
@@ -249,4 +243,10 @@ extern "C" {
   void set_err(const int err, pwind *pw);
   void clear_err(pwind *pw);
   const char *get_err_str(const pwind *pw);
+
+  // Functions to manage the hot data tabulated data
+  hot_wind_table *read_hot_wind_table(const char *dirname,
+				      const int yidx,
+				      const int midx);
+  void free_hot_wind_table(hot_wind_table *tab);
 }

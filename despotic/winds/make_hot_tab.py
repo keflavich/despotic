@@ -14,6 +14,7 @@ from shutil import copyfileobj
 overwrite = False
 
 # Set directory into which to write output
+tmpdir = "hot_gas_data_src"
 outdir = "hot_gas_data"
 
 # Resolution of grid to compute
@@ -54,7 +55,7 @@ while ptr < ya.size:
             "{:f} --dir {:s} --verbose").format(
                 uha[ptr], ya[ptr], ma[ptr],
                 nu, nq, qmin, qmax, ngex, loggex_max,
-                outdir)
+                tmpdir)
         if overwrite:
             cmd += " --overwrite"
         args = shlex.split(cmd)
@@ -105,7 +106,7 @@ for m_ in m:
     for y_ in y:
 
         # Metadata files
-        metaname = osp.join(outdir, "table_params_y{:1d}_m{:1d}.txt".
+        metaname = osp.join(tmpdir, "table_params_y{:1d}_m{:1d}.txt".
                             format(y_, m_))
         fp = open(metaname, 'w')
         fp.write(str(len(uh))+"\n")
@@ -127,7 +128,7 @@ for m_ in m:
             print("Consolidating to {:s}...".format(dstname))
             fpout = open(dstname, 'wb')
             for u_ in uh:
-                inname = osp.join(outdir,
+                inname = osp.join(tmpdir,
                                   "gextab_gex_uh{:f}_y{:1d}_m{:1d}.bin".
                                   format(u_, y_, m_))
                 fpin = open(inname, 'rb')
@@ -142,7 +143,7 @@ for m_ in m:
             print("Consolidating to {:s}...".format(dstname))
             fpout = open(dstname, 'wb')
             for u_ in uh:
-                inname = osp.join(outdir,
+                inname = osp.join(tmpdir,
                                   "gextab_q_uh{:f}_y{:1d}_m{:1d}.bin".
                                   format(u_, y_, m_))
                 fpin = open(inname, 'rb')
@@ -157,7 +158,7 @@ for m_ in m:
             print("Consolidating to {:s}...".format(dstname))
             fpout = open(dstname, 'wb')
             for u_ in uh:
-                inname = osp.join(outdir,
+                inname = osp.join(tmpdir,
                                   "gextab_u_uh{:f}_y{:1d}_m{:1d}.bin".
                                   format(u_, y_, m_))
                 fpin = open(inname, 'rb')
@@ -172,7 +173,7 @@ for m_ in m:
             print("Consolidating to {:s}...".format(dstname))
             fpout = open(dstname, 'wb')
             for u_ in uh:
-                inname = osp.join(outdir,
+                inname = osp.join(tmpdir,
                                   "qtab_u_uh{:f}_y{:1d}_m{:1d}.bin".
                                   format(u_, y_, m_))
                 fpin = open(inname, 'rb')
@@ -187,7 +188,7 @@ for m_ in m:
             print("Consolidating to {:s}...".format(dstname))
             fpout = open(dstname, 'wb')
             for u_ in uh:
-                inname = osp.join(outdir,
+                inname = osp.join(tmpdir,
                                   "qtab_q_uh{:f}_y{:1d}_m{:1d}.bin".
                                   format(u_, y_, m_))
                 fpin = open(inname, 'rb')

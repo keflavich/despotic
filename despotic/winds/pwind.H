@@ -229,6 +229,16 @@ public:
 	     const double varpi=0.0, const double varpi_t=0.0,
 	     const bool thin=false) const;
 
+  // Vectorized versions of the functions defined above; these are
+  // identical except that they take vector<double> arguments for u,
+  // and return vector<double> values; these routines use openMP
+  // threading to parallelise the calculation
+  std::vector<double>
+  Phi_uc(const std::vector<double> &u, const double varpi=0.0,
+	 const double varpi_t=0.0, const double a0=1.0,
+	 const double a1=std::numeric_limits<double>::max()) const;
+  
+
   // Error management functions
   int getErr() const { return gsl_err_stat; }
   void setErr(int err_stat) const { gsl_err_stat = err_stat; }

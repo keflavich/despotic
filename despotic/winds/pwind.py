@@ -25,7 +25,9 @@ from .pwind_interface import libpwind
 from .pwind_util import pM, pA, tX
 import numpy as np
 from warnings import warn
-from ctypes import c_double
+from ctypes import c_double, c_char_p
+import os
+import os.path as osp
 
 ########################################################################
 # Physical constants, in cgs units
@@ -38,6 +40,64 @@ c = physcons.c * 1e2
 G = physcons.G * 1e3
 kB = physcons.k * 1e7
 e = physcons.e * c/1e1
+
+########################################################################
+# Define a helper class to hold pre-tabulated wind data; this helper
+# class exists so that we can store the data in a global variable that
+# is shared by all pwind object (they just get a pointer to it) so
+# that we don't need to replicate the data in memory or do redundant
+# reads; however, the class does have a del method, so that when it
+# leaves scope (usually when python closes) it cleanly de-allocates
+# the data
+########################################################################
+class hot_wind_table_data(object):
+
+    # Constructor; this just gets the location of the data in order to
+    # be ready to read, then allocates an empty structure to hold it
+    def __init__(self):
+        if 'DESPOTIC_HOME' in os.environ:
+            self.__dirname = osp.join(os.environ['DESPOTIC_HOME'],
+                                      'despotic',
+                                      'winds',
+                                      'hot_gas_data')
+        else:
+            self.__dirname = osp.join('despotic',
+                                      'winds',
+                                      'hot_gas_data')
+        self.__b_dirname = self.__dirname.encode('utf-8')
+        self.__data = { "y0" : { "m0" : None,
+                                 "m1" : None },
+                        "y1" : { "m0" : None,
+                                 "m1" : None },
+                        "y2" : { "m0" : None,
+                                 "m1" : None } }
+
+    # Method to read data; this just invokes the c class
+    def read(self, yidx, midx):
+        ystr = "y{:1d}".format(yidx)
+        mstr = "m{:1d}".format(midx)
+        self.__data[ystr][mstr] \
+            = libpwind.read_hot_wind_table(
+                c_char_p(self.__b_dirname), yidx, midx)
+
+    # Method to return the pointer to the data for a particular y, m
+    # combination
+    def __call__(self, yidx, midx):
+        ystr = "y{:1d}".format(yidx)
+        mstr = "m{:1d}".format(midx)
+        if self.__data[ystr][mstr] is None:
+            self.read(yidx, midx)
+        return self.__data[ystr][mstr]
+
+    # Method to free memory when object is deleted
+    def __del__(self):
+        for k1 in self.__data.keys():
+            for k2 in self.__data[k1].keys():
+                if self.__data[k1][k2] is not None:
+                    libpwind.free_hot_wind_table(self.__data[k1][k2])
+    
+# Instantiate and instance of the class we just defined
+hot_data = hot_wind_table_data()
 
 ########################################################################
 # Define the main pwind class
@@ -54,8 +114,7 @@ class pwind(object):
                  geometry='sphere', fcrit=1.0, jsp=0.0,
                  epsabs=1.0e-4, epsrel=1.0e-2,
                  theta=None, phi=0.0, theta_in=None,
-                 tau0=None, uh=None, interpabs=1.0e-2,
-                 interprel=1.0e-2, error_policy="warn"):
+                 tau0=None, uh=None, error_policy="warn"):
         """
         Creates a generic wind object to compute observable property
         of winds
@@ -114,15 +173,6 @@ class pwind(object):
               for hot gas-driven winds, the hot gas speed relative to
               the escape speed; must be specified for hot gas-driven
               winds, ignored for all other drivers
-           interpabs: float
-              absolute error tolerance of the iterpolation tables used
-              for hot gas-driven winds; ignored for all other drivers;
-              note that using smaller tolerances quickly becomes very
-              expensive in memory and computation time, so values much
-              below 10^-2 are not recommended
-           interprel: float
-              same as interpabs, but giving relative rather tahn
-              absolute error tolerance
            error_policy: 'warn' | 'halt' | 'silent'
               policy on how to respond to numerical errors in
               evaluation of integrals, most commonly having to do with
@@ -152,8 +202,6 @@ class pwind(object):
         self.epsrel_ = epsrel
         self.tau0_ = tau0
         self.uh_ = uh
-        self.interpabs_ = interpabs
-        self.interprel_ = interprel
 
         # Set up error handling options
         self.error_policy = error_policy
@@ -213,17 +261,27 @@ class pwind(object):
     # Method to instantiate the c++ class wind
     ################################################################
     def __init_lib(self):
+
+        # Sanity check on variables
         if self.Gamma_ <= 0.0:
             raise ValueError("pwind: Gamma must be > 0")
         if self.mach_ <= 0.0:
             raise ValueError("pwind: mach must be > 0")
         if self.fcrit_ > 1.0:
             raise ValueError("pwind: fcrit must be <= 1")
+
+        # If we already have a c++ object allocated, free it
         if self.__pw is not None:
             libpwind.pwind_free(self.__pw)
             self.__pw = None
+
+        # Instantiate requested type of wind object
         if self.driver_ == 'ideal':
+
+            # Ideal
             if self.potential_ == 'point':
+
+                # Point potential
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_ideal_pa_new(
                         self.Gamma, self.mach, self.__geom,
@@ -236,9 +294,13 @@ class pwind(object):
                     self.__pw = libpwind.pwind_ideal_ps_new(
                         self.Gamma, self.mach, self.__geom,
                         self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
-                else: raise(ValueError("pwind: unknown expansion "
-                                      "value "+str(self.expansion_)))
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+                
             elif self.potential_ == 'isothermal':
+
+                # Isothermal potential
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_ideal_ia_new(
                         self.Gamma, self.mach, self.__geom,
@@ -251,18 +313,28 @@ class pwind(object):
                     self.__pw = libpwind.pwind_ideal_is_new(
                         self.Gamma, self.mach, self.__geom,
                         self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
-                else: raise(ValueError("pwind: unknown expansion "
-                                      "value "+str(self.expansion_)))
-            else: raise(ValueError("pwind: unknown potential " +
-                                  str(self.potential_)))
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+                
+            else:
+                raise(ValueError("pwind: unknown potential " +
+                                 str(self.potential_)))
+            
         elif self.driver_ == 'radiation':
+
+            # Radiatively driven -- check for valid tau0 parameter
             if self.tau0 is None:
                 raise(ValueError('pwind: for radiation-driven wind, '
                                  'must explicitly set tau0'))
             if self.Gamma*self.tau0 <= 1.0:
                 raise ValueError('pwind: for radiation-driven wind, ',
                                  'Gamma*tau0 must be > 1')
+
+            # Different potential types
             if self.potential_ == 'point':
+
+                # Point potential
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_rad_pa_new(
                         self.Gamma, self.mach, self.tau0,
@@ -278,9 +350,13 @@ class pwind(object):
                         self.Gamma, self.mach, self.tau0,
                         self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
                         self.jsp_)
-                else: raise(ValueError("pwind: unknown expansion "
-                                      "value "+str(self.expansion_)))
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+                
             elif self.potential_ == 'isothermal':
+
+                # Isothermal potential
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_rad_ia_new(
                         self.Gamma, self.mach, self.tau0,
@@ -296,63 +372,84 @@ class pwind(object):
                         self.Gamma, self.mach, self.tau0,
                         self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
                         self.jsp_)
-                else: raise(ValueError("pwind: unknown expansion "
-                                      "value "+str(self.expansion_)))
-            else: raise(ValueError("pwind: unknown potential " +
-                                  str(self.potential_)))
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+                
+            else:
+                raise(ValueError("pwind: unknown potential " +
+                                 str(self.potential_)))
+            
         elif self.driver_ == 'hot':
+
+            # Hot gas driven -- check for valid uh value
             if self.uh is None:
                 raise(ValueError('pwind: for hot gas-driven wind, '
                                  'must explicitly set uh'))
-            if self.uh <= 0.0:
+            if self.uh <= 1.0:
                 raise ValuError('pwind: for hot gas-driven wind, '
-                                'uh must be > 0')
+                                'uh must be > 1')
+
+            # Declare that we're using the global hot_data
+            global hot_data
+
+            # Different potential types
             if self.potential_ == 'point':
+
+                # Point potential
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_hot_pa_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_,
-                        self.jsp_)
+                        self.fcrit_, self.jsp_,
+                        hot_data(0, 0))
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_pi_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_,
-                        self.jsp_)
+                        self.fcrit_, self.jsp_,
+                        hot_data(1, 0))
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_ps_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_,
-                        self.jsp_)
-                else: raise(ValueError("pwind: unknown expansion "
-                                      "value "+str(self.expansion_)))
+                        self.fcrit_, self.jsp_,
+                        hot_data(2, 0))
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+
             elif self.potential_ == 'isothermal':
+
+                # Isothermal potential
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_hot_ia_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_,
-                        self.jsp_)
+                        self.fcrit_, self.jsp_,
+                        hot_data(0, 1))
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_ii_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_,
-                        self.jsp_)
+                        self.fcrit_, self.jsp_,
+                        hot_data(1, 1))
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_is_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
-                        self.interpabs_, self.interprel_, self.fcrit_,
-                        self.jsp_)
-                else: raise(ValueError("pwind: unknown expansion "
-                                       "value "+str(self.expansion_)))
-            else: raise(ValueError("pwind: unknown potential " +
-                                   str(self.potential_)))
-        else: raise(ValueError("pwind: unknown driver "+
-                               str(self.driver_)))
+                        self.fcrit_, self.jsp_,
+                        hot_data(2, 1))
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+                        
+            else:
+                raise(ValueError("pwind: unknown potential " +
+                                 str(self.potential_)))
+        else:
+            raise(ValueError("pwind: unknown driver "+
+                             str(self.driver_)))
 
     ################################################################
     # Define cloud properties; these are things where, if we change
@@ -736,9 +833,9 @@ class pwind(object):
             else:
                 alim = np.zeros(4)
                 nlim = libpwind.alimits(ur_, 0.0, 0.0, self.__pw, alim)
-                alim.resize(nlim)
+                alim.resize(nlim, refcheck=False)
                 result.flat[i] = np.nan
-                for j in range(alim.size/2):
+                for j in range(int(alim.size/2)):
                     if a_ >= alim[2*j] and a_ <= alim[2*j+1]:
                         result.flat[i] \
                             = libpwind.X(ur_, a_, self.__pw)

@@ -6,6 +6,7 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_roots.h>
 #include "pwind.H"
+#include "omp.H"
 
 using namespace std;
 
@@ -466,6 +467,76 @@ double pwind::Phi_uc(const double u, const double varpi,
     return integ;
   }
 }
+
+std::vector<double>
+pwind::Phi_uc(const std::vector<double> &u, const double varpi,
+	      const double varpi_t, const double a0,
+	      const double a1) const {
+
+  // Data holders
+  std::vector<double> integ(u.size());
+
+  // Start parallel computation
+#pragma omp parallel
+  {
+
+    // Do GSL initialization for this thread
+    gsl_integration_workspace *w =
+      gsl_integration_workspace_alloc(MAXINTERVAL);
+    struct Phi_params par;
+    par.varpi = varpi;
+    par.varpi_t = varpi_t;
+    par.vp2 = SQR(varpi) + SQR(varpi_t);
+    par.jproj = getJproj();
+    par.w = this;
+    gsl_function F;
+    F.function = &Phi_uc_integ;
+    F.params = &par;
+
+    // Parallel loop
+#pragma omp for
+    for (std::vector<double>::size_type i=0; i<u.size(); i++) {
+
+      // Check if velocity is outside bounds
+      if (u[i] == 0) { integ[i] = numeric_limits<double>::max(); continue; }
+      if (u[i] >= umax) { integ[i] = 0.0; continue; }
+
+      // Get integration limits from velocity and geometry
+      vector<double> alim_v = alimits(u[i], varpi, varpi_t);
+      vector<double> alim = geom->a_lim(alim_v, varpi, varpi_t, u[i]);
+      if (alim.size() == 0) { integ[i] = 0.0; continue; }
+
+      // Apply input limits
+      for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
+	if (alim[2*i] < a0) alim[2*i] = a0;
+	if (alim[2*i+1] > a1) alim[2*i+1] = a1;
+      }
+      
+      // Integrate for this u
+      par.u = fabs(u[i]);
+      double result, err;
+      for (vector<double>::size_type i=0; i<alim.size()/2; i++) {
+	if (alim[2*i+1] <= alim[2*i]) continue;
+	if (alim[2*i+1] < numeric_limits<double>::max()) {
+	  checkForErr(gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
+					  epsabs, epsrel, MAXINTERVAL,
+					  GSL_INTEG_GAUSS61, w, &result, &err));
+	} else {
+	  checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
+					    MAXINTERVAL, w, &result, &err));
+	}
+	integ[i] += result;
+      }
+      integ[i] /= zeta_M;
+    }
+
+    // Take down integration machinery for this thread
+    gsl_integration_workspace_free(w);
+  }
+  
+  // Return
+  return integ;
+}  
 
 double pwind::tau_uc(const double u, const double tXtw,
 		     const double fj, const double boltzfac,

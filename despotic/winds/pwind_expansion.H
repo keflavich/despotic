@@ -15,6 +15,7 @@ public:
   virtual double dyda(const double a) const = 0;
   virtual std::vector<double> dyda(const std::vector<double> a) const = 0;
   virtual bool const_sa() const = 0;
+  virtual int yidx() const = 0;
 };
 
 // Derived classes
@@ -35,6 +36,7 @@ public:
     return dyda_;
   }
   virtual bool const_sa() const { return false; }
+  virtual int yidx() const { return 0; }
 };
 
 class pwind_intermediate : public pwind_expansion {
@@ -53,6 +55,7 @@ public:
     return dyda_;
   }
   virtual bool const_sa() const { return false; }
+  virtual int yidx() const { return 1; }
 };
 
 class pwind_solid_angle : public pwind_expansion {
@@ -74,6 +77,7 @@ public:
     return dyda_;
   }
   virtual bool const_sa() const { return true; }
+  virtual int yidx() const { return 2; }
 };
 
 // Create static instances of these classes to that they can be used

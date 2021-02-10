@@ -14,6 +14,7 @@ public:
   virtual std::vector<double> m(const std::vector<double> a) const = 0;
   virtual double dmda(const double a) const = 0;
   virtual std::vector<double> dmda(const std::vector<double> a) const = 0;
+  virtual int midx() const = 0;
 };
 
 // Child classes
@@ -33,6 +34,7 @@ public :
     for (std::vector<double>::size_type i=0; i<a.size(); i++) dmda_[i] = 0.0;
     return dmda_;
   }
+  virtual int midx() const { return 0; }
 };
 
 class pwind_isothermal : public pwind_potential {
@@ -50,6 +52,7 @@ public :
     for (std::vector<double>::size_type i=0; i<a.size(); i++) dmda_[i] = 1.0;
     return dmda_;
   }
+  virtual int midx() const { return 1; }
 };
 
 // Create static instances of these classes to that they can be used

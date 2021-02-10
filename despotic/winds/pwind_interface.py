@@ -82,27 +82,27 @@ libpwind.pwind_rad_is_new.argtypes \
 libpwind.pwind_hot_pa_new.restype = c_void_p
 libpwind.pwind_hot_pa_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_void_p ]
 libpwind.pwind_hot_pi_new.restype = c_void_p
 libpwind.pwind_hot_pi_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_void_p ]
 libpwind.pwind_hot_ps_new.restype = c_void_p
 libpwind.pwind_hot_ps_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_void_p ]
 libpwind.pwind_hot_ia_new.restype = c_void_p
 libpwind.pwind_hot_ia_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_void_p ]
 libpwind.pwind_hot_ii_new.restype = c_void_p
 libpwind.pwind_hot_ii_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_void_p ]
 libpwind.pwind_hot_is_new.restype = c_void_p
 libpwind.pwind_hot_is_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_double, c_double ]
+        c_double, c_double, c_double, c_double, c_void_p ]
 
 # Free
 libpwind.pwind_free.restype = None
@@ -229,3 +229,9 @@ libpwind.clear_err.restype = None
 libpwind.clear_err.argtypes = [ c_void_p ]
 libpwind.get_err_str.restype = c_char_p
 libpwind.get_err_str.argtypes = [ c_void_p ]
+
+# Methods to manage pre-tabulated hot gas data
+libpwind.read_hot_wind_table.restype = c_void_p
+libpwind.read_hot_wind_table.argtypes = [ c_char_p, c_int, c_int ]
+libpwind.free_hot_wind_table.restype = None
+libpwind.free_hot_wind_table.argtypes = [ c_void_p ]
