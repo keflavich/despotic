@@ -9,7 +9,7 @@
 #include "pwind_expansion.H"
 #include "pwind_geom.H"
 #include "pwind_potential.H"
-#include "pwind_util.h"
+#include "pwind_util.H"
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 
