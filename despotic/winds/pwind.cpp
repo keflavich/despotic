@@ -6,7 +6,9 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_roots.h>
 #include "pwind.H"
-#include "omp.H"
+#if defined(_OPENMP)
+#  include "omp.H"
+#endif
 
 using namespace std;
 
@@ -477,7 +479,9 @@ pwind::Phi_uc(const std::vector<double> &u, const double varpi,
   std::vector<double> integ(u.size());
 
   // Start parallel computation
-#pragma omp parallel
+#if defined(_OPENMP)
+#  pragma omp parallel
+#endif
   {
 
     // Do GSL initialization for this thread
@@ -494,7 +498,9 @@ pwind::Phi_uc(const std::vector<double> &u, const double varpi,
     F.params = &par;
 
     // Parallel loop
-#pragma omp for
+#if defined(_OPENMP)
+#  pragma omp for
+#endif
     for (std::vector<double>::size_type i=0; i<u.size(); i++) {
 
       // Check if velocity is outside bounds
