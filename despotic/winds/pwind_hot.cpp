@@ -55,9 +55,29 @@ pwind_hot::pwind_hot(const double Gamma_,
       char cwd[1000];
       despotic_home = string(getcwd(cwd, 1000));
     }
+#if __cplusplus >= 201703L
+    filesystem::path p(despotic_home);
+    string data_dir = (((despotic_home / "despotic") / "winds")
+		       / "hot_gas_data").str();
+#else
+    stringstream ss;
+    ss << despotic_home << "/despotic/winds/hot_gas_data";
+    string data_dir = ss.str();
+#endif
 
     // Read
-    full_tab = read_table(despotic_home, expansion->yidx(), potential->midx());
+    full_tab = read_table(data_dir, expansion->yidx(), potential->midx());
+
+    // Check for error
+    if (!full_tab) {
+      cerr << "pwind::hot: unable to find data for y = "
+	   << expansion->yidx() << ", m = "
+	   << potential->midx() << " in directory "
+	   << data_dir
+	   << endl;
+    exit(1);
+  }
+
 
     // Flag that we own the table
     manage_table = true;
@@ -364,7 +384,8 @@ pwind_hot::X(const double ur, const double a) const {
   if (uidx >= full_tab->nu-1) return -numeric_limits<double>::max();
   if (hasUmin()) {
     double umin = (1.0 - wq) * tab.umin[qidx] + wq * tab.umin[qidx+1];
-    if (ur < umin) return -numeric_limits<double>::max();
+    if (ur < umin)
+      return -numeric_limits<double>::max();
   }
 
   // Do binlinear interpolation in to get log (Gamma exp^-x)
@@ -401,7 +422,7 @@ pwind_hot::U2(const double x, const double a) const {
   }
 
   // Handle special case of x off the grid
-  if (lgidx >= full_tab->ngex-1) return 0.0;
+  if (lgidx < 0.0 || lgidx >= full_tab->ngex-1) return 0.0;
   
   // Interpolate to get stopping point and maximum u value at this x
   double q_stop = (1.0 - wlg) * tab.q_stop[lgidx] +
@@ -586,7 +607,7 @@ pwind_hot::alimits(const double u, const double varpi,
   } else if (!isFountain()) {
 
     // Case of a wind that is not a fountain, but where even material
-    // at x = x_crit is at fininte velocity > 0 for a > 1. In this
+    // at x = x_crit is at finite velocity > 0 for a > 1. In this
     // case, there may be a finite maximum a, which we must find by
     // tracing out the velocity of material at x = xcrit
     vector<double> aLOSmin, uLOSmin;
