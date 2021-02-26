@@ -93,7 +93,7 @@ pwind_hot::pwind_hot(const double Gamma_,
 
   // Interpolate in uh to our target value
   int idx;
-  for (idx = 0; idx < full_tab->uh.size()-1; idx++) {
+  for (idx = 0; idx < nuh-1; idx++) {
     if (uh <= full_tab->uh[idx+1]) break;
   }
   double w = (uh - full_tab->uh[idx]) /
