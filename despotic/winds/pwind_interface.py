@@ -235,3 +235,5 @@ libpwind.read_hot_wind_table.restype = c_void_p
 libpwind.read_hot_wind_table.argtypes = [ c_char_p, c_int, c_int ]
 libpwind.free_hot_wind_table.restype = None
 libpwind.free_hot_wind_table.argtypes = [ c_void_p ]
+libpwind.get_hot_wind_table_limits.restype = None
+libpwind.get_hot_wind_table_limits.argtypes = [ c_void_p, array_1d_double ]

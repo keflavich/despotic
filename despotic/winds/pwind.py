@@ -80,6 +80,18 @@ class hot_wind_table_data(object):
             = libpwind.read_hot_wind_table(
                 c_char_p(self.__b_dirname), yidx, midx)
 
+    # Method to return the range in uh that is available for a
+    # particular yidx, midx combination
+    def uh_lim(self, yidx, midx):
+        ystr = "y{:1d}".format(yidx)
+        mstr = "m{:1d}".format(midx)
+        if self.__data[ystr][mstr] is None:
+            self.read(yidx, midx)
+        lim = np.zeros(2)
+        libpwind.get_hot_wind_table_limits(self.__data[ystr][mstr],
+                                           lim)
+        return lim
+
     # Method to return the pointer to the data for a particular y, m
     # combination
     def __call__(self, yidx, midx):
@@ -121,9 +133,9 @@ class pwind(object):
 
         Parameters
            Gamma: float
-              Eddington factor
+              Eddington factor; must be 0 - 1
            mach: float
-              Mach number
+              Mach number; must be > 0
            driver: 'ideal' | 'radiation' | 'hot'
               wind driving mechanism; allowed values are 'ideal'
               (ideal momentum-driven wind), 'radiation'
@@ -263,12 +275,12 @@ class pwind(object):
     def __init_lib(self):
 
         # Sanity check on variables
-        if self.Gamma_ <= 0.0:
-            raise ValueError("pwind: Gamma must be > 0")
+        if self.Gamma_ <= 0.0 or self.Gamma >= 1.0:
+            raise ValueError("pwind: Gamma must be in the range (0,1)")
         if self.mach_ <= 0.0:
             raise ValueError("pwind: mach must be > 0")
-        if self.fcrit_ > 1.0:
-            raise ValueError("pwind: fcrit must be <= 1")
+        if self.fcrit_ <= 0.0 or self.fcrit_ > 1.0:
+            raise ValueError("pwind: fcrit must be in the range (0,1]")
 
         # If we already have a c++ object allocated, free it
         if self.__pw is not None:
@@ -382,7 +394,8 @@ class pwind(object):
             
         elif self.driver_ == 'hot':
 
-            # Hot gas driven -- check for valid uh value
+            # Hot gas driven -- check that uh is not none; we make
+            # sure that the value within the data limits below
             if self.uh is None:
                 raise(ValueError('pwind: for hot gas-driven wind, '
                                  'must explicitly set uh'))
@@ -393,7 +406,46 @@ class pwind(object):
             # Declare that we're using the global hot_data
             global hot_data
 
-            # Different potential types
+            # Grab pretabulated data for this potential and expansion
+            # law, and the limits on uh for it
+            if self.potential_ == 'point':
+                if self.expansion_ == 'area':
+                    dat = hot_data(0,0)
+                    lim = hot_data.uh_lim(0,0)
+                elif self.expansion_ == 'intermediate':
+                    dat = hot_data(1,0)
+                    lim = hot_data.uh_lim(1,0)
+                elif self.expansion_ == 'solid angle':
+                    dat = hot_data(2,0)
+                    lim = hot_data.uh_lim(2,0)
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+            elif self.potential_ == 'isothermal':
+                if self.expansion_ == 'area':
+                    dat = hot_data(0,1)
+                    lim = hot_data.uh_lim(0,1)
+                elif self.expansion_ == 'intermediate':
+                    dat = hot_data(1,1)
+                    lim = hot_data.uh_lim(1,1)
+                elif self.expansion_ == 'solid angle':
+                    dat = hot_data(2,1)
+                    lim = hot_data.uh_lim(2,1)
+                else:
+                    raise(ValueError("pwind: unknown expansion "
+                                     "value "+str(self.expansion_)))
+            else:
+                raise(ValueError("pwind: unknown potential " +
+                                 str(self.potential_)))
+
+            # Ensure uh value is within limits
+            if self.uh < lim[0] or self.uh > lim[1]:
+                raise(ValueError("pwind: pre-tabulated data for "
+                                 "hot gas-driven winds available "
+                                 "only for uh in the range "
+                                 +str(lim)))
+
+            # Now instantiate the wind
             if self.potential_ == 'point':
 
                 # Point potential
@@ -402,19 +454,19 @@ class pwind(object):
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
                         self.fcrit_, self.jsp_,
-                        hot_data(0, 0))
+                        dat)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_pi_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
                         self.fcrit_, self.jsp_,
-                        hot_data(1, 0))
+                        dat)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_ps_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
                         self.fcrit_, self.jsp_,
-                        hot_data(2, 0))
+                        dat)
                 else:
                     raise(ValueError("pwind: unknown expansion "
                                      "value "+str(self.expansion_)))
@@ -427,19 +479,19 @@ class pwind(object):
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
                         self.fcrit_, self.jsp_,
-                        hot_data(0, 1))
+                        dat)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_ii_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
                         self.fcrit_, self.jsp_,
-                        hot_data(1, 1))
+                        dat)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_is_new(
                         self.Gamma, self.mach, self.uh,
                         self.__geom, self.epsabs_, self.epsrel_,
                         self.fcrit_, self.jsp_,
-                        hot_data(2, 1))
+                        dat)
                 else:
                     raise(ValueError("pwind: unknown expansion "
                                      "value "+str(self.expansion_)))

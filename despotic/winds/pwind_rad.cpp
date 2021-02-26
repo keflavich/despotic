@@ -346,7 +346,7 @@ pwind_rad_isothermal::a_from_u_max(const double u,
   // Ensure that the root is properly bracketed; return -1 if not
   double sgn1 = U2max_func_loga(loga_lo, &params);
   if (loga_lo ==  0.5*log(params.vp2)) sgn1 = 0.0;
-  double sgn2 = U2max_func_loga(loga_hi, & params);
+  double sgn2 = U2max_func_loga(loga_hi, &params);
   if (sgn1*sgn2 > 0){
     gsl_root_fsolver_free(s);
     return -1;

@@ -147,6 +147,7 @@ double pwind::a_from_u_x(const double u, const double x,
   // Specify that we want to use the Brent solver, and allocate its
   // workspace
   const gsl_root_fsolver_type *T = gsl_root_fsolver_brent;
+  //const gsl_root_fsolver_type *T = gsl_root_fsolver_falsepos;
   gsl_root_fsolver *s = gsl_root_fsolver_alloc(T);
 
   // Ensure that the root is properly bracketed; return -1 if not

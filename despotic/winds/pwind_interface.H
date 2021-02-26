@@ -249,4 +249,6 @@ extern "C" {
 				      const int yidx,
 				      const int midx);
   void free_hot_wind_table(hot_wind_table *tab);
+  void get_hot_wind_table_limits(hot_wind_table *tab,
+				 double *uh_limits);
 }

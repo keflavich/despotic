@@ -373,3 +373,8 @@ hot_wind_table *read_hot_wind_table(const char *dirname,
 void free_hot_wind_table(hot_wind_table *tab) {
   pwind_hot::free_table(tab);
 }
+void get_hot_wind_table_limits(hot_wind_table *tab,
+			       double *uh_limits) {
+  uh_limits[0] = tab->uh.front();
+  uh_limits[1] = tab->uh.back();
+}
