@@ -445,7 +445,8 @@ pwind_hot::U2(const double x, const double a) const {
 	wlg * tab.q[(lgidx+1) * full_tab->nu + i];
 
     // Now use table to get interpolated value
-    return umax * interp(q, qtab);
+    double u = umax * interp(q, qtab);
+    return u*u;
 
   } else {
 
@@ -466,7 +467,8 @@ pwind_hot::U2(const double x, const double a) const {
 	wlg * tab.q[off + (lgidx+1) * full_tab->nu + i];
 
     // Use interpolated table to get u
-    return umax * interp(q, qtab);
+    double u = umax * interp(q, qtab);
+    return u*u;
 
   }
 }
