@@ -101,6 +101,9 @@ class emitter(object):
        escapeProb : array, shape (nlev, nlev)
           2d array giving escape probability for photons emitted in a
           line connecting the given level pair 
+       tau : array, shape (nlev, nlev)
+          2d array giving mean optical depth for photons emitted in a
+          line connecting the given level pair
        escapeProbInitialized : Boolean
           flag for whether escapeProb is initialized or uninitialized
        energySkip : Boolean
@@ -190,6 +193,7 @@ class emitter(object):
         self.escapeProbInitialized = False
         self.escapeProb = np.zeros((self.data.nlev, self.data.nlev)) \
             + 1.0
+        self.tau = np.zeros(self.data.radUpper.size)
 
         # Record if we're using extrapolation
         self.__extrap = extrap
@@ -665,17 +669,17 @@ class emitter(object):
         if escapeProbGeom == "sphere":
             sigmaTot = np.sqrt(thisCloud.sigmaNT**2 + \
                                 kB*thisCloud.Tg/(self.data.molWgt*mH))
-            tau = (self.data.levWgt[u]/self.data.levWgt[l]) * \
+            self.tau = (self.data.levWgt[u]/self.data.levWgt[l]) * \
                 self.data.EinsteinA[u,l] * (c/self.data.freq[u,l])**3 * \
                 3.0 / (16.0*(2.0*np.pi)**1.5*sigmaTot) * \
                 self.abundance * thisCloud.colDen * self.levPop[l] * \
                 (1.0 - self.levPop[u]*self.data.levWgt[l] / \
                      (self.levPop[l]*self.data.levWgt[u]))
-            self.escapeProb[u,l] = 1.0 / (1.0+0.5*tau)
+            self.escapeProb[u,l] = 1.0 / (1.0+0.5*self.tau)
             # The following is RADEX's approximation
             #self.escapeProb[u,l] = 1.5/tau * (1-2/tau**2+(2/tau+2/tau**2)*exp(-tau))
         elif escapeProbGeom == "LVG":
-            tau = (self.data.levWgt[u]/self.data.levWgt[l]) * \
+            self.tau = (self.data.levWgt[u]/self.data.levWgt[l]) * \
                 self.data.EinsteinA[u,l] * (c/self.data.freq[u,l])**3 / \
                 (8.0*np.pi*abs(thisCloud.dVdr)) * \
                 self.abundance * thisCloud.nH * self.levPop[l] * \
@@ -685,27 +689,27 @@ class emitter(object):
             # handle the case of very small tau with care to avoid
             # roundoff problems and make sure we correctly limit to
             # beta -> 1 as tau -> 0
-            idx = tau > 1e-6
+            idx = self.tau > 1e-6
             self.escapeProb[u[idx], l[idx]] = \
-                (1.0 - np.exp(-tau[idx])) / tau[idx]
-            idx = tau <= 1e-6
+                (1.0 - np.exp(-self.tau[idx])) / self.tau[idx]
+            idx = self.tau <= 1e-6
             self.escapeProb[u[idx], l[idx]] = \
-                1.0 - tau[idx]/2.0
+                1.0 - self.tau[idx]/2.0
         elif escapeProbGeom == "slab":
             sigmaTot = np.sqrt(thisCloud.sigmaNT**2 + \
                                 kB*thisCloud.Tg/(self.data.molWgt*mH))
-            tau = (self.data.levWgt[u]/self.data.levWgt[l]) * \
+            self.tau = (self.data.levWgt[u]/self.data.levWgt[l]) * \
                 self.data.EinsteinA[u,l] * (c/self.data.freq[u,l])**3 / \
                 (4.0*(2.0*np.pi)**1.5*sigmaTot) * \
                 self.abundance * thisCloud.colDen * self.levPop[l] * \
                 (1.0 - self.levPop[u]*self.data.levWgt[l] / \
                      (self.levPop[l]*self.data.levWgt[u]))
-            idx = tau > 1e-6
+            idx = self.tau > 1e-6
             self.escapeProb[u[idx], l[idx]] = \
-                (1.0 - np.exp(-3.0*tau[idx])) / (3.0*tau[idx])
-            idx = tau <= 1e-6
+                (1.0 - np.exp(-3.0*self.tau[idx])) / (3.0*self.tau[idx])
+            idx = self.tau <= 1e-6
             self.escapeProb[u[idx], l[idx]] = \
-                1.0 - 3.0*tau[idx]/2.0
+                1.0 - 3.0*self.tau[idx]/2.0
         else:
             raise despoticError("unknown escapeProbGeom " +
                                 str(escapeProbGeom))
@@ -1035,29 +1039,11 @@ class emitter(object):
                 "Error: cannot compute optical depths before "+
                 "escape probabilities are initialized")
         if transition==None:
-            u = self.data.radUpper
-            l = self.data.radLower
+            return self.tau
         else:
-            u = transition[0]
-            l = transition[1]
-        if escapeProbGeom == 'sphere':
-            return 2.0*(1.0/self.escapeProb[u,l] - 1.0)
-        elif escapeProbGeom == 'LVG':
-            tau=np.zeros(len(u))
-            for i, beta in enumerate(self.escapeProb[u,l]):
-                tau[i] = brentq(_betaTauLVG, 1e-10, 1.0/beta,
-                                args=(beta,))
-            return tau
-        elif escapeProbGeom == 'slab':
-            tau=np.zeros(len(u))
-            for i, beta in enumerate(self.escapeProb[u,l]):
-                tau[i] = brentq(_betaTauSlab, 1e-10, 3.0/beta,
-                                args=(beta,))
-            return tau
-        else:
-            raise despoticError("unknown escapeProbGeom " +
-                                str(escapeProbGeom))
-
+            tauArr = np.zeros((self.data.nlev, self.data.nlev))
+            tauArr[self.data.radUpper, self.data.radLower] = self.tau
+            return tauArr[u,l]
 
     ####################################################################
     # Method to return the luminosity per H with all transitions
