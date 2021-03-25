@@ -101,9 +101,9 @@ class emitter(object):
        escapeProb : array, shape (nlev, nlev)
           2d array giving escape probability for photons emitted in a
           line connecting the given level pair 
-       tau : array, shape (nlev, nlev)
-          2d array giving mean optical depth for photons emitted in a
-          line connecting the given level pair
+       tau : array, shape (ntrans)
+          1d array giving the optical depth for every transition in
+          the list of radiative transitions for this species
        escapeProbInitialized : Boolean
           flag for whether escapeProb is initialized or uninitialized
        energySkip : Boolean
