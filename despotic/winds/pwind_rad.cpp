@@ -240,7 +240,7 @@ pwind_rad_point::a_from_u_max(const double u, const double varpi,
       gsl_poly_solve_cubic(1.0/fac, vp2/fac, -vp2/fac,
 			   a, a+1, a+2);
     for (int i=0; i<nroots; i++) {
-      if (SQR(a[i]) > vp2) {
+      if (SQR(a[i]) > vp2 && a[i] > 0.0) {
 	return a[i];
       }
     }
@@ -609,7 +609,7 @@ pwind_rad_ps::alimits(const double u, const double varpi,
   if (u > umax) return ret;  // No solutions; u too big
   ret.resize(2); // Two solutions
   ret[0] = a_from_u_max(u, varpi, varpi_t);
-  if (u > u_min_infinity)
+  if (fabs(u) > u_min_infinity)
     // Velocity is larger than minimum velocity at infinity, so upper
     // limit on a = infinity
     ret[1] = numeric_limits<double>::max();
