@@ -484,7 +484,13 @@ pwind_hot::dU2dx(const double x, const double a) const {
   double x2 = log(pow(10., -(loggex - 0.01*full_tab->dlg)) * Gamma);
   double u1 = U(x1, a);
   double u2 = U(x2, a);
-  return (u2*u2 - u1*u1) / (x2 - x1);
+  // In special case where we are off the table, usually due to a
+  // numerical roundoff issue, it is better to return infinity, since
+  // dU2dx should approach this value as we go off the table
+  if (u1 == 0.0 || u2 == 0) return numeric_limits<double>::max();
+  // Normal case
+  double ret = (u2*u2 - u1*u1) / (x2 - x1);
+  return ret;
 }
 
 inline double
