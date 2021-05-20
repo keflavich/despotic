@@ -33,7 +33,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////
 
 struct U2_params {
-  double u, a, x, vp2;
+  double u, a, x, varpi, varpi_t, vp2;
   const pwind *pw;
 };
 
@@ -118,7 +118,13 @@ static double U2_func_loga(double loga, void *params) {
   // This routine returns the residual for U2(x, a) - U2_target
   struct U2_params *par = (struct U2_params *) params;
   double a = exp(loga);
-  double U2 = SQR(par->u) / (1.0 - par->vp2/SQR(a));
+  double jproj = par->pw->getJproj();
+  double varpi_a = par->varpi;
+  double varpi_t = par->varpi_t;
+  double vp2 = par->vp2;
+  double u = par->u;
+  double U2 = SQR(u - jproj*varpi_t / (SQR(a) - SQR(varpi_a)))
+    / (1.0 - vp2/SQR(a));
   // Catch roundoff problems
   if (U2 < 0.0)
     return numeric_limits<double>::max();
@@ -130,6 +136,7 @@ static double U2_func_loga(double loga, void *params) {
 }
 
 double pwind::a_from_u_x(const double u, const double x,
+			 //const int side,
 			 const double varpi, const double varpi_t,
 			 const double alo, const double ahi,
 			 const int maxiter) const {
@@ -138,6 +145,8 @@ double pwind::a_from_u_x(const double u, const double x,
   struct U2_params params;
   params.u = u;
   params.x = x;
+  params.varpi = varpi;
+  params.varpi_t = varpi_t;
   params.vp2 = SQR(varpi) + SQR(varpi_t);
   params.pw = this;
   gsl_function F;
@@ -322,7 +331,15 @@ static double Phi_uc_integ(double loga, void *params) {
     sqrt(1.0 - par->vp2/SQR(a));
   if (ur > par->w->uMax()) return 0.0;
   double x = par->w->X(ur, a);
+
+  // Return if x is too large, or if it is -inf -- the latter is
+  // possible if we invoke this function with values of u and a near
+  // the limit of where solutions exist, and for numerical reasons we
+  // fail to find the solution we're looking for
   if (x > par->w->xcr() + log(par->w->getFcrit())) return 0.0;
+  if (x == -numeric_limits<double>::max()) return 0.0;
+
+  // Get dU2dx
   double dU2dx = par->w->dU2dx(x, a);
 
   // Return
@@ -421,7 +438,7 @@ double pwind::Phi_uc(const double u, const double varpi,
 
     // Check if velocity is outside bounds
     if (u == 0) return numeric_limits<double>::max();
-    if (u >= umax) return 0.0;
+    if (fabs(u) >= umax) return 0.0;
 
     // Get integration limits from velocity and geometry
     vector<double> alim_v = alimits(u, varpi, varpi_t);

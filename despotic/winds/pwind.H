@@ -130,9 +130,12 @@ public:
   // in many cases the inversion can be done analytically;
   // a_from_u_x -- returns the value of a at which material with a
   // given x has velocity u; returns -1 if the input limits do not
-  // properly bracket the root
+  // properly bracket the root; the argument side indicates which side
+  // of the wind to look at: side = 1 means far side, side = -1 means
+  // near side, though the distinction matters only if jsp != 0
   // x_from_u_a -- same as a_from_u_x, but gets x given u and a
   double a_from_u_x(const double u, const double x,
+		    //const int side,
 		    const double varpi=0.0,
 		    const double varpi_t=0.0,
 		    const double alo=1.0,

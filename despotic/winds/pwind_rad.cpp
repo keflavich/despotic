@@ -525,7 +525,7 @@ vector<double>
 pwind_rad_pa::alimits(const double u, const double varpi,
 		      const double varpi_t) const {
   vector<double> ret;
-  if (u > umax) return ret;  // No solutions
+  if (fabs(u) > umax) return ret;  // No solutions
   ret.resize(2);    // 2 solutions
   ret[0] = a_from_u_max(u, varpi, varpi_t);
   ret[1] = numeric_limits<double>::max();
@@ -567,10 +567,10 @@ vector<double>
 pwind_rad_pi::alimits(const double u, const double varpi,
 		      const double varpi_t) const {
   vector<double> ret;
-  if (u > umax) return ret;  // No solutions; u too big
+  if (fabs(u) > umax) return ret;  // No solutions; u too big
   ret.resize(2); // Two solutions
   ret[0] = a_from_u_max(u, varpi, varpi_t);
-  if (u > u_min_infinity)
+  if (fabs(u) > u_min_infinity)
     // Velocity is larger than minimum velocity at infinity, so upper
     // limit on a = infinity
     ret[1] = numeric_limits<double>::max();
@@ -606,7 +606,7 @@ vector<double>
 pwind_rad_ps::alimits(const double u, const double varpi,
 		      const double varpi_t) const {
   vector<double> ret;
-  if (u > umax) return ret;  // No solutions; u too big
+  if (fabs(u) > umax) return ret;  // No solutions; u too big
   ret.resize(2); // Two solutions
   ret[0] = a_from_u_max(u, varpi, varpi_t);
   if (fabs(u) > u_min_infinity)
@@ -637,7 +637,7 @@ vector<double>
 pwind_rad_ia::alimits(const double u, const double varpi,
 		      const double varpi_t) const {
   vector<double> ret;
-  if (u > umax) return ret;  // No solutions; u too big
+  if (fabs(u) > umax) return ret;  // No solutions; u too big
   if (varpi == 0.0 && varpi_t == 0.0) {
     // For varpi = 0, looking down the barrel, two solutions exist
     // if u < umax
@@ -692,7 +692,7 @@ vector<double>
 pwind_rad_ii::alimits(const double u, const double varpi,
 		      const double varpi_t) const {
   vector<double> ret;
-  if (u > umax) return ret;  // No solutions; u too big
+  if (fabs(u) > umax) return ret;  // No solutions; u too big
   if (varpi == 0.0 && varpi_t == 0.0) {
     // For varpi = 0, looking down the barrel, two solutions exist
     // if u < umax
@@ -765,11 +765,11 @@ vector<double>
 pwind_rad_is::alimits(const double u, const double varpi,
 		      const double varpi_t) const {
   vector<double> ret;
-  if (u > umax) return ret;  // No solutions; u too big
+  if (fabs(u) > umax) return ret;  // No solutions; u too big
   if (varpi == 0.0 && varpi_t == 0.0) {
     // For varpi = 0, looking down the barrel, there can be 2 or 4
     // solutions
-    if (u < umax_xcrit) {
+    if (fabs(u) < umax_xcrit) {
       // Four solutions, which are as follows:
       // 1. Radius at which u = U(-inf, a), in the region of a where U
       // is increasing
@@ -815,7 +815,7 @@ pwind_rad_is::alimits(const double u, const double varpi,
       (1.0 - vp2/SQR(apeak_xcrit));
 
     // Step 3: decide how many solutions there are
-    if (u < u2peak_xcrit) {
+    if (SQR(u) < u2peak_xcrit) {
       // Step 3a: there are 4 solutions, analogous to the u <
       // umax_xcrit case for varpi = 0
       ret.resize(4);
