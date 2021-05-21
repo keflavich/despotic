@@ -745,12 +745,24 @@ pwind_rad_is::pwind_rad_is(const double Gamma_, const double mach_,
 		       (&pwind_expansion_solid_angle), geom_,
 		       epsabs_, epsrel_, fcrit_, jsp_)
 {
+  // Do these computations with improved precision, because otherwise
+  // we will not be able to do integrals with enough precision later
+  // on
+  double epsr_ = epsrel;
+  double epsa_ = epsabs;
+  epsrel /= 1e4;
+  epsabs /= 1e4;
+
   // Solve for radius of maximum velocity along x = xcrit curve
   a_maxu_xcrit = a_max_u_from_varpi(xcrit);
   // Next get velocity maximum at x = xcrit
   umax_xcrit = sqrt(U2(xcrit, a_maxu_xcrit));
   // Get radius at which a = 0 along x = xcrit curve
   amax_xcrit = a_from_u_x(0.0, xcrit, 0.0, 0.0, a_maxu_xcrit);
+
+  // Reset precision
+  epsrel = epsr_;
+  epsabs = epsa_;
 }
 double
 pwind_rad_is::U2(const double x, const double a) const {
