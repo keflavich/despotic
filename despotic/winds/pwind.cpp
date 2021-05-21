@@ -441,7 +441,13 @@ double pwind::Phi_uc(const double u, const double varpi,
     if (fabs(u) >= umax) return 0.0;
 
     // Get integration limits from velocity and geometry
+    double epsrel_ = epsrel;
+    double epsabs_ = epsabs;
+    epsrel /= 1e4;
+    epsabs /= 1e4;
     vector<double> alim_v = alimits(u, varpi, varpi_t);
+    epsrel = epsrel_;
+    epsabs = epsabs_;
     vector<double> alim = geom->a_lim(alim_v, varpi, varpi_t, u);
     if (alim.size() == 0) return 0.0;
 
@@ -496,6 +502,12 @@ pwind::Phi_uc(const std::vector<double> &u, const double varpi,
   // Data holders
   std::vector<double> integ(u.size());
 
+  // Tighten tolerance on calculation of integration limits
+  double epsrel_ = epsrel;
+  double epsabs_ = epsabs;
+  epsrel /= 1e4;
+  epsabs /= 1e4;
+    
   // Start parallel computation
 #if defined(_OPENMP)
 #  pragma omp parallel
@@ -514,7 +526,7 @@ pwind::Phi_uc(const std::vector<double> &u, const double varpi,
     gsl_function F;
     F.function = &Phi_uc_integ;
     F.params = &par;
-
+    
     // Parallel loop
 #if defined(_OPENMP)
 #  pragma omp for
@@ -543,10 +555,11 @@ pwind::Phi_uc(const std::vector<double> &u, const double varpi,
 	if (alim[2*i+1] <= alim[2*i]) continue;
 	if (alim[2*i+1] < numeric_limits<double>::max()) {
 	  checkForErr(gsl_integration_qag(&F, log(alim[2*i]), log(alim[2*i+1]),
-					  epsabs, epsrel, MAXINTERVAL,
+					  epsabs_, epsrel_, MAXINTERVAL,
 					  GSL_INTEG_GAUSS61, w, &result, &err));
 	} else {
-	  checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]), epsabs, epsrel,
+	  checkForErr(gsl_integration_qagiu(&F, log(alim[2*i]),
+					    epsabs_, epsrel_,
 					    MAXINTERVAL, w, &result, &err));
 	}
 	integ[i] += result;
@@ -557,6 +570,10 @@ pwind::Phi_uc(const std::vector<double> &u, const double varpi,
     // Take down integration machinery for this thread
     gsl_integration_workspace_free(w);
   }
+
+  // Restore tolerances
+  epsrel = epsrel_;
+  epsabs = epsabs_;
   
   // Return
   return integ;
@@ -601,7 +618,13 @@ double pwind::Phi_c(const double u, const double fw,
   // Get integration limits
   vector<double> alim;
   if (alimits_.size() == 0) {
+    double epsrel_ = epsrel;
+    double epsabs_ = epsabs;
+    epsrel /= 1e4;
+    epsabs /= 1e4;
     vector<double> alim_v = alimits(u, varpi, varpi_t);
+    epsrel = epsrel_;
+    epsabs = epsabs_;
     alim = geom->a_lim(alim_v, varpi, varpi_t, u);
   } else {
     alim = alimits_;
@@ -683,7 +706,13 @@ double pwind::tau_c(const double u, const double tXtw,
 		    const double a0, const double a1) const {
 
   // Get integration limits
+  double epsrel_ = epsrel;
+  double epsabs_ = epsabs;
+  epsrel /= 1e4;
+  epsabs /= 1e4;
   vector<double> alim_v = alimits(u, varpi, varpi_t);
+  epsrel = epsrel_;
+  epsabs = epsabs_;
   vector<double> alim = geom->a_lim(alim_v, varpi, varpi_t, u);
   if (alim.size() == 0) return 0.0;
   
@@ -821,7 +850,13 @@ double pwind::tau_c(const double u,
   vector< vector<double> > alim(u_trans.size());
   vector<double>::size_type nlim_max = 0;
   for (vector<double>::size_type i=0; i<u_trans.size(); i++) {
+    double epsrel_ = epsrel;
+    double epsabs_ = epsabs;
+    epsrel /= 1e4;
+    epsabs /= 1e4;
     vector<double> alim_v = alimits(u - u_trans[i], varpi, varpi_t);
+    epsrel = epsrel_;
+    epsabs = epsabs_;
     alim[i] = geom->a_lim(alim_v, varpi, varpi_t, u - u_trans[i]);
     if (nlim_max < alim[i].size()) nlim_max = alim[i].size();
   }
@@ -1414,7 +1449,13 @@ double pwind::Xi(const double u, const double varpi,
   if (fabs(u) >= umax) return 0.0;
 
   // Get integration limits
+  double epsrel_ = epsrel;
+  double epsabs_ = epsabs;
+  epsrel /= 1e4;
+  epsabs /= 1e4;
   vector<double> alim_v = alimits(u, varpi, varpi_t);
+  epsrel = epsrel_;
+  epsabs = epsabs_;
   vector<double> alim = geom->a_lim(alim_v, varpi, varpi_t, u);
 
   // Load the GSL data
@@ -1624,8 +1665,16 @@ double pwind::eta(const double u, const double tXtw,
   if (u == 0) return numeric_limits<double>::max();
   if (fabs(u) >= umax) return 0.0;
 
-  // Get integration limits
+  // Get integration limits; note that we tighten the tolerance
+  // considerably before this step, because getting the limits off can
+  // have unexpectedly large consequences
+  double epsrel_ = epsrel;
+  double epsabs_ = epsabs;
+  epsrel /= 1e4;
+  epsabs /= 1e4;
   vector<double> alim_v = alimits(u, varpi, varpi_t);
+  epsrel = epsrel_;
+  epsabs = epsabs_;
   vector<double> alim = geom->a_lim(alim_v, varpi, varpi_t, u);
   if (alim.size() == 0) return 0.0;
   double a0 = numeric_limits<double>::max(), a1 = 0.0;
