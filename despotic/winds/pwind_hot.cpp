@@ -422,7 +422,27 @@ pwind_hot::U2(const double x, const double a) const {
   }
 
   // Handle special case of x off the grid
-  if (lgidx < 0.0 || lgidx >= full_tab->ngex-1) return 0.0;
+  if (lgidx < 0 || lgidx >= full_tab->ngex-1) return 0.0;
+
+  // Handle special case where x is on the grid, but is at the very
+  // edge (lgidx = 0), and we don't have a valid row in the table for
+  // lgidx = 0 because for lgidx = 0 the wind turns around
+  // immediately; we handle this case by using the analytic solution
+  // for an ideal case, because if we're off the table in that
+  // direction, the solution will approach the solution for the ideal
+  // case
+  if (lgidx == 0 && expansion->yidx() <= potential->midx()) {
+    if (expansion->yidx() == 0 && potential->midx() == 0) {
+      // Point, area
+      return (Gamma*exp(-x)-1.0)*(1.0-1.0/a);
+    } else if (expansion->yidx() == 0 && potential->midx() == 1) {
+      // Isothermal, area
+      return Gamma*exp(-x)*(1.0-1.0/a) - log(a);
+    } else {
+      // Isothermal, intermediate
+      return (Gamma*exp(-x)-1.0) * log(a);
+    }
+  }
   
   // Interpolate to get stopping point and maximum u value at this x
   double q_stop = (1.0 - wlg) * tab.q_stop[lgidx] +
@@ -476,18 +496,43 @@ pwind_hot::U2(const double x, const double a) const {
 inline double
 pwind_hot::dU2dx(const double x, const double a) const {
 
+  // Handle special case where Gamma e^-x > 0, but is so close to zero
+  // that it is below the smallest non-zero value in our table, *and*
+  // we don't have a valid entry in the table before Gamma e^-x = 0
+  // exactly, because in that case the wind turns around immediately;
+  // if this happens, we use the analytic solution for the
+  // corresponding ideal case, because in this case we are in the
+  // limit u -> 0, in which case the hot gas case reduces to the ideal
+  // case
+  double loggex = log10(Gamma * exp(-x));
+  if (loggex >= 0.0 &&
+      loggex < full_tab->dlg &&
+      expansion->yidx() <= potential->midx()) {
+    if (expansion->yidx() == 0 && potential->midx() == 0) {
+      // Point, area
+      return -(1.0-1.0/a)*Gamma*exp(-x);
+    } else if (expansion->yidx() == 0 && potential->midx() == 1) {
+      // Isothermal, area
+      return -(1.0-1.0/a)*Gamma*exp(-x);
+    } else {
+      // Isothermal, intermediate
+      return -Gamma*exp(-x)*log(a);
+    }
+  }
+
   // Here we compute the derivative numerically by computing the
   // interpolated values at x values displaced by a fraction of a cell
   // spacing
-  double loggex = log10(Gamma * exp(-x));
   double x1 = log(pow(10., -(loggex + 0.01*full_tab->dlg)) * Gamma);
   double x2 = log(pow(10., -(loggex - 0.01*full_tab->dlg)) * Gamma);
   double u1 = U(x1, a);
   double u2 = U(x2, a);
+  
   // In special case where we are off the table, usually due to a
   // numerical roundoff issue, it is better to return infinity, since
   // dU2dx should approach this value as we go off the table
-  if (u1 == 0.0 || u2 == 0) return numeric_limits<double>::max();
+  if (u1 == 0.0 || u2 == 0.0) return numeric_limits<double>::max();
+
   // Normal case
   double ret = (u2*u2 - u1*u1) / (x2 - x1);
   return ret;
