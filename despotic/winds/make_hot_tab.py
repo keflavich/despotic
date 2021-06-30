@@ -24,6 +24,7 @@ ngex = 512
 qmin = -4.0
 qmax = 4.0
 loggex_max = 3.0
+ngex_lo = 64
 
 # Range of parameters
 m = np.array([0, 1], dtype=int)
@@ -52,9 +53,9 @@ while ptr < ya.size:
         # Build command string for this case
         cmd = (
             "./hot_wind_tab {:f} {:d} {:d} {:d} {:d} {:f} {:f} {:d} "
-            "{:f} --dir {:s} --verbose").format(
+            "{:f} {:d} --dir {:s} --verbose").format(
                 uha[ptr], ya[ptr], ma[ptr],
-                nu, nq, qmin, qmax, ngex, loggex_max,
+                nu, nq, qmin, qmax, ngex, loggex_max, ngex_lo,
                 tmpdir)
         if overwrite:
             cmd += " --overwrite"
@@ -106,13 +107,14 @@ for m_ in m:
     for y_ in y:
 
         # Metadata files
-        metaname = osp.join(tmpdir, "table_params_y{:1d}_m{:1d}.txt".
+        metaname = osp.join(outdir, "table_params_y{:1d}_m{:1d}.txt".
                             format(y_, m_))
         fp = open(metaname, 'w')
         fp.write(str(len(uh))+"\n")
         fp.write(str(nu)+"\n")
         fp.write(str(nq)+"\n")
         fp.write(str(ngex)+"\n")
+        fp.write(str(ngex_lo)+"\n")
         fp.write(str(qmin)+"\n")
         fp.write(str(qmax)+"\n")
         fp.write(str(loggex_max)+"\n")
@@ -181,7 +183,7 @@ for m_ in m:
                 fpin.close()
                 print("   processed {:s}".format(inname))
 
-        # gex_u files
+        # q_q files
         dstname = osp.join(outdir,
                            "qtab_q_y{:1d}_m{:1d}.bin".format(y_, m_))
         if overwrite or not osp.isfile(dstname):
@@ -195,3 +197,35 @@ for m_ in m:
                 copyfileobj(fpin, fpout)
                 fpin.close()
                 print("   processed {:s}".format(inname))
+
+        if (y_ <= m_):
+            # q_gexlo_u files
+            dstname = osp.join(outdir,
+                               "qtab_gexlo_u_y{:1d}_m{:1d}.bin".format(y_, m_))
+            if overwrite or not osp.isfile(dstname):
+                print("Consolidating to {:s}...".format(dstname))
+                fpout = open(dstname, 'wb')
+                for u_ in uh:
+                    inname = osp.join(tmpdir,
+                                      "qtab_gexlo_u_uh{:f}_y{:1d}_m{:1d}.bin".
+                                      format(u_, y_, m_))
+                    fpin = open(inname, 'rb')
+                    copyfileobj(fpin, fpout)
+                    fpin.close()
+                    print("   processed {:s}".format(inname))
+
+            # q_gexlo_q files
+            dstname = osp.join(outdir,
+                               "qtab_gexlo_q_y{:1d}_m{:1d}.bin".format(y_, m_))
+            if overwrite or not osp.isfile(dstname):
+                print("Consolidating to {:s}...".format(dstname))
+                fpout = open(dstname, 'wb')
+                for u_ in uh:
+                    inname = osp.join(tmpdir,
+                                      "qtab_gexlo_q_uh{:f}_y{:1d}_m{:1d}.bin".
+                                      format(u_, y_, m_))
+                    fpin = open(inname, 'rb')
+                    copyfileobj(fpin, fpout)
+                    fpin.close()
+                    print("   processed {:s}".format(inname))
+                

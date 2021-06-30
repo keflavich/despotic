@@ -656,7 +656,8 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
 			double *q, double *umax, double *q_umax,
 			double *q_stop,
 			double *mean_err, double *max_err,
-			double *max_err_u, double *max_err_loggex) {
+			double *max_err_u, double *max_err_loggex,
+			bool gex_lo) {
   
   // Build GSL machinery we will be using
   ode_params par = { 0.0, uh, yidx, midx };
@@ -668,7 +669,10 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
   // Fill values on grid
   if (verbose) printf("Bulding q grid\n");
   for (int j=0; j<ngex; j++) {
-    double loggex = j * loggex_max / (ngex-1.0);
+    double loggex;
+    if (!gex_lo) loggex = j * loggex_max / (ngex-1.0);
+    else loggex = log10(1.0 + j * (pow(10., loggex_max) - 1.0) /
+			(ngex - 1));
     if (verbose)
       printf("   ...row %d / %d at loggex = %f\n", j+1, ngex, loggex);
 
@@ -810,8 +814,8 @@ void build_q_gex_u_grid(double uh, int yidx, int midx,
 int main(int argc, char *argv[]) {
 
   // Parse inputs
-  char usage[] = "Usage: hot_wind_tab uh yidx midx nu nq qmin qmax ngex loggex_max [-v, --verbose] [-ovr, --overwrite] [-d, --dir dir] [-a, --ascii]\n   uh = hot gas velocity\n   yidx = expansion parameter for clouds, y = a^yidx\n   midx = gravitational potential parameter, m = a^idx\n   nu = number of grid points in velocity\n   nq = number of grid points in q, where q = log_10(a - 1)\n   qmin = minimum value of q in grid\n   qmax = maximum value of q in grid\n   ngex = number of grid points in log_10(Gamma e^-x)\n   loggex_max = maximum value of log_10(Gamma e^-x) in grid\n   --verbose = produce verbose output\n   --ovewrite = overwrite existing output files (default behavior is to skip if existing output is found)\n   --dir = write output to directory dir (default is run directory)\n   --ascii = write ASCII output (default is raw binary output)\n";
-  if (argc < 10 || argc > 15) {
+  char usage[] = "Usage: hot_wind_tab uh yidx midx nu nq qmin qmax ngex loggex_max ngex_lo [-v, --verbose] [-ovr, --overwrite] [-d, --dir dir] [-a, --ascii]\n   uh = hot gas velocity\n   yidx = expansion parameter for clouds, y = a^yidx\n   midx = gravitational potential parameter, m = a^idx\n   nu = number of grid points in velocity\n   nq = number of grid points in q, where q = log_10(a - 1)\n   qmin = minimum value of q in grid\n   qmax = maximum value of q in grid\n   ngex = number of grid points in log_10(Gamma e^-x)\n   loggex_max = maximum value of log_10(Gamma e^-x) in grid\n   ngex_lo = number of grid points in the grid of log_10(Gamma e^-x) near 0\n   --verbose = produce verbose output\n   --ovewrite = overwrite existing output files (default behavior is to skip if existing output is found)\n   --dir = write output to directory dir (default is run directory)\n   --ascii = write ASCII output (default is raw binary output)\n";
+  if (argc < 11 || argc > 16) {
     fprintf(stderr, "%s", usage);
     exit(1);
   }
@@ -824,11 +828,12 @@ int main(int argc, char *argv[]) {
   double qmax = atof(argv[7]);
   int ngex = atoi(argv[8]);
   double loggex_max = atof(argv[9]);
+  int ngex_lo = atoi(argv[10]);
   bool overwrite = false;
   bool ascii = false;
   char *dir = NULL;
   verbose = false;
-  for (int n=10; n<argc; n++) {
+  for (int n=11; n<argc; n++) {
     if (strcmp(argv[n], "-v") == 0 ||
 	strcmp(argv[n], "--verbose") == 0) {
       verbose = true;
@@ -863,7 +868,8 @@ int main(int argc, char *argv[]) {
 
   // Check that parameters are valid
   if (uh <= 0.0 || yidx < 0 || yidx > 2 || midx < 0 || midx > 1 ||
-      qmin >= qmax || loggex_max <= 0.0 || nu < 4 || nq < 4 || ngex < 4) {
+      qmin >= qmax || loggex_max <= 0.0 || nu < 4 || nq < 4 || ngex < 4 ||
+      ngex_lo < 4) {
     fprintf(stderr, "Parameter out of range; valid ranges are:\n");
     fprintf(stderr, "   uh > 0\n");
     fprintf(stderr, "   yidx = 0, 1, or 2\n");
@@ -873,6 +879,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "   qmin < qmax\n");
     fprintf(stderr, "   ngex > 3\n");
     fprintf(stderr, "   loggex_max > 0\n");
+    fprintf(stderr, "   ngex_lo > 3\n");
     exit(1);
   }
 
@@ -925,7 +932,7 @@ int main(int argc, char *argv[]) {
     build_q_gex_u_grid(uh, yidx, midx, nu, ngex, loggex_max, qmax,
 		       q, umax, q_umax, q_stop,
 		       &mean_err, &max_err,
-		       &max_err_u, &max_err_loggex);
+		       &max_err_u, &max_err_loggex, false);
     if (verbose)
       printf("Mean error = %f, max error = %f at u/umax = %f, loggex = %f\n",
 	     mean_err, max_err, max_err_u, max_err_loggex);
@@ -978,6 +985,116 @@ int main(int argc, char *argv[]) {
     free(umax);
     free(q_umax);
     free(q_stop);
+  }
+
+  // Handle q(u, gex) grid for values near gex = 1 -- only required
+  // for yidx <= midx
+  if (yidx <= midx) {
+  
+    // Construct output filenames
+    char *fname1, *fname2, ext[4];
+    if (ascii) sprintf(ext, "txt"); else sprintf(ext, "bin");
+    if (dir) {
+      fname1 = malloc(strlen(dir) + 100);
+      fname2 = malloc(strlen(dir) + 100);
+      sprintf(fname1, "%sqtab_gexlo_u_uh%f_y%d_m%d.%s", dir, uh, yidx, midx, ext);
+      sprintf(fname2, "%sqtab_gexlo_q_uh%f_y%d_m%d.%s", dir, uh, yidx, midx, ext);
+    } else {
+      fname1 = malloc(100);
+      fname2 = malloc(100);
+      sprintf(fname1, "qtab_gexlo_u_uh%f_y%d_m%d.%s", uh, yidx, midx, ext);
+      sprintf(fname2, "qtab_gexlo_q_uh%f_y%d_m%d.%s", uh, yidx, midx, ext);
+    }
+
+    // Check if files exist; if it does and overwriting is not set, skip
+    FILE *fp1, *fp2, *fp3;
+    fp1 = fopen(fname1, "r");
+    fp2 = fopen(fname2, "r");
+    if (fp1 && fp2 && !overwrite) {
+      
+      // Just close
+      fclose(fp1);
+      fclose(fp2);
+    
+    } else {
+    
+      // Files do not exist, or we are overwriting existing ones
+      if (fp1) fclose(fp1);
+      if (fp2) fclose(fp2);
+
+      // Allocate memory to hold q(u, gex) results
+      int nc = yidx < midx ? 2 : 1;
+      double *q = calloc(nc*nu*ngex_lo, sizeof(double));
+      double *umax = calloc(ngex_lo, sizeof(double));
+      double *q_umax = calloc(ngex_lo, sizeof(double));
+      double *q_stop = calloc(ngex_lo, sizeof(double));
+      if (!q || !umax || !q_umax || !q_stop) {
+	fprintf(stderr, "Error: unable to allocate memory to hold result\n");
+	exit(1);
+      }
+  
+      // Build q(u, gex) grid
+      double mean_err, max_err, max_err_u, max_err_loggex;
+      double loggex_lo_max = loggex_max / (ngex - 1);
+      build_q_gex_u_grid(uh, yidx, midx, nu, ngex_lo, loggex_lo_max, qmax,
+			 q, umax, q_umax, q_stop,
+			 &mean_err, &max_err,
+			 &max_err_u, &max_err_loggex, true);
+      if (verbose)
+	printf("Mean error = %f, max error = %f at u/umax = %f, loggex = %f\n",
+	       mean_err, max_err, max_err_u, max_err_loggex);
+
+      // Write output
+      fp1 = fopen(fname1, "w");
+      fp2 = fopen(fname2, "w");
+      if (ascii) {
+
+	// ASCII mode
+	for (int j=0; j<ngex_lo; j++) {
+	  double loggex = log10(1.0 + j * (pow(10., loggex_lo_max) - 1.0) /
+				(ngex_lo - 1));
+	fprintf(fp1, "%e   %e   %e   %e\n",
+		loggex, umax[j], q_umax[j], q_stop[j]);
+	}
+	for (int j=0; j<ngex_lo; j++) {
+	  for (int i=0; i<nu; i++) {
+	    fprintf(fp2, "   %e", q[nu*j+i]);
+	  }
+	  fprintf(fp2, "\n");
+	}
+	if (yidx < midx) {
+	  for (int j=0; j<ngex; j++) {
+	    for (int i=0; i<nu; i++) {
+	      fprintf(fp2, "   %e", q[ngex_lo*nu + nu*j+i]);
+	    }
+	    fprintf(fp2, "\n");
+	  }
+	}
+      } else {
+
+	// Binary mode
+	for (int j=0; j<ngex_lo; j++) {
+	  double loggex = log10(1.0 + j * (pow(10., loggex_lo_max) - 1.0) /
+				(ngex_lo - 1));
+	  fwrite(&loggex, sizeof(double), 1, fp1);
+	}
+	fwrite(umax, sizeof(double), ngex_lo, fp1);
+	fwrite(q_umax, sizeof(double), ngex_lo, fp1);
+	fwrite(q_stop, sizeof(double), ngex_lo, fp1);
+	if (yidx >= midx)
+	  fwrite(q, sizeof(double), ngex_lo*nu, fp2);
+	else
+	  fwrite(q, sizeof(double), 2*ngex_lo*nu, fp2);
+      }
+      fclose(fp1);
+      fclose(fp2);
+
+      // Free memory
+      free(q);
+      free(umax);
+      free(q_umax);
+      free(q_stop);
+    }
   }
 
   // gex(u, q) calculation

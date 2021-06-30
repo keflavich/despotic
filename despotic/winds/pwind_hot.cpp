@@ -4,6 +4,7 @@
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_poly.h>
 #include <gsl/gsl_roots.h>
+#include <gsl/gsl_sf.h>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -102,12 +103,19 @@ pwind_hot::pwind_hot(const double Gamma_,
   // Allocate space in the interpolated data
   int nuh = full_tab->uh.size();
   int ngex = full_tab->uh_data[0].umax.size();
+  int ngex_lo = full_tab->uh_data[0].umax_lo.size();
   int nu = full_tab->uh_data[0].q.size() / ngex;
   int nq = full_tab->uh_data[0].umin.size();
   tab.umax.resize(ngex);
   tab.q_umax.resize(ngex);
   tab.q_stop.resize(ngex);
   tab.q.resize(ngex * nu);
+  if (expansion->yidx() <= potential->midx()) {
+    tab.umax_lo.resize(ngex_lo);
+    tab.q_umax_lo.resize(ngex_lo);
+    tab.q_stop_lo.resize(ngex_lo);
+    tab.q_lo.resize(ngex_lo * nu);
+  }
   tab.umin.resize(nq);
   tab.loggex.resize(nu * nq);
 
@@ -131,6 +139,22 @@ pwind_hot::pwind_hot(const double Gamma_,
   for (int i=0; i<ngex*nu; i++) {
     tab.q[i] = (1.0 - w) * full_tab->uh_data[idx].q[i] +
       w * full_tab->uh_data[idx+1].q[i];
+  }
+  if (expansion->yidx() <= potential->midx()) {
+    for (int i=0; i<ngex_lo; i++) {
+      tab.umax_lo[i] = (1.0 - w) * full_tab->uh_data[idx].umax_lo[i] +
+	w * full_tab->uh_data[idx+1].umax_lo[i];
+      tab.q_stop_lo[i] = (1.0 - w) * full_tab->uh_data[idx].q_stop_lo[i] +
+	w * full_tab->uh_data[idx+1].q_stop_lo[i];
+      if (isFountain()) {
+	tab.q_umax_lo[i] = (1.0 - w) * full_tab->uh_data[idx].q_umax_lo[i] +
+	  w * full_tab->uh_data[idx+1].q_umax_lo[i];
+      }
+    }
+    for (int i=0; i<ngex_lo*nu; i++) {
+      tab.q_lo[i] = (1.0 - w) * full_tab->uh_data[idx].q_lo[i] +
+	w * full_tab->uh_data[idx+1].q_lo[i];
+    }
   }
   if (hasUmin()) {
     for (int i=0; i<nq; i++) {
@@ -187,12 +211,13 @@ pwind_hot::read_table(const string &dirname,
   
   // Read the index file
   int nuh;
-  idx_if >> nuh >> dat->nu >> dat->nq >> dat->ngex
+  idx_if >> nuh >> dat->nu >> dat->nq >> dat->ngex >> dat->ngex_lo
 	 >> dat->qmin >> dat->qmax >> dat->loggex_max;
   dat->uh.resize(nuh);
   dat->dq = (dat->qmax - dat->qmin) / (dat->nq-1);
   dat->du = 1.0 / (dat->nu-1);
   dat->dlg = dat->loggex_max / (dat->ngex-1);
+  dat->dgex_lo = (pow(10., dat->dlg) - 1) / (dat->ngex_lo-1);
   for (int i=0; i<nuh; i++) idx_if >> dat->uh[i];
   idx_if.close();
 
@@ -208,6 +233,15 @@ pwind_hot::read_table(const string &dirname,
     else
       dat->uh_data[i].q.resize(2 * dat->ngex * dat->nu);
     dat->uh_data[i].loggex.resize(dat->nu * dat->nq);
+    if (yidx <= midx) {
+      dat->uh_data[i].umax_lo.resize(dat->ngex_lo);
+      dat->uh_data[i].q_umax_lo.resize(dat->ngex_lo);
+      dat->uh_data[i].q_stop_lo.resize(dat->ngex_lo);
+      if (yidx != 0 || midx != 1) 
+	dat->uh_data[i].q_lo.resize(dat->ngex_lo * dat->nu);
+      else
+	dat->uh_data[i].q_lo.resize(2 * dat->ngex_lo * dat->nu);
+    }
   }
 
   // Now begin to read the data files; first file: qtab_u
@@ -260,6 +294,61 @@ pwind_hot::read_table(const string &dirname,
   }
   qtab_q_if.close();
 
+  // gexlo files
+  if (yidx <= midx) {
+    
+    // qtab_gexlo_u
+    ss.str("");
+#if __cplusplus >= 201703L
+    ss << "qtab_gexlo_u_y" << yidx << "_m" << midx << ".bin";
+    p /= ss.str();
+    string fname = p.string();
+#else
+    ss << dirname << "/qtab_gexlo_u_y" << yidx << "_m" << midx << ".bin";
+    string fname = ss.str();
+#endif
+    ifstream qtab_gexlo_u_if(fname, ios::in | ios::binary);
+    if (!qtab_gexlo_u_if) {
+      delete dat;
+      return nullptr;
+    }
+
+    // Read the qtab_gexlo_u file
+    for (int i=0; i<nuh; i++) {
+      // Burn first ngex_lo entries, because these list gex values; we
+      // can construct these ourselves later as needed
+      qtab_gexlo_u_if.seekg(dat->ngex_lo * sizeof(double),
+			    qtab_gexlo_u_if.cur);
+      qtab_gexlo_u_if.read((char *) (dat->uh_data[i].umax_lo.data()),
+			   dat->ngex_lo * sizeof(double));
+      qtab_gexlo_u_if.read((char *) (dat->uh_data[i].q_umax_lo.data()),
+			   dat->ngex_lo * sizeof(double));
+      qtab_gexlo_u_if.read((char *) (dat->uh_data[i].q_stop_lo.data()),
+			   dat->ngex_lo * sizeof(double));
+    }
+    qtab_gexlo_u_if.close();
+
+    // Next data file: qtab_gexlo_q
+    ss.str("");
+#if __cplusplus >= 201703L
+    ss << "qtab_gexlo_q_y" << yidx << "_m" << midx << ".bin";
+    fname = (p / ss.str()).string();
+#else
+    ss << dirname << "/qtab_gexlo_q_y" << yidx << "_m" << midx << ".bin";
+    fname = ss.str();
+#endif
+    ifstream qtab_gexlo_q_if(fname, ios::in | ios::binary);
+    if (!qtab_gexlo_q_if) {
+      delete dat;
+      return nullptr;
+    }
+    for (int i=0; i<nuh; i++) {
+      qtab_gexlo_q_if.read((char *) (dat->uh_data[i].q_lo.data()),
+			   dat->uh_data[i].q_lo.size() * sizeof(double));
+    }
+    qtab_gexlo_q_if.close();
+  }
+  
   // Next data file: gextab_q
   ss.str("");
 #if __cplusplus >= 201703L
@@ -388,7 +477,7 @@ pwind_hot::X(const double ur, const double a) const {
       return -numeric_limits<double>::max();
   }
 
-  // Do binlinear interpolation in to get log (Gamma exp^-x)
+  // Do binlinear interpolation in q and u to get log (Gamma exp^-x)
   double loggex =
     (1.0 - wq) * (1.0 - wu) * tab.loggex[uidx + full_tab->nu * qidx] +
     (1.0 - wq) * wu * tab.loggex[uidx + 1 + full_tab->nu * qidx] +
@@ -408,6 +497,7 @@ pwind_hot::U2(const double x, const double a) const {
   int lgidx = (int) (loggex / full_tab->dlg);
   double wlg = loggex / full_tab->dlg - lgidx;
   double q = log10(a - 1.0);
+  int ngex = full_tab->ngex;
 
   // Handle special case of q below minimum value in our grid using
   // series solution
@@ -427,28 +517,31 @@ pwind_hot::U2(const double x, const double a) const {
   // Handle special case where x is on the grid, but is at the very
   // edge (lgidx = 0), and we don't have a valid row in the table for
   // lgidx = 0 because for lgidx = 0 the wind turns around
-  // immediately; we handle this case by using the analytic solution
-  // for an ideal case, because if we're off the table in that
-  // direction, the solution will approach the solution for the ideal
-  // case
-  if (lgidx == 0 && expansion->yidx() <= potential->midx()) {
-    if (expansion->yidx() == 0 && potential->midx() == 0) {
-      // Point, area
-      return (Gamma*exp(-x)-1.0)*(1.0-1.0/a);
-    } else if (expansion->yidx() == 0 && potential->midx() == 1) {
-      // Isothermal, area
-      return Gamma*exp(-x)*(1.0-1.0/a) - log(a);
-    } else {
-      // Isothermal, intermediate
-      return (Gamma*exp(-x)-1.0) * log(a);
-    }
+  // immediately or never launches. In this case we have a separate
+  // gexlo table that samples linearly from gex = 1 to gex = minimum
+  // of other table, and we use this table to interpolate
+  const double *q_stop_ptr, *umax_ptr, *q_umax_ptr, *q_ptr;
+  if (lgidx > 0 || expansion->yidx() > potential->midx()) {
+    q_stop_ptr = tab.q_stop.data();
+    umax_ptr = tab.umax.data();
+    q_umax_ptr = tab.q_umax.data();
+    q_ptr = tab.q.data();
+  } else {
+    double gex = Gamma * exp(-x);
+    ngex = full_tab->ngex_lo;
+    lgidx = (int) ((gex-1.0) / full_tab->dgex_lo);
+    wlg = (gex-1.0) / full_tab->dgex_lo - lgidx;
+    q_stop_ptr = tab.q_stop_lo.data();
+    umax_ptr = tab.umax_lo.data();
+    q_umax_ptr = tab.q_umax_lo.data();
+    q_ptr = tab.q_lo.data();
   }
   
   // Interpolate to get stopping point and maximum u value at this x
-  double q_stop = (1.0 - wlg) * tab.q_stop[lgidx] +
-    wlg * tab.q_stop[lgidx+1];
-  double umax = (1.0 - wlg) * tab.umax[lgidx] +
-    wlg * tab.umax[lgidx+1];
+  double q_stop = (1.0 - wlg) * q_stop_ptr[lgidx] +
+    wlg * q_stop_ptr[lgidx+1];
+  double umax = (1.0 - wlg) * umax_ptr[lgidx] +
+    wlg * umax_ptr[lgidx+1];
 
   // Fountain and non-fountain cases are handled differently
   if (!isFountain()) {
@@ -461,8 +554,8 @@ pwind_hot::U2(const double x, const double a) const {
     // table to this x, then locate this point in it.
     vector<double> qtab(full_tab->nu);
     for (int i=0; i<full_tab->nu; i++)
-      qtab[i] = (1.0-wlg) * tab.q[lgidx * full_tab->nu + i] +
-	wlg * tab.q[(lgidx+1) * full_tab->nu + i];
+      qtab[i] = (1.0-wlg) * q_ptr[lgidx * full_tab->nu + i] +
+	wlg * q_ptr[(lgidx+1) * full_tab->nu + i];
 
     // Now use table to get interpolated value
     double u = umax * interp(q, qtab);
@@ -474,17 +567,17 @@ pwind_hot::U2(const double x, const double a) const {
     if (q > q_stop) return 0.0;
 
     // Get turnaround point for fountain
-    double q_umax = (1.0 - wlg) * tab.q_umax[lgidx] +
-      wlg * tab.q_umax[lgidx+1];
+    double q_umax = (1.0 - wlg) * q_umax_ptr[lgidx] +
+      wlg * q_umax_ptr[lgidx+1];
 
     // Figure out whether we are in the accelerating or decelerating
     // part of the fountain, and interpolate the correct part of the q
     // vs. u curve
     vector<double> qtab(full_tab->nu);
-    int off = q < q_umax ? 0 : full_tab->ngex * full_tab->nu;
+    int off = q < q_umax ? 0 : ngex * full_tab->nu;
     for (int i=0; i<full_tab->nu; i++)
-      qtab[i] = (1.0-wlg) * tab.q[off + lgidx * full_tab->nu + i] +
-	wlg * tab.q[off + (lgidx+1) * full_tab->nu + i];
+      qtab[i] = (1.0-wlg) * q_ptr[off + lgidx * full_tab->nu + i] +
+	wlg * q_ptr[off + (lgidx+1) * full_tab->nu + i];
 
     // Use interpolated table to get u
     double u = umax * interp(q, qtab);
@@ -496,35 +589,19 @@ pwind_hot::U2(const double x, const double a) const {
 inline double
 pwind_hot::dU2dx(const double x, const double a) const {
 
-  // Handle special case where Gamma e^-x > 0, but is so close to zero
-  // that it is below the smallest non-zero value in our table, *and*
-  // we don't have a valid entry in the table before Gamma e^-x = 0
-  // exactly, because in that case the wind turns around immediately;
-  // if this happens, we use the analytic solution for the
-  // corresponding ideal case, because in this case we are in the
-  // limit u -> 0, in which case the hot gas case reduces to the ideal
-  // case
-  double loggex = log10(Gamma * exp(-x));
-  if (loggex >= 0.0 &&
-      loggex < full_tab->dlg &&
-      expansion->yidx() <= potential->midx()) {
-    if (expansion->yidx() == 0 && potential->midx() == 0) {
-      // Point, area
-      return -(1.0-1.0/a)*Gamma*exp(-x);
-    } else if (expansion->yidx() == 0 && potential->midx() == 1) {
-      // Isothermal, area
-      return -(1.0-1.0/a)*Gamma*exp(-x);
-    } else {
-      // Isothermal, intermediate
-      return -Gamma*exp(-x)*log(a);
-    }
-  }
-
   // Here we compute the derivative numerically by computing the
   // interpolated values at x values displaced by a fraction of a cell
-  // spacing
-  double x1 = log(pow(10., -(loggex + 0.01*full_tab->dlg)) * Gamma);
-  double x2 = log(pow(10., -(loggex - 0.01*full_tab->dlg)) * Gamma);
+  // spacing. Be careful to handle special case where we need to use
+  // the gexlo table.
+  double x1, x2;
+  double loggex = log10(Gamma * exp(-x));
+  if (loggex > full_tab->dlg || expansion->yidx() > potential->midx()) {
+    x1 = log(pow(10., -(loggex + 0.01*full_tab->dlg)) * Gamma);
+    x2 = log(pow(10., -(loggex - 0.01*full_tab->dlg)) * Gamma);
+  } else {
+    x1 = log((pow(10., -loggex) + 0.01*full_tab->dgex_lo) * Gamma);
+    x2 = log((pow(10., -loggex) - 0.01*full_tab->dgex_lo) * Gamma);
+  }
   double u1 = U(x1, a);
   double u2 = U(x2, a);
   

@@ -19,12 +19,13 @@
 ////////////////////////////////////////////////////////////////////////
 typedef struct {
   std::vector<double> umax, q_umax, q_stop, q;
+  std::vector<double> umax_lo, q_umax_lo, q_stop_lo, q_lo;
   std::vector<double> umin, loggex;
 } hot_wind_table_entry;
 
 typedef struct {
-  int nu, nq, ngex;
-  double qmin, qmax, loggex_max, dq, du, dlg;
+  int nu, nq, ngex, ngex_lo;
+  double qmin, qmax, loggex_max, dq, du, dlg, dgex_lo;
   std::vector<double> uh;
   std::vector<hot_wind_table_entry> uh_data;
 } hot_wind_table;
