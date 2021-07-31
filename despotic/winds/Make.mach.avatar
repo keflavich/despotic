@@ -1,0 +1,27 @@
+# Machine-specific settings for avatar
+
+# Use intel compilers
+MACH_CXX          = icpc
+MACH_CC		  = icc
+
+# Flag needed to specify c++11 standard
+MACH_C11FLAG      = -std=c++11
+
+# Optimization flags for clang; note that we omit -Wall because
+# g++ issues a ton of warnings about boost when -Wall is enabled
+MACH_CXXOPTFLAGS  = -Ofast
+MACH_COPTFLAGS	  = $(MACH_CXXOPTFLAGS)
+MACH_LDOPTFLAGS   = -Ofast
+
+# Debug flags for clang
+MACH_CXXDEBFLAGS  = -Og
+MACH_CDEBFLAGS	  = $(MACH_CXXDEBFLAGS)
+MACH_LDDEBFLAGS   = -Og
+
+# Flags to compile shared libaries
+LIB_EXTENSION	   = .so
+CLIBFLAGS	   = -fPIC
+DYNLIBFLAG	   = -shared
+
+# OpenMP flag
+MACH_OMPFLAGS	   = -qopenmp
