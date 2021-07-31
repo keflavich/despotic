@@ -35,74 +35,74 @@ libpwind.pwind_geom_cone_sheath_new.argtypes \
 # Ideal winds
 libpwind.pwind_ideal_pa_new.restype = c_void_p
 libpwind.pwind_ideal_pa_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double ]
 libpwind.pwind_ideal_pi_new.restype = c_void_p
 libpwind.pwind_ideal_pi_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double ]
 libpwind.pwind_ideal_ps_new.restype = c_void_p
 libpwind.pwind_ideal_ps_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double ]
 libpwind.pwind_ideal_ia_new.restype = c_void_p
 libpwind.pwind_ideal_ia_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double ]
 libpwind.pwind_ideal_ii_new.restype = c_void_p
 libpwind.pwind_ideal_ii_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double ]
 libpwind.pwind_ideal_is_new.restype = c_void_p
 libpwind.pwind_ideal_is_new.argtypes \
-    = [ c_double, c_double, c_void_p, c_double, c_double, c_double, c_double ]
+    = [ c_double, c_double, c_void_p, c_double, c_double ]
 
 # Radiation-driven winds
 libpwind.pwind_rad_pa_new.restype = c_void_p
 libpwind.pwind_rad_pa_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double ]
+        c_double, c_double ]
 libpwind.pwind_rad_pi_new.restype = c_void_p
 libpwind.pwind_rad_pi_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double ]
+        c_double, c_double ]
 libpwind.pwind_rad_ps_new.restype = c_void_p
 libpwind.pwind_rad_ps_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double ]
+        c_double, c_double ]
 libpwind.pwind_rad_ia_new.restype = c_void_p
 libpwind.pwind_rad_ia_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double ]
+        c_double, c_double ]
 libpwind.pwind_rad_ii_new.restype = c_void_p
 libpwind.pwind_rad_ii_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double ]
+        c_double, c_double ]
 libpwind.pwind_rad_is_new.restype = c_void_p
 libpwind.pwind_rad_is_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double ]
+        c_double, c_double ]
 
 # Hot gas-driven winds
 libpwind.pwind_hot_pa_new.restype = c_void_p
 libpwind.pwind_hot_pa_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_void_p ]
+        c_double, c_double, c_void_p ]
 libpwind.pwind_hot_pi_new.restype = c_void_p
 libpwind.pwind_hot_pi_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_void_p ]
+        c_double, c_double, c_void_p ]
 libpwind.pwind_hot_ps_new.restype = c_void_p
 libpwind.pwind_hot_ps_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_void_p ]
+        c_double, c_double, c_void_p ]
 libpwind.pwind_hot_ia_new.restype = c_void_p
 libpwind.pwind_hot_ia_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_void_p ]
+        c_double, c_double, c_void_p ]
 libpwind.pwind_hot_ii_new.restype = c_void_p
 libpwind.pwind_hot_ii_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_void_p ]
+        c_double, c_double, c_void_p ]
 libpwind.pwind_hot_is_new.restype = c_void_p
 libpwind.pwind_hot_is_new.argtypes \
     = [ c_double, c_double, c_double, c_void_p,
-        c_double, c_double, c_double, c_double, c_void_p ]
+        c_double, c_double, c_void_p ]
 
 # Free
 libpwind.pwind_free.restype = None
@@ -115,10 +115,6 @@ libpwind.Gamma.restype = c_double
 libpwind.Gamma.argtypes = [ c_void_p ]
 libpwind.mach.restype = c_double
 libpwind.mach.argtypes = [ c_void_p ]
-libpwind.epsrel.restype = c_double
-libpwind.epsrel.argtypes = [ c_void_p ]
-libpwind.epsabs.restype = c_double
-libpwind.epsabs.argtypes = [ c_void_p ]
 libpwind.fcrit.restype = c_double
 libpwind.fcrit.argtypes = [ c_void_p ]
 libpwind.jsp.restype = c_double
@@ -137,10 +133,6 @@ libpwind.umax.argtypes = [ c_void_p ]
 # Simple setting methods
 libpwind.set_mach.restype = None
 libpwind.set_mach.argtypes = [ c_double, c_void_p ]
-libpwind.set_epsrel.restype = None
-libpwind.set_epsrel.argtypes = [ c_double, c_void_p ]
-libpwind.set_epsabs.restype = None
-libpwind.set_epsabs.argtypes = [ c_double, c_void_p ]
 libpwind.set_fcrit.restype = None
 libpwind.set_fcrit.argtypes = [ c_double, c_void_p ]
 libpwind.set_jsp.restype = None
@@ -166,13 +158,14 @@ libpwind.dU2da.argtypes = [ c_double, c_double, c_void_p ]
 
 # Limit methods
 libpwind.alimits.restype = c_ulong
-libpwind.alimits.argtypes = [ c_double, c_double, c_double, c_void_p,
+libpwind.alimits.argtypes = [ c_double, c_double, c_double,
+                              c_double, c_double, c_void_p,
                               array_1d_double ]
 libpwind.xlimits.restype = c_ulong
 libpwind.xlimits.argtypes = [ c_double, c_void_p,
                               array_1d_double ]
 libpwind.amax.restype = c_double
-libpwind.amax.argtypes = [ c_double, c_void_p ]
+libpwind.amax.argtypes = [ c_double, c_double, c_double, c_void_p ]
 libpwind.amax_abs.restype = c_double
 libpwind.amax_abs.argtypes = [ c_void_p ]
 libpwind.s_crit.restype = c_ulong
@@ -184,41 +177,98 @@ libpwind.a_crit.argtypes = [ c_double, c_double, c_double, c_void_p,
 
 # Computation methods
 libpwind.pdot_approx.restype = c_double
-libpwind.pdot_approx.argtypes = [ c_double, c_void_p ]
+libpwind.pdot_approx.argtypes = [ c_double, c_double, c_double, c_void_p ]
 libpwind.pdot_exact.restype = c_double
-libpwind.pdot_exact.argtypes = [ c_double, c_double, c_double, c_void_p ]
+libpwind.pdot_exact.argtypes = [ c_double, c_double, c_double,
+                                 c_double, c_double, c_void_p ]
 libpwind.Phi_uc.restype = c_double
 libpwind.Phi_uc.argtypes = [ c_double, c_double, c_double, c_double,
-                             c_double, c_void_p ]
+                             c_double, c_double, c_void_p ]
+libpwind.Phi_uc_vec.restype = None
+libpwind.Phi_uc_vec.argtypes = [ c_ulong, array_1d_double,
+                                 c_double, c_double, c_double, c_double,
+                                 c_double, c_double, c_void_p,
+                                 array_1d_double]
 libpwind.Phi_c.restype = c_double
 libpwind.Phi_c.argtypes = [ c_double, c_double, c_double, c_double,
-                            c_double, c_double, c_void_p ]
+                            c_double, c_double, c_double, c_double, c_void_p ]
+libpwind.Phi_c_vec.restype = None
+libpwind.Phi_c_vec.argtypes = [ c_ulong, array_1d_double, c_double,
+                                c_double, c_double, c_double, c_double,
+                                c_double, c_double, c_void_p,
+                                array_1d_double]
 libpwind.tau_uc.restype = c_double
 libpwind.tau_uc.argtypes = [ c_double, c_double, c_double, c_double,
-                             c_double, c_double, c_double, c_double, c_void_p ]
-libpwind.tau_uc_vec.restype = c_double
-libpwind.tau_uc_vec.argtypes = [ c_double, array_1d_double, array_1d_double,
-                                 c_double, c_double,
-                                 c_ulong, c_double, c_double, c_double,
-                                 c_double, c_void_p ]
+                             c_double, c_double, c_double, c_double,
+                             c_double, c_double, c_void_p ]
+libpwind.tau_uc_vec.restype = None
+libpwind.tau_uc_vec.argtypes = [ c_ulong, array_1d_double,
+                                 c_double, c_double, c_double,
+                                 c_double, c_double, c_double, c_double,
+                                 c_double, c_double, c_void_p,
+                                 array_1d_double ]
+libpwind.tau_uc_multiple.restype = c_double
+libpwind.tau_uc_multiple.argtypes = [ c_double, array_1d_double,
+                                      array_1d_double,
+                                      c_double, c_double,
+                                      c_ulong, c_double, c_double, c_double,
+                                      c_double, c_double, c_double, c_void_p ]
+libpwind.tau_uc_multiple_vec.restype = None
+libpwind.tau_uc_multiple_vec.argtypes = [ c_ulong, array_1d_double,
+                                          array_1d_double,
+                                          array_1d_double,
+                                          c_double, c_double,
+                                          c_ulong, c_double, c_double,
+                                          c_double, c_double, c_double,
+                                          c_double, c_void_p,
+                                          array_1d_double ]
 libpwind.tau_c.restype = c_double
 libpwind.tau_c.argtypes = [ c_double, c_double, c_double, c_double, c_double,
-                            c_double, c_double, c_double, c_double, c_void_p ]
-libpwind.tau_c_vec.restype = c_double
-libpwind.tau_c_vec.argtypes = [ c_double, array_1d_double, array_1d_double,
-                                c_double, c_double,
-                                c_ulong, c_double, c_double, c_double,
-                                c_double, c_double, c_void_p ]
+                            c_double, c_double, c_double, c_double, c_double,
+                            c_double, c_void_p ]
+libpwind.tau_c_vec.restype = None
+libpwind.tau_c_vec.argtypes = [ c_ulong, array_1d_double,
+                                c_double, c_double, c_double, c_double,
+                                c_double, c_double, c_double, c_double,
+                                c_double, c_double, c_void_p,
+                                array_1d_double ]
+libpwind.tau_c_multiple.restype = c_double
+libpwind.tau_c_multiple.argtypes = [ c_double, array_1d_double,
+                                     array_1d_double,
+                                     c_double, c_double,
+                                     c_ulong, c_double, c_double, c_double,
+                                     c_double, c_double,
+                                     c_double, c_double, c_void_p ]
+libpwind.tau_c_multiple_vec.restype = None
+libpwind.tau_c_multiple_vec.argtypes = [ c_ulong, array_1d_double,
+                                         array_1d_double,
+                                         array_1d_double,
+                                         c_double, c_double,
+                                         c_ulong, c_double, c_double, c_double,
+                                         c_double, c_double,
+                                         c_double, c_double, c_void_p,
+                                         array_1d_double ]
 libpwind.Xi.restype = c_double
-libpwind.Xi.argtypes = [ c_double, c_double, c_double, c_void_p ]
+libpwind.Xi.argtypes = [ c_double, c_double, c_double,
+                         c_double, c_double, c_void_p ]
+libpwind.Xi_vec.restype = None
+libpwind.Xi_vec.argtypes = [ c_ulong, array_1d_double, c_double, c_double,
+                             c_double, c_double, c_void_p, array_1d_double ]
 libpwind.xi.restype = c_double
 libpwind.xi.argtypes = [ c_double, c_double, c_void_p ]
 libpwind.eta.restype = c_double
 libpwind.eta.argtypes = [ c_double, c_double, c_double, c_double, c_bool,
-                          c_double, c_double, c_double, c_bool, c_void_p ]
+                          c_double, c_double, c_double, c_bool,
+                          c_double, c_double, c_void_p ]
+libpwind.eta_vec.restype = None
+libpwind.eta_vec.argtypes = [ c_ulong, array_1d_double, c_double, c_double,
+                              c_double, c_bool, c_double, c_double, c_double,
+                              c_bool, c_double, c_double, c_void_p,
+                              array_1d_double ]
 libpwind.Psi.restype = c_double
 libpwind.Psi.argtypes = [ c_double, c_double, c_double, c_bool,
-                          c_double, c_double, c_double, c_bool, c_void_p ]
+                          c_double, c_double, c_double, c_bool,
+                          c_double, c_double, c_void_p ]
 
 # Error management methods
 libpwind.get_err.restype = c_int

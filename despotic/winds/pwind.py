@@ -210,8 +210,8 @@ class pwind(object):
         self.phi_ = phi
         self.theta_in_ = theta_in
         self.driver_ = driver
-        self.epsabs_ = epsabs
-        self.epsrel_ = epsrel
+        self.epsabs = epsabs
+        self.epsrel = epsrel
         self.tau0_ = tau0
         self.uh_ = uh
 
@@ -297,15 +297,15 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_ideal_pa_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
+                        self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_ideal_pi_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
+                        self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_ideal_ps_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
+                        self.fcrit_, self.jsp_)
                 else:
                     raise(ValueError("pwind: unknown expansion "
                                      "value "+str(self.expansion_)))
@@ -316,15 +316,15 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_ideal_ia_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
+                        self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_ideal_ii_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
+                        self.fcrit_, self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_ideal_is_new(
                         self.Gamma, self.mach, self.__geom,
-                        self.epsabs_, self.epsrel_, self.fcrit_, self.jsp_)
+                        self.fcrit_, self.jsp_)
                 else:
                     raise(ValueError("pwind: unknown expansion "
                                      "value "+str(self.expansion_)))
@@ -350,17 +350,17 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_rad_pa_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.__geom, self.fcrit_,
                         self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_rad_pi_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.__geom, self.fcrit_,
                         self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_rad_ps_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.__geom, self.fcrit_,
                         self.jsp_)
                 else:
                     raise(ValueError("pwind: unknown expansion "
@@ -372,17 +372,17 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_rad_ia_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.__geom, self.fcrit_,
                         self.jsp_)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_rad_ii_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.__geom, self.fcrit_,
                         self.jsp_)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_rad_is_new(
                         self.Gamma, self.mach, self.tau0,
-                        self.__geom, self.epsabs_, self.epsrel_, self.fcrit_,
+                        self.__geom, self.fcrit_,
                         self.jsp_)
                 else:
                     raise(ValueError("pwind: unknown expansion "
@@ -452,19 +452,19 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_hot_pa_new(
                         self.Gamma, self.mach, self.uh,
-                        self.__geom, self.epsabs_, self.epsrel_,
+                        self.__geom,
                         self.fcrit_, self.jsp_,
                         dat)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_pi_new(
                         self.Gamma, self.mach, self.uh,
-                        self.__geom, self.epsabs_, self.epsrel_,
+                        self.__geom,
                         self.fcrit_, self.jsp_,
                         dat)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_ps_new(
                         self.Gamma, self.mach, self.uh,
-                        self.__geom, self.epsabs_, self.epsrel_,
+                        self.__geom,
                         self.fcrit_, self.jsp_,
                         dat)
                 else:
@@ -477,19 +477,19 @@ class pwind(object):
                 if self.expansion_ == 'area':
                     self.__pw = libpwind.pwind_hot_ia_new(
                         self.Gamma, self.mach, self.uh,
-                        self.__geom, self.epsabs_, self.epsrel_,
+                        self.__geom,
                         self.fcrit_, self.jsp_,
                         dat)
                 elif self.expansion_ == 'intermediate':
                     self.__pw = libpwind.pwind_hot_ii_new(
                         self.Gamma, self.mach, self.uh,
-                        self.__geom, self.epsabs_, self.epsrel_,
+                        self.__geom,
                         self.fcrit_, self.jsp_,
                         dat)
                 elif self.expansion_ == 'solid angle':
                     self.__pw = libpwind.pwind_hot_is_new(
                         self.Gamma, self.mach, self.uh,
-                        self.__geom, self.epsabs_, self.epsrel_,
+                        self.__geom,
                         self.fcrit_, self.jsp_,
                         dat)
                 else:
@@ -580,20 +580,6 @@ class pwind(object):
             self.__init_geom()
             libpwind.set_geometry(self.__pw, self.__geom)
     @property
-    def epsabs(self):
-        return self.epsabs_
-    @epsabs.setter
-    def epsabs(self, val):
-        self.epsabs_ = val
-        libpwind.set_epsabs(val, self.__pw)
-    @property
-    def epsrel(self):
-        return self.epsrel_
-    @epsrel.setter
-    def epsrel(self, val):
-        self.epsrel_ = val
-        libpwind.set_epsrel(val, self.__pw)
-    @property
     def fcrit(self):
         return self.fcrit_
     @fcrit.setter
@@ -621,22 +607,6 @@ class pwind(object):
     @uh.setter
     def uh(self, val):
         self.uh_ = val
-        if self.driver == 'hot':
-            self.__init_lib()
-    @property
-    def interpabs(self):
-        return self.interpabs_
-    @interpabs.setter
-    def interpabs(self, val):
-        self.interpabs_ = val
-        if self.driver == 'hot':
-            self.__init_lib()
-    @property
-    def interprel(self):
-        return self.interprel_
-    @interprel.setter
-    def interprel(self, val):
-        self.interprel_ = val
         if self.driver == 'hot':
             self.__init_lib()
     @property
@@ -1075,6 +1045,29 @@ class pwind(object):
         a_crit.resize(na)
         return a_crit
 
+    def alimits(self, u, varpi=0.0, varpi_t=0.0):
+        """
+        Return the range of radii within which material can be found
+        at a given velocity u
+
+        Parameters:
+           u: float
+              velocity of interest
+           varpi: float
+              dimensionless impact parameter along the wind axis
+           varpi_t: float
+              dimensionless impact parameter transverse to the wind axis
+
+        Returns:
+           a_crit: array
+              dimensionless radii
+        """
+        a_lim = np.zeros(8)
+        na = libpwind.alimits(u, varpi, varpi_t, self.epsabs,
+                              self.epsrel, self.__pw, a_lim)
+        a_lim.resize(na)
+        return a_lim
+    
     def pdot(self, a, fg=None, tctw=None):
         """
         This returns the total momentum flux through the shell at
@@ -1108,9 +1101,12 @@ class pwind(object):
         i = 0
         for (a_, fg_, tctw_) in bcast:
             if fg_ is None and tctw_ is None:
-                pdot.flat[i] = libpwind.pdot_approx(a_, self.__pw)
+                pdot.flat[i] = libpwind.pdot_approx(a_, self.epsabs,
+                                                    self.epsrel, self.__pw)
             elif fg_ is not None and tctw_ is not None:
                 pdot.flat[i] = libpwind.pdot_exact(a, fg, tctw,
+                                                   self.epsabs,
+                                                   self.epsrel,
                                                    self.__pw)
             else:
                 raise ValueError(
@@ -1241,10 +1237,10 @@ class pwind(object):
               gas mass per H nucleus, in units of H masses
            tw: float or arraylike
               mass removal timescale, in sec
-           fj: float or array
+           fj: float or arraylike
               fraction of the emitters in the lower state of the
               transition
-           boltzfac: float or array
+           boltzfac: float or arraylike
               Boltzmann factor exp(-E_ij/kB T_ex) for the two states of
               the transition, where T_ex = excitation temperature
            u_trans: arraylike
@@ -1291,10 +1287,11 @@ class pwind(object):
                       np.asarray(tw)
         # Call c++ code to compute result; note the different
         # broadcasting depending on whether the trailing dimension of
-        # tXtw is to be summed over transitions or not
+        # tXtw is to be summed over transitions or not; also note that
+        # u is not included in the broadcast, since looping over u is
+        # handled internally by openmp parallelization in the c++ code
         if u_trans is None:
-            bcast = np.broadcast(np.asarray(u),
-                                 np.asarray(tXtw),
+            bcast = np.broadcast(np.asarray(tXtw),
                                  np.asarray(fj),
                                  np.asarray(boltzfac),
                                  np.asarray(varpi),
@@ -1314,34 +1311,71 @@ class pwind(object):
                 for i in range(tXtw_tmp.size):
                     idx = np.unravel_index(i, tXtw_tmp.shape)
                     tXtw_tmp[idx] = np.asarray(tXtw)[idx]
-            bcast = np.broadcast(np.asarray(u),
-                                 tXtw_tmp,
+            bcast = np.broadcast(tXtw_tmp,
                                  np.asarray(fj),
                                  np.asarray(boltzfac),
                                  np.asarray(varpi),
                                  np.asarray(varpi_t),
                                  np.asarray(a0),
                                  np.asarray(a1))
-        tau_uc = np.zeros(bcast.shape)
+        # Get the shaep of the result; this is the shape produced by
+        # broadcasting tXtw, fj, boltzfac, varpi, varpi_t, a0, and a1
+        # together, plus then adding the shape of u if u is a vector
+        if not hasattr(u, '__iter__'):
+            tau_uc = np.zeros(bcast.shape)
+            lenu = 1
+        else:
+            u_ = np.array(u)
+            tau_uc = np.zeros(bcast.shape + u_.shape)
+            lenu = u_.size
         i = 0
-        for (u_, tXtw_, fj_, boltzfac_, varpi_, varpi_t_,
+        for (tXtw_, fj_, boltzfac_, varpi_, varpi_t_,
              a0_, a1_) in bcast:
             if u_trans is None:
-                tau_uc.flat[i] \
-                    = libpwind.tau_uc(u_, tXtw_, fj_, boltzfac_,
-                                      varpi_, varpi_t_, a0_, a1_,
-                                      self.__pw)
-            else:
-                tau_uc.flat[i] \
-                    = libpwind.tau_uc_vec(u_,
-                                          np.array(u_trans,
-                                                   dtype=c_double),
-                                          np.array(tXtw_,
-                                                   dtype=c_double),
-                                          fj_, boltzfac_, len(u_trans),
+                # Use vectorized or non-vectorized version depending
+                # on whether u is a scalar or not
+                if not hasattr(u, '__iter__'):
+                    tau_uc.flat[i] \
+                        = libpwind.tau_uc(u, tXtw_, fj_, boltzfac_,
                                           varpi_, varpi_t_, a0_, a1_,
+                                          self.epsabs, self.epsrel,
                                           self.__pw)
-            i = i+1
+                else:
+                    res = np.zeros(lenu)
+                    libpwind.tau_uc(lenu, u_, tXtw_, fj_, boltzfac_,
+                                    varpi_, varpi_t_, a0_, a1_,
+                                    self.epsabs, self.epsrel,
+                                    self.__pw, res)
+                    tau_uc.flat[i:i+lenu] = res
+            else:
+                if not hasattr(u, '__iter__'):
+                    tau_uc.flat[i] \
+                        = libpwind.tau_uc_multiple(u,
+                                                   np.array(u_trans,
+                                                            dtype=c_double),
+                                                   np.array(tXtw_,
+                                                            dtype=c_double),
+                                                   fj_, boltzfac_,
+                                                   len(u_trans),
+                                                   varpi_, varpi_t_,
+                                                   a0_, a1_,
+                                                   self.epsabs, self.epsrel,
+                                                   self.__pw)
+                else:
+                    res = np.zeros(lenu)
+                    libpwind.tau_uc_multiple_vec(lenu, u_,
+                                                 np.array(u_trans,
+                                                          dtype=c_double),
+                                                 np.array(tXtw_,
+                                                          dtype=c_double),
+                                                 fj_, boltzfac_,
+                                                 len(u_trans),
+                                                 varpi_, varpi_t_,
+                                                 a0_, a1_,
+                                                 self.epsabs, self.epsrel,
+                                                 self.__pw, res)
+                    tau_uc.flat[i:i+lenu] = res
+            i = i+lenu
 
         # Manage return type
         if u_trans is None:
@@ -1403,10 +1437,10 @@ class pwind(object):
            fw: float or arraylike
               covering factor of wind at launch point; if left as
               None, defaults to zeta_A
-           fj: float or array
+           fj: float or arraylike
               fraction of the emitters in the lower state of the
               transition
-           boltzfac: float or array
+           boltzfac: float or arraylike
               Boltzmann factor exp(-E_ij/kB T_ex) for the two states of
               the transition, where T_ex = excitation temperature
            u_trans: arraylike
@@ -1455,7 +1489,7 @@ class pwind(object):
         # broadcasting depending on whether the trailing dimension of
         # tXtw is to be summed over transitions or not
         if u_trans is None:
-            bcast = np.broadcast(np.asarray(u), np.asarray(tXtw),
+            bcast = np.broadcast(np.asarray(tXtw),
                                  np.asarray(fj), np.asarray(boltzfac),
                                  np.asarray(fw), np.asarray(varpi),
                                  np.asarray(varpi_t), np.asarray(a0),
@@ -1473,33 +1507,71 @@ class pwind(object):
                 for i in range(tXtw_tmp.size):
                     idx = np.unravel_index(i, tXtw_tmp.shape)
                     tXtw_tmp[idx] = np.asarray(tXtw)[idx]
-            bcast = np.broadcast(np.asarray(u), tXtw_tmp,
+            bcast = np.broadcast(tXtw_tmp,
                                  np.asarray(fj), np.asarray(boltzfac),
                                  np.asarray(fw), np.asarray(varpi),
                                  np.asarray(varpi_t), np.asarray(a0),
                                  np.asarray(a1))
-        tau_c = np.zeros(bcast.shape)
+        # Get the shaep of the result; this is the shape produced by
+        # broadcasting tXtw, fj, boltzfac, varpi, varpi_t, a0, and a1
+        # together, plus then adding the shape of u if u is a vector
+        if not hasattr(u, '__iter__'):
+            tau_c = np.zeros(bcast.shape)
+            lenu = 1
+        else:
+            u_ = np.array(u)
+            tau_c = np.zeros(bcast.shape + u_.shape)
+            lenu = u_.size
         i = 0
-        for (u_, tXtw_, fj_, boltzfac_, fw_, varpi_, varpi_t_,
+        for (tXtw_, fj_, boltzfac_, fw_, varpi_, varpi_t_,
              a0_, a1_) in bcast:
             if fw_ is None:
                 fw_ = self.zetaA
             if u_trans is None:
-                tau_c.flat[i] \
-                    = libpwind.tau_c(u_, tXtw_, fj_, boltzfac_,
-                                     fw_, varpi_, varpi_t_, a0_, a1_,
-                                     self.__pw)
-            else:
-                tau_c.flat[i] \
-                    = libpwind.tau_c_vec(u_,
-                                         np.array(u_trans,
-                                                  dtype=c_double),
-                                         np.array(tXtw_,
-                                                  dtype=c_double),
-                                         fj_, boltzfac_, len(u_trans),
+                if not hasattr(u, '__iter__'):
+                    tau_c.flat[i] \
+                        = libpwind.tau_c(u, tXtw_, fj_, boltzfac_,
                                          fw_, varpi_, varpi_t_, a0_, a1_,
+                                         self.epsabs, self.epsrel,
                                          self.__pw)
-            i = i+1
+                else:
+                    res = np.zeros(lenu)
+                    libpwind.tau_c(lenu, u_, tXtw_, fj_, boltzfac_,
+                                   fw_, varpi_, varpi_t_, a0_, a1_,
+                                   self.epsabs, self.epsrel,
+                                   self.__pw, res)
+                    tau_c.flat[i:i+lenu] = res
+            else:
+                if not hasattr(u, '__iter__'):
+                    tau_c.flat[i] \
+                        = libpwind.tau_c_multiple(u,
+                                                  np.array(u_trans,
+                                                           dtype=c_double),
+                                                  np.array(tXtw_,
+                                                           dtype=c_double),
+                                                  fj_, boltzfac_,
+                                                  len(u_trans),
+                                                  fw_, varpi_, varpi_t_,
+                                                  a0_, a1_,
+                                                  self.epsabs,
+                                                  self.epsrel,
+                                                  self.__pw)
+                else:
+                    res = np.zeros(lenu)
+                    libpwind.tau_c_multiple_vec(lenu, u_,
+                                                np.array(u_trans,
+                                                         dtype=c_double),
+                                                np.array(tXtw_,
+                                                         dtype=c_double),
+                                                fj_, boltzfac_,
+                                                len(u_trans),
+                                                fw_, varpi_, varpi_t_,
+                                                a0_, a1_,
+                                                self.epsabs,
+                                                self.epsrel,
+                                                self.__pw, res)
+                    tau_c.flat[i:i+lenu] = res
+            i = i+lenu
 
         # Manage return type
         if u_trans is None:
@@ -1562,19 +1634,36 @@ class pwind(object):
            Phi_c: float or array
               correlated absorption function
         """
-        bcast = np.broadcast(np.asarray(u), np.asarray(fw),
+        bcast = np.broadcast(np.asarray(fw),
                              np.asarray(varpi),
                              np.asarray(varpi_t),
                              np.asarray(a0),
                              np.asarray(a1))
-        Phi_c = np.zeros(bcast.shape)
+        # Set shape of result
+        if not hasattr(u, '__iter__'):
+            Phi_c = np.zeros(bcast.shape)
+            lenu = 1
+        else:
+            u_ = np.array(u)
+            Phi_c = np.zeros(bcast.shape + u_.shape)
+            lenu = u_.size
         i = 0
-        for (u_, fw_, varpi_, varpi_t_, a0_, a1_) in bcast:
+        for (fw_, varpi_, varpi_t_, a0_, a1_) in bcast:
             if fw_ is None:
                 fw_ = self.zetaA
-            Phi_c.flat[i] = libpwind.Phi_c(u_, fw_, varpi_, varpi_t_,
-                                           a0_, a1_, self.__pw)
-            i = i+1
+            if not hasattr(u, '__iter__'):
+                Phi_c.flat[i] = libpwind.Phi_c(u, fw_, varpi_, varpi_t_,
+                                               a0_, a1_,
+                                               self.epsabs,
+                                               self.epsrel,
+                                               self.__pw)
+            else:
+                res = np.zeros(lenu)
+                libpwind.Phi_c_vec(lenu, u_, fw_, varpi_, varpi_t_,
+                                   a0_, a1_, self.epsabs,
+                                   self.epsrel, self.__pw, res)
+                Phi_c.flat[i:i+lenu] = res
+            i = i+lenu
 
         # Manage return type
         if (not hasattr(u, '__iter__')) and \
@@ -1619,17 +1708,33 @@ class pwind(object):
            Phi_uc: float or array
               correlated absorption function
         """
-        bcast = np.broadcast(np.asarray(u),
-                             np.asarray(varpi),
+        bcast = np.broadcast(np.asarray(varpi),
                              np.asarray(varpi_t),
                              np.asarray(a0),
                              np.asarray(a1))
-        Phi_uc = np.zeros(bcast.shape)
+        # Set shape of result
+        if not hasattr(u, '__iter__'):
+            Phi_uc = np.zeros(bcast.shape)
+            lenu = 1
+        else:
+            u_ = np.array(u)
+            Phi_uc = np.zeros(bcast.shape + u_.shape)
+            lenu = u_.size
         i = 0
-        for (u_, varpi_, varpi_t_, a0_, a1_) in bcast:
-            Phi_uc.flat[i] = libpwind.Phi_uc(u_, varpi_, varpi_t_,
-                                             a0_, a1_, self.__pw)
-            i = i+1
+        for (varpi_, varpi_t_, a0_, a1_) in bcast:
+            if not hasattr(u, '__iter__'):
+                Phi_uc.flat[i] = libpwind.Phi_uc(u, varpi_, varpi_t_,
+                                                 a0_, a1_,
+                                                 self.epsabs,
+                                                 self.epsrel,
+                                                 self.__pw)
+            else:
+                res = np.zeros(lenu)
+                libwind.Phi_uc_vec(lenu, u_, varpi_, varpi_t_,
+                                   a0_, a1_, self.epsabs,
+                                   self.epsrel, self.__pw, res)
+                Phi_uc.flat[i:i+lenu] = res
+            i = i+lenu
 
         # Manage return type
         if (not hasattr(u, '__iter__')) and \
@@ -1668,13 +1773,28 @@ class pwind(object):
            Xi: float or array
               subcritical line emission shape function
         """
-        bcast = np.broadcast(np.asarray(u), np.asarray(varpi),
+        bcast = np.broadcast(np.asarray(varpi),
                              np.asarray(varpi_t))
-        Xi = np.zeros(bcast.shape)
+        if not hasattr(u, '__iter__'):
+            Xi = np.zeros(bcast.shape)
+            lenu = 1
+        else:
+            u_ = np.array(u)
+            Xi = np.zeros(bcast.shape + u_.shape)
+            lenu = u_.size
         i = 0
-        for (u_, varpi_, varpi_t_) in bcast:
-            Xi.flat[i] = libpwind.Xi(u_, varpi_, varpi_t_, self.__pw)
-            i = i+1
+        for (varpi_, varpi_t_) in bcast:
+            if not hasattr(u, '__iter__'):
+                Xi.flat[i] = libpwind.Xi(u, varpi_, varpi_t_,
+                                         self.epsabs, self.epsrel,
+                                         self.__pw)
+            else:
+                res = np.zeros(lenu)
+                libpwind.Xi_vec(lenu, u_, varpi_, varpi_t_,
+                                self.epsabs, self.epsrel,
+                                self.__pw)
+                Xi.flat[i:i+lenu] = res
+            i = i+lenu
 
         # Manage return type
         if (not hasattr(u, '__iter__')) and \
@@ -1741,9 +1861,9 @@ class pwind(object):
         Return the LTE emission profile function eta
 
         Parameters:
-           u: float or array
+           u: float or arraylike
               dimensionless line of sight velocity
-           tXtw: float or array
+           tXtw: float or arraylike
               ratio of timescales tX and tw
            abd: float or arraylike
               abundance of absorbers relative to H
@@ -1755,10 +1875,10 @@ class pwind(object):
               gas mass per H nucleus, in units of H masses
            tw: float or arraylike
               mass removal timescale, in sec
-           fj: float or array
+           fj: float or arraylike
               fraction of the emitters in the lower state of the
               transition
-           boltzfac: float or array
+           boltzfac: float or arraylike
               Boltzmann factor exp(-E_ij/kB T) for the two states of
               the transition
            correlated: bool
@@ -1797,21 +1917,38 @@ class pwind(object):
             tXtw = tX(np.asarray(abd), np.asarray(Omega),
                       np.asarray(wl), np.asarray(muH)) / np.asarray(tw)
         # Call c++ code to compute result
-        bcast = np.broadcast(np.asarray(u), np.asarray(tXtw),
+        bcast = np.broadcast(np.asarray(tXtw),
                              np.asarray(fj), np.asarray(boltzfac),
                              np.asarray(correlated), np.asarray(fw),
                              np.asarray(varpi), np.asarray(varpi_t),
                              np.asarray(thin))
-        eta = np.zeros(bcast.shape)
+        if not hasattr(u, '__iter__'):
+            eta = np.zeros(bcast.shape)
+            lenu = 1
+        else:
+            u_ = np.array(u)
+            eta = np.zeros(bcast.shape + u_.shape)
+            lenu = u_.size
         i = 0
-        for (u_, tXtw_, fj_, boltzfac_, correlated_, fw_, varpi_,
+        for (tXtw_, fj_, boltzfac_, correlated_, fw_, varpi_,
              varpi_t_, thin_) in bcast:
             if fw_ is None:
                 fw_ = self.zetaA
-            eta.flat[i] = libpwind.eta(u_, tXtw_, fj_, boltzfac_,
-                                       correlated_, fw_, varpi_,
-                                       varpi_t_, thin_, self.__pw)
-            i = i+1
+            if not hasattr(u, '__iter__'):
+                eta.flat[i] = libpwind.eta(u, tXtw_, fj_, boltzfac_,
+                                           correlated_, fw_, varpi_,
+                                           varpi_t_, thin_,
+                                           self.epsabs, self.epsrel,
+                                           self.__pw)
+            else:
+                res = np.zeros(lenu)
+                libpwind.eta_vec(lenu, u_, tXtw_, fj_, boltzfac_,
+                                 correlated_, fw_, varpi_,
+                                 varpi_t_, thin_,
+                                 self.epsabs, self.epsrel,
+                                 self.__pw, res)
+                eta.flat[i:i+lenu] = res
+            i = i+lenu
             
         # Manage return type
         if (not hasattr(u, '__iter__')) and \

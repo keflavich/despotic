@@ -46,8 +46,6 @@ public:
 	    const pwind_expansion *expansion_,
 	    const pwind_geom *geom_ =
 	    static_cast<const pwind_geom *>(&pw_geom_sphere),
-	    const double epsabs_ = 1.0e-6,
-	    const double epsrel_ = 1.0e-4,
 	    const double fcrit_ = 1.0,
 	    const double jsp_ = 0.0,
 	    hot_wind_table *full_tab_ = nullptr);
@@ -75,9 +73,13 @@ public:
   // Limits on the range of the wind
   virtual std::vector<double> alimits(const double u,
 				      const double varpi = 0.0,
-				      const double varpi_t = 0.0) const;
+				      const double varpi_t = 0.0,
+				      const double epsabs = 1.0e-6,
+				      const double epsrel = 1.0e-6) const;
   virtual std::vector<double> xlimits(const double a) const;
-  virtual double amax(const double x) const;
+  virtual double amax(const double x,
+		      const double epsabs = 1.0e-6,
+		      const double epsrel = 1.0e-6) const;
 
   // Utility functions
   bool hasUmin() const { return expansion->yidx() > potential->midx(); }
@@ -109,8 +111,6 @@ public:
 	       const double uh_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0,
 	       hot_wind_table *full_tab_ = nullptr) :
@@ -119,7 +119,7 @@ public:
 	      (&pwind_potential_point),
 	      static_cast<const pwind_expansion *>
 	      (&pwind_expansion_area),
-	      geom_, epsabs_, epsrel_, fcrit_, jsp_, full_tab_)
+	      geom_, fcrit_, jsp_, full_tab_)
   { }
   virtual ~pwind_hot_pa() { }
 };
@@ -133,8 +133,6 @@ public:
 	       const double uh_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0,
 	       hot_wind_table *full_tab_ = nullptr) :
@@ -143,7 +141,7 @@ public:
 	      (&pwind_potential_point),
 	      static_cast<const pwind_expansion *>
 	      (&pwind_expansion_intermediate),
-	      geom_, epsabs_, epsrel_, fcrit_, jsp_, full_tab_)
+	      geom_, fcrit_, jsp_, full_tab_)
   { }
   virtual ~pwind_hot_pi() { }
 };
@@ -158,8 +156,6 @@ public:
 	       const double uh_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0,
 	       hot_wind_table *full_tab_ = nullptr) :
@@ -168,7 +164,7 @@ public:
 	      (&pwind_potential_point),
 	      static_cast<const pwind_expansion *>
 	      (&pwind_expansion_solid_angle),
-	      geom_, epsabs_, epsrel_, fcrit_, jsp_, full_tab_)
+	      geom_, fcrit_, jsp_, full_tab_)
   { }
   virtual ~pwind_hot_ps() { }
 };
@@ -183,8 +179,6 @@ public:
 	       const double uh_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0,
 	       hot_wind_table *full_tab_ = nullptr) :
@@ -193,7 +187,7 @@ public:
 	      (&pwind_potential_isothermal),
 	      static_cast<const pwind_expansion *>
 	      (&pwind_expansion_area),
-	      geom_, epsabs_, epsrel_, fcrit_, jsp_, full_tab_)
+	      geom_, fcrit_, jsp_, full_tab_)
   { }
   virtual ~pwind_hot_ia() { }
 };
@@ -207,8 +201,6 @@ public:
 	       const double uh_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0,
 	       hot_wind_table *full_tab_ = nullptr) :
@@ -217,7 +209,7 @@ public:
 	      (&pwind_potential_isothermal),
 	      static_cast<const pwind_expansion *>
 	      (&pwind_expansion_intermediate),
-	      geom_, epsabs_, epsrel_, fcrit_, jsp_, full_tab_)
+	      geom_, fcrit_, jsp_, full_tab_)
   { }
   virtual ~pwind_hot_ii() { }
 };
@@ -232,8 +224,6 @@ public:
 	       const double uh_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0,
 	       hot_wind_table *full_tab_ = nullptr) :
@@ -242,7 +232,7 @@ public:
 	      (&pwind_potential_isothermal),
 	      static_cast<const pwind_expansion *>
 	      (&pwind_expansion_solid_angle),
-	      geom_, epsabs_, epsrel_, fcrit_, jsp_, full_tab_)
+	      geom_, fcrit_, jsp_, full_tab_)
   { }
   virtual ~pwind_hot_is() { }
 };

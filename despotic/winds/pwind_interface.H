@@ -5,6 +5,9 @@
 #include "pwind_rad.H"
 #include "pwind_hot.H"
 #include <iostream>
+#ifdef _OPENMP
+#include "omp.h"
+#endif
 
 extern "C" {
   ////////////////////////////////////////////////////////////////////////
@@ -30,37 +33,31 @@ extern "C" {
   pwind_ideal_pa *
   pwind_ideal_pa_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
-		     const double epsabs, const double epsrel,
 		     const double fcrit,
 		     const double jsp);
   pwind_ideal_pi *
   pwind_ideal_pi_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
-		     const double epsabs, const double epsrel,
 		     const double fcrit,
 		     const double jsp);
   pwind_ideal_ps *
   pwind_ideal_ps_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
-		     const double epsabs, const double epsrel,
 		     const double fcrit,
 		     const double jsp);
   pwind_ideal_ia *
   pwind_ideal_ia_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
-		     const double epsabs, const double epsrel,
 		     const double fcrit,
 		     const double jsp);
   pwind_ideal_ii *
   pwind_ideal_ii_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
-		     const double epsabs, const double epsrel,
 		     const double fcrit,
 		     const double jsp);
   pwind_ideal_is *
   pwind_ideal_is_new(const double Gamma, const double mach,
 		     const pwind_geom* geom,
-		     const double epsabs, const double epsrel,
 		     const double fcrit,
 		     const double jsp);
 
@@ -68,37 +65,31 @@ extern "C" {
   pwind_rad_pa *
   pwind_rad_pa_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp);
   pwind_rad_pi *
   pwind_rad_pi_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp);
   pwind_rad_ps *
   pwind_rad_ps_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp);
   pwind_rad_ia *
   pwind_rad_ia_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp);
   pwind_rad_ii *
   pwind_rad_ii_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp);
   pwind_rad_is *
   pwind_rad_is_new(const double Gamma, const double mach,
 		   const double tau0, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp);
 
@@ -106,42 +97,36 @@ extern "C" {
   pwind_hot_pa *
   pwind_hot_pa_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp,
 		   hot_wind_table *tab);
   pwind_hot_pi *
   pwind_hot_pi_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp,
 		   hot_wind_table *tab);
   pwind_hot_ps *
   pwind_hot_ps_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp,
 		   hot_wind_table *tab);
   pwind_hot_ia *
   pwind_hot_ia_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp,
 		   hot_wind_table *tab);
   pwind_hot_ii *
   pwind_hot_ii_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp,
 		   hot_wind_table *tab);
   pwind_hot_is *
   pwind_hot_is_new(const double Gamma, const double mach,
 		   const double uh, const pwind_geom* geom,
-		   const double epsabs, const double epsrel,
 		   const double fcrit,
 		   const double jsp,
 		   hot_wind_table *tab);
@@ -159,8 +144,6 @@ extern "C" {
   double dU2da(const double x, const double a, const pwind *pw);
   double Gamma(const pwind *pw);
   double mach(const pwind *pw);
-  double epsrel(const pwind *pw);
-  double epsabs(const pwind *pw);
   double fcrit(const pwind *pw);
   double jsp(const pwind *pw);
   double xcrit(const pwind *pw);
@@ -170,8 +153,6 @@ extern "C" {
   double umax(const pwind *pw);
   double amax_abs(const pwind *pw);
   void set_mach(const double mach, pwind *pw);
-  void set_epsrel(const double epsrel, pwind *pw);
-  void set_epsabs(const double epsabs, pwind *pw);
   void set_geometry(const pwind_geom *geom, pwind *pw);
   void set_fcrit(const double fcrit, pwind *pw);
   void set_jsp(const double jsp, pwind *pw);
@@ -181,61 +162,249 @@ extern "C" {
   ////////////////////////////////////////////////////////////////////////
 
   // Range limits
-  unsigned long alimits(const double u, const double varpi,
-			const double varpi_t, const pwind *pw,
+  unsigned long alimits(const double u,
+			const double varpi,
+			const double varpi_t,
+			const double epsabs,
+			const double epsrel,
+			const pwind *pw,
 			double *alim);
-  unsigned long xlimits(const double a, const pwind *pw,
+  unsigned long xlimits(const double a,
+			const pwind *pw,
 			double *xlim);
-  double amax(const double x, const pwind *pw);
-  unsigned long s_crit(const double varpi, const double varpi_t,
-		       const double u, const pwind *pw, double *s_crit_);
-  unsigned long a_crit(const double varpi, const double varpi_t,
-		       const double u, const pwind *pw, double *a_crit_);
+  double amax(const double x,
+	      const double epsabs,
+	      const double epsrel,
+	      const pwind *pw);
+  unsigned long s_crit(const double varpi,
+		       const double varpi_t,
+		       const double u,
+		       const pwind *pw,
+		       double *s_crit_);
+  unsigned long a_crit(const double varpi,
+		       const double varpi_t,
+		       const double u,
+		       const pwind *pw,
+		       double *a_crit_);
 
   // Momentum flux
-  double pdot_approx(const double a, const pwind *pw);
-  double pdot_exact(const double a, const double fg,
-		    const double tctw, const pwind *pw);
+  double pdot_approx(const double a,
+		     const double epsabs,
+		     const double epsrel,
+		     const pwind *pw);
+  double pdot_exact(const double a,
+		    const double fg,
+		    const double tctw,
+		    const double epsabs,
+		    const double epsrel,
+		    const pwind *pw);
   
   // Absorption
-  double Phi_uc(const double u, const double varpi, const double varpi_t,
-		const double a0, const double a1, const pwind *pw);
-  double tau_uc(const double u, const double tXtw, const double fj,
-		const double boltzfac, const double varpi,
-		const double varpi_t, const double a0, const double a1,
+  double Phi_uc(const double u,
+		const double varpi,
+		const double varpi_t,
+		const double a0,
+		const double a1,
+		const double epsabs,
+		const double epsrel,
 		const pwind *pw);
-  double tau_uc_vec(const double u, const double *u_trans, const double *tXtw,
-		    const double fj, const double boltzfac,
-		    unsigned long ntrans, const double varpi,
-		    const double varpi_t, const double a0, const double a1,
-		    const pwind *pw);
-  double Phi_c(const double u, const double fw, const double varpi,
-	       const double varpi_t, const double a0, const double a1,
+  void Phi_uc_vec(const unsigned long nu,
+		  const double *u,
+		  const double varpi,
+		  const double varpi_t,
+		  const double a0,
+		  const double a1,
+		  const double epsabs,
+		  const double epsrel,
+		  const pwind *pw,
+		  double *result);
+  double tau_uc(const double u,
+		const double tXtw,
+		const double fj,
+		const double boltzfac,
+		const double varpi,
+		const double varpi_t,
+		const double a0,
+		const double a1,
+		const double epsabs,
+		const double epsrel,
+		const pwind *pw);
+  void tau_uc_vec(const unsigned long nu,
+		  const double *u,
+		  const double tXtw,
+		  const double fj,
+		  const double boltzfac,
+		  const double varpi,
+		  const double varpi_t,
+		  const double a0,
+		  const double a1,
+		  const double epsabs,
+		  const double epsrel,
+		  const pwind *pw,
+		  double *result);
+  double tau_uc_multiple(const double u,
+			 const double *u_trans,
+			 const double *tXtw,
+			 const double fj,
+			 const double boltzfac,
+			 const unsigned long ntrans,
+			 const double varpi,
+			 const double varpi_t,
+			 const double a0,
+			 const double a1,
+			 const double epsabs,
+			 const double epsrel,
+			 const pwind *pw);
+  void tau_uc_multiple_vec(const unsigned long nu,
+			   const double *u,
+			   const double *u_trans,
+			   const double *tXtw,
+			   const double fj,
+			   const double boltzfac,
+			   const unsigned long ntrans,
+			   const double varpi,
+			   const double varpi_t,
+			   const double a0,
+			   const double a1,
+			   const double epsabs,
+			   const double epsrel,
+			   const pwind *pw,
+			   double *result);
+  double Phi_c(const double u,
+	       const double fw,
+	       const double varpi,
+	       const double varpi_t,
+	       const double a0,
+	       const double a1,
+	       const double epsabs,
+	       const double epsrel,
 	       const pwind *pw);
-  double tau_c(const double u, const double tXtw, const double fj,
-	       const double boltzfac, const double fw, const double varpi,
-	       const double varpi_t, const double a0, const double a1,
+  void Phi_c_vec(const unsigned long nu,
+		 const double *u,
+		 const double fw,
+		 const double varpi,
+		 const double varpi_t,
+		 const double a0,
+		 const double a1,
+		 const double epsabs,
+		 const double epsrel,
+		 const pwind *pw,
+		 double *result);
+  double tau_c(const double u,
+	       const double tXtw,
+	       const double fj,
+	       const double boltzfac,
+	       const double fw,
+	       const double varpi,
+	       const double varpi_t,
+	       const double a0,
+	       const double a1,
+	       const double epsabs,
+	       const double epsrel,
 	       const pwind *pw);
-  double tau_c_vec(const double u, const double *u_trans, const double *tXtw,
-		   const double fj, const double boltzfac,
-		   unsigned long ntrans, const double fw, const double varpi,
-		   const double varpi_t, const double a0, const double a1,
-		   const pwind *pw);
+  void tau_c_vec(const unsigned long nu,
+		 const double *u,
+		 const double tXtw,
+		 const double fj,
+		 const double boltzfac,
+		 const double fw,
+		 const double varpi,
+		 const double varpi_t,
+		 const double a0,
+		 const double a1,
+		 const double epsabs,
+		 const double epsrel,
+		 const pwind *pw,
+		 double *result);
+  double tau_c_multiple(const double u,
+			const double *u_trans,
+			const double *tXtw,
+			const double fj,
+			const double boltzfac,
+			const unsigned long ntrans,
+			const double fw,
+			const double varpi,
+			const double varpi_t,
+			const double a0,
+			const double a1,
+			const double epsabs,
+			const double epsrel,
+			const pwind *pw);
+  void tau_c_multiple_vec(const unsigned long nu,
+			  const double *u,
+			  const double *u_trans,
+			  const double *tXtw,
+			  const double fj,
+			  const double boltzfac,
+			  const unsigned long ntrans,
+			  const double fw,
+			  const double varpi,
+			  const double varpi_t,
+			  const double a0,
+			  const double a1,
+			  const double epsabs,
+			  const double epsrel,
+			  const pwind *pw,
+			  double *result);
 
   // Thin, subcritical emission
-  double Xi(const double u, const double varpi, const double varpi_t,
+  double Xi(const double u,
+	    const double varpi,
+	    const double varpi_t,
+	    const double epsabs,
+	    const double epsrel,
 	    const pwind *pw);
-  double xi(const double varpi, const double varpi_t,
+  void Xi_vec(const unsigned long nu,
+	      const double *u,
+	      const double varpi,
+	      const double varpi_t,
+	      const double epsabs,
+	      const double epsrel,
+	      const pwind *pw,
+	      double *result);
+  double xi(const double varpi,
+	    const double varpi_t,
+	    const double epsabs,
+	    const double epsrel,
 	    const pwind *pw);
 
   // LTE emission
-  double eta(const double u, const double tXtw, const double fj,
-	     const double boltzfac, const bool correlated, const double fw,
-	     const double varpi, const double varpi_t, const bool thin,
+  double eta(const double u,
+	     const double tXtw,
+	     const double fj,
+	     const double boltzfac,
+	     const bool correlated,
+	     const double fw,
+	     const double varpi,
+	     const double varpi_t,
+	     const bool thin,
+	     const double epsabs,
+	     const double epsrel,
 	     const pwind *pw);
-  double Psi(const double tXtw, const double fj,
-  	     const double boltzfac, const bool correlated, const double fw,
-	     const double varpi, const double varpi_t, const bool thin,
+  void eta_vec(const unsigned long nu,
+	       const double *u,
+	       const double tXtw,
+	       const double fj,
+	       const double boltzfac,
+	       const bool correlated,
+	       const double fw,
+	       const double varpi,
+	       const double varpi_t,
+	       const bool thin,
+	       const double epsabs,
+	       const double epsrel,
+	       const pwind *pw,
+	       double *result);
+  double Psi(const double tXtw,
+	     const double fj,
+  	     const double boltzfac,
+	     const bool correlated,
+	     const double fw,
+	     const double varpi,
+	     const double varpi_t,
+	     const bool thin,
+	     const double epsabs,
+	     const double epsrel,
 	     const pwind *pw);
 
   // Error management

@@ -26,23 +26,28 @@ static inline double xcrit_func(double x, void *params) {
 ////////////////////////////////////////////////////////////////////////
 // Base pwind_rad class
 ////////////////////////////////////////////////////////////////////////
-pwind_rad::pwind_rad(const double Gamma_, const double mach_,
+pwind_rad::pwind_rad(const double Gamma_,
+		     const double mach_,
 		     const double tau0_,
 		     const pwind_potential *potential_,
 		     const pwind_expansion *expansion_,
-		     const pwind_geom *geom_, const double epsabs_,
-		     const double epsrel_, const double fcrit_,
+		     const pwind_geom *geom_,
+		     const double fcrit_,
 		     const double jsp_) :
   pwind(Gamma_, mach_, potential_, expansion_, geom_,
-	epsabs_, epsrel_, fcrit_, jsp_),
+        fcrit_, jsp_),
   tau0(tau0_)
 {
-  xcrit = xCrit();
+  xcrit = xCrit(100, 1.0e-12, 1.0e-12); // Use very high accuracy,
+					// since this only needs to be
+					// done once
   zeta_M = zetaM(xcrit + log(fcrit_), sx);
   zeta_A = zetaA(xcrit + log(fcrit_), sx);
 }
 
-double pwind_rad::xCrit(const int maxiter) const {
+double pwind_rad::xCrit(const int maxiter,
+			const double epsabs,
+			const double epsrel) const {
   // Prepare data to pass to the GSL
   struct xcrit_params params;
   params.w = this;
@@ -207,15 +212,17 @@ pwind_rad::fac5(const double x, const double a) const {
 ////////////////////////////////////////////////////////////////////////
 
 pwind_rad_point::
-pwind_rad_point(const double Gamma_, const double mach_,
-		const double tau0_, const pwind_expansion *expansion_,
-		const pwind_geom *geom_, const double epsabs_,
-		const double epsrel_, const double fcrit_,
+pwind_rad_point(const double Gamma_,
+		const double mach_,
+		const double tau0_,
+		const pwind_expansion *expansion_,
+		const pwind_geom *geom_,
+		const double fcrit_,
 		const double jsp_) :
   pwind_rad(Gamma_, mach_, tau0_,
 	    static_cast<const pwind_potential *>(&pwind_potential_point),
 	    expansion_,
-	    geom_, epsabs_, epsrel_, fcrit_, jsp_)
+	    geom_, fcrit_, jsp_)
 {
   umax = sqrt(Gamma_*tau0_-1.0);
   amax_abs = numeric_limits<double>::max();
@@ -225,7 +232,8 @@ pwind_rad_point::U2max(const double a) const {
   return (1.0-1.0/a)*(Gamma*tau0-1.0);
 }
 double
-pwind_rad_point::a_from_u_max(const double u, const double varpi,
+pwind_rad_point::a_from_u_max(const double u,
+			      const double varpi,
 			      const double varpi_t) const {
   double vp2 = SQR(varpi) + SQR(varpi_t);
   if (vp2 == 0.0) {
@@ -255,7 +263,9 @@ pwind_rad_point::xlimits(const double a) const {
   return ret;
 }
 double
-pwind_rad_point::amax(const double x) const {
+pwind_rad_point::amax(const double x,
+		      const double epsabs,
+		      const double epsrel) const {
   return numeric_limits<double>::max();
 }
 
@@ -264,25 +274,23 @@ pwind_rad_point::amax(const double x) const {
 ////////////////////////////////////////////////////////////////////////
 
 pwind_rad_isothermal::
-pwind_rad_isothermal(const double Gamma_, const double mach_,
+pwind_rad_isothermal(const double Gamma_,
+		     const double mach_,
 		     const double tau0_,
 		     const pwind_expansion *expansion_,
-		     const pwind_geom *geom_, const double epsabs_,
-		     const double epsrel_, const double fcrit_,
+		     const pwind_geom *geom_,
+		     const double fcrit_,
 		     const double jsp_) :
   pwind_rad(Gamma_, mach_, tau0_,
 	    static_cast<const pwind_potential *>(&pwind_potential_isothermal),
-	    expansion_, geom_, epsabs_, epsrel_, fcrit_, jsp_)
+	    expansion_, geom_, fcrit_, jsp_)
 {
   umax = sqrt(Gamma_*tau0_ - log(Gamma_*tau0_) - 1.0);
   a_maxu = Gamma_*tau0_;
   // Note: use high tolerance here, because we need to compute this
-  // limit numerically; then switch back to original
-  epsrel /= 1e4;
-  epsabs /= 1e4;
-  amax_abs = a_from_u_max(0.0, 0.0, 0.0, 1.0+fmin(epsabs, epsrel));
-  epsrel *= 1e4;
-  epsabs *= 1e4;
+  // limit numerically, and it only needs to be done once
+  amax_abs = a_from_u_max(0.0, 0.0, 0.0, 1.0+1.0e-12, 0.0, 100,
+			  1.0e-12, 1.0e-12);
 }
 
 double
@@ -318,7 +326,10 @@ pwind_rad_isothermal::a_from_u_max(const double u,
 				   const double varpi_t,
 				   const double alo,
 				   const double ahi,
-				   const int maxiter) const {
+				   const int maxiter,
+				   const double epsabs,
+				   const double epsrel) const {
+
 
   // Prepare data for the GSL
   struct U2max_params params;
@@ -391,9 +402,12 @@ static double a_max_u_loga(double loga, void *params) {
 
 double
 pwind_rad_isothermal::
-a_max_u_from_varpi(const double x, const double varpi,
+a_max_u_from_varpi(const double x,
+		   const double varpi,
 		   const double varpi_t,
-		   const int maxiter) const {
+		   const int maxiter,
+		   const double epsabs,
+		   const double epsrel) const {
   // To understand what this function does, note that
   //
   // u^2 = ur^2 * (1 - varpi^2/a^2),
@@ -462,13 +476,15 @@ static double a_max_umax_loga(double loga, void *params) {
 
 double
 pwind_rad_isothermal::
-a_max_umax_from_varpi(const double varpi, const double varpi_t,
-		      const int maxiter) const {
+a_max_umax_from_varpi(const double varpi,
+		      const double varpi_t,
+		      const int maxiter,
+		      const double epsabs,
+		      const double epsrel) const {
   // Same as a_max_u_from_varpi, but with umax in place of u
 
-  double vp2 = SQR(varpi) + SQR(varpi_t);
-  
   // Trivial case
+  double vp2 = SQR(varpi) + SQR(varpi_t);
   if (vp2 == 0.0) return(a_maxu);
 
   // Prepare data for GSL
@@ -522,8 +538,11 @@ pwind_rad_pa::dU2dx(const double x, const double a) const {
     (1.0-1.0/a);
 }
 vector<double>
-pwind_rad_pa::alimits(const double u, const double varpi,
-		      const double varpi_t) const {
+pwind_rad_pa::alimits(const double u,
+		      const double varpi,
+		      const double varpi_t,
+		      const double epsabs,
+		      const double epsrel) const {
   vector<double> ret;
   if (fabs(u) > umax) return ret;  // No solutions
   ret.resize(2);    // 2 solutions
@@ -532,27 +551,58 @@ pwind_rad_pa::alimits(const double u, const double varpi,
   return ret;
 }
 double
-pwind_rad_pa::Phi_c(const double u, const double fw,
-		    const double varpi, const double varpi_t,
-		    const double a0, const double a1,
+pwind_rad_pa::Phi_c(const double u,
+		    const double fw,
+		    const double varpi,
+		    const double varpi_t,
+		    const double a0,
+		    const double a1,
+		    const double epsabs,
+		    const double epsrel,
 		    const vector<double>& alimits_) const {
   if (a1 >= numeric_limits<double>::max())
     return numeric_limits<double>::max();
   else
-    return pwind::Phi_c(u, fw, varpi, varpi_t, a0, a1, alimits_);
+    return pwind::Phi_c(u, fw, varpi, varpi_t, a0, a1, epsabs, epsrel,
+			alimits_);
+}
+vector<double>
+pwind_rad_pa::Phi_c(const vector<double>& u,
+		    const double fw,
+		    const double varpi,
+		    const double varpi_t,
+		    const double a0,
+		    const double a1,
+		    const double epsabs,
+		    const double epsrel,
+		    const vector<double>& alimits_) const {
+  // Output holder
+  vector<double> result(u.size());
+
+  // Parallel loop over inputs
+#ifdef _OPENMP
+#  pragma omp parallel for schedule(dynamic, 4)
+#endif
+  for (std::vector<double>::size_type i=0; i<u.size(); i++)
+    result[i] = Phi_c(u[i], fw, varpi, varpi_t, a0, a1, epsabs, epsrel,
+		      alimits_);
+
+  // Return
+  return result;
 }
 
 // Point, intermediate
 pwind_rad_pi::
-pwind_rad_pi(const double Gamma_, const double mach_,
+pwind_rad_pi(const double Gamma_,
+	     const double mach_,
 	     const double tau0_, 
-	     const pwind_geom *geom_, const double epsabs_,
-	     const double epsrel_, const double fcrit_,
+	     const pwind_geom *geom_,
+	     const double fcrit_,
 	     const double jsp_) :
     pwind_rad_point(Gamma_, mach_, tau0_,
 		    static_cast<const pwind_expansion *>
 		    (&pwind_expansion_intermediate), geom_,
-		    epsabs_, epsrel_, fcrit_, jsp_) {
+		    fcrit_, jsp_) {
   u_min_infinity = sqrt(U2(xcrit, numeric_limits<double>::max()));
 }
 double
@@ -564,8 +614,11 @@ pwind_rad_pi::dU2dx(const double x, const double a) const {
   return Gamma*(fac5(x, a) - fac2(x, a));
 }
 vector<double>
-pwind_rad_pi::alimits(const double u, const double varpi,
-		      const double varpi_t) const {
+pwind_rad_pi::alimits(const double u,
+		      const double varpi,
+		      const double varpi_t,
+		      const double epsabs,
+		      const double epsrel) const {
   vector<double> ret;
   if (fabs(u) > umax) return ret;  // No solutions; u too big
   ret.resize(2); // Two solutions
@@ -577,21 +630,22 @@ pwind_rad_pi::alimits(const double u, const double varpi,
   else
     // u < minimum velocity at infinity, so there is a solution at
     // finite a
-    ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t);
+    ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t, epsabs, epsrel);
   return ret;
 }
 
 // Point, solid angle
 pwind_rad_ps::
-pwind_rad_ps(const double Gamma_, const double mach_,
+pwind_rad_ps(const double Gamma_,
+	     const double mach_,
 	     const double tau0_, 
-	     const pwind_geom *geom_, const double epsabs_,
-	     const double epsrel_, const double fcrit_,
+	     const pwind_geom *geom_,
+	     const double fcrit_,
 	     const double jsp_) :
     pwind_rad_point(Gamma_, mach_, tau0_,
 		    static_cast<const pwind_expansion *>
 		    (&pwind_expansion_solid_angle), geom_,
-		    epsabs_, epsrel_, fcrit_, jsp_) {
+		    fcrit_, jsp_) {
   u_min_infinity = sqrt(U2(xcrit, numeric_limits<double>::max()));
 }
 double
@@ -603,8 +657,11 @@ pwind_rad_ps::dU2dx(const double x, const double a) const {
     return Gamma*(fac1(x) - fac3(x, a) - 0.5*fac4(x, a));
 }
 vector<double>
-pwind_rad_ps::alimits(const double u, const double varpi,
-		      const double varpi_t) const {
+pwind_rad_ps::alimits(const double u,
+		      const double varpi,
+		      const double varpi_t,
+		      const double epsabs,
+		      const double epsrel) const {
   vector<double> ret;
   if (fabs(u) > umax) return ret;  // No solutions; u too big
   ret.resize(2); // Two solutions
@@ -616,7 +673,7 @@ pwind_rad_ps::alimits(const double u, const double varpi,
   else
     // u < minimum velocity at infinity, so there is a solution at
     // finite a
-    ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t);
+    ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t, epsabs, epsrel);
   return ret;
 }
 
@@ -634,28 +691,36 @@ pwind_rad_ia::dU2dx(const double x, const double a) const {
   return (1.0-1.0/a) * Gamma * (tau0*exp(-tau0*exp(x)) - fac1(x));
 }
 vector<double>
-pwind_rad_ia::alimits(const double u, const double varpi,
-		      const double varpi_t) const {
+pwind_rad_ia::alimits(const double u,
+		      const double varpi,
+		      const double varpi_t,
+		      const double epsabs,
+		      const double epsrel) const {
   vector<double> ret;
   if (fabs(u) > umax) return ret;  // No solutions; u too big
   if (varpi == 0.0 && varpi_t == 0.0) {
     // For varpi = 0, looking down the barrel, two solutions exist
     // if u < umax
     ret.resize(2);
-    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu);
-    ret[1] = a_from_u_max(u, varpi, varpi_t, a_maxu, amax_abs);
+    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu,
+			  100, epsabs, epsrel);
+    ret[1] = a_from_u_max(u, varpi, varpi_t, a_maxu, amax_abs,
+			  100, epsabs, epsrel);
     return ret;
   } else {
     // For varpi != 0, we must first find the radius at which the line
     // of sight velocity reaches its maximum, and the velocity at that
     // radus, to check if a solution exists
     double vp2 = SQR(varpi) + SQR(varpi_t);
-    double apeak = a_max_umax_from_varpi(varpi, varpi_t);
+    double apeak = a_max_umax_from_varpi(varpi, varpi_t,
+					 100, epsabs, epsrel);
     double u2peak = U2max(apeak) * (1.0 - vp2/SQR(apeak));
     if (SQR(u) > u2peak) return ret; // No solutions; u too big
     ret.resize(2);
-    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak);
-    ret[1] = a_from_u_max(u, varpi, varpi_t, apeak, amax_abs);
+    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak,
+			  100, epsabs, epsrel);
+    ret[1] = a_from_u_max(u, varpi, varpi_t, apeak, amax_abs,
+			  100, epsabs, epsrel);
     return ret;
   }
 }
@@ -673,8 +738,11 @@ pwind_rad_ia::xlimits(const double a) const {
   return ret;
 }
 double
-pwind_rad_ia::amax(const double x) const {
-  double amx = a_from_u_x(0.0, x, 0.0, 1.0+1.0e-8, amax_abs);
+pwind_rad_ia::amax(const double x,
+		   const double epsabs,
+		   const double epsrel) const {
+  double amx = a_from_u_x(0.0, x, 0.0, 1.0+1.0e-8, amax_abs, 100,
+			  epsabs, epsrel);
   if (amx > 0.) return amx;
   else return 1.0+1.0e-8; // Safety value
 }
@@ -689,28 +757,36 @@ pwind_rad_ii::dU2dx(const double x, const double a) const {
   return Gamma*(fac5(x, a) - fac2(x, a));
 }
 vector<double>
-pwind_rad_ii::alimits(const double u, const double varpi,
-		      const double varpi_t) const {
+pwind_rad_ii::alimits(const double u,
+		      const double varpi,
+		      const double varpi_t,
+		      const double epsabs,
+		      const double epsrel) const {
   vector<double> ret;
   if (fabs(u) > umax) return ret;  // No solutions; u too big
   if (varpi == 0.0 && varpi_t == 0.0) {
     // For varpi = 0, looking down the barrel, two solutions exist
     // if u < umax
     ret.resize(2);
-    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu);
-    ret[1] = a_from_u_max(u, varpi, varpi_t, a_maxu, amax_abs);
+    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu,
+			  100, epsabs, epsrel);
+    ret[1] = a_from_u_max(u, varpi, varpi_t, a_maxu, amax_abs,
+			  100, epsabs, epsrel);
     return ret;
   } else {
     // For varpi != 0, we must first find the radius at which the line
     // of sight velocity reaches its maximum, and the velocity at that
     // radus, to check if a solution exists
     double vp2 = SQR(varpi) + SQR(varpi_t);
-    double apeak = a_max_umax_from_varpi(varpi, varpi_t);
+    double apeak = a_max_umax_from_varpi(varpi, varpi_t, 100,
+					 epsabs, epsrel);
     double u2peak = U2max(apeak) / (1.0 - vp2/SQR(apeak));
     if (SQR(u) > u2peak) return ret; // No solutions; u too big
     ret.resize(2);
-    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak);
-    ret[1] = a_from_u_max(u, varpi, varpi_t, apeak, amax_abs);
+    ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak,
+			  100, epsabs, epsrel);
+    ret[1] = a_from_u_max(u, varpi, varpi_t, apeak, amax_abs,
+			  100, epsabs, epsrel);
     return ret;
   }
 }
@@ -728,41 +804,38 @@ pwind_rad_ii::xlimits(const double a) const {
   return ret;
 }
 double
-pwind_rad_ii::amax(const double x) const {
-  double amx = a_from_u_x(0.0, x, 0.0, 1.0+1.0e-8, amax_abs);
+pwind_rad_ii::amax(const double x,
+		   const double epsabs,
+		   const double epsrel) const {
+  double amx = a_from_u_x(0.0, x, 0.0, 1.0+1.0e-8, amax_abs, 100,
+			  epsabs, epsrel);
   if (amx > 0.) return amx;
   else return 1.0+1.0e-8; // Safety value
 }
 
 // Isothermal, constant solid angle
-pwind_rad_is::pwind_rad_is(const double Gamma_, const double mach_,
+pwind_rad_is::pwind_rad_is(const double Gamma_,
+			   const double mach_,
 			   const double tau0_, 
-			   const pwind_geom *geom_, const double epsabs_,
-			   const double epsrel_, const double fcrit_,
+			   const pwind_geom *geom_,
+			   const double fcrit_,
 			   const double jsp_) :
   pwind_rad_isothermal(Gamma_, mach_, tau0_,
 		       static_cast<const pwind_expansion *>
 		       (&pwind_expansion_solid_angle), geom_,
-		       epsabs_, epsrel_, fcrit_, jsp_)
+		       fcrit_, jsp_)
 {
-  // Do these computations with improved precision, because otherwise
-  // we will not be able to do integrals with enough precision later
-  // on
-  double epsr_ = epsrel;
-  double epsa_ = epsabs;
-  epsrel /= 1e4;
-  epsabs /= 1e4;
+  // Do these computations with very high precisio, since they are
+  // only done once
 
   // Solve for radius of maximum velocity along x = xcrit curve
-  a_maxu_xcrit = a_max_u_from_varpi(xcrit);
+  a_maxu_xcrit = a_max_u_from_varpi(xcrit, 0.0, 0.0, 100,
+				    1e-12, 1e-12);
   // Next get velocity maximum at x = xcrit
   umax_xcrit = sqrt(U2(xcrit, a_maxu_xcrit));
   // Get radius at which a = 0 along x = xcrit curve
-  amax_xcrit = a_from_u_x(0.0, xcrit, 0.0, 0.0, a_maxu_xcrit);
-
-  // Reset precision
-  epsrel = epsr_;
-  epsabs = epsa_;
+  amax_xcrit = a_from_u_x(0.0, xcrit, 0.0, 0.0, 1.0, a_maxu_xcrit,
+			  100, 1e-12, 1e-12);
 }
 double
 pwind_rad_is::U2(const double x, const double a) const {
@@ -774,8 +847,11 @@ pwind_rad_is::dU2dx(const double x, const double a) const {
   return Gamma*(fac1(x) - fac3(x, a) - 0.5*fac4(x, a));
 }
 vector<double>
-pwind_rad_is::alimits(const double u, const double varpi,
-		      const double varpi_t) const {
+pwind_rad_is::alimits(const double u,
+		      const double varpi,
+		      const double varpi_t,
+		      const double epsabs,
+		      const double epsrel) const {
   vector<double> ret;
   if (fabs(u) > umax) return ret;  // No solutions; u too big
   if (varpi == 0.0 && varpi_t == 0.0) {
@@ -792,18 +868,24 @@ pwind_rad_is::alimits(const double u, const double varpi,
       // 4. Radius at which u = U(-inf, a), in the region of a where U
       // is decreasing
       ret.resize(4);
-      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu);
-      ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t, ret[0], a_maxu_xcrit);
+      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu, 100, epsabs,
+			    epsrel);
+      ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t, ret[0], a_maxu_xcrit,
+			  100, epsabs, epsrel);
       ret[2] = a_from_u_x(u, xcrit, varpi, varpi_t,
-			  max(a_maxu_xcrit, ret[1]), amax_xcrit);
-      ret[3] = a_from_u_max(u, varpi, varpi_t, ret[2], amax_abs);
+			  max(a_maxu_xcrit, ret[1]), amax_xcrit,
+			  100, epsabs, epsrel);
+      ret[3] = a_from_u_max(u, varpi, varpi_t, ret[2], amax_abs,
+			    100, epsabs, epsrel);
       return ret;
     } else {
       // Two solutions; only solutions 1. and 4. of those listed above
       // exist
       ret.resize(2);
-      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu);
-      ret[1] = a_from_u_max(u, varpi, varpi_t, a_maxu, amax_abs);
+      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, a_maxu,
+			    100, epsabs, epsrel);
+      ret[1] = a_from_u_max(u, varpi, varpi_t, a_maxu, amax_abs,
+			    100, epsabs, epsrel);
       return ret;
     }
   } else {
@@ -815,14 +897,16 @@ pwind_rad_is::alimits(const double u, const double varpi,
     // Step 1: find the radius of maximum velocity along the x = -inf
     // curve
     double vp2 = SQR(varpi) + SQR(varpi_t);
-    double apeak_xinf = a_max_umax_from_varpi(varpi, varpi_t);
+    double apeak_xinf = a_max_umax_from_varpi(varpi, varpi_t,
+					      100, epsabs, epsrel);
     double u2peak_xinf = U2max(apeak_xinf) /
       (1.0 - vp2/SQR(apeak_xinf));
     if (SQR(u) > u2peak_xinf) return ret; // No solutions; u too big
 
     // Step 2: find the radius of maximum velocity along the x = xcrit
     // curve
-    double apeak_xcrit = a_max_u_from_varpi(xcrit, varpi, varpi_t);
+    double apeak_xcrit = a_max_u_from_varpi(xcrit, varpi, varpi_t,
+					    100, epsabs, epsrel);
     double u2peak_xcrit = U2(xcrit, apeak_xcrit) /
       (1.0 - vp2/SQR(apeak_xcrit));
 
@@ -831,18 +915,24 @@ pwind_rad_is::alimits(const double u, const double varpi,
       // Step 3a: there are 4 solutions, analogous to the u <
       // umax_xcrit case for varpi = 0
       ret.resize(4);
-      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak_xinf);
-      ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t, ret[0], apeak_xcrit);
+      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak_xinf,
+			    100, epsabs, epsrel);
+      ret[1] = a_from_u_x(u, xcrit, varpi, varpi_t, ret[0], apeak_xcrit,
+			  100, epsabs, epsrel);
       ret[2] = a_from_u_x(u, xcrit, varpi, varpi_t,
-			  max(apeak_xcrit, ret[1]), amax_xcrit);
-      ret[3] = a_from_u_max(u, varpi, varpi_t, ret[2], amax_abs);
+			  max(apeak_xcrit, ret[1]), amax_xcrit,
+			  100, epsabs, epsrel);
+      ret[3] = a_from_u_max(u, varpi, varpi_t, ret[2], amax_abs,
+			    100, epsabs, epsrel);
       return ret;
     } else {
       // Step 3b, there are 2 solutions, analogous to the u >=
       // umax_xcrit case for varpi = 0
       ret.resize(2);
-      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak_xinf);
-      ret[1] = a_from_u_max(u, varpi, varpi_t, apeak_xinf, amax_abs);
+      ret[0] = a_from_u_max(u, varpi, varpi_t, 1.0, apeak_xinf,
+			    100, epsabs, epsrel);
+      ret[1] = a_from_u_max(u, varpi, varpi_t, apeak_xinf, amax_abs,
+			    100, epsabs, epsrel);
       return ret;
     }
   }
@@ -865,8 +955,11 @@ pwind_rad_is::xlimits(const double a) const {
   return ret;
 }
 double
-pwind_rad_is::amax(const double x) const {
-  double amx = a_from_u_x(0.0, x, 0.0, 0.0, 1.0+1.0e-8, amax_abs);
+pwind_rad_is::amax(const double x,
+		   const double epsabs,
+		   const double epsrel) const {
+  double amx = a_from_u_x(0.0, x, 0.0, 0.0, 1.0+1.0e-8, amax_abs,
+			  100, epsabs, epsrel);
   if (amx > 0.) return amx;
   else return 1.0+1.0e-8; // Safety value
 }

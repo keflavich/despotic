@@ -29,13 +29,11 @@ pwind_hot::pwind_hot(const double Gamma_,
 		     const pwind_potential *potential_,
 		     const pwind_expansion *expansion_,
 		     const pwind_geom *geom_,
-		     const double epsabs_,
-		     const double epsrel_,
 		     const double fcrit_,
 		     const double jsp_,
 		     hot_wind_table *full_tab_) :
   pwind(Gamma_, mach_, potential_, expansion_, geom_,
-	epsabs_, epsrel_, fcrit_, jsp_),
+	fcrit_, jsp_),
   uh(uh_),
   full_tab(full_tab_)
 {
@@ -625,7 +623,9 @@ pwind_hot::dU2da(const double x, const double a) const {
 ////////////////////////////////////////////////////////////////////////
 
 inline double
-pwind_hot::amax(const double x) const {
+pwind_hot::amax(const double x,
+		const double epsabs,
+		const double epsrel) const {
   if (!isFountain()) {
     
     // Wind reaches infinity
@@ -689,8 +689,11 @@ pwind_hot::xlimits(const double a) const {
 
 // Get limits on a at a given u, varpi.
 vector<double>
-pwind_hot::alimits(const double u, const double varpi,
-		   const double varpi_t) const {
+pwind_hot::alimits(const double u,
+		   const double varpi,
+		   const double varpi_t,
+		   const double epsabs,
+		   const double epsrel) const {
 
   // Setup
   double vp2 = SQR(varpi) + SQR(varpi_t);

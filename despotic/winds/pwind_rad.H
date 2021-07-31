@@ -64,13 +64,13 @@ class pwind_rad : public pwind {
 public:
 
   // The constructor
-  pwind_rad(const double Gamma_, const double mach_, const double tau0_,
+  pwind_rad(const double Gamma_,
+	    const double mach_,
+	    const double tau0_,
 	    const pwind_potential *potential_,
 	    const pwind_expansion *expansion_,
 	    const pwind_geom *geom_ =
 	    static_cast<const pwind_geom *>(&pw_geom_sphere),
-	    const double epsabs_ = 1.0e-6,
-	    const double epsrel_ = 1.0e-6,
 	    const double fcrit_ = 1.0,
 	    const double jsp_ = 0.0);
 
@@ -78,7 +78,9 @@ public:
   virtual ~pwind_rad() { }
 
   // Method to get xcrit
-  virtual double xCrit(const int maxiter=100) const;
+  virtual double xCrit(const int maxiter = 100,
+		       const double epsabs = 1.0e-6,
+		       const double epsrel = 1.0e-6) const;
 
   // Method to get X; since we have to do this numerically, it is the
   // same for all geometries and potentials
@@ -128,13 +130,12 @@ protected:
 class pwind_rad_point : public pwind_rad {
 
 public:
-  pwind_rad_point(const double Gamma_, const double mach_,
+  pwind_rad_point(const double Gamma_,
+		  const double mach_,
 		  const double tau0_,
 		  const pwind_expansion *expansion_,
 		  const pwind_geom *geom_ =
 		  static_cast<const pwind_geom *>(&pw_geom_sphere),
-		  const double epsabs_ = 1.0e-6,
-		  const double epsrel_ = 1.0e-6,
 		  const double fcrit_ = 1.0,
 		  const double jsp_ = 0.0);
   virtual ~pwind_rad_point() { }
@@ -146,13 +147,15 @@ public:
   // Radius at which fluid element with x->-infinity reaches a
   // specified line of sight velocity; same for all point potentials
   double a_from_u_max(const double u,
-		      const double varpi=0.0,
-		      const double varpi_t=0.0) const;
+		      const double varpi = 0.0,
+		      const double varpi_t = 0.0) const;
 
   // Limits on x and maximum value of a at a given x; same for all
   // point potentials
   virtual std::vector<double> xlimits(const double a) const;
-  virtual double amax(const double x) const;
+  virtual double amax(const double x,
+		      const double epsabs = 1.0e-6,
+		      const double epsrel = 1.0e-6) const;
 };
 
 // Isothermal potential; radiatively-driven winds with this potential
@@ -160,13 +163,12 @@ public:
 // velocity at a finite value of a that depends on x
 class pwind_rad_isothermal : public pwind_rad {
 public:
-  pwind_rad_isothermal(const double Gamma_, const double mach_,
+  pwind_rad_isothermal(const double Gamma_,
+		       const double mach_,
 		       const double tau0_,
 		       const pwind_expansion *expansion_,
 		       const pwind_geom *geom_ =
 		       static_cast<const pwind_geom *>(&pw_geom_sphere),
-		       const double epsabs_ = 1.0e-6,
-		       const double epsrel_ = 1.0e-6,
 		       const double fcrit_ = 1.0,
 		       const double jsp_ = 0.0);
   virtual ~pwind_rad_isothermal() { }
@@ -180,24 +182,32 @@ public:
 
   // Function to return the radius at which maximum value of u = given
   // value; analogous to a_from_u_x, but using U2max in place of U2
-  double a_from_u_max(const double u, const double varpi=0.0,
-		      const double varpi_t=0.0,
-		      const double alo=1.0,
-		      const double ahi=0.0,
-		      const int maxiter=100) const;
+  double a_from_u_max(const double u,
+		      const double varpi = 0.0,
+		      const double varpi_t = 0.0,
+		      const double alo = 1.0,
+		      const double ahi = 0.0,
+		      const int maxiter = 100,
+		      const double epsabs = 1.0e-6,
+		      const double epsrel = 1.0e-6) const;
 
   // This function returns the radius a at which the line of sight
   // velocity reaches a maximum for material with surface density x,
   // viewed at impact parameter varpi
-  double a_max_u_from_varpi(const double x, const double varpi=0.0,
+  double a_max_u_from_varpi(const double x,
+			    const double varpi = 0.0,
 			    const double varpi_t = 0.0,
-			    const int maxiter=100) const;
+			    const int maxiter = 100,
+			    const double epsabs = 1.0e-6,
+			    const double epsrel = 1.0e-6) const;
   
   // Same as a_max_u_from_varpi, but using u = umax, i.e., in the
   // limit x -> -infinity
-  double a_max_umax_from_varpi(const double varpi=0.0,
-			       const double varpi_t=0.0,
-			       const int maxiter=100) const;
+  double a_max_umax_from_varpi(const double varpi = 0.0,
+			       const double varpi_t = 0.0,
+			       const int maxiter = 100,
+			       const double epsabs = 1.0e-6,
+			       const double epsrel = 1.0e-6) const;
 
 
 protected:
@@ -213,18 +223,17 @@ protected:
 class pwind_rad_pa : public pwind_rad_point
 {
 public:
-  pwind_rad_pa(const double Gamma_, const double mach_,
+  pwind_rad_pa(const double Gamma_,
+	       const double mach_,
 	       const double tau0_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0) :
     pwind_rad_point(Gamma_, mach_, tau0_,
 		    static_cast<const pwind_expansion *>
 		    (&pwind_expansion_area), geom_,
-		    epsabs_, epsrel_, fcrit_, jsp_) { }
+		    fcrit_, jsp_) { }
   virtual ~pwind_rad_pa() { }
 
   // Wind kinematics
@@ -232,28 +241,43 @@ public:
   virtual double dU2dx(const double x, const double a) const;
   virtual std::vector<double> alimits(const double u,
 				      const double varpi = 0.0,
-				      const double varpi_t = 0.0) const;
+				      const double varpi_t = 0.0,
+				      const double epsabs = 1.0e-6,
+				      const double epsrel = 1.0e-6) const;
   
   // Override Phi_c, since it diverges if we try to integrate to infinity
-  virtual double Phi_c(const double u, const double fw=-1.0,
-		       const double varpi=0.0,
-		       const double varpi_t=0.0,
-		       const double a0=1.0,
-		       const double a1=std::numeric_limits<double>::max(),
+  virtual double Phi_c(const double u,
+		       const double fw = -1.0,
+		       const double varpi = 0.0,
+		       const double varpi_t = 0.0,
+		       const double a0 = 1.0,
+		       const double a1 = std::numeric_limits<double>::max(),
+		       const double epsabs = 1.0e-6,
+		       const double epsrel = 1.0e-6,
 		       const std::vector<double>& alimits_ =
 		       std::vector<double>()) const;
+  virtual std::vector<double> Phi_c(const std::vector<double>& u,
+				    const double fw = -1.0,
+				    const double varpi = 0.0,
+				    const double varpi_t = 0.0,
+				    const double a0 = 1.0,
+				    const double a1 =
+				    std::numeric_limits<double>::max(),
+				    const double epsabs = 1.0e-6,
+				    const double epsrel = 1.0e-6,
+				    const std::vector<double>& alimits_ =
+				    std::vector<double>()) const;
 };
 
 // Intermediate expansion, point potential
 class pwind_rad_pi : public pwind_rad_point
 {
 public:
-  pwind_rad_pi(const double Gamma_, const double mach_,
+  pwind_rad_pi(const double Gamma_,
+	       const double mach_,
 	       const double tau0_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0);
   virtual ~pwind_rad_pi() { }
@@ -263,7 +287,9 @@ public:
   virtual double dU2dx(const double x, const double a) const;
   virtual std::vector<double> alimits(const double u,
 				      const double varpi = 0.0,
-				      const double varpi_t = 0.0) const;
+				      const double varpi_t = 0.0,
+				      const double epsabs = 1.0e-6,
+				      const double epsrel = 1.0e-6) const;
 
 protected:
   double u_min_infinity; // Minimum velocity as a->inifinity
@@ -273,12 +299,11 @@ protected:
 class pwind_rad_ps : public pwind_rad_point
 {
 public:
-  pwind_rad_ps(const double Gamma_, const double mach_,
+  pwind_rad_ps(const double Gamma_,
+	       const double mach_,
 	       const double tau0_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0);
   virtual ~pwind_rad_ps() { }
@@ -288,7 +313,9 @@ public:
   virtual double dU2dx(const double x, const double a) const;
   virtual std::vector<double> alimits(const double u,
 				      const double varpi = 0.0,
-				      const double varpi_t = 0.0) const;
+				      const double varpi_t = 0.0,
+				      const double epsabs = 1.0e-6,
+				      const double epsrel = 1.0e-6) const;
 
 protected:
   double u_min_infinity; // Minimum velocity as a->inifinity
@@ -299,18 +326,17 @@ protected:
 class pwind_rad_ia : public pwind_rad_isothermal
 {
 public:
-  pwind_rad_ia(const double Gamma_, const double mach_,
+  pwind_rad_ia(const double Gamma_,
+	       const double mach_,
 	       const double tau0_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0) :
     pwind_rad_isothermal(Gamma_, mach_, tau0_,
 			 static_cast<const pwind_expansion *>
 			 (&pwind_expansion_area), geom_,
-			 epsabs_, epsrel_, fcrit_, jsp_) { }
+			 fcrit_, jsp_) { }
   virtual ~pwind_rad_ia() { }
 
   // Wind kinematics
@@ -318,9 +344,13 @@ public:
   virtual double dU2dx(const double x, const double a) const;
   virtual std::vector<double> alimits(const double u,
 				      const double varpi = 0.0,
-				      const double varpi_t = 0.0) const;
+				      const double varpi_t = 0.0,
+				      const double epsabs = 1.0e-6,
+				      const double epsrel = 1.0e-6) const;
   virtual std::vector<double> xlimits(const double a) const;
-  virtual double amax(const double x) const;
+  virtual double amax(const double x,
+		      const double epsabs = 1.0e-6,
+		      const double epsrel = 1.0e-6) const;
 };
 
 
@@ -328,18 +358,17 @@ public:
 class pwind_rad_ii : public pwind_rad_isothermal
 {
 public:
-  pwind_rad_ii(const double Gamma_, const double mach_,
+  pwind_rad_ii(const double Gamma_,
+	       const double mach_,
 	       const double tau0_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0) :
     pwind_rad_isothermal(Gamma_, mach_, tau0_,
 			 static_cast<const pwind_expansion *>
 			 (&pwind_expansion_intermediate), geom_,
-			 epsabs_, epsrel_, fcrit_, jsp_) { }
+			 fcrit_, jsp_) { }
   virtual ~pwind_rad_ii() { }
 
   // Wind kinematics
@@ -347,9 +376,13 @@ public:
   virtual double dU2dx(const double x, const double a) const;
   virtual std::vector<double> alimits(const double u,
 				      const double varpi = 0.0,
-				      const double varpi_t = 0.0) const;
+				      const double varpi_t = 0.0,
+				      const double epsabs = 1.0e-6,
+				      const double epsrel = 1.0e-6) const;
   virtual std::vector<double> xlimits(const double a) const;
-  virtual double amax(const double x) const;
+  virtual double amax(const double x,
+		      const double epsabs = 1.0e-6,
+		      const double epsrel = 1.0e-6) const;
 };
 
 
@@ -361,8 +394,6 @@ public:
 	       const double tau0_,
 	       const pwind_geom *geom_ =
 	       static_cast<const pwind_geom *>(&pw_geom_sphere),
-	       const double epsabs_ = 1.0e-6,
-	       const double epsrel_ = 1.0e-6,
 	       const double fcrit_ = 1.0,
 	       const double jsp_ = 0.0);
   virtual ~pwind_rad_is() { }
@@ -372,9 +403,13 @@ public:
   virtual double dU2dx(const double x, const double a) const;
   virtual std::vector<double> alimits(const double u,
 				      const double varpi = 0.0,
-				      const double varpi_t = 0.0) const;
+				      const double varpi_t = 0.0,
+				      const double epsabs = 1.0e-6,
+				      const double epsrel = 1.0e-6) const;
   virtual std::vector<double> xlimits(const double a) const;
-  virtual double amax(const double x) const;
+  virtual double amax(const double x,
+		      const double epsabs = 1.0e-6,
+		      const double epsrel = 1.0e-6) const;
 
 protected:
 
