@@ -7,7 +7,7 @@
 #include <gsl/gsl_roots.h>
 #include "pwind.H"
 #if defined(_OPENMP)
-#  include "omp.H"
+#  include "omp.h"
 #endif
 
 using namespace std;
