@@ -1,0 +1,27 @@
+# Machine-specific settings
+
+# C and C++ compilers
+MACH_CXX          = g++-11 -isysroot`xcrun --show-sdk-path`
+MACH_CC		  = gcc-11 -isysroot`xcrun --show-sdk-path`
+
+# Flag needed to specify c++11 standard
+MACH_C11FLAG      = -std=c++11
+
+# Optimization flags
+MACH_CXXOPTFLAGS   = -O3 -ffast-math -Wall -fopenmp
+MACH_COPTFLAGS	  = $(MACH_CXXOPTFLAGS)
+MACH_LDOPTFLAGS	   = -O4 -Wall -lgomp
+
+# Debug flags
+MACH_CXXDEBFLAGS  = -g -Wall -fopenmp
+MACH_CDEBFLAGS	  = $(MACH_CXXDEBFLAGS)
+MACH_LDDEBFLAGS   = -g -Wall -lgomp
+
+# GSL location
+GSL_HDR_PATH      = /usr/local/include
+GSL_LIB_PATH      = /usr/local/lib
+
+# Flags to compile shared libaries
+LIB_EXTENSION	  = .dylib
+CLIBFLAGS	  = 
+DYNLIBFLAG	  = -dynamiclib

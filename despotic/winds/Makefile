@@ -14,6 +14,8 @@ else
           include Make.mach.morticia
      else ifeq ($(UNAMEN), avatar)
           include Make.mach.avatar
+     else ifneq (,$(findstring RSAA, $(UNAMEN)))
+          include Make.mach.RSAA
      else ifneq (,$(findstring gadi, $(UNAMEN)))
           include Make.mach.icc-gadi
      else ifeq ($(UNAME), Linux)
