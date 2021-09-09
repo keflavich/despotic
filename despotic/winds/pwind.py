@@ -1792,7 +1792,7 @@ class pwind(object):
                 res = np.zeros(lenu)
                 libpwind.Xi_vec(lenu, u_, varpi_, varpi_t_,
                                 self.epsabs, self.epsrel,
-                                self.__pw)
+                                self.__pw, res)
                 Xi.flat[i:i+lenu] = res
             i = i+lenu
 
