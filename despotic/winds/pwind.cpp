@@ -1304,7 +1304,7 @@ void pwind::tau_interp_var_fc(const double u,
       vector<double> loga_int_lim = { par.loga };
       vector<double> tau_break = { 0.1, 0.316, 1.0, 3.16, 10.0 };
       size_t ptr = 1;
-      for (vector<double>::size_type i=0; i<tau_break.size(); i++) {
+      for (vector<double>::size_type k=0; k<tau_break.size(); k++) {
 	for ( ; ptr<spl_cover->size; ptr++) {
 	  if (spl_cover->y[ptr] > tau_break[i]+tau_start) {
 	    double loga_val = spl_cover->x[ptr-1] +
