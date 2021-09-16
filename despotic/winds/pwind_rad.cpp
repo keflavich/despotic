@@ -825,7 +825,7 @@ pwind_rad_is::pwind_rad_is(const double Gamma_,
 		       (&pwind_expansion_solid_angle), geom_,
 		       fcrit_, jsp_)
 {
-  // Do these computations with very high precisio, since they are
+  // Do these computations with very high precision, since they are
   // only done once
 
   // Solve for radius of maximum velocity along x = xcrit curve
@@ -834,8 +834,9 @@ pwind_rad_is::pwind_rad_is(const double Gamma_,
   // Next get velocity maximum at x = xcrit
   umax_xcrit = sqrt(U2(xcrit, a_maxu_xcrit));
   // Get radius at which a = 0 along x = xcrit curve
-  amax_xcrit = a_from_u_x(0.0, xcrit, 0.0, 0.0, 1.0, a_maxu_xcrit,
-			  100, 1e-12, 1e-12);
+  amax_xcrit = a_from_u_x(0.0, xcrit, 0.0, 0.0, a_maxu_xcrit,
+			  numeric_limits<double>::max(),
+			  500, 1e-12, 1e-12);
 }
 double
 pwind_rad_is::U2(const double x, const double a) const {
