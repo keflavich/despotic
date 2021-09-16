@@ -168,7 +168,7 @@ double pwind::a_from_u_x(const double u,
   double loga_lo = SQR(alo) < params.vp2 ? 0.5*log(params.vp2) : log(alo);
   double loga_hi = log(ahi);
   double sgn1 = U2_func_loga(loga_lo, &params);
-  double sgn2 = U2_func_loga(loga_hi, & params);
+  double sgn2 = U2_func_loga(loga_hi, &params);
   if (sgn1*sgn2 > 0){
     gsl_root_fsolver_free(s);
     return -1;
