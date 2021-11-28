@@ -909,7 +909,8 @@ class pwind(object):
         """
         Return the differential contribution to the mean density,
         drho_mean/dx, from material with initial surface density x at
-        radius a
+        radius a; to scale to a dimensional quantity, multiply by Mdot
+        / (4 pi r0^2 v0)
 
         Parameters:
            x: float or arraylike
@@ -921,8 +922,8 @@ class pwind(object):
            drhodx: float or arraylike
               dimensionless differential density
         """
-        return pM(x, self.sx) / (a**2 * self.U(x,a))
-        
+        return pM(x, self.sx) / (a**2 * self.U(x,a) * self.zetaM)
+    
 
     def dfcdx(self, x, a):
         """
@@ -1067,8 +1068,123 @@ class pwind(object):
                               self.epsrel, self.__pw, a_lim)
         a_lim.resize(na)
         return a_lim
+
+    def rho(self, a):
+        """
+        This returns the mean dimensionless density of the wind at
+        dimensionless radius a; the diemnsional density is this
+        quantity multiplied by Mdot / (4 pi r0^2 v0)
+
+        Parameters:
+           a: float or array
+              dimensionless radius
+
+        Returns:
+           rho: float or array
+              dimensionless density
+        """
+
+        # Call c code to do computation
+        if hasattr(a, '__iter__'):
+            a_ = np.array(a).flatten()
+            rho = np.zeros(a.size)
+            libpwind.rho_vec(a.size, a_, self.epsabs, self.epsrel,
+                             self.__pw, rho)
+            rho.reshape(np.array(a).shape)
+        else:
+            rho = libpwind.rho(a, self.epsabs, self.epsrel, self.__pw)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
+
+        # Return
+        return rho
+
+    def pdot(self, a):
+        """
+        This returns the dimensionless momentum flux of the wind at
+        dimensionless radius a; the diemnsional version is this
+        quantity multiplied by Mdot v0
+
+        Parameters:
+           a: float or array
+              dimensionless radius
+
+        Returns:
+           pdot: float or array
+              dimensionless momentum flux
+        """
+
+        # Call c code to do computation
+        if hasattr(a, '__iter__'):
+            a_ = np.array(a).flatten()
+            pdot = np.zeros(a.size)
+            libpwind.pdot_vec(a.size, a_, self.epsabs, self.epsrel,
+                              self.__pw, pdot)
+            pdot.reshape(np.array(a).shape)
+        else:
+            pdot = libpwind.pdot(a, self.epsabs, self.epsrel, self.__pw)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
+
+        # Return
+        return pdot
     
-    def pdot(self, a, fg=None, tctw=None):
+    def Edot(self, a):
+        """
+        This returns the dimensionless energy flux of the wind at
+        dimensionless radius a; the dimensional version is this
+        quantity multiplied by Mdot v0^2
+
+        Parameters:
+           a: float or array
+              dimensionless radius
+
+        Returns:
+           Edot: float or array
+              dimensionless energy flux
+        """
+
+        # Call c code to do computation
+        if hasattr(a, '__iter__'):
+            a_ = np.array(a).flatten()
+            Edot = np.zeros(a.size)
+            libpwind.Edot_vec(a.size, a_, self.epsabs, self.epsrel,
+                              self.__pw, Edot)
+            Edot.reshape(np.array(a).shape)
+        else:
+            Edot = libpwind.Edot(a, self.epsabs, self.epsrel, self.__pw)
+            
+        # Check for errors
+        if libpwind.get_err(self.__pw):
+            try:
+                self.error_stat = libpwind.get_err_str(
+                    self.__pw).decode("ascii")
+            except:
+                self.error_stat = libpwind.get_err_str(self.__pw)
+            if self.error_policy == 'warn':
+                libpwind.clear_err(self.__pw)
+
+        # Return
+        return Edot
+    
+    
+    def pdotrel(self, a, fg=None, tctw=None):
         """
         This returns the total momentum flux through the shell at
         radius a, normalised to the driving momentum flux.
@@ -1083,7 +1199,7 @@ class pwind(object):
               wind evacuation time
 
         Returns:
-           pdot: float or array
+           pdotrel: float or array
               momentum flux normalised to driving momentum flux
 
         Notes:
@@ -1097,20 +1213,22 @@ class pwind(object):
 
         # Call c code to do computation
         bcast = np.broadcast(a, fg, tctw)
-        pdot = np.zeros(bcast.shape)
+        pdotRel = np.zeros(bcast.shape)
         i = 0
         for (a_, fg_, tctw_) in bcast:
             if fg_ is None and tctw_ is None:
-                pdot.flat[i] = libpwind.pdot_approx(a_, self.epsabs,
-                                                    self.epsrel, self.__pw)
+                pdotRel.flat[i] \
+                    = libpwind.pdotRel_approx(a_, self.epsabs,
+                                              self.epsrel, self.__pw)
             elif fg_ is not None and tctw_ is not None:
-                pdot.flat[i] = libpwind.pdot_exact(a, fg, tctw,
-                                                   self.epsabs,
-                                                   self.epsrel,
-                                                   self.__pw)
+                pdotRel.flat[i] \
+                    = libpwind.pdotRel_exact(a, fg, tctw,
+                                             self.epsabs,
+                                             self.epsrel,
+                                             self.__pw)
             else:
                 raise ValueError(
-                    "pwind.pdot: fg and tctw must both be None, or"
+                    "pwind.pdotrel: fg and tctw must both be None, or"
                     " neither be None")
             i = i+1
 
@@ -1118,7 +1236,7 @@ class pwind(object):
         if not hasattr(a, '__iter__') and \
            not hasattr(fg, '__iter__') and \
            not hasattr(tctw, '__iter__'):
-            pdot = float(pdot)
+            pdotRel = float(pdotRel)
 
         # Check for errors
         if libpwind.get_err(self.__pw):
@@ -1131,7 +1249,7 @@ class pwind(object):
                 libpwind.clear_err(self.__pw)
 
         # Return
-        return pdot
+        return pdotRel
     
     ################################################################
     # Functions that return observable quantities

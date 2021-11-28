@@ -176,10 +176,27 @@ libpwind.a_crit.argtypes = [ c_double, c_double, c_double, c_void_p,
                              array_1d_double ]
 
 # Computation methods
-libpwind.pdot_approx.restype = c_double
-libpwind.pdot_approx.argtypes = [ c_double, c_double, c_double, c_void_p ]
-libpwind.pdot_exact.restype = c_double
-libpwind.pdot_exact.argtypes = [ c_double, c_double, c_double,
+libpwind.drhodx.restype = c_double
+libpwind.drhodx.argtypes = [ c_double, c_double, c_void_p ]
+libpwind.rho.restype = c_double
+libpwind.rho.argtypes = [ c_double, c_double, c_double, c_void_p ]
+libpwind.rho_vec.restype = None
+libpwind.rho_vec.argtypes = [ c_ulong, array_1d_double, c_double, c_double,
+                              c_void_p, array_1d_double ]
+libpwind.pdot.restype = c_double
+libpwind.pdot.argtypes = [ c_double, c_double, c_double, c_void_p ]
+libpwind.pdot_vec.restype = None
+libpwind.pdot_vec.argtypes = [ c_ulong, array_1d_double, c_double, c_double,
+                              c_void_p, array_1d_double ]
+libpwind.Edot.restype = c_double
+libpwind.Edot.argtypes = [ c_double, c_double, c_double, c_void_p ]
+libpwind.Edot_vec.restype = None
+libpwind.Edot_vec.argtypes = [ c_ulong, array_1d_double, c_double, c_double,
+                              c_void_p, array_1d_double ]
+libpwind.pdotRel_approx.restype = c_double
+libpwind.pdotRel_approx.argtypes = [ c_double, c_double, c_double, c_void_p ]
+libpwind.pdotRel_exact.restype = c_double
+libpwind.pdotRel_exact.argtypes = [ c_double, c_double, c_double,
                                  c_double, c_double, c_void_p ]
 libpwind.Phi_uc.restype = c_double
 libpwind.Phi_uc.argtypes = [ c_double, c_double, c_double, c_double,

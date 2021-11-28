@@ -187,17 +187,56 @@ extern "C" {
 		       const pwind *pw,
 		       double *a_crit_);
 
+  // Wind density
+  double drhodx(const double x,
+		const double a,
+		const pwind *pw);
+  double rho(const double a,
+	     const double epsabs,
+	     const double epsrel,
+	     const pwind *pw);
+  void rho_vec(const unsigned long na,
+	       const double *a,
+	       const double epsabs,
+	       const double epsrel,
+	       const pwind *pw,
+	       double *result);
+
   // Momentum flux
-  double pdot_approx(const double a,
-		     const double epsabs,
-		     const double epsrel,
-		     const pwind *pw);
-  double pdot_exact(const double a,
-		    const double fg,
-		    const double tctw,
-		    const double epsabs,
-		    const double epsrel,
-		    const pwind *pw);
+  double pdot(const double a,
+	      const double epsabs,
+	      const double epsrel,
+	      const pwind *pw);
+  void pdot_vec(const unsigned long na,
+		const double *a,
+		const double epsabs,
+		const double epsrel,
+		const pwind *pw,
+		double *result);
+
+  // Energy flux
+  double Edot(const double a,
+	      const double epsabs,
+	      const double epsrel,
+	      const pwind *pw);
+  void Edot_vec(const unsigned long na,
+		const double *a,
+		const double epsabs,
+		const double epsrel,
+		const pwind *pw,
+		double *result);
+
+  // Momentum flux normalised to driving momentum flux
+  double pdotRel_approx(const double a,
+			const double epsabs,
+			const double epsrel,
+			const pwind *pw);
+  double pdotRel_exact(const double a,
+		       const double fg,
+		       const double tctw,
+		       const double epsabs,
+		       const double epsrel,
+		       const pwind *pw);
   
   // Absorption
   double Phi_uc(const double u,

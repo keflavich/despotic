@@ -174,18 +174,56 @@ public:
 		    const double epsabs = 1.0e-6,
 		    const double epsrel = 1.0e-6) const;
 
+  // Functions to return the differential density and mean density of
+  // the wind as a function of radius
+  // drhodx = pM / a^2 U zeta_M = differential contribution of mean wind
+  //                       density by material with surface density x
+  // rho = \int drhodx dx = mean density of wind material at
+  //                        radius a
+  double drhodx(const double x, const double a) const {
+    return pM(x, sx) / (SQR(a) * U(x, a) * zeta_M);
+  }
+  double rho(const double a,
+	     const double epsabs,
+	     const double epsrel) const;
+  std::vector<double> rho(const std::vector<double>& a,
+			  const double epsabs,
+			  const double epsrel) const;
+
+  // Function to return the total momentum flux of the wind across the
+  // shell at radius a; the quantity returned is dimensionless, and
+  // can be converted to the dimensional momentum flux by multiplying
+  // by Mdot v0
+  double pdot(const double a,
+	      const double epsabs,
+	      const double epsrel) const;
+  std::vector<double> pdot(const std::vector<double>& a,
+			   const double epsabs,
+			   const double epsrel) const;
+
   // Function to return the total momentum flux of the wind across the
   // shell at radius a, normalised to the driving momentum flux; the
   // first form uses the approximation Mdot ~= fg M_0/(zeta_M tc),
   // while the second form is the completely general one
-  double pdot(const double a,
+  double pdotRel(const double a,
+		 const double epsabs,
+		 const double epsrel) const;
+  double pdotRel(const double a,
+		 const double fg,
+		 const double tctw,
+		 const double epsabs,
+		 const double epsrel) const;
+
+  // Function to return the total energy flux of the wind across the
+  // shell at radius a; the quantity returned is dimensionless, and
+  // can be converted to the dimensional energy flux by multiplying by
+  // Mdot v0^2
+  double Edot(const double a,
 	      const double epsabs,
 	      const double epsrel) const;
-  double pdot(const double a,
-	      const double fg,
-	      const double tctw,
-	      const double epsabs,
-	      const double epsrel) const;
+  std::vector<double> Edot(const std::vector<double>& a,
+			   const double epsabs,
+			   const double epsrel) const;
 
   // Functions to return absorption quantities; note that Phi_c is
   // declared as virtual because it is not guaranteed to converge for

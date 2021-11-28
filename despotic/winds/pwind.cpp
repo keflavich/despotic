@@ -114,6 +114,10 @@ pwind::pwind(const double Gamma_,
 
 
 ////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////
 // Numerical inversions of the wind acceleration law
 ////////////////////////////////////////////////////////////////////////
 static double U2_func_loga(double loga, void *params) {
@@ -256,6 +260,82 @@ double pwind::x_from_u_a(const double u,
   return x;
 }
 
+
+////////////////////////////////////////////////////////////////////////
+// Wind differential and total density
+////////////////////////////////////////////////////////////////////////
+
+struct rho_integ_params {
+  double a;
+  const pwind *pw;
+};
+
+static double rho_integ(double x, void *params) {
+  struct rho_integ_params *par = (struct rho_integ_params *) params;
+  double pMval = pM(x, par->pw->s());
+  double U = sqrt(par->pw->U2(x, par->a));
+  if (pMval == 0) return 0.0;
+  else return pMval / (par->a * par->a * U);
+}
+
+double pwind::rho(const double a,
+		  const double epsabs,
+		  const double epsrel) const {
+  
+  // Load structures for the GSL */
+  struct rho_integ_params par;
+  par.a = a;
+  par.pw = this;
+  gsl_function F;
+  F.function = &rho_integ;
+  F.params = &par;
+
+  // Get integration limits
+  vector<double> xlim = xlimits(a);
+
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
+
+  // Integrate
+  double result, err;
+  if (xlim[0] == -numeric_limits<double>::max()) {
+    checkForErr(gsl_integration_qagil(&F, xlim[1]+log(fcrit), epsabs, epsrel,
+				      MAXINTERVAL, w, &result, &err));
+  } else {
+    if (xlim[1] - log(fcrit) > xlim[0])
+      checkForErr(gsl_integration_qag(&F, xlim[0], xlim[1]+log(fcrit),
+				      epsabs, epsrel,
+				      MAXINTERVAL, GSL_INTEG_GAUSS61,
+				      w, &result, &err));
+    else {
+      result = 0.0;
+    }
+  }
+
+  // Take down integration machinery
+  gsl_integration_workspace_free(w);
+
+  // Apply prefactor and return
+  result /= zeta_M;
+  return result;  
+}
+
+
+// Vectorized version of function above
+vector<double> pwind::rho(const vector<double>& a,
+			  const double epsabs,
+			  const double epsrel) const {
+  
+  vector<double> result(a.size());
+#ifdef _OPENMP
+#  pragma omp parallel for schedule(dynamic, 4)
+#endif
+  for (vector<double>::size_type i=0; i<a.size(); i++)
+    result[i] = rho(a[i], epsabs, epsrel);
+  return result;
+}
+ 
+
 ////////////////////////////////////////////////////////////////////////
 // Total momentum flux
 ////////////////////////////////////////////////////////////////////////
@@ -275,6 +355,137 @@ static double pdot_integ(double x, void *params) {
 double pwind::pdot(const double a,
 		   const double epsabs,
 		   const double epsrel) const {
+  // Load structures for the GSL */
+  struct pdot_integ_params par;
+  par.a = a;
+  par.pw = this;
+  gsl_function F;
+  F.function = &pdot_integ;
+  F.params = &par;
+
+  // Get integration limits
+  vector<double> xlim = xlimits(a);
+
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
+
+  // Integrate
+  double result, err;
+  if (xlim[0] == -numeric_limits<double>::max()) {
+    checkForErr(gsl_integration_qagil(&F, xlim[1]+log(fcrit), epsabs, epsrel,
+				      MAXINTERVAL, w, &result, &err));
+  } else {
+    if (xlim[1] - log(fcrit) > xlim[0])
+      checkForErr(gsl_integration_qag(&F, xlim[0], xlim[1]+log(fcrit),
+				      epsabs, epsrel,
+				      MAXINTERVAL, GSL_INTEG_GAUSS61,
+				      w, &result, &err));
+    else {
+      result = 0.0;
+    }
+  }
+
+  // Take down integration machinery
+  gsl_integration_workspace_free(w);
+
+  // Multiply by prefactor and return
+  result /= zeta_M;
+  return result;
+}
+
+// Vectorized version of function above
+vector<double> pwind::pdot(const vector<double>& a,
+			   const double epsabs,
+			   const double epsrel) const {
+  
+  vector<double> result(a.size());
+#ifdef _OPENMP
+#  pragma omp parallel for schedule(dynamic, 4)
+#endif
+  for (vector<double>::size_type i=0; i<a.size(); i++)
+    result[i] = pdot(a[i], epsabs, epsrel);
+  return result;
+}
+
+
+////////////////////////////////////////////////////////////////////////
+// Total energy flux
+////////////////////////////////////////////////////////////////////////
+struct Edot_integ_params {
+  double a;
+  const pwind *pw;
+};
+
+static double Edot_integ(double x, void *params) {
+  struct Edot_integ_params *par = (struct Edot_integ_params *) params;
+  double pMval = pM(x, par->pw->s());
+  double U2 = par->pw->U2(x, par->a);
+  if (pMval == 0) return 0.0;
+  else return pMval * U2;
+}
+
+double pwind::Edot(const double a,
+		   const double epsabs,
+		   const double epsrel) const {
+  // Load structures for the GSL */
+  struct Edot_integ_params par;
+  par.a = a;
+  par.pw = this;
+  gsl_function F;
+  F.function = &Edot_integ;
+  F.params = &par;
+
+  // Get integration limits
+  vector<double> xlim = xlimits(a);
+
+  // Set up integration
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(MAXINTERVAL);
+
+  // Integrate
+  double result, err;
+  if (xlim[0] == -numeric_limits<double>::max()) {
+    checkForErr(gsl_integration_qagil(&F, xlim[1]+log(fcrit), epsabs, epsrel,
+				      MAXINTERVAL, w, &result, &err));
+  } else {
+    if (xlim[1] - log(fcrit) > xlim[0])
+      checkForErr(gsl_integration_qag(&F, xlim[0], xlim[1]+log(fcrit),
+				      epsabs, epsrel,
+				      MAXINTERVAL, GSL_INTEG_GAUSS61,
+				      w, &result, &err));
+    else {
+      result = 0.0;
+    }
+  }
+
+  // Take down integration machinery
+  gsl_integration_workspace_free(w);
+
+  // Multiply by prefactor and return
+  result /= 2.0*zeta_M;
+  return result;
+}
+
+// Vectorized version of function above
+vector<double> pwind::Edot(const vector<double>& a,
+			   const double epsabs,
+			   const double epsrel) const {
+  
+  vector<double> result(a.size());
+#ifdef _OPENMP
+#  pragma omp parallel for schedule(dynamic, 4)
+#endif
+  for (vector<double>::size_type i=0; i<a.size(); i++)
+    result[i] = Edot(a[i], epsabs, epsrel);
+  return result;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Total momentum flux normalised to driving momentum flux
+////////////////////////////////////////////////////////////////////////
+
+double pwind::pdotRel(const double a,
+		      const double epsabs,
+		      const double epsrel) const {
 
   // Load structures for the GSL */
   struct pdot_integ_params par;
@@ -315,11 +526,11 @@ double pwind::pdot(const double a,
 }
   
 double
-pwind::pdot(const double a,
-	    const double fg,
-	    const double tctw,
-	    const double epsabs,
-	    const double epsrel) const {
+pwind::pdotRel(const double a,
+	       const double fg,
+	       const double tctw,
+	       const double epsabs,
+	       const double epsrel) const {
   double pd = pdot(a, epsabs, epsrel);
   return 2.0*tctw*pd/(3.0*fg*zeta_M);
 }

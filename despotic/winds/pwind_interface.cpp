@@ -255,21 +255,88 @@ unsigned long a_crit(const double varpi,
   return ac.size();
 }
 
+// Density
+double drhodx(const double x,
+	      const double a,
+	      const pwind *pw) {
+  return pw->drhodx(x, a);
+}
+double rho(const double a,
+	   const double epsabs,
+	   const double epsrel,
+	   const pwind *pw) {
+  return pw->rho(a, epsabs, epsrel);
+}
+void rho_vec(const unsigned long na,
+	     const double *a,
+	     const double epsabs,
+	     const double epsrel,
+	     const pwind *pw,
+	     double *result) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic, 4)
+#endif
+  for (unsigned long i=0; i<na; i++)
+    result[i] = pw->rho(a[i], epsabs, epsrel);
+}
+
 // Momentum flux
-double pdot_approx(const double a,
-		   const double epsabs,
-		   const double epsrel,
-		   const pwind *pw) {
+double pdot(const double a,
+	    const double epsabs,
+	    const double epsrel,
+	    const pwind *pw) {
   return pw->pdot(a, epsabs, epsrel);
 }
-double pdot_exact(const double a,
-		  const double fg,
-		  const double tctw,
-		  const double epsabs,
-		  const double epsrel,
-		  const pwind *pw) {
-  return pw->pdot(a, fg, tctw, epsabs, epsrel);
+void pdot_vec(const unsigned long na,
+	      const double *a,
+	      const double epsabs,
+	      const double epsrel,
+	      const pwind *pw,
+	      double *result) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic, 4)
+#endif
+  for (unsigned long i=0; i<na; i++)
+    result[i] = pw->pdot(a[i], epsabs, epsrel);
 }
+
+
+// Momentum flux normalised to driving momentum flux
+double pdotRel_approx(const double a,
+		      const double epsabs,
+		      const double epsrel,
+		      const pwind *pw) {
+  return pw->pdotRel(a, epsabs, epsrel);
+}
+double pdotRel_exact(const double a,
+		     const double fg,
+		     const double tctw,
+		     const double epsabs,
+		     const double epsrel,
+		     const pwind *pw) {
+  return pw->pdotRel(a, fg, tctw, epsabs, epsrel);
+}
+
+// Energy flux
+double Edot(const double a,
+	    const double epsabs,
+	    const double epsrel,
+	    const pwind *pw) {
+  return pw->Edot(a, epsabs, epsrel);
+}
+void Edot_vec(const unsigned long na,
+	      const double *a,
+	      const double epsabs,
+	      const double epsrel,
+	      const pwind *pw,
+	      double *result) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic, 4)
+#endif
+  for (unsigned long i=0; i<na; i++)
+    result[i] = pw->Edot(a[i], epsabs, epsrel);
+}
+
 
 // Absorption
 double Phi_uc(const double u,
@@ -293,7 +360,7 @@ void Phi_uc_vec(const unsigned long nu,
 		const pwind *pw,
 		double *result) {
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->Phi_uc(u[i], varpi, varpi_t, a0, a1, epsabs, epsrel);
@@ -326,7 +393,7 @@ void tau_uc_vec(const unsigned long nu,
 		const pwind *pw,
 		double *result) {
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->tau_uc(u[i], tXtw, fj, boltzfac, varpi, varpi_t, a0, a1,
@@ -370,7 +437,7 @@ void tau_uc_multiple_vec(const unsigned long nu,
   u_trans_.assign(u_trans, u_trans+ntrans);
   tXtw_.assign(tXtw, tXtw+ntrans);
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->tau_uc(u[i], u_trans_, tXtw_, fj, boltzfac,
@@ -400,7 +467,7 @@ void Phi_c_vec(const unsigned long nu,
 	       const pwind *pw,
 	       double *result) {
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->Phi_c(u[i], fw, varpi, varpi_t, a0, a1, epsabs, epsrel);
@@ -435,7 +502,7 @@ void tau_c_vec(const unsigned long nu,
 	       const pwind *pw,
 	       double *result) {
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->tau_c(u[i], tXtw, fj, boltzfac, fw, varpi, varpi_t, a0, a1,
@@ -481,7 +548,7 @@ void tau_c_multiple_vec(const unsigned long nu,
   u_trans_.assign(u_trans, u_trans+ntrans);
   tXtw_.assign(tXtw, tXtw+ntrans);
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->tau_c(u[i], u_trans_, tXtw_, fj, boltzfac, fw,
@@ -507,7 +574,7 @@ void Xi_vec(const unsigned long nu,
 	    const pwind *pw,
 	    double *result) {
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->Xi(u[i], varpi, varpi_t, epsabs, epsrel);
@@ -551,7 +618,7 @@ void eta_vec(const unsigned long nu,
 	     const pwind *pw,
 	     double *result) {
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 4)
 #endif
   for (unsigned long i=0; i<nu; i++)
     result[i] = pw->eta(u[i], tXtw, fj, boltzfac, correlated, fw,
