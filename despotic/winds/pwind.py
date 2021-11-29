@@ -2276,6 +2276,7 @@ class pwind(object):
             Psi.flat[i] = libpwind.Psi(tXtw_, fj_, boltzfac_,
                                        correlated_, fw_,
                                        varpi_, varpi_t_, thin_,
+                                       self.epsabs, self.epsrel,
                                        self.__pw)
             i = i+1
 
